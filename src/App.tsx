@@ -23,6 +23,10 @@ import HowToJoinPage from './pages/HowToJoinPage';
 import BeatmapPage from './pages/BeatmapPage';
 import BeatmapsPage from './pages/BeatmapsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import BBCodeTester from './components/BBCode/BBCodeTester';
+import AdminPanel from './pages/Admin/AdminPanel';
+import AdminBeatmap from './pages/Admin/AdminBeatmap';
+import AdminBeatmapRankstatus from './pages/Admin/AdminBeatmapRankstatus';
 
 function App() {
   const { t } = useTranslation();
@@ -54,6 +58,10 @@ function App() {
             <Route path="beatmaps/:beatmapId" element={<BeatmapPage />} />
             <Route path="beatmapsets/:beatmapsetId" element={<BeatmapPage />} />
             <Route path="beatmaps" element={<BeatmapsPage />} />
+            <Route path="bbcode-test" element={<BBCodeTester />} />
+            <Route path="admin" element={<AdminPanel />} />
+            <Route path="admin/beatmaps" element={<AdminBeatmap />} />
+            <Route path="admin/beatmaps/:id" element={<AdminBeatmapRankstatus />} />
             <Route
               path="*"
               element={
