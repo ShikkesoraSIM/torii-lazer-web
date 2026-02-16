@@ -19,6 +19,9 @@ export default {
         'osu-pink': 'var(--osu-pink, #ED8EA6)',
         'profile-color': 'var(--profile-color, #ED8EA6)',
         'osu-blue': '#7DD5D4',
+        'shikke-purple': '#8a2be2',
+        'shikke-pink': '#ff007f',
+        'bg-dark': '#030014',
         'osu-purple': '#7DD5D4',
         'primary': 'var(--osu-pink, #ED8EA6)',
         'secondary': '#7DD5D4',
@@ -62,11 +65,15 @@ export default {
         },
       },
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        // 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        // 'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'shikke-gradient': 'linear-gradient(135deg, #8a2be2 0%, #ff007f 100%)',
+        'shikke-text': 'linear-gradient(135deg, #c084fc 0%, #ff79c6 100%)',
       },
       fontFamily: {
-        'sans': ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['Outfit', 'system-ui', 'sans-serif'],
+        body: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'], // default
       },
     },
   },

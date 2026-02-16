@@ -1,349 +1,572 @@
-import React, { useState } from 'react';
-import { 
-  FaDownload, 
-  FaExclamationTriangle, 
-  FaGamepad, 
-  FaCopy, 
-  FaCheck, 
-  FaWindows, 
-  FaLinux, 
-  FaApple, 
-  FaAndroid,
-  FaChevronLeft
-} from 'react-icons/fa';
-import { PhotoProvider, PhotoView } from 'react-photo-view';
-import { useTranslation } from 'react-i18next';
-import 'react-photo-view/dist/react-photo-view.css';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
-// --- Sub-components for cleaner code ---
+const SHIGETIRO_PORTABLE_URL =
+  "https://github.com/shigetiro/osu/releases/latest/download/osulazer-win-Portable.zip";
 
-/**
- * A copy-paste snippet component that looks like a code block
- */
-const CodeSnippet: React.FC<{ text: string; label: string }> = ({ text, label }) => {
+const INJECTOR_RELEASES_URL =
+  "https://github.com/MingxuanGame/LazerAuthlibInjection/releases/latest";
+
+const SERVER_HOST = "lazer-api.shikkesora.com";
+const API_URL = "https://lazer-api.shikkesora.com";
+const WEBSITE_URL = "https://lazer.shikkesora.com";
+
+function cx(...classes: Array<string | false | undefined | null>) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function CopyButton({
+  value,
+  accent = "fuchsia",
+  className,
+}: {
+  value: string;
+  accent?: "fuchsia" | "violet";
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
-  const { t } = useTranslation();
 
-  const handleCopy = async () => {
+  const copy = async () => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(value);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy", err);
+      window.setTimeout(() => setCopied(false), 900);
+    } catch {
+      // fallback: select + execCommand
+      const ta = document.createElement("textarea");
+      ta.value = value;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 900);
+      } finally {
+        document.body.removeChild(ta);
+      }
     }
   };
 
   return (
-    <div className="flex flex-col gap-1 w-full max-w-md">
-      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">
-        {label}
-      </span>
-      <div 
-        onClick={handleCopy}
-        className="group relative flex items-center justify-between bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 cursor-pointer hover:border-osu-pink/50 transition-all duration-200"
-      >
-        <code className="font-mono text-sm sm:text-base text-gray-800 dark:text-gray-200 truncate pr-8 select-all">
-          {text}
-        </code>
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-          {copied ? (
-            <FaCheck className="w-4 h-4 text-green-500" />
-          ) : (
-            <FaCopy className="w-4 h-4 text-gray-400 group-hover:text-osu-pink transition-colors" />
-          )}
+    <button
+      type="button"
+      onClick={copy}
+      className={cx(
+        "inline-flex items-center justify-center rounded-xl border px-3 py-2 text-xs font-semibold transition",
+        "border-white/10 bg-black/25 text-white/80 hover:border-white/20 hover:bg-black/35",
+        accent === "fuchsia" && "hover:border-fuchsia-400/30",
+        accent === "violet" && "hover:border-violet-400/30",
+        className
+      )}
+      aria-label="Copy to clipboard"
+      title="Copy"
+    >
+      {copied ? "Copied" : "Copy"}
+    </button>
+  );
+}
+
+function CodeBox({
+  label,
+  value,
+  accent = "fuchsia",
+}: {
+  label: string;
+  value: string;
+  accent?: "fuchsia" | "violet";
+}) {
+  return (
+    <div
+      className={cx(
+        "mt-3 rounded-2xl border bg-black/30 p-4",
+        accent === "fuchsia" && "border-fuchsia-400/20",
+        accent === "violet" && "border-violet-400/20"
+      )}
+    >
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="text-xs uppercase tracking-wider text-white/40">
+          {label}
         </div>
-        {/* Tooltip hint */}
-        <span className="absolute -top-8 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          {t('howToJoin.clickToCopy')}
-        </span>
+        <CopyButton value={value} accent={accent} />
+      </div>
+
+      <code
+        className={cx(
+          "block select-text break-all rounded-xl border border-white/10 bg-black/20 px-3 py-2 font-mono text-sm",
+          accent === "fuchsia" && "text-fuchsia-200",
+          accent === "violet" && "text-violet-200"
+        )}
+      >
+        {value}
+      </code>
+
+      <div className="mt-2 text-[11px] text-white/35">
+        Tip: you can also click-drag to select.
       </div>
     </div>
   );
-};
+}
 
-/**
- * Styled Download Button Card
- */
-const DownloadCard: React.FC<{ 
-  href: string; 
-  icon: React.ReactNode; 
-  title: string; 
-  subtitle: string;
-  variant?: 'primary' | 'secondary' 
-}> = ({ href, icon, title, subtitle, variant = 'primary' }) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
-      variant === 'primary' 
-        ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-osu-pink dark:hover:border-osu-pink' 
-        : 'bg-gray-50 dark:bg-gray-800/50 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700'
-    }`}
-  >
-    <div className={`p-3 rounded-full ${
-      variant === 'primary' 
-        ? 'bg-osu-pink/10 text-osu-pink' 
-        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-    }`}>
-      {icon}
-    </div>
-    <div className="flex-1 min-w-0">
-      <h4 className="font-bold text-gray-900 dark:text-white truncate">{title}</h4>
-      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{subtitle}</p>
-    </div>
-    <FaDownload className="text-gray-300 dark:text-gray-600" />
-  </a>
-);
+export default function HowToJoinPage() {
+  const portableRef = useRef<HTMLDivElement>(null);
+  const injectorRef = useRef<HTMLDivElement>(null);
 
-/**
- * Step Container
- */
-const StepItem: React.FC<{ number: number; children: React.ReactNode }> = ({ number, children }) => (
-  <div className="flex gap-4 sm:gap-6">
-    <div className="flex-shrink-0 flex flex-col items-center">
-      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-osu-pink to-purple-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-osu-pink/20">
-        {number}
-      </div>
-      {/* Connector Line */}
-      <div className="w-0.5 flex-1 bg-gray-200 dark:bg-gray-700 my-2 min-h-[2rem]"></div>
-    </div>
-    <div className="flex-1 pb-8">
+  // Fix the “harsh top edge under navbar” by ensuring the document background matches this page.
+  useEffect(() => {
+    const prevBodyBg = document.body.style.background;
+    const prevHtmlBg = document.documentElement.style.background;
+
+    document.body.style.background = "#030014";
+    document.documentElement.style.background = "#030014";
+
+    return () => {
+      document.body.style.background = prevBodyBg;
+      document.documentElement.style.background = prevHtmlBg;
+    };
+  }, []);
+
+  const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const Card = ({
+    children,
+    onClick,
+    className,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    className?: string;
+  }) => (
+    <div
+      onClick={onClick}
+      className={cx(
+        "rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur",
+        onClick && "cursor-pointer transition hover:bg-white/10",
+        className
+      )}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") onClick();
+            }
+          : undefined
+      }
+    >
       {children}
     </div>
-  </div>
-);
+  );
 
-// --- Main Page Component ---
+  const CTAButton = ({
+    children,
+    accent = "neutral",
+  }: {
+    children: React.ReactNode;
+    accent?: "neutral" | "fuchsia" | "violet";
+  }) => (
+    <div className="mt-6">
+      <div
+        className={cx(
+          "inline-flex w-full items-center justify-center rounded-2xl border px-4 py-3 text-sm font-semibold transition",
+          "border-white/10 bg-black/30 text-white hover:border-white/20 hover:bg-black/40",
+          accent === "fuchsia" && "hover:border-fuchsia-400/30",
+          accent === "violet" && "hover:border-violet-400/30"
+        )}
+      >
+        {children}
+      </div>
+    </div>
+  );
 
-const HowToJoinPage: React.FC = () => {
-  const { t } = useTranslation();
+  const Title = useMemo(
+    () => ({
+      title: "Join Shikkesora (osu!lazer private server)",
+      subtitle:
+        "Pick a method. The Shigetiro portable client is a separate performance-focused build. The injector method uses your normal osu!lazer install so you keep all your maps, skins and data — and you can switch back anytime.",
+    }),
+    []
+  );
 
   return (
-    <PhotoProvider maskOpacity={0.8}>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
-        
-        {/* Header Section */}
-        <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800">
-          <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]"></div>
-          <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
-             <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6">
-              {t('howToJoin.title')}
-            </h1>
-            <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              {t('howToJoin.subtitle')}
-            </p>
-          </div>
-        </div>
+    <div className="relative min-h-screen overflow-hidden bg-[#030014]">
+      {/* Shikkesora-style background blobs */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-56 -left-56 h-[640px] w-[640px] rounded-full bg-fuchsia-500/20 blur-[150px]" />
+        <div className="absolute top-1/3 -right-56 h-[640px] w-[640px] rounded-full bg-violet-500/20 blur-[150px]" />
+        <div className="absolute bottom-[-260px] left-1/3 h-[640px] w-[640px] rounded-full bg-sky-400/10 blur-[160px]" />
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 -mt-8">
-          
-          {/* --- Method 1: Custom Client (Recommended) --- */}
-          <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden mb-12 relative">
-            {/* Top Badge */}
-            <div className="absolute top-0 right-0 bg-gradient-to-l from-osu-pink to-purple-600 text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl shadow-sm">
-               {t('howToJoin.method1.recommended')}
-            </div>
-
-            <div className="p-6 sm:p-10">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 bg-osu-pink/10 rounded-2xl">
-                   <FaGamepad className="w-8 h-8 text-osu-pink" />
-                </div>
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                    {t('howToJoin.method1.title')}
-                  </h2>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1">
-                    {t('howToJoin.method1.description')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Steps */}
-              <div className="mt-8">
-                
-                {/* Step 1 */}
-                <StepItem number={1}>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                    {t('howToJoin.method1.steps.step1.title')}
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl">
-                    <DownloadCard 
-                      href="https://github.com/GooGuTeam/osu/releases/latest"
-                      icon={<FaWindows className="w-5 h-5" />}
-                      title={t('howToJoin.method1.steps.step1.downloadPc')}
-                      subtitle={t('howToJoin.method1.steps.step1.pcVersion')}
-                    />
-                     <DownloadCard 
-                      href="https://pan.wo.cn/s/1D1e0H30675"
-                      icon={<FaAndroid className="w-5 h-5" />}
-                      title={t('howToJoin.method1.steps.step1.downloadAndroidDomestic')}
-                      subtitle={t('howToJoin.method1.steps.step1.androidVersion')}
-                    />
-                  </div>
-                  <div className="mt-3">
-                     <a href="#" className="text-sm text-gray-500 hover:text-osu-pink transition-colors underline decoration-dotted">
-                        {t('howToJoin.method1.steps.step1.downloadAndroidOverseas')}
-                     </a>
-                  </div>
-                </StepItem>
-
-                {/* Step 2 */}
-                <StepItem number={2}>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                    {t('howToJoin.method1.steps.step2.description')}
-                  </h3>
-                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
-                    <div className="flex flex-col md:flex-row gap-8 items-start">
-                      <div className="flex-1 w-full">
-                        <CodeSnippet 
-                          label="Server Address"
-                          text="lazer-api.g0v0.top" 
-                        />
-                        <p className="text-sm text-gray-500 mt-4 leading-relaxed">
-                          {t('howToJoin.method1.steps.step2.imageHint')}
-                        </p>
-                      </div>
-                      <div className="w-full md:w-64 flex-shrink-0">
-                         <PhotoView src="/image/join_photos/1.png">
-                          <div className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-                            <img 
-                              src="/image/join_photos/1.png" 
-                              alt={t('howToJoin.method1.steps.step2.imageAlt')}
-                              className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-300"
-                            />
-                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <span className="text-white text-sm font-medium bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">View</span>
-                            </div>
-                          </div>
-                        </PhotoView>
-                      </div>
-                    </div>
-                  </div>
-                </StepItem>
-
-                {/* Step 3 */}
-                <StepItem number={3}>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    {t('howToJoin.method1.steps.step3.description')}
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1">
-                    Enjoy the game!
-                  </p>
-                </StepItem>
-              </div>
-            </div>
-          </section>
-
-          {/* --- Method 2: Authlib Injector --- */}
-          <section className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden mb-8">
-            <div className="p-6 sm:p-10">
-              <div className="flex items-center gap-4 mb-6">
-                 <div className="p-3 bg-osu-blue/10 rounded-2xl">
-                   <FaGamepad className="w-8 h-8 text-osu-blue" />
-                </div>
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                    {t('howToJoin.method2.title')}
-                  </h2>
-                  <div className="flex gap-3 mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="flex items-center gap-1"><FaWindows /> Windows</span>
-                    <span className="flex items-center gap-1"><FaLinux /> Linux</span>
-                    <span className="flex items-center gap-1"><FaApple /> MacOS</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Warning Box */}
-              <div className="bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg">
-                <div className="flex gap-3">
-                  <FaExclamationTriangle className="text-amber-500 text-xl flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-bold text-amber-800 dark:text-amber-400 text-sm">
-                      {t('howToJoin.method2.warning.title')}
-                    </h4>
-                    <p className="text-amber-700 dark:text-amber-500 text-sm mt-1">
-                      {t('howToJoin.method2.warning.description')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {/* M2 - Step 1 */}
-                <StepItem number={1}>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                         {t('howToJoin.method2.steps.step1.title')}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        Download the latest injector release.
-                      </p>
-                    </div>
-                    <a
-                      href="https://github.com/MingxuanGame/LazerAuthlibInjection/releases/latest"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    >
-                      <FaDownload className="mr-2" />
-                      {t('howToJoin.method2.steps.step1.download')}
-                    </a>
-                  </div>
-                </StepItem>
-                
-                {/* M2 - Step 2 */}
-                <StepItem number={2}>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                     {t('howToJoin.method2.steps.step2.description')}
-                  </h3>
-                </StepItem>
-
-                {/* M2 - Step 3 */}
-                <StepItem number={3}>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
-                     {t('howToJoin.method2.steps.step3.description')}
-                  </h3>
-                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-gray-200 dark:border-gray-700 grid gap-4">
-                     <CodeSnippet 
-                        label={t('howToJoin.method2.steps.step3.apiUrl')}
-                        text="https://lazer-api.g0v0.top"
-                     />
-                     <CodeSnippet 
-                        label={t('howToJoin.method2.steps.step3.websiteUrl')}
-                        text="https://lazer.g0v0.top"
-                     />
-                  </div>
-                </StepItem>
-
-                {/* M2 - Step 4 */}
-                <StepItem number={4}>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                     {t('howToJoin.method2.steps.step4.description')}
-                  </h3>
-                </StepItem>
-              </div>
-            </div>
-          </section>
-
-          {/* Footer Back Button */}
-          <div className="flex justify-center mt-16 mb-8">
-            <button
-              onClick={() => window.history.back()}
-              className="group flex items-center gap-2 px-8 py-4 bg-white dark:bg-slate-800 text-gray-900 dark:text-white font-semibold rounded-full shadow-lg shadow-gray-200/50 dark:shadow-black/30 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
-            >
-              <FaChevronLeft className="text-osu-pink group-hover:-translate-x-1 transition-transform" />
-              {t('common.backToPrevious')}
-            </button>
-          </div>
-
-        </div>
+        {/* Soft top fade to avoid any harsh banding near the navbar area */}
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#030014] via-[#030014]/80 to-transparent" />
       </div>
-    </PhotoProvider>
-  );
-};
 
-export default HowToJoinPage;
+      {/* Slightly more top padding so it never feels “cut” under nav */}
+      <div className="relative mx-auto max-w-6xl px-6 pb-24 pt-20 md:pt-24">
+        {/* Title */}
+        <motion.h1
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 text-center text-4xl font-bold tracking-tight text-white md:text-5xl"
+        >
+          {Title.title}
+        </motion.h1>
+
+        <p className="mx-auto mb-14 max-w-3xl text-center text-white/70">
+          {Title.subtitle}
+        </p>
+
+        {/* Two big option cards */}
+        <div className="grid gap-8 md:grid-cols-2">
+          {/* Portable (Shigetiro) */}
+          <Card
+            onClick={() => scrollTo(portableRef)}
+            className="flex h-full flex-col hover:border-fuchsia-400/40"
+          >
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <h2 className="text-2xl font-semibold leading-tight text-white">
+                Shigetiro portable custom client
+              </h2>
+              <span className="shrink-0 rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-3 py-1 text-xs text-fuchsia-200">
+                Performance build
+              </span>
+            </div>
+
+            <p className="mb-5 text-white/70">
+              Standalone portable build by Shigetiro. Best if you want the extra
+              performance features and don’t mind using a separate install.
+            </p>
+
+            <div className="mb-6 rounded-2xl border border-white/10 bg-black/20 p-5">
+              <p className="mb-3 text-sm font-semibold text-white">Features</p>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li>• Unlimited FPS (no artificial cap)</li>
+                <li>• NVIDIA Reflex support</li>
+                <li>• AMD Anti-Lag 2 support</li>
+                <li>• Portable install (runs from its own folder)</li>
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-red-400/20 bg-red-500/5 p-5">
+              <p className="mb-3 text-sm font-semibold text-white">
+                Downsides / things to know
+              </p>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li className="text-red-300">
+                  • You won’t have your existing maps, skins, settings, or local
+                  data by default (it’s a separate install).
+                </li>
+                <li className="text-red-300">
+                  • If you want your maps/skins here too, you’ll need to
+                  import/copy them manually.
+                </li>
+                <li className="text-red-300">
+                  • This build may not always be perfectly in-sync with the
+                  latest official osu!lazer features/updates.
+                </li>
+              </ul>
+            </div>
+
+            {/* Push CTA + hint to the bottom so both cards align */}
+            <div className="mt-auto pt-6">
+              <CTAButton accent="fuchsia">Choose portable</CTAButton>
+              <p className="mt-3 text-xs text-white/40">
+                Click to view setup steps ↓
+              </p>
+            </div>
+          </Card>
+
+          {/* Injector */}
+          <Card
+            onClick={() => scrollTo(injectorRef)}
+            className="flex h-full flex-col hover:border-violet-400/40"
+          >
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <h2 className="text-2xl font-semibold leading-tight text-white">
+                Injector (keep your normal osu!lazer install)
+              </h2>
+              <span className="shrink-0 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1 text-xs text-violet-200">
+                Official-like
+              </span>
+            </div>
+
+            <p className="mb-5 text-white/70">
+              Connect using an injector with your existing osu!lazer. This keeps
+              your maps, skins, settings and data, and works with the latest
+              official builds.
+            </p>
+
+            <div className="mb-6 rounded-2xl border border-white/10 bg-black/20 p-5">
+              <p className="mb-3 text-sm font-semibold text-white">
+                What you get
+              </p>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li>
+                  • Keeps all your maps, skins, settings and local data (no
+                  separate install)
+                </li>
+                <li>
+                  • Works with the most up-to-date official osu!lazer versions
+                </li>
+                <li>
+                  • Switch between Shikkesora and the official servers whenever
+                  you want
+                </li>
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-5">
+              <p className="mb-3 text-sm font-semibold text-white">Tradeoffs</p>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li className="text-amber-200">
+                  • You don’t get the portable-client-only performance
+                  toggles/features
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-auto pt-6">
+              <CTAButton accent="violet">Choose injector</CTAButton>
+              <p className="mt-3 text-xs text-white/40">
+                Click to view setup steps ↓
+              </p>
+            </div>
+          </Card>
+        </div>
+
+        {/* Portable instructions */}
+        <section ref={portableRef} className="mt-28 scroll-mt-28">
+          <h3 className="mb-6 text-3xl font-semibold text-white">
+            Portable client setup (Shigetiro build)
+          </h3>
+
+          <Card>
+            <p className="mb-6 text-white/70">
+              This method uses a separate portable build. You ONLY need to set
+              the Server Address — you do NOT need to set a Website URL for this
+              method.
+            </p>
+
+            <ol className="space-y-5 text-white/70">
+              <li>
+                <span className="font-semibold text-white">
+                  1) Download the portable build
+                </span>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <a
+                    className="break-all text-fuchsia-300 underline"
+                    href={SHIGETIRO_PORTABLE_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {SHIGETIRO_PORTABLE_URL}
+                  </a>
+                  <CopyButton value={SHIGETIRO_PORTABLE_URL} accent="fuchsia" />
+                </div>
+              </li>
+
+              <li>
+                <span className="font-semibold text-white">
+                  2) Extract and launch
+                </span>
+                <div className="mt-2 text-sm text-white/60">
+                  Unzip it anywhere you like and run osu!lazer from that folder.
+                </div>
+              </li>
+
+              <li>
+                <span className="font-semibold text-white">
+                  3) Set the server address
+                </span>
+                <div className="mt-2 text-sm text-white/60">
+                  In the connection/server settings, set Server Address to the
+                  value below.
+                </div>
+
+                <CodeBox
+                  label="Server Address"
+                  value={SERVER_HOST}
+                  accent="fuchsia"
+                />
+
+                <div className="mt-3 text-sm text-white/60">
+                  Portable method: Website is NOT required — only Server Address.
+                </div>
+              </li>
+
+              <li>
+                <span className="font-semibold text-white">
+                  4) Apply + restart
+                </span>
+                <div className="mt-2 text-sm text-white/60">
+                  Press Apply, then fully restart osu!lazer for the change to
+                  take effect.
+                </div>
+              </li>
+            </ol>
+
+            <div className="mt-8 rounded-2xl border border-red-400/20 bg-red-500/5 p-6">
+              <p className="mb-2 text-sm font-semibold text-white">
+                Why do I not see my maps/skins?
+              </p>
+              <p className="text-sm text-white/70">
+                Because portable is a separate install with its own data folder.
+                It won’t automatically include your existing osu!lazer
+                maps/skins/settings unless you import them.
+              </p>
+            </div>
+          </Card>
+        </section>
+
+        {/* Injector instructions */}
+        <section ref={injectorRef} className="mt-28 scroll-mt-28">
+          <h3 className="mb-6 text-3xl font-semibold text-white">
+            Injector setup (recommended for most people)
+          </h3>
+
+          <Card>
+            <p className="mb-6 text-white/70">
+              This method keeps your normal osu!lazer installation and data.
+              You’ll download the injector, place the .dll into your osu! folder,
+              restart, then set API + Website and restart once more.
+            </p>
+
+            <ol className="space-y-5 text-white/70">
+              <li>
+                <span className="font-semibold text-white">
+                  1) Download the injector (.dll)
+                </span>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <a
+                    className="break-all text-violet-300 underline"
+                    href={INJECTOR_RELEASES_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {INJECTOR_RELEASES_URL}
+                  </a>
+                  <CopyButton value={INJECTOR_RELEASES_URL} accent="violet" />
+                </div>
+
+                <div className="mt-2 text-sm text-white/60">
+                  Download the latest release from the project page, then grab
+                  the .dll from the release assets.
+                </div>
+              </li>
+
+              <li>
+                <span className="font-semibold text-white">
+                  2) Open your osu! folder
+                </span>
+                <div className="mt-2 text-sm text-white/60">
+                  Open osu!lazer, then use the menu option “Open osu! folder”.
+                </div>
+              </li>
+
+              <li>
+                <span className="font-semibold text-white">
+                  3) Place the .dll into the ruleset folder
+                </span>
+                <div className="mt-2 text-sm text-white/60">
+                  Inside the osu! folder, find the “ruleset” folder and put the
+                  .dll file there.
+                </div>
+
+                <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-white/70">
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-white/40">
+                      Folder
+                    </div>
+                    <code className="select-text font-mono">ruleset</code>
+                  </div>
+                  <CopyButton value={"ruleset"} accent="violet" />
+                </div>
+              </li>
+
+              <li>
+                <span className="font-semibold text-white">
+                  4) Restart osu!lazer (first restart)
+                </span>
+                <div className="mt-2 text-sm text-white/60">
+                  Completely close osu!lazer and open it again so the injector
+                  loads.
+                </div>
+              </li>
+
+              <li>
+                <span className="font-semibold text-white">
+                  5) Open Settings → Rulesets → API + Website
+                </span>
+                <div className="mt-2 text-sm text-white/60">
+                  Go to Rulesets and set the API and Website URLs exactly like
+                  below.
+                </div>
+
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  <CodeBox label="API" value={API_URL} accent="violet" />
+                  <CodeBox label="Website" value={WEBSITE_URL} accent="violet" />
+                </div>
+              </li>
+
+              <li>
+                <span className="font-semibold text-white">6) Press Apply</span>
+                <div className="mt-2 text-sm text-white/60">
+                  Press Apply to save the values (this step matters both to
+                  connect AND to disconnect).
+                </div>
+              </li>
+
+              <li>
+                <span className="font-semibold text-white">
+                  7) Restart osu!lazer (second restart)
+                </span>
+                <div className="mt-2 text-sm text-white/60">
+                  Restart again to ensure the connection settings fully apply.
+                </div>
+              </li>
+            </ol>
+
+            {/* Safety notice */}
+            <div className="mt-8 rounded-2xl border border-violet-400/25 bg-violet-500/10 p-6">
+              <p className="mb-2 text-sm font-semibold text-white">
+                Important notice (account safety)
+              </p>
+              <p className="text-sm text-white/70">
+                You’re NOT going to get banned from osu! and your account isn’t
+                at risk. osu! explicitly allows custom rulesets. This is simply
+                osu!lazer connecting to a different server, and you can switch
+                back to the official servers at any time.
+              </p>
+            </div>
+
+            {/* Switch back */}
+            <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-6">
+              <p className="mb-2 text-sm font-semibold text-white">
+                Switching back to the official osu! servers
+              </p>
+              <p className="mb-4 text-sm text-white/70">
+                To go back to the normal osu! servers, remove the custom values
+                you set and apply the change.
+              </p>
+
+              <ol className="space-y-3 text-sm text-white/70">
+                <li>
+                  1) Clear the fields you changed (set them back to
+                  empty/default):
+                  <ul className="ml-6 mt-2 list-disc text-white/60">
+                    <li>API</li>
+                    <li>Website</li>
+                  </ul>
+                </li>
+                <li>2) Press Apply.</li>
+                <li>3) Restart osu!lazer.</li>
+              </ol>
+            </div>
+          </Card>
+        </section>
+      </div>
+    </div>
+  );
+}

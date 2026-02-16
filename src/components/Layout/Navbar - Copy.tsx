@@ -386,35 +386,6 @@ const MobileMenuDropdown = memo<{
 MobileMenuDropdown.displayName = 'MobileMenuDropdown';
 
 // ------------------------------
-// Brand mark (NEW) — this is the "point B" glow wrapper
-// ------------------------------
-const BrandMark = memo<{ size?: number }>(({ size = 36 }) => {
-  const inner = Math.max(18, Math.round(size * 0.78));
-
-  return (
-    <div
-      style={{ width: size, height: size }}
-      className={[
-        'rounded-full border border-white/10',
-        'bg-gradient-to-br from-[#c084fc]/25 via-[#ff5bbd]/12 to-[#ff7a18]/10',
-        'shadow-[0_0_18px_rgba(255,90,180,0.16)]',
-        'flex items-center justify-center',
-      ].join(' ')}
-    >
-      <img
-        src="/image/logos/logo.png"
-        srcSet="/image/logos/logo.png 1x, /image/logos/logo@2x.png 2x"
-        alt="Torii"
-        style={{ width: inner, height: inner }}
-        className="object-contain"
-        draggable={false}
-      />
-    </div>
-  );
-});
-BrandMark.displayName = 'BrandMark';
-
-// ------------------------------
 // Main Navbar
 // ------------------------------
 const Navbar: React.FC = () => {
@@ -458,7 +429,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* Desktop */}
+      {/* Desktop - Shikkesora pill */}
       <header className="hidden md:flex fixed top-4 left-0 right-0 z-50 justify-center px-4">
         <div className="w-full max-w-7xl">
           <div
@@ -473,7 +444,12 @@ const Navbar: React.FC = () => {
               {/* Left brand */}
               <div className="flex items-center justify-start">
                 <Link to="/" className="flex items-center gap-3">
-                  <BrandMark size={36} />
+                  <img
+                    src="/image/logos/logo.png"
+                    srcSet="/image/logos/logo.png 1x, /image/logos/logo@2x.png 2x"
+                    alt="Torii"
+                    className="h-9 w-9 rounded-full border border-white/10 object-contain bg-white/5 p-1"
+                  />
 
                   <div className="leading-tight">
                     <div className="text-white font-semibold tracking-wide">Torii</div>
@@ -557,12 +533,17 @@ const Navbar: React.FC = () => {
         </div>
       </header>
 
-      {/* Mobile */}
+      {/* Mobile - glass bar */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-50 px-3 pt-3">
         <div className="rounded-3xl border border-white/10 bg-[rgba(10,10,25,0.78)] backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
           <div className="flex items-center justify-between px-4 py-3">
             <Link to="/" className="flex items-center gap-3">
-              <BrandMark size={36} />
+              <img
+                src="/image/logos/logo.png"
+                srcSet="/image/logos/logo.png 1x, /image/logos/logo@2x.png 2x"
+                alt="Torii"
+                className="h-9 w-9 rounded-full border border-white/10 object-contain bg-white/5 p-1"
+              />
 
               <div className="leading-tight">
                 <div className="text-white font-semibold">Torii</div>

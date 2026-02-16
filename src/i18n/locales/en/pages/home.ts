@@ -2,9 +2,9 @@ export const homePage = {
   hero: {
     tagline: 'Probably the best osu! private server',
     description:
-      'g0v0! is a brand-new osu! private server <bold>built for the lazer client</bold>. We support the standard / taiko / catch / mania rulesets, RX/AP pp calculation, and unlimited renames so you can play your way.',
+      'Shikke Lazer Dojo! is a osu! private server <bold>built for the lazer client</bold>. We support the standard / taiko / catch / mania rulesets, RX/AP pp calculation, and unlimited renames so you can play your way.',
     statusOperational: 'All services are operational',
-    statusCommunity: 'Join our QQ / Discord community for support and updates',
+    statusCommunity: 'Join our Discord community for support and updates',
     joinCta: 'Join Now',
     viewProfile: 'View profile',
     viewRankings: 'View rankings',
@@ -13,10 +13,9 @@ export const homePage = {
     featuresTitle: 'Feature highlights',
     featuresSubtitle: 'Discover the rich features and services we provide for you',
     community: {
-      qq: 'QQ Group',
       discord: 'Discord',
       github: 'GitHub',
-      discordTag: 'g0v0!',
+      discordTag: 'Shikkes Dojo',
     },
   },
 
@@ -25,7 +24,7 @@ export const homePage = {
       {
         title: 'Works on every platform',
         content:
-          'g0v0! is designed for lazer, which means you can play on any system that supports osu! lazer without platform limitations.',
+          'Shikke Lazer Dojo! is designed for lazer, which means you can play on any system that supports osu! lazer without platform limitations.',
         imageAlt: 'Works on every platform',
       },
       {
@@ -37,7 +36,7 @@ export const homePage = {
       {
         title: 'Active community support',
         content:
-          'Our official QQ group and Discord server provide the perfect place to ask for help, share highlights, or just hang out.',
+          'Our official Discord server provide the perfect place to ask for help, share highlights, or just hang out.',
         imageAlt: 'Active community support',
       },
       {
@@ -49,7 +48,7 @@ export const homePage = {
       {
         title: 'Developer friendly',
         content:
-          'Our server follows the official osu! v1/v2 API specs so you can integrate bots and services into g0v0! faster and easier.',
+          'Our server follows the official osu! v1/v2 API specs so you can integrate bots and services into Shikkesora faster and easier.',
         imageAlt: 'Developer friendly',
       },
       {

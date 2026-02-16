@@ -142,23 +142,27 @@
 }
 
 :root {
-  --hue: 340; /* 默认色相值，对应 osu-pink */
-  --profile-color: #ED8EA6;
-  --osu-pink: var(--profile-color, #ED8EA6);
+  /* Cambiamos el tono base a uno más violeta (270-280) en lugar de rosa (340) */
+  --hue: 275; 
+  --profile-color: #8a2be2; /* Tu BlueViolet */
+  --osu-pink: #8a2be2;
   
-  /* 使用 OKLCH 颜色空间，参考 fuwari 实现 */
-  /* 页面背景 */
-  --page-bg: oklch(0.97 0.01 var(--hue));
-  --bg-primary: var(--page-bg);
-  --bg-secondary: oklch(0.95 0.02 var(--hue));
+  /* Fondos inspirados en tu #030014 */
+  --page-bg: #030014;
+  --bg-primary: #030014;
+  --bg-secondary: #0b0b1e;
   
   /* 卡片背景 - 亮色模式用白色 */
-  --card-bg: white;
+  /* --card-bg: white; */ 
   --card-bg-hover: oklch(0.98 0.005 var(--hue));
+  /* Cartas y Paneles con efecto Glass de tu web */
+  --card-bg: rgba(23, 23, 45, 0.6);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --float-panel-bg: rgba(10, 10, 20, 0.75);
   
-  /* 文本颜色 */
-  --text-primary: #1a202c;
-  --text-secondary: #718096;
+/* Textos */
+  --text-primary: #ffffff;
+  --text-secondary: #b4b4c0;
   --text-muted: #a0aec0;
   
   /* 边框颜色 */
@@ -183,12 +187,14 @@
 
 .dark {
   /* 深色模式 - 参考 Fuwari 实现 */
-  --page-bg: oklch(0.16 0.014 var(--hue));
+  /* --page-bg: oklch(0.16 0.014 var(--hue)); */
+  --page-bg: #030014;
   --bg-primary: var(--page-bg);
   --bg-secondary: oklch(0.20 0.015 var(--hue));
   
   /* 卡片背景 - 与 Fuwari 一致 */
-  --card-bg: oklch(0.23 0.015 var(--hue));
+  /* --card-bg: oklch(0.23 0.015 var(--hue)); */
+  --card-bg: rgba(23, 23, 45, 0.8);
   --card-bg-hover: oklch(0.30 0.03 var(--hue));
   
   /* 文本颜色 */
@@ -220,7 +226,8 @@
   --navbar-bg: oklch(0.19 0.015 var(--hue) / 0.9);
   
   /* 深色模式专用颜色 */
-  --osu-pink: var(--profile-color, #ED8EA6);
+  /* --osu-pink: var(--profile-color, #ED8EA6); */
+  --osu-pink: #ff007f;
   --profile-color: #ED8EA6;
 }
 
@@ -251,8 +258,12 @@ html, body {
   padding: 0;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 /* Scrollbar styling */

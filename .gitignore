@@ -32,3 +32,10 @@ gashamkal-main/*
 osu-web-master/*
 fuwari-main/*
 .vercel
+
+# local/production artifacts
+node_modules/
+dist/
+.env.production
+.DS_Store
+.env*
