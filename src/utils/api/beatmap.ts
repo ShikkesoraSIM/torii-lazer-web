@@ -24,6 +24,18 @@ export const beatmapAPI = {
     }
   },
 
+  getBeatmap: async (beatmapId: number) => {
+    try {
+      const response = await api.get(`/api/v2/beatmaps/${beatmapId}`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Beatmap not found');
+      }
+      throw error;
+    }
+  },
+
   getBeatmapset: async (beatmapsetId: number) => {
     try {
       const response = await api.get(`/api/v2/beatmapsets/${beatmapsetId}`);
@@ -112,8 +124,8 @@ export const beatmapAPI = {
 
       return { beatmapset, beatmap };
     } else if (urlInfo.beatmapId) {
-      const beatmap = await beatmapAPI.getBeatmapByBeatmapId(urlInfo.beatmapId);
-      const beatmapset = await beatmapAPI.getBeatmapset(beatmap.beatmapset_id);
+      const beatmapset = await beatmapAPI.getBeatmapByBeatmapId(urlInfo.beatmapId);
+      const beatmap = beatmapset.beatmaps.find((b: any) => b.id === urlInfo.beatmapId) || beatmapset.beatmaps[0];
 
       return { beatmapset, beatmap };
     }

@@ -23,6 +23,22 @@ const BeatmapPage: React.FC = () => {
 
   useEffect(() => {
     const fetchBeatmapData = async () => {
+      const resolveBeatmapsetByBeatmapId = async (
+        targetId: number
+      ): Promise<{ beatmapset: Beatmapset; beatmap?: Beatmap }> => {
+        try {
+          const beatmapset = await beatmapAPI.getBeatmapByBeatmapId(targetId);
+          const beatmap = beatmapset.beatmaps.find((b: Beatmap) => b.id === targetId);
+          return { beatmapset, beatmap };
+        } catch {
+          // Fallback for maps that are not returned by beatmapset lookup.
+          const beatmap = await beatmapAPI.getBeatmap(targetId);
+          const beatmapset = await beatmapAPI.getBeatmapset(beatmap.beatmapset_id);
+          const matchedBeatmap = beatmapset.beatmaps.find((b: Beatmap) => b.id === targetId) || beatmap;
+          return { beatmapset, beatmap: matchedBeatmap };
+        }
+      };
+
       // 从 URL hash 获取 beatmap ID （用于 beatmapsets 路由）
       const hashMatch = window.location.hash.match(/#[^/]+\/(\d+)/);
       const hashBeatmapId = hashMatch ? parseInt(hashMatch[1], 10) : null;
@@ -41,6 +57,7 @@ const BeatmapPage: React.FC = () => {
         setError(null);
 
         let beatmapsetData: Beatmapset;
+        let resolvedBeatmap: Beatmap | undefined;
 
         if (targetBeatmapsetId) {
           // 使用 beatmapset ID 查询
@@ -50,15 +67,9 @@ const BeatmapPage: React.FC = () => {
           if (isNaN(targetBeatmapId)) {
             throw new Error(t('beatmap.notFound'));
           }
-          
-          try {
-            beatmapsetData = await beatmapAPI.getBeatmapByBeatmapId(targetBeatmapId);
-          } catch (error: any) {
-            if (error.message === 'Beatmap not found') {
-              throw new Error(t('beatmap.notFound'));
-            }
-            throw error;
-          }
+          const resolved = await resolveBeatmapsetByBeatmapId(targetBeatmapId);
+          beatmapsetData = resolved.beatmapset;
+          resolvedBeatmap = resolved.beatmap;
         } else {
           throw new Error(t('beatmap.notFound'));
         }
@@ -71,7 +82,7 @@ const BeatmapPage: React.FC = () => {
         if (targetBeatmapId) {
           targetBeatmap = beatmapsetData.beatmaps.find(
             (beatmap) => beatmap.id === targetBeatmapId
-          );
+          ) || resolvedBeatmap;
         }
         
         if (targetBeatmap) {
@@ -95,8 +106,11 @@ const BeatmapPage: React.FC = () => {
 
       } catch (error: any) {
         console.error('Failed to fetch beatmap data:', error);
-        setError(error.message || t('beatmap.error'));
-        toast.error(error.message || t('beatmap.error'));
+        const message = error?.message === 'Beatmap not found'
+          ? t('beatmap.notFound')
+          : (error.message || t('beatmap.error'));
+        setError(message);
+        toast.error(message);
       } finally {
         setLoading(false);
       }
