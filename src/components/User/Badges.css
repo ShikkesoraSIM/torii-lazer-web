@@ -1,0 +1,16 @@
+﻿.user-group-badge {
+  align-items: center;
+  background-color: #474551ab;
+  border-radius: 20px;
+  color: var(--group-colour, hsl(var(--hsl-c1)));
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: 600;
+  justify-content: center;
+  padding: 2px 10px;
+}
+
+.user-group-badge--profile-page {
+  font-size: inherit;
+}
+

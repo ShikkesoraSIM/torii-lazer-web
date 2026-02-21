@@ -14,6 +14,10 @@ import UserBestScores from './UserBestScores';
 import UserRecentScores from './UserRecentScores';
 import UserPageDisplay from './UserPageDisplay';
 import RestrictedBanner from './RestrictedBanner';
+import Badges from './Badges';
+import Achievements from './Achievements';
+import UserMostPlayedBeatmaps from './UserMostPlayedBeatmaps';
+import UserMappedBeatmaps from './UserMappedBeatmaps';
 import { FaTools, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { Tooltip } from 'react-tooltip';
 import { useAuth } from '../../hooks/useAuth';
@@ -273,6 +277,9 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
             <h1 className="mt-[-12px] md:mt-[-15px] ml-0 md:ml-[-10px] text-xl md:text-3xl font-bold mb-3 md:mb-2 text-gray-900 dark:text-gray-100">
               {user.username}
             </h1>
+            <div className="mb-2 md:mb-3 ml-0 md:ml-[-8px]">
+              <Badges badges={user.badges} />
+            </div>
             <div className="flex mt-[-10px] items-center gap-2 md:gap-4 md:mt-[10px] md:ml-[-8px] flex-wrap">
               {/* 国旗和国家名 */}
               {user.country?.code && (
@@ -433,9 +440,21 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
           />
         </div>
 
+        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
+          <UserMostPlayedBeatmaps userId={user.id} user={user} />
+        </div>
+
         {/* 用户最近成绩 */}
         <div className="bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
           <UserRecentScores userId={user.id} selectedMode={selectedMode} user={user} />
+        </div>
+
+        <div className="bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
+          <UserMappedBeatmaps userId={user.id} user={user} />
+        </div>
+
+        <div className="bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
+          <Achievements userAchievements={user.user_achievements} />
         </div>
 
         {/* 施工中 */}

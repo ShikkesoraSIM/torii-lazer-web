@@ -24,6 +24,18 @@ const BeatmapLink: React.FC<BeatmapLinkProps> = ({
   if (!beatmapUrl || beatmapUrl === '#') {
     return <span className={className} title={title}>{children}</span>;
   }
+  // Already an internal route (e.g. /beatmapsets/123#osu/456)
+  if (beatmapUrl.startsWith('/')) {
+    return (
+      <Link
+        to={beatmapUrl}
+        className={className}
+        title={title}
+      >
+        {children}
+      </Link>
+    );
+  }
 
   // Convert to internal route if possible
   const internalUrl = beatmapAPI.convertToInternalBeatmapUrl(beatmapUrl);

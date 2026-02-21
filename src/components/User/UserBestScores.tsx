@@ -118,7 +118,11 @@ const ScoreCard: React.FC<{
   const isPinned = score.current_user_attributes?.pin?.is_pinned || false; // 是否已置顶
   const hasReplay = score.has_replay || false; // 是否有回放
 
-  const beatmapUrl = score.beatmap?.url || '#';
+  const beatmapUrl =
+    score.beatmap?.url ||
+    (score.beatmapset?.id
+      ? `/beatmapsets/${score.beatmapset.id}${score.beatmap?.id ? `#osu/${score.beatmap.id}` : ''}`
+      : '#');
   const coverImage = score.beatmapset?.covers?.['cover@2x'] || score.beatmapset?.covers?.cover;
 
   // 将主题颜色转换为 RGB 以便使用透明度

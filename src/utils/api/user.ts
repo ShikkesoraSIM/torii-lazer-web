@@ -14,6 +14,7 @@ export interface TOTPCreateStart {
 }
 
 export type TOTPBackupCodes = string[];
+export type UserBeatmapsetType = 'ranked' | 'pending' | 'loved' | 'graveyard';
 
 export const userAPI = {
   getMe: async (ruleset?: string) => {
@@ -177,6 +178,35 @@ export const userAPI = {
     params.append('offset', offset.toString());
 
     const url = `/api/v2/users/${userId}/recent_activity?${params.toString()}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  getMostPlayedBeatmaps: async (
+    userId: number,
+    limit: number = 6,
+    offset: number = 0,
+  ) => {
+    const params = new URLSearchParams();
+    params.append('limit', limit.toString());
+    params.append('offset', offset.toString());
+
+    const url = `/api/v2/users/${userId}/beatmapsets/most_played?${params.toString()}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  getUserBeatmapsets: async (
+    userId: number,
+    type: UserBeatmapsetType,
+    limit: number = 12,
+    offset: number = 0,
+  ) => {
+    const params = new URLSearchParams();
+    params.append('limit', limit.toString());
+    params.append('offset', offset.toString());
+
+    const url = `/api/v2/users/${userId}/beatmapsets/${type}?${params.toString()}`;
     const response = await api.get(url);
     return response.data;
   },

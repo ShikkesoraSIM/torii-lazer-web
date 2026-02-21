@@ -165,7 +165,11 @@ const ScoreCard: React.FC<{
   const isPinned = score.current_user_attributes?.pin?.is_pinned || false;
   const hasReplay = score.has_replay || false;
 
-  const beatmapUrl = score.beatmap?.url || '#';
+  const beatmapUrl =
+    score.beatmap?.url ||
+    (score.beatmapset?.id
+      ? `/beatmapsets/${score.beatmapset.id}${score.beatmap?.id ? `#osu/${score.beatmap.id}` : ''}`
+      : '#');
   const coverImage = score.beatmapset?.covers?.['cover@2x'] || score.beatmapset?.covers?.cover;
 
   const hexToRgb = (hex: string): string => {
