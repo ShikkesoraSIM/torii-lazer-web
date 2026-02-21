@@ -178,6 +178,31 @@ const BeatmapPage: React.FC = () => {
     );
   }
 
+  if (!selectedBeatmap) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{t('beatmap.notFound')}</h1>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          >
+            {t('beatmap.goBack')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const coverUrl = beatmapset.covers?.cover ?? '';
+  const heroBackground = coverUrl
+    ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${coverUrl})`
+    : 'linear-gradient(rgba(15,23,42,0.85), rgba(15,23,42,0.95))';
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://torii.local';
+  const selectedMode = selectedBeatmap?.mode || 'osu';
+  const localBeatmapsetUrl = `${window.location.origin}/beatmapsets/${beatmapset.id}#${selectedMode}/${selectedBeatmap.id}`;
+  const downloadUrl = `${apiBaseUrl}/api/v2/beatmapsets/${beatmapset.id}/download?noVideo=true`;
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Hero Section Container */}
@@ -186,7 +211,7 @@ const BeatmapPage: React.FC = () => {
           <div 
             className="relative h-72 overflow-hidden rounded-2xl shadow-lg"
             style={{
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${beatmapset.covers.cover})`,
+              backgroundImage: heroBackground,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
@@ -513,7 +538,7 @@ const BeatmapPage: React.FC = () => {
               </div>
               <div className="p-6 space-y-3">
                 <a
-                  href={`https://osu.ppy.sh/beatmapsets/${beatmapset.id}/download`}
+                  href={downloadUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full text-center px-4 py-3 bg-osu-pink hover:bg-osu-pink/90 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg transform hover:scale-[1.02]"
@@ -541,7 +566,7 @@ const BeatmapPage: React.FC = () => {
                   </a>
                 )}
                 <a
-                  href={`https://osu.ppy.sh/beatmapsets/${beatmapset.id}`}
+                  href={localBeatmapsetUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full text-center px-4 py-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg transform hover:scale-[1.02]"

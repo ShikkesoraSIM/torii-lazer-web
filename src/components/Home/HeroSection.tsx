@@ -163,7 +163,7 @@ const HeroSection: React.FC = () => {
               )}
 
               <a
-                href="https://discord.gg/ydjdaZXGkx"
+                href="https://discord.gg/fZXsZFT5Xv"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/5 px-8 py-3.5 font-semibold text-white/80 hover:bg-white/10 transition-all active:scale-[0.98]"
@@ -294,3 +294,4 @@ function FeatureCard({
 }
 
 export default HeroSection;
+

@@ -7,4 +7,10 @@ export default defineConfig({
   plugins: [react(), removeConsole({
       external: ['error', 'warn']
     })],
+  server: {
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
+    allowedHosts: ['web.torii.local', 'torii.local', 'localhost', '127.0.0.1'],
+  },
 })

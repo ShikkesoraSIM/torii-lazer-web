@@ -104,7 +104,7 @@ const HeroSection: React.FC = () => {
                   </a>
 
                   <a
-                    href="https://discord.gg/AhzJXXWYfF"
+                    href="https://discord.gg/fZXsZFT5Xv"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group w-full flex flex-col sm:flex-row items-center bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg text-xs transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -274,3 +274,4 @@ const HeroSection: React.FC = () => {
 };
 
 export default HeroSection;
+
