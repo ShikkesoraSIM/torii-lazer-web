@@ -1,6 +1,17 @@
 import { api } from './client';
 
 export const beatmapAPI = {
+  searchBeatmaps: async (params: Record<string, string | number | boolean | undefined>) => {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        searchParams.append(key, String(value));
+      }
+    });
+    const response = await api.get(`/api/v2/beatmapsets/search?${searchParams.toString()}`);
+    return response.data;
+  },
+
   getBeatmapByBeatmapId: async (beatmapId: number) => {
     try {
       const response = await api.get(`/api/v2/beatmapsets/lookup?beatmap_id=${beatmapId}`);

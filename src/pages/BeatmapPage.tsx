@@ -8,6 +8,7 @@ import type { Beatmapset, Beatmap } from '../types';
 import { formatDuration, formatNumber } from '../utils/format';
 import { GAME_MODE_NAMES } from '../types';
 import { AudioPlayButton, AudioPlayerControls } from '../components/UI/AudioPlayer';
+import BeatmapLeaderboard from '../components/Score/BeatmapLeaderboard';
 import toast from 'react-hot-toast';
 
 const BeatmapPage: React.FC = () => {
@@ -430,6 +431,20 @@ const BeatmapPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {selectedBeatmap && (
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span className="text-osu-pink">●</span>
+                    {t('beatmap.leaderboard') || 'Leaderboard'}
+                  </h2>
+                </div>
+                <div className="p-0">
+                  <BeatmapLeaderboard beatmapId={selectedBeatmap.id} beatmap={selectedBeatmap} />
                 </div>
               </div>
             )}

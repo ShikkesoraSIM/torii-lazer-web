@@ -1,6 +1,13 @@
 import { api } from './client';
 
 export const scoreAPI = {
+  getBeatmapScores: async (beatmapId: number, mode: string, limit: number = 50) => {
+    const response = await api.get(
+      `/api/v2/beatmaps/${beatmapId}/scores?mode=${encodeURIComponent(mode)}&type=global&legacy_only=0&limit=${limit}&offset=0`
+    );
+    return response.data;
+  },
+
   // 置顶成绩
   pinScore: async (scoreId: number) => {
     console.log('置顶成绩:', scoreId);

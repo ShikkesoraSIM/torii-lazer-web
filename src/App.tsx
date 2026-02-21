@@ -21,6 +21,7 @@ import CreateTeamPage from './pages/CreateTeamPage';
 import MessagesPage from './pages/MessagesPage';
 import HowToJoinPage from './pages/HowToJoinPage';
 import BeatmapPage from './pages/BeatmapPage';
+import BeatmapsPage from './pages/BeatmapsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 function App() {
@@ -52,14 +53,7 @@ function App() {
             <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="beatmaps/:beatmapId" element={<BeatmapPage />} />
             <Route path="beatmapsets/:beatmapsetId" element={<BeatmapPage />} />
-            <Route
-              path="beatmaps"
-              element={
-                <div className="flex items-center justify-center h-screen">
-                  <h1 className="text-2xl font-bold">{t('app.beatmapsComingSoon')}</h1>
-                </div>
-              }
-            />
+            <Route path="beatmaps" element={<BeatmapsPage />} />
             <Route
               path="*"
               element={

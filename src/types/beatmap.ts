@@ -106,4 +106,10 @@ export interface Beatmapset {
   has_favourited: boolean;
   favourite_count: number;
   recent_favourites: any[];
+  is_local?: boolean;
+}
+
+export interface SearchBeatmapsetsResponse {
+  beatmapsets: Beatmapset[];
+  total: number;
 }
