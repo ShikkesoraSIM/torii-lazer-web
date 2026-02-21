@@ -101,10 +101,10 @@ const AchievementMedal: React.FC<{
   return (
     <div className="relative">
       <button
-        className={`w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-lg transition-all duration-200 cursor-help overflow-hidden ${
+        className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center transition-all duration-150 cursor-help ${
           achieved
-            ? 'hover:scale-110 filter drop-shadow-md hover:drop-shadow-lg'
-            : 'opacity-40 grayscale hover:opacity-60'
+            ? 'hover:scale-105'
+            : 'opacity-40 grayscale saturate-50'
         }`}
         data-tooltip-id={tooltipId}
         data-tooltip-content={`${ach.name}${awardedDate ? '\n' + awardedDate : ''}`}
@@ -112,7 +112,7 @@ const AchievementMedal: React.FC<{
         <img
           src={imageUrl}
           alt={ach.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           loading="lazy"
         />
       </button>
@@ -160,9 +160,9 @@ const Achievements: React.FC<AchievementsProps> = ({ userAchievements = [] }) =>
     <div className="w-full space-y-6">
       {/* Latest Section */}
       {latestAchieved.length > 0 && (
-        <div>
+        <div className="border-t border-blue-400/50 pt-3">
           <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Latest</h3>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             {latestAchieved.map((ach, idx: number) => (
               <AchievementMedal
                 key={`latest-${idx}`}
@@ -176,10 +176,10 @@ const Achievements: React.FC<AchievementsProps> = ({ userAchievements = [] }) =>
       )}
 
       {/* Category Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {Object.entries(categories).map(([category, ids]) => (
-          <div key={category} className="space-y-2">
-            <h4 className="text-xs font-bold uppercase text-gray-700 dark:text-gray-300 tracking-wide">
+          <div key={category} className="border-t border-blue-400/50 pt-3 space-y-2">
+            <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 tracking-wide">
               {category}
             </h4>
             <div className="flex flex-wrap gap-2">
