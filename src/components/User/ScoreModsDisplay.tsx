@@ -167,7 +167,7 @@ const ModChip: React.FC<{ mod: ScoreMod }> = ({ mod }) => {
         </>
       ) : isSpeedAdjust ? (
         <>
-          <span className={`${isSlowdownMod ? 'text-lime-50/95' : 'text-rose-50/95'} font-bold mr-1`}>
+          <span className={`${isSlowdownMod ? 'text-lime-50/95' : 'text-rose-50/95'} font-bold ${showSpeedRate ? 'mr-1' : ''}`}>
             {mod.acronym}
           </span>
           {showSpeedRate && (
