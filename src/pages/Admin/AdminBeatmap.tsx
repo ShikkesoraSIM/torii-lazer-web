@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import LazyBackgroundImage from '../../components/UI/LazyBackgroundImage';
 import { Tooltip } from 'react-tooltip';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
@@ -48,7 +47,6 @@ const AdminBeatmap: React.FC = () => {
   const [selectedBeatmapset, setSelectedBeatmapset] = useState<Beatmapset | null>(null);
   const [newRankStatus, setNewRankStatus] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
   const { profileColor } = useProfileColor();
 
   useEffect(() => {
