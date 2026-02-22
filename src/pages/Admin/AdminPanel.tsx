@@ -9,9 +9,10 @@ import AdminBeatmap from './AdminBeatmap';
 import AdminBadges from './AdminBadges';
 import AdminTeams from './AdminTeams';
 import AdminDailyChallenges from './AdminDailyChallenges';
+import AdminAnnouncements from './AdminAnnouncements';
 
 
-type AdminTab = 'users' | 'beatmaps' | 'beatmap-list' | 'badges' | 'teams' | 'daily-challenges';
+type AdminTab = 'users' | 'beatmaps' | 'beatmap-list' | 'badges' | 'teams' | 'daily-challenges' | 'announcements';
 
 interface AdminStats {
   total_users: number;
@@ -166,21 +167,20 @@ const AdminPanel: React.FC = () => {
       </div>
 
       {/* Main Content with Side Panel - Following UserProfileLayout pattern */}
-      <div className="max-w-7xl mx-auto px-0 md:px-4 lg:px-6 py-4 md:py-6">
-        <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-5">
           {/* Side Panel Navigation - Similar to UserProfileLayout sidebar */}
-          <div className="lg:w-64 flex-shrink-0">
-            <div className="bg-card md:main-card-shadow md:rounded-2xl overflow-hidden md:border md:border-card">
+          <div className="lg:w-60 flex-shrink-0">
+            <div className="bg-card/95 md:main-card-shadow md:rounded-2xl overflow-hidden md:border md:border-card backdrop-blur-sm">
               <div className="bg-transparent md:bg-card px-3 md:px-6 py-3 md:py-4 border-b border-card">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
                   <div className="text-base md:text-lg font-bold">Navigation</div>
                 </div>
               </div>
-              <nav className="bg-transparent md:bg-card px-3 md:px-6 py-3 md:py-4 space-y-2">
+              <nav className="bg-transparent md:bg-card px-3 md:px-5 py-3 md:py-4 space-y-1.5">
                 <button
                   onClick={() => setActiveTab('users')}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
                     activeTab === 'users'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -196,7 +196,7 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('beatmaps')}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
                     activeTab === 'beatmaps'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -212,7 +212,7 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('beatmap-list')}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
                     activeTab === 'beatmap-list'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -228,7 +228,7 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('badges')}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
                     activeTab === 'badges'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -244,7 +244,7 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('teams')}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
                     activeTab === 'teams'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -260,7 +260,7 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('daily-challenges')}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
                     activeTab === 'daily-challenges'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -273,13 +273,29 @@ const AdminPanel: React.FC = () => {
                     <span>Daily Challenges</span>
                   </div>
                 </button>
+
+                <button
+                  onClick={() => setActiveTab('announcements')}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                    activeTab === 'announcements'
+                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5l-7 7h4v7h6v-7h4l-7-7z" />
+                    </svg>
+                    <span>Announcements</span>
+                  </div>
+                </button>
               </nav>
             </div>
           </div>
 
           {/* Content Area - Following UserProfileLayout card pattern */}
           <div className="flex-1">
-            <div className="bg-card md:main-card-shadow md:rounded-2xl overflow-hidden md:border md:border-card">
+            <div className="bg-card/95 md:main-card-shadow md:rounded-2xl overflow-hidden md:border md:border-card backdrop-blur-sm">
               <div className="bg-transparent md:bg-card px-3 md:px-6 py-3 md:py-4 border-b border-card">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
@@ -290,6 +306,7 @@ const AdminPanel: React.FC = () => {
                     {activeTab === 'badges' && 'Badge Management'}
                     {activeTab === 'teams' && 'Team Management'}
                     {activeTab === 'daily-challenges' && 'Daily Challenge Management'}
+                    {activeTab === 'announcements' && 'Global Announcements'}
                   </div>
                 </div>
               </div>
@@ -300,10 +317,10 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'badges' && <AdminBadges />}
                 {activeTab === 'teams' && <AdminTeams />}
                 {activeTab === 'daily-challenges' && <AdminDailyChallenges />}
+                {activeTab === 'announcements' && <AdminAnnouncements />}
               </div>
             </div>
           </div>
-        </div>
       </div>
     </main>
   );

@@ -241,4 +241,17 @@ export const adminAPI = {
     const response = await api.post(`/api/private/admin/beatmap-rank-requests/${requestId}/reject`, { reason });
     return response.data;
   },
+
+  // Global announcements
+  sendGlobalAnnouncement: async (payload: {
+    title: string;
+    message: string;
+    severity: 'info' | 'warning' | 'error';
+    also_send_pm: boolean;
+    online_only: boolean;
+    sender_username?: string;
+  }) => {
+    const response = await api.post('/api/private/admin/global-announcement', payload);
+    return response.data;
+  },
 };

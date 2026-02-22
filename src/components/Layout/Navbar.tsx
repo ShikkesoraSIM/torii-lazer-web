@@ -443,14 +443,20 @@ const Navbar: React.FC = () => {
       { path: '/rankings', title: t('nav.rankings'), icon: FiTrendingUp, requireAuth: true },
       { path: '/beatmaps', title: t('nav.beatmaps'), icon: FiMusic, requireAuth: true },
       { path: '/teams', title: t('nav.teams'), icon: FiUsers, requireAuth: true },
+      { path: '/admin', title: 'Admin', icon: FiSettings, requireAuth: true, requireAdmin: true },
       { path: '/how-to-join', title: t('nav.join'), icon: FiServer },
     ],
     [t]
   );
 
   const filteredNavItems = React.useMemo(
-    () => navItems.filter((item) => !item.requireAuth || (item.requireAuth && isAuthenticated)),
-    [navItems, isAuthenticated]
+    () =>
+      navItems.filter((item) => {
+        if (item.requireAuth && !isAuthenticated) return false;
+        if (item.requireAdmin && !user?.is_admin) return false;
+        return true;
+      }),
+    [navItems, isAuthenticated, user?.is_admin]
   );
 
   const handleThemeToggle = useCallback(() => toggleTheme(), [toggleTheme]);
