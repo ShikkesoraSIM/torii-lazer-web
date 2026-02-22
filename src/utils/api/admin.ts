@@ -20,11 +20,11 @@ export const adminAPI = {
 
   updateUser: async (userId: number, userData: {
     username?: string;
-    country_code?: string;
+    country_code?: string | null;
     is_qat?: boolean;
     is_gmt?: boolean;
     is_admin?: boolean;
-    badge?: string | object;
+    badge?: string | object | object[] | null;
   }) => {
     const response = await api.patch(`/api/private/admin/users/${userId}`, userData);
     return response.data;

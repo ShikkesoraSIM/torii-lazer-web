@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
 import type { User } from '../../types';
@@ -27,6 +28,22 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, countries
   useEffect(() => {
     loadBadges();
   }, []);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    const onEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onEsc);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onEsc);
+    };
+  }, [onClose]);
 
   const loadBadges = async () => {
     try {
@@ -100,29 +117,28 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, countries
     try {
       const updateData: any = {
         username: formData.username,
-        country_code: formData.country_code,
+        country_code: formData.country_code?.trim() ? formData.country_code.trim().toUpperCase() : null,
         is_qat: formData.is_qat,
         is_gmt: formData.is_gmt,
         is_admin: formData.is_admin,
-        // We still send the filtered list of legacy badges back to the user object
-        // to keep it in sync, though DB badges are handled separately now
-        badge: userBadges.filter(b => !b.id) 
       };
 
       await adminAPI.updateUser(user.id, updateData);
       toast.success('User updated successfully');
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update user:', error);
-      toast.error('Failed to update user');
+      const detail = error?.response?.data?.detail;
+      const message = typeof detail === 'string' ? detail : 'Failed to update user';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center overflow-y-auto z-50 p-4">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto my-8">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -277,7 +293,8 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, countries
           </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
