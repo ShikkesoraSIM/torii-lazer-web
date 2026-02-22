@@ -486,18 +486,6 @@ const Navbar: React.FC = () => {
                   </Link>
                 )}
 
-                <motion.button
-                  whileHover={{ scale: 1.06 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleThemeToggle}
-                  className="h-10 w-10 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-white/90 transition inline-flex items-center justify-center"
-                  aria-label="Toggle theme"
-                >
-                  <motion.div animate={{ rotate: isDark ? 180 : 0 }} transition={{ duration: 0.5 }}>
-                    {isDark ? <FiSun size={18} /> : <FiMoon size={18} />}
-                  </motion.div>
-                </motion.button>
-
                 {isAuthenticated && user ? (
                   <UserDropdown user={user} onLogout={handleLogout} />
                 ) : (
