@@ -8,7 +8,9 @@ import GameModeSelector from '../UI/GameModeSelector';
 import CustomSelect from '../UI/CustomSelect';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { apiCache } from '../../utils/apiCache';
+import ConfirmationDialog from '../UI/ConfirmationDialog';
 import type { 
   UserPreferences, 
   BeatmapsetCardSize, 
@@ -102,11 +104,13 @@ const hueToHex = (hue: number): string => {
 const UserPreferencesSection: React.FC = () => {
   const { t } = useTranslation();
   const { setProfileColorLocal, setProfileColor } = useProfileColor();
+  const { refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [preferences, setPreferences] = useState<UserPreferences>({});
   const [originalPreferences, setOriginalPreferences] = useState<UserPreferences>({});
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [savingFields, setSavingFields] = useState<Set<string>>(new Set());
+  const [showProfileMediaNsfwConfirm, setShowProfileMediaNsfwConfirm] = useState(false);
   
   // 使用独立的 hue 状态来确保滑块跟手
   const [currentHue, setCurrentHue] = useState<number>(0);
@@ -170,8 +174,19 @@ const UserPreferencesSection: React.FC = () => {
     await savePreference(key, value);
     if (key === 'profile_media_show_nsfw') {
       apiCache.clearCache();
+      await refreshUser();
       window.dispatchEvent(new CustomEvent('torii:profile-media-nsfw-changed'));
     }
+  };
+
+  const handleProfileMediaNsfwToggle = async (nextValue: boolean) => {
+    const currentValue = preferences.profile_media_show_nsfw ?? false;
+    if (nextValue && !currentValue) {
+      setShowProfileMediaNsfwConfirm(true);
+      return;
+    }
+
+    await updateAndSave('profile_media_show_nsfw', nextValue);
   };
 
   // 使用 ref 来存储最新的颜色值，避免频繁更新状态
@@ -379,16 +394,19 @@ const UserPreferencesSection: React.FC = () => {
                 Allow viewing NSFW/suggestive avatars and profile banners.
               </p>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={preferences.profile_media_show_nsfw ?? false}
-                onChange={(e) => updateAndSave('profile_media_show_nsfw', e.target.checked)}
-                disabled={savingFields.has('profile_media_show_nsfw')}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-osu-pink/20 dark:peer-focus:ring-osu-pink/40 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-osu-pink peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
-            </label>
+            <button
+              type="button"
+              disabled={savingFields.has('profile_media_show_nsfw')}
+              onClick={() => void handleProfileMediaNsfwToggle(!(preferences.profile_media_show_nsfw ?? false))}
+              className={`relative inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
+                preferences.profile_media_show_nsfw
+                  ? 'bg-red-500/20 border-red-400/50 text-red-100 shadow-[0_0_0_2px_rgba(239,68,68,0.18)]'
+                  : 'bg-slate-700/30 border-white/10 text-slate-200 hover:border-white/25'
+              }`}
+            >
+              <span className={`inline-block h-2.5 w-2.5 rounded-full ${(preferences.profile_media_show_nsfw ?? false) ? 'bg-red-300 animate-pulse' : 'bg-slate-400'}`} />
+              {(preferences.profile_media_show_nsfw ?? false) ? 'Showing NSFW media' : 'NSFW hidden'}
+            </button>
           </div>
 
           {/* Profile Colour */}
@@ -621,6 +639,20 @@ const UserPreferencesSection: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmationDialog
+        isOpen={showProfileMediaNsfwConfirm}
+        title="Are you sure you want to enable NSFW media?"
+        message="You must be 18+ to view NSFW profile media. By continuing, you confirm you are at least 18 years old."
+        confirmLabel="I am 18+, enable it"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          setShowProfileMediaNsfwConfirm(false);
+          void updateAndSave('profile_media_show_nsfw', true);
+        }}
+        onCancel={() => setShowProfileMediaNsfwConfirm(false)}
+        isDanger
+      />
     </div>
   );
 };

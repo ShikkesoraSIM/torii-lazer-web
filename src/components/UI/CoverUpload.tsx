@@ -4,6 +4,7 @@ import { FiUpload, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { userAPI } from '../../utils/api';
 import ImageCropper from './ImageCropper';
+import ConfirmationDialog from './ConfirmationDialog';
 
 interface CoverUploadProps {
   userId?: number;
@@ -24,6 +25,8 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
   const [originalFileName, setOriginalFileName] = useState<string>('');
   const [isDragOver, setIsDragOver] = useState(false);
   const [isNsfw, setIsNsfw] = useState(false);
+  const [showNsfwPrompt, setShowNsfwPrompt] = useState(false);
+  const [pendingCroppedFile, setPendingCroppedFile] = useState<File | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -80,7 +83,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
     }
   };
 
-  const handleCropComplete = async (croppedFile: File) => {
+  const uploadCover = async (croppedFile: File, nsfwFlag: boolean) => {
     if (!userId) {
       toast.error('Missing user ID.');
       return;
@@ -88,7 +91,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
 
     setIsUploading(true);
     try {
-      const response = await userAPI.uploadCover(croppedFile, isNsfw);
+      const response = await userAPI.uploadCover(croppedFile, nsfwFlag);
       toast.success('Cover uploaded successfully.');
       onUploadSuccess(response.cover_url);
       onClose();
@@ -104,10 +107,43 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
     }
   };
 
+  const handleCropComplete = async (croppedFile: File) => {
+    if (isNsfw) {
+      await uploadCover(croppedFile, true);
+      return;
+    }
+
+    // Close cropper first so the confirmation dialog is always fully visible.
+    setStep('select');
+    setImgSrc('');
+    setPendingCroppedFile(croppedFile);
+    setShowNsfwPrompt(true);
+  };
+
+  const handleNsfwPromptChoice = async (nsfwChoice: boolean) => {
+    const fileToUpload = pendingCroppedFile;
+    setShowNsfwPrompt(false);
+    setPendingCroppedFile(null);
+    setIsNsfw(nsfwChoice);
+
+    if (!fileToUpload) {
+      return;
+    }
+
+    await uploadCover(fileToUpload, nsfwChoice);
+  };
+
+  const closeNsfwPrompt = () => {
+    setShowNsfwPrompt(false);
+    setPendingCroppedFile(null);
+  };
+
   const handleCropCancel = () => {
     setStep('select');
     setImgSrc('');
     setOriginalFileName('');
+    setShowNsfwPrompt(false);
+    setPendingCroppedFile(null);
   };
 
   return createPortal(
@@ -198,26 +234,29 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-osu-pink hover:bg-osu-pink/90 text-white px-6 py-2 rounded-lg transition-colors"
+                className="mx-auto mt-2 block bg-osu-pink hover:bg-osu-pink/90 text-white px-6 py-2 rounded-lg transition-colors"
               >
                 Select Image
               </button>
 
-              <label className="mt-4 inline-flex items-center gap-2 rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-                <input
-                  type="checkbox"
-                  checked={isNsfw}
-                  onChange={(e) => setIsNsfw(e.target.checked)}
-                  className="h-4 w-4 accent-red-500"
-                />
+              <button
+                type="button"
+                onClick={() => setIsNsfw((prev) => !prev)}
+                className={`mt-6 inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-semibold transition-all duration-200 active:scale-[0.98] ${
+                  isNsfw
+                    ? 'bg-red-500/30 border-red-300/60 text-red-50 shadow-[0_0_0_2px_rgba(239,68,68,0.28)]'
+                    : 'bg-red-500/14 border-red-400/35 text-red-100/95 hover:bg-red-500/20 hover:border-red-300/45'
+                }`}
+              >
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isNsfw ? 'bg-red-200 animate-pulse' : 'bg-red-300/85'}`} />
                 Is this NSFW / suggestive?
-              </label>
+              </button>
             </div>
           )}
         </div>
       </div>
 
-      {step === 'crop' && imgSrc && (
+      {step === 'crop' && imgSrc && !showNsfwPrompt && (
         <ImageCropper
           src={imgSrc}
           aspectRatio={4}
@@ -231,6 +270,19 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
           uploadingText="Uploading cover..."
         />
       )}
+
+      <ConfirmationDialog
+        isOpen={showNsfwPrompt}
+        title="Is this image NSFW?"
+        message="Our server allows NSFW assets as long as you point it out. We use this flag to protect users who should not or do not want to see suggestive media."
+        confirmLabel="Yes, mark as NSFW"
+        secondaryLabel="No, upload as safe"
+        cancelLabel="Cancel"
+        onConfirm={() => void handleNsfwPromptChoice(true)}
+        onSecondary={() => void handleNsfwPromptChoice(false)}
+        onCancel={closeNsfwPrompt}
+        isDanger
+      />
     </div>,
     document.body
   );
