@@ -77,9 +77,40 @@ const getDifficultyAdjustLabel = (mod: ScoreMod): string | null => {
   return `${mod.acronym} ${parts.join(' ')}`;
 };
 
+const getDifficultyAdjustParts = (mod: ScoreMod): Array<{ stat: string; value: string }> => {
+  if (!DIFFICULTY_ADJUST_MODS.has(mod.acronym)) return [];
+
+  const settings = typeof mod.settings === 'object' && mod.settings ? mod.settings : {};
+  const source = settings as Record<string, unknown>;
+
+  const extract = (keys: string[]): number | null => {
+    for (const key of keys) {
+      const parsed = parsePositiveNumber(source[key]);
+      if (parsed !== null) return parsed;
+    }
+    return null;
+  };
+
+  return [
+    { stat: 'AR', value: extract(['approach_rate', 'approachRate', 'ar']) },
+    { stat: 'OD', value: extract(['overall_difficulty', 'overallDifficulty', 'od']) },
+    { stat: 'CS', value: extract(['circle_size', 'circleSize', 'cs']) },
+    { stat: 'HP', value: extract(['drain_rate', 'drainRate', 'hp', 'hp_drain']) },
+  ]
+    .filter((entry): entry is { stat: string; value: number } => entry.value !== null)
+    .map((entry) => ({
+      stat: entry.stat,
+      value: entry.value.toFixed(1).replace(/\.0$/, ''),
+    }));
+};
+
 const ModChip: React.FC<{ mod: ScoreMod }> = ({ mod }) => {
   const speed = getSpeedMultiplier(mod);
+  const daParts = getDifficultyAdjustParts(mod);
   const daLabel = getDifficultyAdjustLabel(mod);
+  const isDifficultyAdjust = daParts.length > 0;
+  const isSpeedAdjust = speed !== null;
+  const isSlowdownMod = mod.acronym === 'HT' || mod.acronym === 'DC';
   const label = speed ? `${mod.acronym} ${speed.toFixed(2)}x` : daLabel ?? mod.acronym;
   const title = speed
     ? `${mod.acronym} with rate ${speed.toFixed(2)}x`
@@ -94,11 +125,41 @@ const ModChip: React.FC<{ mod: ScoreMod }> = ({ mod }) => {
         'inline-flex items-center px-2 py-0.5 rounded-full',
         'text-[10px] font-semibold tracking-wide',
         speed
-          ? 'text-rose-100 bg-gradient-to-r from-rose-600/90 via-rose-500/85 to-red-500/75 border border-rose-300/20'
+          ? isSlowdownMod
+            ? 'text-lime-100 bg-gradient-to-r from-lime-700/90 via-emerald-700/85 to-yellow-700/80 border border-lime-300/20'
+            : 'text-rose-100 bg-gradient-to-r from-rose-600/90 via-rose-500/85 to-red-500/75 border border-rose-300/20'
+          : isDifficultyAdjust
+            ? 'text-violet-100 bg-gradient-to-r from-violet-700/90 via-fuchsia-700/85 to-indigo-700/80 border border-violet-300/25'
           : 'text-white/85 bg-white/10 border border-white/15',
       ].join(' ')}
     >
-      {label}
+      {isDifficultyAdjust ? (
+        <>
+          <span className="text-violet-50/95 font-bold mr-1">DA</span>
+          <span className="flex items-center gap-1">
+            {daParts.map((part) => (
+              <span
+                key={part.stat}
+                className="inline-flex items-center gap-0.5 rounded-md px-1 py-[1px] bg-black/25 border border-white/15 text-[9px]"
+              >
+                <span className="text-violet-200/95">{part.stat}</span>
+                <span className="text-white">{part.value}</span>
+              </span>
+            ))}
+          </span>
+        </>
+      ) : isSpeedAdjust ? (
+        <>
+          <span className={`${isSlowdownMod ? 'text-lime-50/95' : 'text-rose-50/95'} font-bold mr-1`}>
+            {mod.acronym}
+          </span>
+          <span className="inline-flex items-center gap-0.5 rounded-md px-1 py-[1px] bg-black/25 border border-white/15 text-[9px]">
+            <span className="text-white">{speed.toFixed(2)}x</span>
+          </span>
+        </>
+      ) : (
+        label
+      )}
     </span>
   );
 };
