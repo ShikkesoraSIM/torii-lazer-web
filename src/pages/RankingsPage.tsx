@@ -123,6 +123,18 @@ const RankingsPage: React.FC = () => {
     };
   }, [selectedTab, loadUserRankings, loadCountryRankings]);
 
+  useEffect(() => {
+    const handleNsfwPreferenceChanged = () => {
+      if (selectedTab === 'users') {
+        loadUserRankings();
+      }
+    };
+    window.addEventListener('torii:profile-media-nsfw-changed', handleNsfwPreferenceChanged);
+    return () => {
+      window.removeEventListener('torii:profile-media-nsfw-changed', handleNsfwPreferenceChanged);
+    };
+  }, [selectedTab, loadUserRankings]);
+
   // 页面切换时滚动到顶部
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

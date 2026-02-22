@@ -170,6 +170,7 @@ const UserPreferencesSection: React.FC = () => {
     await savePreference(key, value);
     if (key === 'profile_media_show_nsfw') {
       apiCache.clearCache();
+      window.dispatchEvent(new CustomEvent('torii:profile-media-nsfw-changed'));
     }
   };
 
