@@ -147,7 +147,7 @@ const ModChip: React.FC<{ mod: ScoreMod }> = ({ mod }) => {
             : 'text-rose-100 bg-gradient-to-r from-rose-600/90 via-rose-500/85 to-red-500/75 border border-rose-300/20'
           : isDifficultyAdjust
             ? 'text-violet-100 bg-gradient-to-r from-violet-700/90 via-fuchsia-700/85 to-indigo-700/80 border border-violet-300/25'
-          : 'text-white/85 bg-white/10 border border-white/15',
+          : 'text-white bg-slate-800/70 border border-slate-200/30 shadow-[0_1px_2px_rgba(0,0,0,0.35)] backdrop-blur-[2px]',
       ].join(' ')}
     >
       {isDifficultyAdjust ? (
