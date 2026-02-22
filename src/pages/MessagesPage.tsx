@@ -14,7 +14,7 @@ import { useAuth } from '../hooks/useAuth';
 // 使用全局通知上下文，避免与 Navbar 各自实例不同步
 import { useNotificationContext } from '../contexts/NotificationContext';
 import { useWebSocketNotifications } from '../hooks/useWebSocketNotifications';
-import { chatAPI, teamsAPI, userAPI } from '../utils/api';
+import { chatAPI, teamsAPI } from '../utils/api';
 import { apiCache } from '../utils/apiCache';
 import { useTranslation } from 'react-i18next';
 
@@ -264,7 +264,7 @@ const MessagesPage: React.FC = () => {
                       user_info: {
                         id: userInfo.id,
                         username: userInfo.username,
-                        avatar_url: userInfo.avatar_url || userAPI.getAvatarUrl(userInfo.id),
+                        avatar_url: userInfo.avatar_url || '/default-avatar.png',
                         cover_url: userInfo.cover_url || userInfo.cover?.url || ''
                       }
                     };
@@ -566,7 +566,7 @@ const MessagesPage: React.FC = () => {
                   user_info: {
                     id: userInfo.id,
                     username: userInfo.username,
-                    avatar_url: userInfo.avatar_url || userAPI.getAvatarUrl(userInfo.id),
+                    avatar_url: userInfo.avatar_url || '/default-avatar.png',
                     cover_url: userInfo.cover_url || userInfo.cover?.url || ''
                   }
                 };
@@ -1094,12 +1094,12 @@ const MessagesPage: React.FC = () => {
           if (userInfo) {
             console.log('获取到用户信息:', userInfo);
             userName = userInfo.username || userName;
-            userAvatarUrl = userInfo.avatar_url || userAPI.getAvatarUrl(sourceUserId);
+            userAvatarUrl = userInfo.avatar_url || '/default-avatar.png';
             userCoverUrl = userInfo.cover_url || userInfo.cover?.url || '';
           }
         } catch (error) {
           console.error('获取用户信息失败，使用默认值:', error);
-          userAvatarUrl = userAPI.getAvatarUrl(sourceUserId);
+          userAvatarUrl = '/default-avatar.png';
         }
         
         // 创建新的私聊频道对象
@@ -1683,7 +1683,7 @@ const MessagesPage: React.FC = () => {
   }, []);
 
   // 辅助函数：从apiCache获取用户信息
-  const getUserInfoFromCache = useCallback((userId: number): { username: string } | null => {
+  const getUserInfoFromCache = useCallback((userId: number): { username: string; avatar_url?: string } | null => {
     return apiCache.getCachedUser(userId);
   }, []);
 
@@ -1975,7 +1975,7 @@ const MessagesPage: React.FC = () => {
                                 {/* 显示用户头像或默认图标 */}
                                 {notification.source_user_id && hasUserInfoInCache(notification.source_user_id) ? (
                                   <img
-                                    src={userAPI.getAvatarUrl(notification.source_user_id)}
+                                    src={getUserInfoFromCache(notification.source_user_id)?.avatar_url || '/default-avatar.png'}
                                     alt={t('messages.sidebar.avatarAlt')}
                                     className="w-10 h-10 rounded-lg object-cover"
                                     onError={(e) => {

@@ -40,13 +40,14 @@ export const userAPI = {
     return bustCache ? `${baseUrl}?t=${Date.now()}` : baseUrl;
   },
 
-  uploadAvatar: async (imageFile: File | Blob) => {
+  uploadAvatar: async (imageFile: File | Blob, isNsfw: boolean = false) => {
     console.log('开始上传头像，文件类型:', imageFile.type, '文件大小:', imageFile.size);
 
     const formData = new FormData();
     const isJpeg = imageFile.type === 'image/jpeg';
     const fileName = isJpeg ? 'avatar.jpg' : 'avatar.png';
     formData.append('content', imageFile, fileName);
+    formData.append('is_nsfw', String(isNsfw));
 
     console.log('FormData内容:');
     for (const [key, value] of formData.entries()) {
@@ -117,13 +118,14 @@ export const userAPI = {
     return result;
   },
 
-  uploadCover: async (imageFile: File | Blob) => {
+  uploadCover: async (imageFile: File | Blob, isNsfw: boolean = false) => {
     console.log('开始上传头图，文件类型:', imageFile.type, '文件大小:', imageFile.size);
 
     const formData = new FormData();
     const isJpeg = imageFile.type === 'image/jpeg';
     const fileName = isJpeg ? 'cover.jpg' : 'cover.png';
     formData.append('content', imageFile, fileName);
+    formData.append('is_nsfw', String(isNsfw));
 
     console.log('FormData内容:');
     for (const [key, value] of formData.entries()) {

@@ -23,6 +23,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
   const [step, setStep] = useState<'select' | 'crop'>('select');
   const [originalFileName, setOriginalFileName] = useState<string>('');
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isNsfw, setIsNsfw] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -87,7 +88,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
 
     setIsUploading(true);
     try {
-      const response = await userAPI.uploadCover(croppedFile);
+      const response = await userAPI.uploadCover(croppedFile, isNsfw);
       toast.success('Cover uploaded successfully.');
       onUploadSuccess(response.cover_url);
       onClose();
@@ -201,6 +202,16 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
               >
                 Select Image
               </button>
+
+              <label className="mt-4 inline-flex items-center gap-2 rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                <input
+                  type="checkbox"
+                  checked={isNsfw}
+                  onChange={(e) => setIsNsfw(e.target.checked)}
+                  className="h-4 w-4 accent-red-500"
+                />
+                Is this NSFW / suggestive?
+              </label>
             </div>
           )}
         </div>

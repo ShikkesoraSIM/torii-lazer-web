@@ -8,6 +8,7 @@ import GameModeSelector from '../UI/GameModeSelector';
 import CustomSelect from '../UI/CustomSelect';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
+import { apiCache } from '../../utils/apiCache';
 import type { 
   UserPreferences, 
   BeatmapsetCardSize, 
@@ -167,6 +168,9 @@ const UserPreferencesSection: React.FC = () => {
   ) => {
     setPreferences(prev => ({ ...prev, [key]: value }));
     await savePreference(key, value);
+    if (key === 'profile_media_show_nsfw') {
+      apiCache.clearCache();
+    }
   };
 
   // 使用 ref 来存储最新的颜色值，避免频繁更新状态
@@ -358,6 +362,28 @@ const UserPreferencesSection: React.FC = () => {
                 checked={preferences.profile_cover_expanded ?? false}
                 onChange={(e) => updateAndSave('profile_cover_expanded', e.target.checked)}
                 disabled={savingFields.has('profile_cover_expanded')}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-osu-pink/20 dark:peer-focus:ring-osu-pink/40 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-osu-pink peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
+            </label>
+          </div>
+
+          {/* Show NSFW profile media */}
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Show NSFW profile media
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Allow viewing NSFW/suggestive avatars and profile banners.
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={preferences.profile_media_show_nsfw ?? false}
+                onChange={(e) => updateAndSave('profile_media_show_nsfw', e.target.checked)}
+                disabled={savingFields.has('profile_media_show_nsfw')}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-osu-pink/20 dark:peer-focus:ring-osu-pink/40 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-osu-pink peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>

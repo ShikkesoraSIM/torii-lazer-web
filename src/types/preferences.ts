@@ -45,6 +45,7 @@ export interface UserPreferences {
   beatmapset_card_size?: BeatmapsetCardSize;
   beatmap_download?: BeatmapDownload;
   beatmapset_show_nsfw?: boolean;
+  profile_media_show_nsfw?: boolean;
 
   // Profile settings
   profile_order?: string[];
