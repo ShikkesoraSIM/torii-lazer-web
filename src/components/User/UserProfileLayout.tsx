@@ -218,9 +218,17 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-0 md:px-4 lg:px-6 py-4 md:py-6">
-      {/* 主卡片 */}
-      <div className="bg-card md:main-card-shadow md:rounded-t-2xl md:rounded-b-2xl overflow-hidden md:border md:border-card">
+    <main className="relative max-w-7xl mx-auto px-0 md:px-4 lg:px-6 py-4 md:py-8 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[#030014]" />
+        <div className="absolute -top-44 left-1/2 h-[520px] w-[880px] -translate-x-1/2 rounded-full bg-[#8a2be2]/16 blur-[140px]" />
+        <div className="absolute top-24 -left-40 h-[420px] w-[420px] rounded-full bg-[#ff007f]/12 blur-[130px]" />
+        <div className="absolute bottom-0 right-0 h-[480px] w-[480px] rounded-full bg-[#ff7a18]/10 blur-[140px]" />
+        <div className="absolute top-[48%] left-1/2 h-[360px] w-[680px] -translate-x-1/2 rounded-full bg-[#ff5bbd]/10 blur-[150px]" />
+        <div className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.22)_1px,transparent_0)] [background-size:22px_22px]" />
+      </div>
+
+      <div className="rounded-[26px] border border-white/10 bg-[rgba(10,10,24,0.82)] backdrop-blur-xl shadow-[0_20px_70px_rgba(0,0,0,0.45)] overflow-hidden">
         
         {/* 受限用户提示 - 仅管理员可见 */}
         {user.is_restricted && currentUser?.is_admin && (
@@ -234,7 +242,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
           <div className="relative z-10 bg-transparent md:bg-card px-4 md:px-6 py-3 md:py-4 flex items-center justify-between md:rounded-t-2xl border-b border-card" style={{ color: 'var(--text-primary)' }}>
             <div className="flex items-center gap-3">
               <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
-              <div className="text-base md:text-lg font-bold">{t('profile.info.title')}</div>
+              <div className="text-base md:text-lg font-heading font-bold tracking-wide">{t('profile.info.title')}</div>
             </div>
             <div className="flex items-center gap-2 md:gap-3">
               {/* 右侧模式按钮们（来自你的 GameModeSelector） */}
@@ -274,7 +282,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
           </div>
           {/* 用户名 + 国家 + 团队旗帜 */}
           <div className="flex-1">
-            <h1 className="mt-[-12px] md:mt-[-15px] ml-0 md:ml-[-10px] text-xl md:text-3xl font-bold mb-3 md:mb-2 text-gray-900 dark:text-gray-100">
+            <h1 className="mt-[-12px] md:mt-[-15px] ml-0 md:ml-[-10px] text-xl md:text-3xl font-heading font-bold mb-3 md:mb-2 text-gray-900 dark:text-gray-100 tracking-wide">
               {user.username}
             </h1>
             <div className="mb-2 md:mb-3 ml-0 md:ml-[-8px]">
