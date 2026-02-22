@@ -57,6 +57,7 @@ export interface User {
   cover_url?: string;
   cover?: {
     url: string;
+    custom_url?: string;
   };
   is_active: boolean;
   is_bot: boolean;

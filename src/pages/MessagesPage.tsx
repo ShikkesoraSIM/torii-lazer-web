@@ -265,7 +265,7 @@ const MessagesPage: React.FC = () => {
                         id: userInfo.id,
                         username: userInfo.username,
                         avatar_url: userInfo.avatar_url || '/default-avatar.png',
-                        cover_url: userInfo.cover_url || userInfo.cover?.url || ''
+                        cover_url: userInfo.cover_url || userInfo.cover?.url || userInfo.cover?.custom_url || ''
                       }
                     };
                   }
@@ -567,7 +567,7 @@ const MessagesPage: React.FC = () => {
                     id: userInfo.id,
                     username: userInfo.username,
                     avatar_url: userInfo.avatar_url || '/default-avatar.png',
-                    cover_url: userInfo.cover_url || userInfo.cover?.url || ''
+                    cover_url: userInfo.cover_url || userInfo.cover?.url || userInfo.cover?.custom_url || ''
                   }
                 };
               }
@@ -1095,7 +1095,7 @@ const MessagesPage: React.FC = () => {
             console.log('获取到用户信息:', userInfo);
             userName = userInfo.username || userName;
             userAvatarUrl = userInfo.avatar_url || '/default-avatar.png';
-            userCoverUrl = userInfo.cover_url || userInfo.cover?.url || '';
+            userCoverUrl = userInfo.cover_url || userInfo.cover?.url || userInfo.cover?.custom_url || '';
           }
         } catch (error) {
           console.error('获取用户信息失败，使用默认值:', error);

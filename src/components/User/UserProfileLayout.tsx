@@ -146,7 +146,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
       )
     : undefined;
 
-  const coverUrlRaw = user.cover_url || user.cover?.url || undefined;
+  const coverUrlRaw = user.cover_url || user.cover?.url || user.cover?.custom_url || undefined;
   const coverUrl =
     coverUrlRaw === "https://assets.ppy.sh/user-profile-covers/default.jpeg"
       ? "/image/backgrounds/bgcover.jpg"
