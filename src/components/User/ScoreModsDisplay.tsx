@@ -15,6 +15,7 @@ const DEFAULT_SPEED_BY_MOD: Record<string, number> = {
 
 const SPEED_MODS = new Set(Object.keys(DEFAULT_SPEED_BY_MOD));
 const DIFFICULTY_ADJUST_MODS = new Set(['DA']);
+const SPEED_EPSILON = 0.001;
 
 const parsePositiveNumber = (value: unknown): number | null => {
   if (typeof value === 'number' && Number.isFinite(value) && value > 0) return value;
@@ -25,7 +26,7 @@ const parsePositiveNumber = (value: unknown): number | null => {
   return null;
 };
 
-const getSpeedMultiplier = (mod: ScoreMod): number | null => {
+const getSpeedInfo = (mod: ScoreMod): { multiplier: number; showCustomRate: boolean } | null => {
   if (!SPEED_MODS.has(mod.acronym)) return null;
 
   const settings = typeof mod.settings === 'object' && mod.settings ? mod.settings : {};
@@ -40,12 +41,24 @@ const getSpeedMultiplier = (mod: ScoreMod): number | null => {
     (mod as Record<string, unknown>).clock_rate,
   ];
 
+  let explicitMultiplier: number | null = null;
   for (const candidate of candidates) {
     const parsed = parsePositiveNumber(candidate);
-    if (parsed !== null) return parsed;
+    if (parsed !== null) {
+      explicitMultiplier = parsed;
+      break;
+    }
   }
 
-  return DEFAULT_SPEED_BY_MOD[mod.acronym] ?? null;
+  const defaultMultiplier = DEFAULT_SPEED_BY_MOD[mod.acronym];
+  if (defaultMultiplier === undefined) return null;
+
+  if (explicitMultiplier === null) {
+    return { multiplier: defaultMultiplier, showCustomRate: false };
+  }
+
+  const isCustom = Math.abs(explicitMultiplier - defaultMultiplier) > SPEED_EPSILON;
+  return { multiplier: explicitMultiplier, showCustomRate: isCustom };
 };
 
 const getDifficultyAdjustLabel = (mod: ScoreMod): string | null => {
@@ -105,15 +118,19 @@ const getDifficultyAdjustParts = (mod: ScoreMod): Array<{ stat: string; value: s
 };
 
 const ModChip: React.FC<{ mod: ScoreMod }> = ({ mod }) => {
-  const speed = getSpeedMultiplier(mod);
+  const speedInfo = getSpeedInfo(mod);
+  const speed = speedInfo?.multiplier ?? null;
   const daParts = getDifficultyAdjustParts(mod);
   const daLabel = getDifficultyAdjustLabel(mod);
   const isDifficultyAdjust = daParts.length > 0;
-  const isSpeedAdjust = speed !== null;
+  const isSpeedAdjust = speedInfo !== null;
+  const showSpeedRate = speedInfo?.showCustomRate ?? false;
   const isSlowdownMod = mod.acronym === 'HT' || mod.acronym === 'DC';
   const label = speed ? `${mod.acronym} ${speed.toFixed(2)}x` : daLabel ?? mod.acronym;
   const title = speed
-    ? `${mod.acronym} with rate ${speed.toFixed(2)}x`
+    ? showSpeedRate
+      ? `${mod.acronym} with rate ${speed.toFixed(2)}x`
+      : mod.acronym
     : daLabel
       ? `Difficulty Adjust: ${daLabel.replace(`${mod.acronym} `, '')}`
       : mod.acronym;
@@ -153,9 +170,11 @@ const ModChip: React.FC<{ mod: ScoreMod }> = ({ mod }) => {
           <span className={`${isSlowdownMod ? 'text-lime-50/95' : 'text-rose-50/95'} font-bold mr-1`}>
             {mod.acronym}
           </span>
-          <span className="inline-flex items-center gap-0.5 rounded-md px-1 py-[1px] bg-black/25 border border-white/15 text-[9px]">
-            <span className="text-white">{speed.toFixed(2)}x</span>
-          </span>
+          {showSpeedRate && (
+            <span className="inline-flex items-center gap-0.5 rounded-md px-1 py-[1px] bg-black/25 border border-white/15 text-[9px]">
+              <span className="text-white">{speedInfo.multiplier.toFixed(2)}x</span>
+            </span>
+          )}
         </>
       ) : (
         label
