@@ -94,6 +94,10 @@ export const profilePage = {
         downloadSuccess: 'Replay downloaded successfully',
       },
     },
+    mostPlayed: {
+      title: 'Most Played Beatmaps',
+      loadFailed: 'Failed to load most played beatmaps',
+    },
     recentScores: {
       title: 'Recent Scores',
       last24h: 'Last 24 hours',

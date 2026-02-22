@@ -1,22 +1,25 @@
-import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiSun,
   FiMoon,
-  FiHome,
-  FiTrendingUp,
-  FiMusic,
   FiBell,
-  FiUsers,
   FiMenu,
   FiX,
   FiSettings,
-  FiServer,
   FiGlobe,
   FiCheck,
   FiLogOut,
 } from 'react-icons/fi';
+import {
+  House,
+  BarChart3,
+  Disc3,
+  Users2,
+  Shield,
+  Wrench,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
@@ -27,104 +30,60 @@ import LanguageSelector from '../UI/LanguageSelector';
 import type { NavItem as NavItemType } from '../../types';
 
 // ------------------------------
-// Nav item (kept exactly from yours)
+// Nav item
 // ------------------------------
 const NavItem = memo<{ item: NavItemType }>(({ item }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [forceShowText, setForceShowText] = useState(false);
-  const prevIsActiveRef = useRef<boolean | undefined>(undefined);
   const location = useLocation();
   const IconComponent = item.icon;
   const isActive = location.pathname === item.path;
-
-  const shouldShowText = isActive || forceShowText || isHovered;
-
-  const isRouteChange =
-    prevIsActiveRef.current !== undefined && prevIsActiveRef.current !== isActive;
-
-  useEffect(() => {
-    prevIsActiveRef.current = isActive;
-    if (isActive) setForceShowText(true);
-    else setForceShowText(false);
-  }, [isActive]);
 
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
 
   return (
     <motion.div
-      animate={{
-        scale: isActive ? 1 : 0.98,
-        opacity: isActive ? 1 : 0.75,
-      }}
+      animate={{ scale: isActive ? 1 : 0.98, opacity: isActive ? 1 : 0.8 }}
       whileHover={{
-        scale: 1,
+        y: -1,
         opacity: 1,
-        transition: { duration: 0.2 },
+        scale: 1,
+        transition: { duration: 0.16 },
       }}
-      transition={{
-        duration: 0.3,
-        ease: 'easeOut',
-      }}
+      transition={{ duration: 0.24, ease: 'easeOut' }}
       onHoverStart={handleMouseEnter}
       onHoverEnd={handleMouseLeave}
       className="relative flex-shrink-0"
     >
       <Link
         to={item.path}
-        className={`relative flex items-center rounded-xl font-medium text-sm transition-all duration-200 group ${
+        className={`relative flex items-center gap-2 rounded-full font-medium text-sm transition-all duration-200 group ${
           isActive
-            ? 'text-white bg-osu-pink shadow-lg shadow-osu-pink/25'
-            : 'text-white/70 hover:text-white hover:bg-white/5'
+            ? 'text-white bg-gradient-to-r from-[#ff5bbd] via-[#ff7eb8] to-[#fda4af] shadow-lg shadow-[#ff5bbd]/25'
+            : 'text-white/75 hover:text-white hover:bg-white/8'
         }`}
-        style={{
-          paddingLeft: '12px',
-          paddingRight: shouldShowText ? '16px' : '12px',
-          paddingTop: '8px',
-          paddingBottom: '8px',
-        }}
+        style={{ padding: '7px 12px' }}
       >
-        {IconComponent && (
-          <motion.div
-            animate={{
-              rotate: isHovered && !isActive ? 10 : 0,
-            }}
-            transition={{ type: 'spring', stiffness: 300 }}
-            className="flex-shrink-0"
-          >
-            <IconComponent size={16} />
-          </motion.div>
-        )}
-
         <motion.div
-          className="overflow-hidden flex items-center"
+          className={`h-6 w-6 rounded-full flex items-center justify-center border ${
+            isActive
+              ? 'border-white/35 bg-white/20'
+              : 'border-white/12 bg-white/5'
+          }`}
           animate={{
-            width: shouldShowText ? 'auto' : 0,
-            marginLeft: shouldShowText ? 8 : 0,
+            rotate: isHovered && !isActive ? -8 : 0,
+            scale: isActive ? 1.05 : 1,
           }}
-          transition={{
-            duration: isRouteChange ? 0 : 0.3,
-            ease: [0.4, 0, 0.2, 1],
-          }}
+          transition={{ type: 'spring', stiffness: 280, damping: 16 }}
         >
-          <motion.span
-            className="whitespace-nowrap"
-            animate={{
-              opacity: shouldShowText ? 1 : 0,
-              x: shouldShowText ? 0 : -10,
-            }}
-            transition={{
-              duration: isRouteChange ? 0 : 0.25,
-              delay: shouldShowText && !isActive && isHovered ? 0.1 : 0,
-            }}
-          >
-            {item.title}
-          </motion.span>
+          {IconComponent && <IconComponent size={14} />}
         </motion.div>
+
+        <span className="whitespace-nowrap">{item.title}</span>
 
         {isActive && (
           <motion.div
-            className="absolute bottom-0 left-2 right-2 h-0.5 bg-white/50 rounded-full"
+            className="absolute inset-0 rounded-full border border-white/30 pointer-events-none"
             layoutId="activeTabIndicator"
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           />
@@ -132,7 +91,7 @@ const NavItem = memo<{ item: NavItemType }>(({ item }) => {
 
         {!isActive && (
           <motion.div
-            className="absolute inset-0 rounded-xl bg-osu-pink/10"
+            className="absolute inset-0 rounded-full bg-white/5"
             animate={{ opacity: isHovered ? 1 : 0 }}
             transition={{ duration: 0.2 }}
           />
@@ -154,7 +113,7 @@ interface LanguageConfig {
 }
 
 const SUPPORTED_LANGUAGES: LanguageConfig[] = [
-  { code: 'zh', name: 'Chinese', nativeName: '中文', flag: 'cn' },
+  { code: 'zh', name: 'Chinese', nativeName: 'Chinese', flag: 'cn' },
   { code: 'en', name: 'English', nativeName: 'English', flag: 'us' },
 ];
 
@@ -191,7 +150,7 @@ const LanguageMenuSection = memo<{ i18n: any; t: any }>(({ i18n, t }) => {
         onClick={() => setShowLanguages(false)}
         className="w-full flex items-center px-2 py-2 text-xs font-medium text-white/60 hover:text-white transition-all duration-200"
       >
-        ← {t('common.back')}
+        â† {t('common.back')}
       </button>
       <div className="mt-1">
         {SUPPORTED_LANGUAGES.map((lang) => {
@@ -386,7 +345,7 @@ const MobileMenuDropdown = memo<{
 MobileMenuDropdown.displayName = 'MobileMenuDropdown';
 
 // ------------------------------
-// Brand mark (NEW) — this is the "point B" glow wrapper
+// Brand mark (NEW) â€” this is the "point B" glow wrapper
 // ------------------------------
 const BrandMark = memo<{ size?: number }>(({ size = 36 }) => {
   const inner = Math.max(18, Math.round(size * 0.78));
@@ -439,12 +398,12 @@ const Navbar: React.FC = () => {
 
   const navItems: NavItemType[] = React.useMemo(
     () => [
-      { path: '/', title: t('nav.home'), icon: FiHome },
-      { path: '/rankings', title: t('nav.rankings'), icon: FiTrendingUp, requireAuth: true },
-      { path: '/beatmaps', title: t('nav.beatmaps'), icon: FiMusic, requireAuth: true },
-      { path: '/teams', title: t('nav.teams'), icon: FiUsers, requireAuth: true },
-      { path: '/admin', title: 'Admin', icon: FiSettings, requireAuth: true, requireAdmin: true },
-      { path: '/how-to-join', title: t('nav.join'), icon: FiServer },
+      { path: '/', title: t('nav.home'), icon: House },
+      { path: '/rankings', title: t('nav.rankings'), icon: BarChart3, requireAuth: true },
+      { path: '/beatmaps', title: t('nav.beatmaps'), icon: Disc3, requireAuth: true },
+      { path: '/teams', title: t('nav.teams'), icon: Users2, requireAuth: true },
+      { path: '/admin', title: 'Admin', icon: Shield, requireAuth: true, requireAdmin: true },
+      { path: '/how-to-join', title: t('nav.join'), icon: Wrench },
     ],
     [t]
   );
@@ -483,7 +442,7 @@ const Navbar: React.FC = () => {
 
                   <div className="leading-tight">
                     <div className="text-white font-semibold tracking-wide">Torii</div>
-                    <div className="text-white/60 text-xs -mt-0.5">forged in Shikke’s Dojo</div>
+                    <div className="text-white/60 text-xs -mt-0.5">forged in Shikke's Dojo</div>
                   </div>
                 </Link>
               </div>
@@ -572,7 +531,7 @@ const Navbar: React.FC = () => {
 
               <div className="leading-tight">
                 <div className="text-white font-semibold">Torii</div>
-                <div className="text-white/60 text-xs -mt-0.5">forged in Shikke’s Dojo</div>
+                <div className="text-white/60 text-xs -mt-0.5">forged in Shikke's Dojo</div>
               </div>
             </Link>
 
@@ -619,3 +578,4 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+

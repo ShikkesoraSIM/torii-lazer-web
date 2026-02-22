@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { FiUpload, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
@@ -23,10 +23,9 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   const [step, setStep] = useState<'select' | 'crop'>('select');
   const [originalFileName, setOriginalFileName] = useState<string>('');
   const [isDragOver, setIsDragOver] = useState(false);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 防止背景滚动
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -34,28 +33,23 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     };
   }, []);
 
-  // 处理文件选择
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     processFile(file);
   };
 
-  // 处理文件（统一的文件处理逻辑）
   const processFile = (file: File) => {
-    // 验证文件类型
     if (!['image/png', 'image/jpeg', 'image/gif'].includes(file.type)) {
-      toast.error('只支持 PNG、JPEG、GIF 格式的图片');
+      toast.error('Only PNG, JPEG, and GIF images are supported.');
       return;
     }
 
-    // 验证文件大小 (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('文件大小不能超过 5MB');
+      toast.error('File size cannot exceed 5MB.');
       return;
     }
 
-    // 读取文件
     const reader = new FileReader();
     reader.onload = (e) => {
       setImgSrc(e.target?.result as string);
@@ -65,7 +59,6 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     reader.readAsDataURL(file);
   };
 
-  // 拖拽事件处理
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -79,46 +72,42 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       processFile(files[0]);
     }
   };
 
-  // 处理裁剪完成
   const handleCropComplete = async (croppedFile: File) => {
     if (!userId) {
-      toast.error('用户 ID 不存在');
+      toast.error('Missing user ID.');
       return;
     }
 
     setIsUploading(true);
     try {
       const response = await userAPI.uploadAvatar(croppedFile);
-      toast.success('头像上传成功');
+      toast.success('Avatar uploaded successfully.');
       onUploadSuccess(response.avatar_url);
       onClose();
     } catch (error: any) {
-      console.error('头像上传失败:', error);
+      console.error('Avatar upload failed:', error);
       if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
-        toast.error('头像上传失败，请重试');
+        toast.error('Avatar upload failed. Please try again.');
       }
     } finally {
       setIsUploading(false);
     }
   };
 
-  // 处理裁剪取消
   const handleCropCancel = () => {
     setStep('select');
     setImgSrc('');
     setOriginalFileName('');
   };
-
-  // （保留占位：可能未来需要添加“重新开始”按钮，此处移除未使用的 resetUpload 函数以消除 TS 警告）
 
   return createPortal(
     <div
@@ -146,10 +135,9 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         className="bg-card rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden"
         style={{ minHeight: '400px' }}
       >
-        {/* 头部 */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {step === 'select' ? '上传头像' : '裁剪头像'}
+            {step === 'select' ? 'Upload Avatar' : 'Crop Avatar'}
           </h3>
           <button
             type="button"
@@ -161,7 +149,6 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
           </button>
         </div>
 
-        {/* 内容区域 */}
         <div className="p-6">
           {step === 'select' && (
             <div className="text-center">
@@ -172,22 +159,22 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              
+
               {currentAvatarUrl && (
                 <div className="mb-6">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">当前头像</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Current Avatar</p>
                   <img
                     src={currentAvatarUrl}
-                    alt="当前头像"
+                    alt="Current avatar"
                     className="w-24 h-24 rounded-full mx-auto object-cover border-2 border-gray-200 dark:border-gray-600"
                   />
                 </div>
               )}
 
-              <div 
+              <div
                 className={`border-2 border-dashed rounded-lg p-8 mb-4 transition-colors cursor-pointer ${
-                  isDragOver 
-                    ? 'border-osu-pink bg-osu-pink/10' 
+                  isDragOver
+                    ? 'border-osu-pink bg-osu-pink/10'
                     : 'border-gray-300 dark:border-gray-600 hover:border-osu-pink/50'
                 }`}
                 onDragOver={handleDragOver}
@@ -197,13 +184,13 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
               >
                 <FiUpload className={`w-12 h-12 mx-auto mb-4 ${isDragOver ? 'text-osu-pink' : 'text-gray-400'}`} />
                 <p className={`mb-2 ${isDragOver ? 'text-osu-pink' : 'text-gray-600 dark:text-gray-400'}`}>
-                  {isDragOver ? '释放文件开始上传' : '点击选择图片或拖拽图片到此处'}
+                  {isDragOver ? 'Drop file to upload' : 'Click to select an image or drag it here'}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-500">
-                  支持 PNG、JPEG、GIF 格式，最大 5MB
+                  Supports PNG, JPEG, GIF. Max 5MB.
                 </p>
                 <p className="text-xs text-gray-400 dark:text-gray-400 mt-1">
-                  头像将自动调整为 256x256 像素
+                  Avatar will be resized to 256x256.
                 </p>
               </div>
 
@@ -212,18 +199,17 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
                 onClick={() => fileInputRef.current?.click()}
                 className="bg-osu-pink hover:bg-osu-pink/90 text-white px-6 py-2 rounded-lg transition-colors"
               >
-                选择图片
+                Select Image
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* 图片裁剪器 */}
       {step === 'crop' && imgSrc && (
         <ImageCropper
           src={imgSrc}
-          aspectRatio={1} // 1:1 正方形头像
+          aspectRatio={1}
           maxWidth={256}
           maxHeight={256}
           quality={0.9}
@@ -231,7 +217,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
           onCancel={handleCropCancel}
           fileName={originalFileName}
           isUploading={isUploading}
-          uploadingText="上传头像中..."
+          uploadingText="Uploading avatar..."
         />
       )}
     </div>,

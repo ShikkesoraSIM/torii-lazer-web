@@ -205,6 +205,11 @@ const UserMostPlayedBeatmaps: React.FC<UserMostPlayedBeatmapsProps> = ({ userId,
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const translatedMostPlayedTitle = t('profile.mostPlayed.title');
+  const mostPlayedTitle =
+    translatedMostPlayedTitle && translatedMostPlayedTitle !== 'profile.mostPlayed.title'
+      ? translatedMostPlayedTitle
+      : 'Most Played Beatmaps';
 
   useEffect(() => {
     const fetchMostPlayedBeatmaps = async () => {
@@ -255,7 +260,7 @@ const UserMostPlayedBeatmaps: React.FC<UserMostPlayedBeatmapsProps> = ({ userId,
         <div className="flex items-center gap-3 mb-6">
           <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-            {t('profile.mostPlayed.title') || 'Most Played Beatmaps'} {totalCount > 0 ? `(${totalCount.toLocaleString()})` : ''}
+            {mostPlayedTitle} {totalCount > 0 ? `(${totalCount.toLocaleString()})` : ''}
           </h3>
         </div>
         <div className="shadow-sm overflow-hidden rounded-lg">
@@ -279,7 +284,7 @@ const UserMostPlayedBeatmaps: React.FC<UserMostPlayedBeatmapsProps> = ({ userId,
         <div className="flex items-center gap-3 mb-6">
           <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-            {t('profile.mostPlayed.title') || 'Most Played Beatmaps'} {totalCount > 0 ? `(${totalCount.toLocaleString()})` : ''}
+            {mostPlayedTitle} {totalCount > 0 ? `(${totalCount.toLocaleString()})` : ''}
           </h3>
         </div>
         <div className="text-center text-gray-500 dark:text-gray-400 py-6 text-sm">
@@ -294,7 +299,7 @@ const UserMostPlayedBeatmaps: React.FC<UserMostPlayedBeatmapsProps> = ({ userId,
       <div className="flex items-center gap-3 mb-6">
         <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-          {t('Most Played Beatmaps') || 'Most Played Beatmaps'} {totalCount > 0 ? `(${totalCount.toLocaleString()})` : ''}
+          {mostPlayedTitle} {totalCount > 0 ? `(${totalCount.toLocaleString()})` : ''}
         </h3>
       </div>
 
