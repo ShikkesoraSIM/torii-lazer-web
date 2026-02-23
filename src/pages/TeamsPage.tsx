@@ -21,56 +21,47 @@ const TeamsPage: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<GameMode>('osu');
   const [rankingType, setRankingType] = useState<RankingType>('performance');
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   const [teamRankings, setTeamRankings] = useState<TeamRankingsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  
-  // 加载战队排行榜
+
   const loadTeamRankings = async () => {
     setIsLoading(true);
     try {
       const response = await rankingsAPI.getTeamRankings(
-        selectedMode, 
-        rankingType, 
+        selectedMode,
+        rankingType,
         currentPage
       );
       setTeamRankings(response);
     } catch (error) {
       handleApiError(error);
-      console.error('加载战队排行榜失败:', error);
+      console.error('Failed to load team rankings:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 重置分页并加载数据
-  const resetAndLoad = () => {
-    setCurrentPage(1);
-    loadTeamRankings();
-    // 滚动到顶部
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // 模式改变时重置并加载数据
   useEffect(() => {
-    resetAndLoad();
+    setCurrentPage(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [selectedMode, rankingType]);
 
-  // 分页改变时加载数据
   useEffect(() => {
     loadTeamRankings();
-    // 滚动到顶部
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentPage]);
+  }, [selectedMode, rankingType, currentPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
+  const actionClass =
+    'inline-flex items-center px-4 py-2 rounded-2xl border border-white/20 bg-gradient-to-r from-[#ff8b6b] to-[#ff6f91] text-white hover:brightness-110 transition-all self-start sm:self-auto shadow-[0_12px_28px_rgba(255,111,145,0.35)]';
+
   return (
     <div className="min-h-screen torii-page-stage">
       <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 sm:py-8">
-        {/* 页面标题 */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -81,32 +72,22 @@ const TeamsPage: React.FC = () => {
                 {t('teams.description')}
               </p>
             </div>
-            
+
             {isAuthenticated && (
               user?.team ? (
-                // 检查用户是否是队长
                 user.id === user.team.leader_id ? (
-                  <Link
-                    to={`/teams/${user.team.id}/edit`}
-                    className="inline-flex items-center px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 transition-colors self-start sm:self-auto"
-                  >
+                  <Link to={`/teams/${user.team.id}/edit`} className={actionClass}>
                     <FiEdit className="mr-2" />
                     {t('teams.editTeam')}
                   </Link>
                 ) : (
-                  <Link
-                      to={`/teams/${user.team.id}`}
-                      className="inline-flex items-center px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/80 transition-colors self-start sm:self-auto"
-                    >
+                  <Link to={`/teams/${user.team.id}`} className={actionClass}>
                     <FiEye className="mr-2" />
                     {t('teams.viewTeam')}
                   </Link>
                 )
               ) : (
-                <Link
-                  to="/teams/create"
-                  className="inline-flex items-center px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 transition-colors self-start sm:self-auto"
-                >
+                <Link to="/teams/create" className={actionClass}>
                   <FiPlus className="mr-2" />
                   {t('teams.createTeam')}
                 </Link>
@@ -115,11 +96,8 @@ const TeamsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 控制面板：模式选择 + 筛选选项 */}
         <div className="flex flex-col xl:flex-row xl:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
-          
-          {/* 游戏模式选择 */}
-          <div className="bg-card rounded-lg shadow-sm border-card p-2">
+          <div className="torii-liquid-soft rounded-2xl p-2">
             <GameModeSelector
               selectedMode={selectedMode}
               onModeChange={setSelectedMode}
@@ -128,7 +106,6 @@ const TeamsPage: React.FC = () => {
             />
           </div>
 
-          {/* 筛选选项 */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 xl:flex-1">
             <div className="w-full sm:w-48">
               <RankingTypeSelector
@@ -139,8 +116,7 @@ const TeamsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 排行榜内容 */}
-        <div className="-mx-4 sm:mx-0 sm:bg-card sm:rounded-xl sm:shadow-sm sm:border-card sm:p-6">
+        <div className="torii-liquid rounded-3xl p-3 sm:p-6">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 sm:px-0">
               <LoadingSpinner size="lg" className="mb-4" />
@@ -155,7 +131,6 @@ const TeamsPage: React.FC = () => {
             />
           )}
 
-          {/* 分页 */}
           {!isLoading && (
             <PaginationControls
               total={teamRankings?.total || 0}

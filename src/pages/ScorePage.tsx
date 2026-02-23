@@ -180,18 +180,18 @@ const ScorePage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen pb-10 select-text torii-page-stage" style={{ userSelect: 'text' }}>
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 pt-6 space-y-6">
+    <div className="min-h-screen pb-12 select-text torii-page-stage" style={{ userSelect: 'text' }}>
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 pt-6 space-y-7">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-slate-200 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-slate-100 hover:text-white transition-colors px-3 py-2 rounded-xl torii-liquid-soft"
         >
           <span aria-hidden="true">&larr;</span>
           <span>{t('beatmap.goBack') || 'Back'}</span>
         </button>
 
         <section
-          className="relative overflow-hidden rounded-2xl torii-liquid"
+          className="relative overflow-hidden rounded-3xl torii-liquid"
           style={{
             backgroundImage: heroBackground,
             backgroundSize: 'cover',
@@ -199,12 +199,14 @@ const ScorePage: React.FC = () => {
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/35 to-transparent" />
+          <div className="absolute -top-20 -left-24 w-64 h-64 rounded-full bg-fuchsia-400/12 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 right-10 w-56 h-56 rounded-full bg-cyan-300/10 blur-3xl pointer-events-none" />
           <div className="relative p-6 lg:p-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-6 flex-wrap">
                 <div
-                  className="w-36 h-36 rounded-full border-[10px] flex items-center justify-center bg-black/35 backdrop-blur-sm"
-                  style={{ borderColor: rankColor }}
+                  className="w-36 h-36 rounded-full border-[10px] flex items-center justify-center bg-black/35 backdrop-blur-sm shadow-[0_0_32px_rgba(0,0,0,0.45)]"
+                  style={{ borderColor: rankColor, boxShadow: `0 0 0 1px ${rankColor}66` }}
                 >
                   <img
                     src={RANK_ICON_MAP[score.rank] || RANK_ICON_MAP.F}
@@ -226,19 +228,19 @@ const ScorePage: React.FC = () => {
                   </p>
                   <p className="text-sm text-slate-300">Submitted on {formatDateTime(score.ended_at)}</p>
                   <div className="flex flex-wrap gap-2 mt-4">
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black/35 text-slate-100">
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/12 border border-white/20 text-slate-100">
                       {formatMode(mode)}
                     </span>
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black/35 text-slate-100">
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/12 border border-white/20 text-slate-100">
                       {getMods(score)}
                     </span>
                     {globalRank && (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-osu-pink/80 text-white">
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-osu-pink/75 border border-white/20 text-white">
                         GLOBAL #{globalRank.toLocaleString()}
                       </span>
                     )}
                     {countryRank && (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black/35 text-slate-100">
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/12 border border-white/20 text-slate-100">
                         COUNTRY #{countryRank.toLocaleString()}
                       </span>
                     )}
@@ -249,7 +251,7 @@ const ScorePage: React.FC = () => {
                     </span>
                     <button
                       onClick={() => handleCopy(String(score.id), 'Score ID')}
-                      className="px-2.5 py-1 rounded-md bg-white/10 text-slate-100 hover:bg-white/20 transition-colors select-none"
+                      className="px-2.5 py-1 rounded-lg bg-white/12 border border-white/20 text-slate-100 hover:bg-white/20 transition-colors"
                     >
                       Copy ID
                     </button>
@@ -258,7 +260,7 @@ const ScorePage: React.FC = () => {
                     </span>
                     <button
                       onClick={() => handleCopy(String(score.beatmap_id), 'Beatmap ID')}
-                      className="px-2.5 py-1 rounded-md bg-white/10 text-slate-100 hover:bg-white/20 transition-colors select-none"
+                      className="px-2.5 py-1 rounded-lg bg-white/12 border border-white/20 text-slate-100 hover:bg-white/20 transition-colors"
                     >
                       Copy map ID
                     </button>
@@ -270,7 +272,7 @@ const ScorePage: React.FC = () => {
                 type="button"
                 disabled={!score.has_replay || downloadingReplay}
                 onClick={handleDownloadReplay}
-                className="self-start lg:self-center px-6 py-3 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="self-start lg:self-center px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-500 border border-white/25 text-white font-semibold hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_14px_30px_rgba(14,165,233,0.35)]"
               >
                 {downloadingReplay ? 'Downloading...' : 'Download Replay'}
               </button>
@@ -279,8 +281,8 @@ const ScorePage: React.FC = () => {
         </section>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <section className="xl:col-span-1 rounded-2xl overflow-hidden torii-liquid">
-            <div className="px-5 py-4 border-b border-white/10">
+          <section className="xl:col-span-1 rounded-3xl overflow-hidden torii-liquid">
+            <div className="px-5 py-4 border-b border-white/10 bg-white/[0.03]">
               <h2 className="text-lg font-semibold text-white">Player</h2>
             </div>
             <div className="p-5">
@@ -313,8 +315,8 @@ const ScorePage: React.FC = () => {
             </div>
           </section>
 
-          <section className="xl:col-span-2 rounded-2xl overflow-hidden torii-liquid">
-            <div className="px-5 py-4 border-b border-white/10">
+          <section className="xl:col-span-2 rounded-3xl overflow-hidden torii-liquid">
+            <div className="px-5 py-4 border-b border-white/10 bg-white/[0.03]">
               <h2 className="text-lg font-semibold text-white">Performance</h2>
             </div>
             <div className="p-5 space-y-5">
@@ -353,7 +355,7 @@ const ScorePage: React.FC = () => {
               </div>
 
               <details className="rounded-xl border border-white/15 torii-liquid-soft">
-                <summary className="px-4 py-3 text-sm text-slate-200 cursor-pointer select-none">
+                <summary className="px-4 py-3 text-sm text-slate-200 cursor-pointer">
                   Hit breakdown (optional details)
                 </summary>
                 <div className="px-4 pb-4 pt-1 grid grid-cols-2 md:grid-cols-4 gap-3">

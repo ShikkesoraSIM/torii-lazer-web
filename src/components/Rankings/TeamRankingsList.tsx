@@ -39,7 +39,7 @@ const TeamRankingsList: React.FC<Props> = ({
   const startRank = (currentPage - 1) * 50 + 1;
 
   return (
-    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+    <div className="space-y-3">
       {rankings.ranking.map((ranking: TeamRanking, index: number) => (
         <TeamRankingCard
           key={ranking.team_id}
