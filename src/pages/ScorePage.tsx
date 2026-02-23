@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
-import { beatmapAPI, handleApiError, scoreAPI } from '../utils/api';
+import { beatmapAPI, handleApiError, scoreAPI, userAPI } from '../utils/api';
 import type { BestScore } from '../types';
 
 const RANK_ICON_MAP: Record<string, string> = {
@@ -110,6 +110,7 @@ const ScorePage: React.FC = () => {
   const [downloadingReplay, setDownloadingReplay] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resolvedCoverUrl, setResolvedCoverUrl] = useState<string | null>(null);
+  const [resolvedProfileColor, setResolvedProfileColor] = useState<string | null>(null);
   const [isHitBreakdownOpen, setIsHitBreakdownOpen] = useState(false);
 
   useEffect(() => {
@@ -178,6 +179,35 @@ const ScorePage: React.FC = () => {
     };
   }, [score]);
 
+  useEffect(() => {
+    const userId = score?.user?.id;
+    if (!userId) return;
+
+    const fromScore = score?.user?.profile_colour;
+    if (fromScore && String(fromScore).trim().length > 0) {
+      setResolvedProfileColor(fromScore);
+      return;
+    }
+
+    let cancelled = false;
+    const hydrateProfileColor = async () => {
+      try {
+        const mode = score?.beatmap?.mode || 'osu';
+        const fullUser = await userAPI.getUser(userId, mode);
+        if (!cancelled && fullUser?.profile_colour) {
+          setResolvedProfileColor(fullUser.profile_colour);
+        }
+      } catch (hydrateUserErr) {
+        console.warn('Could not hydrate profile color for score page:', hydrateUserErr);
+      }
+    };
+
+    hydrateProfileColor();
+    return () => {
+      cancelled = true;
+    };
+  }, [score?.user?.id, score?.user?.profile_colour, score?.beatmap?.mode]);
+
   const heroBackground = useMemo(() => {
     if (!resolvedCoverUrl) {
       return 'linear-gradient(135deg, rgba(30,41,59,0.95), rgba(15,23,42,0.95))';
@@ -186,7 +216,7 @@ const ScorePage: React.FC = () => {
   }, [resolvedCoverUrl]);
 
   const accentTheme = useMemo(() => {
-    const accent = normalizeHex(score?.user?.profile_colour, '#22d3ee');
+    const accent = normalizeHex(resolvedProfileColor || score?.user?.profile_colour, '#22d3ee');
     const accentRgbObj = hexToRgb(accent);
     const accentRgb = `${accentRgbObj.r}, ${accentRgbObj.g}, ${accentRgbObj.b}`;
     const accentSoft = blendHex(accent, '#60a5fa', 0.28);
@@ -199,7 +229,7 @@ const ScorePage: React.FC = () => {
       accentDeep,
       accuracyColor,
     };
-  }, [score?.user?.profile_colour]);
+  }, [resolvedProfileColor, score?.user?.profile_colour]);
 
   const handleDownloadReplay = async () => {
     if (!score) return;
@@ -391,8 +421,8 @@ const ScorePage: React.FC = () => {
         </section>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-          <section className="xl:col-span-1 self-start rounded-3xl overflow-hidden torii-liquid">
-            <div className="px-5 py-4 border-b border-white/10 bg-white/[0.03]">
+          <section className="xl:col-span-1 self-start rounded-3xl overflow-hidden bg-[linear-gradient(165deg,rgba(20,24,60,0.78),rgba(12,16,40,0.66))] shadow-[0_16px_42px_rgba(0,0,0,0.32)] ring-1 ring-black/35">
+            <div className="px-5 py-4 border-b border-white/10 bg-white/[0.02]">
               <h2 className="text-lg font-semibold text-white">Player</h2>
             </div>
             <div className="p-5">
@@ -425,43 +455,53 @@ const ScorePage: React.FC = () => {
             </div>
           </section>
 
-          <section className="xl:col-span-2 self-start rounded-3xl overflow-hidden torii-liquid">
-            <div className="px-5 py-4 border-b border-white/10 bg-white/[0.03]">
+          <section className="xl:col-span-2 self-start rounded-3xl overflow-hidden bg-[linear-gradient(165deg,rgba(20,24,60,0.78),rgba(12,16,40,0.66))] shadow-[0_16px_42px_rgba(0,0,0,0.32)] ring-1 ring-black/35">
+            <div className="px-5 py-4 border-b border-white/10 bg-white/[0.02]">
               <h2 className="text-lg font-semibold text-white">Performance</h2>
             </div>
             <div className="p-5 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div
-                  className="rounded-xl torii-liquid-soft px-4 py-4 border"
-                  style={{ borderColor: `rgba(${accentTheme.accentRgb},0.28)` }}
+                  className="rounded-xl px-4 py-4 border border-white/15 bg-[linear-gradient(165deg,rgba(18,22,53,0.64),rgba(10,13,35,0.56))]"
                 >
                   <p className="text-[11px] uppercase tracking-wide text-slate-400">Accuracy</p>
-                  <p className="text-3xl font-semibold" style={{ color: accentTheme.accuracyColor }}>
+                  <p
+                    className="text-3xl font-semibold"
+                    style={{
+                      color: accentTheme.accuracyColor,
+                      textShadow: `0 0 16px rgba(${accentTheme.accentRgb},0.22)`,
+                    }}
+                  >
                     {accuracy}%
                   </p>
                 </div>
-                <div className="rounded-xl torii-liquid-soft px-4 py-4 border border-emerald-400/25">
+                <div className="rounded-xl px-4 py-4 border border-white/15 bg-[linear-gradient(165deg,rgba(18,22,53,0.64),rgba(10,13,35,0.56))]">
                   <p className="text-[11px] uppercase tracking-wide text-slate-400">PP</p>
-                  <p className="text-3xl font-semibold torii-pp-gradient">{pp}</p>
+                  <p
+                    className="text-3xl font-semibold torii-pp-gradient"
+                    style={{ textShadow: `0 0 16px rgba(${accentTheme.accentRgb},0.16)` }}
+                  >
+                    {pp}
+                  </p>
                 </div>
-                <div className="rounded-xl torii-liquid-soft px-4 py-4 border border-white/15">
+                <div className="rounded-xl px-4 py-4 border border-white/15 bg-[linear-gradient(165deg,rgba(18,22,53,0.64),rgba(10,13,35,0.56))]">
                   <p className="text-[11px] uppercase tracking-wide text-slate-400">Max Combo</p>
                   <p className="text-3xl font-semibold text-white">{comboText}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="rounded-xl torii-liquid-soft px-4 py-3 border border-white/15">
+                <div className="rounded-xl px-4 py-3 border border-white/15 bg-[linear-gradient(165deg,rgba(18,22,53,0.64),rgba(10,13,35,0.56))]">
                   <p className="text-[11px] uppercase tracking-wide text-slate-400">Total Score</p>
                   <p className="text-xl font-semibold text-white">{scoreValue}</p>
                 </div>
-                <div className="rounded-xl torii-liquid-soft px-4 py-3 border border-white/15">
+                <div className="rounded-xl px-4 py-3 border border-white/15 bg-[linear-gradient(165deg,rgba(18,22,53,0.64),rgba(10,13,35,0.56))]">
                   <p className="text-[11px] uppercase tracking-wide text-slate-400">Global Rank</p>
                   <p className="text-xl font-semibold text-white">
                     {globalRank ? `#${globalRank.toLocaleString()}` : '-'}
                   </p>
                 </div>
-                <div className="rounded-xl torii-liquid-soft px-4 py-3 border border-white/15">
+                <div className="rounded-xl px-4 py-3 border border-white/15 bg-[linear-gradient(165deg,rgba(18,22,53,0.64),rgba(10,13,35,0.56))]">
                   <p className="text-[11px] uppercase tracking-wide text-slate-400">Country Rank</p>
                   <p className="text-xl font-semibold text-white">
                     {countryRank ? `#${countryRank.toLocaleString()}` : '-'}
@@ -469,7 +509,7 @@ const ScorePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-white/15 torii-liquid-soft overflow-hidden">
+              <div className="rounded-xl border border-white/15 bg-[linear-gradient(165deg,rgba(18,22,53,0.64),rgba(10,13,35,0.56))] overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setIsHitBreakdownOpen((open) => !open)}
@@ -495,7 +535,7 @@ const ScorePage: React.FC = () => {
                     >
                       <div className="px-4 pb-4 pt-1 grid grid-cols-2 md:grid-cols-4 gap-3">
                         {hitStats.map((stat) => (
-                          <div key={stat.label} className="rounded-xl torii-liquid-soft px-4 py-3 border border-white/10">
+                          <div key={stat.label} className="rounded-xl px-4 py-3 border border-white/10 bg-[linear-gradient(165deg,rgba(18,22,53,0.64),rgba(10,13,35,0.56))]">
                             <p className="text-[11px] uppercase tracking-wide text-slate-400">{stat.label}</p>
                             <p className="text-xl font-semibold text-white">{stat.value.toLocaleString()}</p>
                           </div>
