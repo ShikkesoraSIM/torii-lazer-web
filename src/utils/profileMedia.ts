@@ -55,6 +55,15 @@ export const normalizeMediaUrl = (value?: string | null): string | undefined => 
   const normalized = value.trim();
   if (!normalized || normalized === 'null' || normalized === 'undefined') return undefined;
 
+  if (normalized.startsWith('data:') || normalized.startsWith('blob:')) {
+    return normalized;
+  }
+
+  if (normalized.startsWith('//')) {
+    const protocol = typeof window !== 'undefined' ? window.location.protocol : 'https:';
+    return `${protocol}${normalized}`;
+  }
+
   if (normalized.startsWith('/')) {
     if (normalized.startsWith('/image/') || normalized === '/default.jpg') {
       return normalized;
@@ -80,6 +89,11 @@ export const normalizeMediaUrl = (value?: string | null): string | undefined => 
 
     return parsed.toString();
   } catch {
+    const apiOrigin = getApiBaseOrigin();
+    if (apiOrigin) {
+      const relativePath = normalized.replace(/^\.?\//, '');
+      return `${apiOrigin}/${relativePath}`;
+    }
     return normalized;
   }
 };

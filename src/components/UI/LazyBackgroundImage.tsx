@@ -103,6 +103,11 @@ const LazyBackgroundImage: React.FC<LazyBackgroundImageProps> = ({
           setCandidateIndex((previous) => previous + 1);
           return;
         }
+        console.warn('[cover] failed to load background image candidates', {
+          label: debugLabel,
+          failed: activeSrc,
+          candidates: sourceCandidates,
+        });
         setResolvedSrc(undefined);
         setHasError(true);
         setIsLoaded(false);

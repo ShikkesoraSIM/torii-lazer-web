@@ -17,6 +17,8 @@ interface Props {
   rankingType: RankingType;
 }
 
+const loggedMissingCoverUsers = new Set<number>();
+
 const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, rankingType }) => {
   const { t } = useTranslation();
   const isTopThree = rank <= 3;
@@ -26,6 +28,23 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
     userId: ranking.user.id,
     username: ranking.user.username,
   });
+  const rawCoverCandidates = [
+    ranking.user.cover_url,
+    ranking.user.cover?.url,
+    ranking.user.cover?.custom_url,
+  ].filter(Boolean);
+  if (
+    coverCandidates.length === 0 &&
+    rawCoverCandidates.length > 0 &&
+    !loggedMissingCoverUsers.has(ranking.user.id)
+  ) {
+    loggedMissingCoverUsers.add(ranking.user.id);
+    console.warn('[cover] no usable ranking cover candidates after normalization/filter', {
+      userId: ranking.user.id,
+      username: ranking.user.username,
+      raw: rawCoverCandidates,
+    });
+  }
 
   const profilePath = `/users/${ranking.user.id}?mode=${selectedMode}`;
 
