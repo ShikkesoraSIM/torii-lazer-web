@@ -3,12 +3,44 @@ const DEFAULT_USER_COVER_MARKERS = [
   '/user-profile-covers/default.jpg',
 ];
 
+const MEDIA_DEBUG_FLAG = 'torii_debug_cover';
+
 type UserWithCover = {
   cover?: {
     url?: string | null;
     custom_url?: string | null;
   } | null;
   cover_url?: string | null;
+};
+
+type CoverDebugContext = {
+  scope?: string;
+  userId?: number | string;
+  username?: string;
+};
+
+const getApiBaseOrigin = (): string | undefined => {
+  const rawBaseUrl = String(import.meta.env.VITE_API_BASE_URL || '').trim();
+  if (!rawBaseUrl) return undefined;
+  try {
+    return new URL(rawBaseUrl).origin;
+  } catch {
+    return undefined;
+  }
+};
+
+const shouldDebugCoverMedia = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  if (window.location.search.includes('debugCover=1')) return true;
+  return window.localStorage.getItem(MEDIA_DEBUG_FLAG) === '1';
+};
+
+const debugCoverMedia = (
+  message: string,
+  payload: Record<string, unknown>
+): void => {
+  if (!shouldDebugCoverMedia()) return;
+  console.info(`[cover-debug] ${message}`, payload);
 };
 
 export const isDefaultUserCoverUrl = (value?: string | null): boolean => {
@@ -24,6 +56,13 @@ export const normalizeMediaUrl = (value?: string | null): string | undefined => 
   if (!normalized || normalized === 'null' || normalized === 'undefined') return undefined;
 
   if (normalized.startsWith('/')) {
+    if (normalized.startsWith('/image/') || normalized === '/default.jpg') {
+      return normalized;
+    }
+    const apiOrigin = getApiBaseOrigin();
+    if (apiOrigin) {
+      return `${apiOrigin}${normalized}`;
+    }
     return normalized;
   }
 
@@ -45,24 +84,45 @@ export const normalizeMediaUrl = (value?: string | null): string | undefined => 
   }
 };
 
-export const pickUserCoverCandidates = (user?: UserWithCover | null): string[] => {
-  if (!user) return [];
+export const pickUserCoverCandidates = (
+  user?: UserWithCover | null,
+  debugContext?: CoverDebugContext
+): string[] => {
+  if (!user) {
+    debugCoverMedia('no-user', { context: debugContext });
+    return [];
+  }
 
-  const candidates = [
+  const rawCandidates = [
     user.cover_url,
     user.cover?.url,
     user.cover?.custom_url,
   ];
 
   const uniqueCandidates = new Set<string>();
-  for (const candidate of candidates) {
+  const skipped: Array<{ value?: string | null; reason: string }> = [];
+
+  for (const candidate of rawCandidates) {
     const normalized = normalizeMediaUrl(candidate);
-    if (!normalized) continue;
-    if (isDefaultUserCoverUrl(normalized)) continue;
+    if (!normalized) {
+      skipped.push({ value: candidate, reason: 'empty-or-invalid' });
+      continue;
+    }
+    if (isDefaultUserCoverUrl(normalized)) {
+      skipped.push({ value: candidate, reason: 'default-cover' });
+      continue;
+    }
     uniqueCandidates.add(normalized);
   }
 
-  return Array.from(uniqueCandidates);
+  const resolved = Array.from(uniqueCandidates);
+  debugCoverMedia('resolved-candidates', {
+    context: debugContext,
+    rawCandidates,
+    skipped,
+    resolved,
+  });
+  return resolved;
 };
 
 export const pickBestUserCoverUrl = (user?: UserWithCover | null): string | undefined => {

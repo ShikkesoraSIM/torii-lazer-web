@@ -21,7 +21,11 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
   const { t } = useTranslation();
   const isTopThree = rank <= 3;
 
-  const coverCandidates = pickUserCoverCandidates(ranking.user);
+  const coverCandidates = pickUserCoverCandidates(ranking.user, {
+    scope: 'rankings:user-card',
+    userId: ranking.user.id,
+    username: ranking.user.username,
+  });
 
   const profilePath = `/users/${ranking.user.id}?mode=${selectedMode}`;
 
@@ -135,6 +139,7 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
   return (
     <LazyBackgroundImage
       sources={coverCandidates}
+      debugLabel={`rankings:user-card:${ranking.user.id}`}
       className={`${cardBaseClass} bg-[#090d25]`}
     >
       <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f2edd] via-[#0a0f2eb8] to-[#090d25e6] group-hover:from-[#080c24e6] group-hover:via-[#080c24c9] group-hover:to-[#080c24ee] transition-all duration-300" />

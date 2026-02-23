@@ -59,7 +59,11 @@ const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beat
 
   const renderPlayerCell = (score: BestScore) => {
     const profilePath = `/users/${score.user.id}?mode=${mode}`;
-    const coverCandidates = pickUserCoverCandidates(score.user);
+    const coverCandidates = pickUserCoverCandidates(score.user, {
+      scope: 'beatmap:leaderboard',
+      userId: score.user.id,
+      username: score.user.username,
+    });
 
     const content = (
       <div className="flex items-center gap-3">
@@ -101,6 +105,7 @@ const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beat
     return (
       <LazyBackgroundImage
         sources={coverCandidates}
+        debugLabel={`beatmap:leaderboard:${score.user.id}`}
         className="rounded-lg border border-slate-200/80 dark:border-white/10 overflow-hidden bg-slate-100 dark:bg-slate-900/45"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-white/88 via-white/82 to-white/70 dark:from-[#070b23ea] dark:via-[#070b23d9] dark:to-[#070b23ba]" />

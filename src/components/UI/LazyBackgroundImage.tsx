@@ -4,6 +4,7 @@ interface LazyBackgroundImageProps {
   src?: string;
   sources?: string[];
   fallback?: string;
+  debugLabel?: string;
   className?: string;
   children: React.ReactNode;
 }
@@ -12,6 +13,7 @@ const LazyBackgroundImage: React.FC<LazyBackgroundImageProps> = ({
   src,
   sources,
   fallback,
+  debugLabel,
   className = '',
   children,
 }) => {
@@ -22,6 +24,9 @@ const LazyBackgroundImage: React.FC<LazyBackgroundImageProps> = ({
   const [candidateIndex, setCandidateIndex] = useState(0);
   const [resolvedSrc, setResolvedSrc] = useState<string | undefined>(undefined);
   const elementRef = useRef<HTMLDivElement>(null);
+  const shouldDebug =
+    typeof window !== 'undefined' &&
+    (window.location.search.includes('debugCover=1') || window.localStorage.getItem('torii_debug_cover') === '1');
 
   const sourceCandidates = useMemo(() => {
     const list = sources && sources.length > 0 ? sources : src ? [src] : [];
@@ -74,10 +79,26 @@ const LazyBackgroundImage: React.FC<LazyBackgroundImageProps> = ({
         setResolvedSrc(activeSrc);
         setIsLoaded(true);
         setHasError(false);
+        if (shouldDebug) {
+          console.info('[cover-debug] background-load-success', {
+            label: debugLabel,
+            selected: activeSrc,
+            candidates: sourceCandidates,
+          });
+        }
         setTimeout(() => setShowBackground(true), 50);
       };
       img.onerror = () => {
         const hasNextCandidate = candidateIndex < sourceCandidates.length - 1;
+        if (shouldDebug) {
+          console.warn('[cover-debug] background-load-error', {
+            label: debugLabel,
+            failed: activeSrc,
+            candidateIndex,
+            hasNextCandidate,
+            candidates: sourceCandidates,
+          });
+        }
         if (hasNextCandidate) {
           setCandidateIndex((previous) => previous + 1);
           return;
