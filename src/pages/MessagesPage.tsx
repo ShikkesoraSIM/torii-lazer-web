@@ -264,7 +264,7 @@ const MessagesPage: React.FC = () => {
                       user_info: {
                         id: userInfo.id,
                         username: userInfo.username,
-                        avatar_url: userInfo.avatar_url || '/default-avatar.png',
+                        avatar_url: userInfo.avatar_url || '/default.jpg',
                         cover_url: userInfo.cover_url || userInfo.cover?.url || userInfo.cover?.custom_url || ''
                       }
                     };
@@ -566,7 +566,7 @@ const MessagesPage: React.FC = () => {
                   user_info: {
                     id: userInfo.id,
                     username: userInfo.username,
-                    avatar_url: userInfo.avatar_url || '/default-avatar.png',
+                    avatar_url: userInfo.avatar_url || '/default.jpg',
                     cover_url: userInfo.cover_url || userInfo.cover?.url || userInfo.cover?.custom_url || ''
                   }
                 };
@@ -1094,12 +1094,12 @@ const MessagesPage: React.FC = () => {
           if (userInfo) {
             console.log('获取到用户信息:', userInfo);
             userName = userInfo.username || userName;
-            userAvatarUrl = userInfo.avatar_url || '/default-avatar.png';
+            userAvatarUrl = userInfo.avatar_url || '/default.jpg';
             userCoverUrl = userInfo.cover_url || userInfo.cover?.url || userInfo.cover?.custom_url || '';
           }
         } catch (error) {
           console.error('获取用户信息失败，使用默认值:', error);
-          userAvatarUrl = '/default-avatar.png';
+          userAvatarUrl = '/default.jpg';
         }
         
         // 创建新的私聊频道对象
@@ -1975,7 +1975,7 @@ const MessagesPage: React.FC = () => {
                                 {/* 显示用户头像或默认图标 */}
                                 {notification.source_user_id && hasUserInfoInCache(notification.source_user_id) ? (
                                   <img
-                                    src={getUserInfoFromCache(notification.source_user_id)?.avatar_url || '/default-avatar.png'}
+                                    src={getUserInfoFromCache(notification.source_user_id)?.avatar_url || '/default.jpg'}
                                     alt={t('messages.sidebar.avatarAlt')}
                                     className="w-10 h-10 rounded-lg object-cover"
                                     onError={(e) => {

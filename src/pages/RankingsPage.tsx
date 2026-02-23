@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import { rankingsAPI, handleApiError } from '../utils/api';
 import CountrySelect from '../components/UI/CountrySelect';
 import RankingTypeSelector from '../components/UI/RankingTypeSelector';
@@ -19,6 +20,9 @@ import type {
 
 const RankingsPage: React.FC = () => {
   const { t } = useTranslation();
+  const pageTitle = t('rankings.title');
+  const pageSubtitle = t('nav.rankings');
+  const showSubtitle = pageSubtitle.trim().toLowerCase() !== pageTitle.trim().toLowerCase();
   const [selectedMode, setSelectedMode] = useState<GameMode>('osu');
   const [selectedTab, setSelectedTab] = useState<TabType>('users');
   const [rankingType, setRankingType] = useState<RankingType>('performance');
@@ -150,14 +154,16 @@ const RankingsPage: React.FC = () => {
         {/* Page title */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            {t('rankings.title')}
+            {pageTitle}
           </h1>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
-            {t('nav.rankings')}
-          </p>
+          {showSubtitle && (
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
+              {pageSubtitle}
+            </p>
+          )}
         </div>
 
-        <div className="flex flex-col xl:flex-row xl:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
+        <div className="relative z-30 flex flex-col xl:flex-row xl:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
           <div className="torii-liquid-soft rounded-2xl p-2">
             <GameModeSelector
               selectedMode={selectedMode}
@@ -169,26 +175,40 @@ const RankingsPage: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 xl:flex-1">
           <div className="flex-1">
-            <div className="inline-flex torii-liquid-soft rounded-2xl p-1.5 sm:p-2 min-h-[44px] sm:min-h-[48px] items-center">
+            <div className="inline-flex torii-liquid-soft rounded-2xl p-1.5 sm:p-2 min-h-[44px] sm:min-h-[48px] items-center gap-1">
               <button
                 onClick={() => setSelectedTab('users')}
-                className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium transition-all text-sm sm:text-base ${
+                className={`relative px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium transition-colors duration-200 text-sm sm:text-base ${
                   selectedTab === 'users'
-                    ? 'bg-white/14 text-white border border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.22)]'
-                    : 'text-white/70 hover:text-white hover:bg-white/8'
+                    ? 'text-white'
+                    : 'text-white/70 hover:text-white'
                 }`}
               >
-                {t('rankings.tabs.users')}
+                {selectedTab === 'users' && (
+                  <motion.span
+                    layoutId="rankings-tab-pill"
+                    className="absolute inset-0 rounded-xl border border-white/20 bg-white/14 shadow-[0_8px_24px_rgba(0,0,0,0.22)]"
+                    transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10">{t('rankings.tabs.users')}</span>
               </button>
               <button
                 onClick={() => setSelectedTab('countries')}
-                className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium transition-all text-sm sm:text-base ${
+                className={`relative px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium transition-colors duration-200 text-sm sm:text-base ${
                   selectedTab === 'countries'
-                    ? 'bg-white/14 text-white border border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.22)]'
-                    : 'text-white/70 hover:text-white hover:bg-white/8'
+                    ? 'text-white'
+                    : 'text-white/70 hover:text-white'
                 }`}
               >
-                {t('rankings.tabs.countries')}
+                {selectedTab === 'countries' && (
+                  <motion.span
+                    layoutId="rankings-tab-pill"
+                    className="absolute inset-0 rounded-xl border border-white/20 bg-white/14 shadow-[0_8px_24px_rgba(0,0,0,0.22)]"
+                    transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10">{t('rankings.tabs.countries')}</span>
               </button>
             </div>
           </div>
@@ -216,7 +236,7 @@ const RankingsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="torii-liquid rounded-3xl p-3 sm:p-6">
+        <div className="relative z-10 torii-liquid rounded-3xl p-3 sm:p-6">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 sm:px-0">
               <LoadingSpinner size="lg" className="mb-4" />

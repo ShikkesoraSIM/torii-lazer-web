@@ -82,9 +82,12 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
             <>
               <div className="flex-shrink-0">
                 <img
-                  src={selectedMember.avatar_url || '/default-avatar.png'}
+                  src={selectedMember.avatar_url || '/default.jpg'}
                   alt={selectedMember.username}
                   className="w-6 h-6 rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.src = '/default.jpg';
+                  }}
                 />
               </div>
               <div className="flex flex-col items-start min-w-0">
@@ -163,9 +166,12 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
               >
                 <div className="flex-shrink-0">
                   <img
-                    src={member.avatar_url || '/default-avatar.png'}
+                    src={member.avatar_url || '/default.jpg'}
                     alt={member.username}
                     className="w-6 h-6 rounded-full"
+                    onError={(e) => {
+                      e.currentTarget.src = '/default.jpg';
+                    }}
                   />
                 </div>
                 <div className="flex flex-col items-start min-w-0">

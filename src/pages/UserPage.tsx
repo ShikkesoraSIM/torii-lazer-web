@@ -94,12 +94,14 @@ const UserPage: React.FC = () => {
   }
 
   return (
-    <UserProfileLayout
-      user={user}
-      selectedMode={selectedMode}
-      onModeChange={setSelectedMode}
-      onUserUpdate={setUser}
-    />
+    <div className="torii-page-stage min-h-screen">
+      <UserProfileLayout
+        user={user}
+        selectedMode={selectedMode}
+        onModeChange={setSelectedMode}
+        onUserUpdate={setUser}
+      />
+    </div>
   );
 };
 

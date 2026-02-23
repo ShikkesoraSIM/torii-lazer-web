@@ -136,9 +136,12 @@ const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beat
                     className="flex-shrink-0"
                   >
                     <img
-                      src={score.user.avatar_url}
+                      src={score.user.avatar_url || '/default.jpg'}
                       alt={score.user.username}
                       className="w-8 h-8 rounded-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/default.jpg';
+                      }}
                     />
                   </Link>
                   <div>

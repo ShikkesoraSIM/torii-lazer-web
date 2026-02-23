@@ -35,14 +35,14 @@ export const CustomToast: React.FC<CustomToastProps> = ({
         .then(user => {
           setUserInfo({
             username: user.username,
-            avatar_url: user.avatar_url || '/default-avatar.png'
+            avatar_url: user.avatar_url || '/default.jpg'
           });
         })
         .catch(error => {
           console.error(t('common.fetchUserInfoFailed'), error);
           setUserInfo({
             username: t('common.unknownUser'),
-            avatar_url: '/default-avatar.png'
+            avatar_url: '/default.jpg'
           });
         })
         .finally(() => {
@@ -69,7 +69,7 @@ export const CustomToast: React.FC<CustomToastProps> = ({
   const getAvatarUrl = () => {
     if (avatar) return avatar;
     if (userInfo?.avatar_url) return userInfo.avatar_url;
-    if (sourceUserId) return '/default-avatar.png';
+    if (sourceUserId) return '/default.jpg';
     return null;
   };
 

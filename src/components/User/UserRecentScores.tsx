@@ -182,7 +182,7 @@ const ScoreCard: React.FC<{ score: BestScore; t: any; profileColor: string; show
           {showPP && originalPp > 0 && (
             <div className="absolute right-0 top-0 h-full w-20 flex items-center justify-center">
               {/* PP 值 */}
-              <div className={`text-sm font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${!passed ? 'text-gray-400 dark:text-gray-500' : 'text-profile-color'}`}>
+              <div className={`text-sm font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${!passed ? 'text-gray-400 dark:text-gray-500' : 'torii-pp-gradient'}`}>
                 {originalPp} PP
               </div>
             </div>
@@ -250,7 +250,7 @@ const ScoreCard: React.FC<{ score: BestScore; t: any; profileColor: string; show
                   </div>
                 </div>
                 {showPP && originalPp > 0 && (
-                  <div className={`text-sm font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${!passed ? 'text-gray-400 dark:text-gray-500' : 'text-profile-color'}`}>
+                  <div className={`text-sm font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${!passed ? 'text-gray-400 dark:text-gray-500' : 'torii-pp-gradient'}`}>
                     {originalPp} PP
                   </div>
                 )}

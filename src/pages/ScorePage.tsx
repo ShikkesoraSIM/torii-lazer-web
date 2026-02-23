@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { handleApiError, scoreAPI } from '../utils/api';
+import { AnimatePresence, motion } from 'framer-motion';
+import { beatmapAPI, handleApiError, scoreAPI } from '../utils/api';
 import type { BestScore } from '../types';
 
 const RANK_ICON_MAP: Record<string, string> = {
@@ -55,6 +56,50 @@ const getMods = (score: BestScore) => {
   return score.mods.map((mod) => mod.acronym).join('');
 };
 
+const getBestScoreCover = (score?: BestScore | null): string | null => {
+  const covers = score?.beatmapset?.covers;
+  if (!covers) return null;
+
+  return (
+    covers['cover@2x'] ||
+    covers.cover ||
+    covers['card@2x'] ||
+    covers.card ||
+    covers['slimcover@2x'] ||
+    covers.slimcover ||
+    covers['list@2x'] ||
+    covers.list ||
+    null
+  );
+};
+
+const normalizeHex = (value?: string | null, fallback: string = '#22d3ee') => {
+  if (!value) return fallback;
+  const raw = value.trim();
+  const withHash = raw.startsWith('#') ? raw : `#${raw}`;
+  return /^#[0-9A-Fa-f]{6}$/.test(withHash) ? withHash : fallback;
+};
+
+const hexToRgb = (hex: string) => {
+  const normalized = normalizeHex(hex);
+  const parsed = normalized.slice(1);
+  return {
+    r: parseInt(parsed.slice(0, 2), 16),
+    g: parseInt(parsed.slice(2, 4), 16),
+    b: parseInt(parsed.slice(4, 6), 16),
+  };
+};
+
+const blendHex = (baseHex: string, mixHex: string, ratio: number) => {
+  const base = hexToRgb(baseHex);
+  const mix = hexToRgb(mixHex);
+  const clamped = Math.max(0, Math.min(1, ratio));
+  const r = Math.round(base.r * (1 - clamped) + mix.r * clamped);
+  const g = Math.round(base.g * (1 - clamped) + mix.g * clamped);
+  const b = Math.round(base.b * (1 - clamped) + mix.b * clamped);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+};
+
 const ScorePage: React.FC = () => {
   const { scoreId } = useParams<{ scoreId: string }>();
   const navigate = useNavigate();
@@ -64,6 +109,8 @@ const ScorePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [downloadingReplay, setDownloadingReplay] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resolvedCoverUrl, setResolvedCoverUrl] = useState<string | null>(null);
+  const [isHitBreakdownOpen, setIsHitBreakdownOpen] = useState(false);
 
   useEffect(() => {
     const parsedScoreId = Number(scoreId);
@@ -78,7 +125,9 @@ const ScorePage: React.FC = () => {
       setError(null);
       try {
         const data = await scoreAPI.getScoreById(parsedScoreId);
-        setScore(data as BestScore);
+        const normalized = data as BestScore;
+        setScore(normalized);
+        setResolvedCoverUrl(getBestScoreCover(normalized));
       } catch (err) {
         console.error('Failed to fetch score details:', err);
         setError(err instanceof Error ? err.message : 'Failed to load score');
@@ -90,12 +139,67 @@ const ScorePage: React.FC = () => {
     fetchScore();
   }, [scoreId]);
 
+  useEffect(() => {
+    const preferredCover = getBestScoreCover(score);
+    if (preferredCover) {
+      setResolvedCoverUrl(preferredCover);
+      return;
+    }
+
+    const beatmapsetId = score?.beatmapset?.id;
+    if (!beatmapsetId) return;
+
+    let cancelled = false;
+    const hydrateCover = async () => {
+      try {
+        const beatmapset = await beatmapAPI.getBeatmapset(beatmapsetId);
+        const hydratedCover =
+          beatmapset?.covers?.['cover@2x'] ||
+          beatmapset?.covers?.cover ||
+          beatmapset?.covers?.['card@2x'] ||
+          beatmapset?.covers?.card ||
+          beatmapset?.covers?.['slimcover@2x'] ||
+          beatmapset?.covers?.slimcover ||
+          beatmapset?.covers?.['list@2x'] ||
+          beatmapset?.covers?.list ||
+          null;
+
+        if (!cancelled && hydratedCover) {
+          setResolvedCoverUrl(hydratedCover);
+        }
+      } catch (fetchCoverErr) {
+        console.warn('Could not hydrate beatmap cover for score page:', fetchCoverErr);
+      }
+    };
+
+    hydrateCover();
+    return () => {
+      cancelled = true;
+    };
+  }, [score]);
+
   const heroBackground = useMemo(() => {
-    if (!score?.beatmapset?.covers?.cover) {
+    if (!resolvedCoverUrl) {
       return 'linear-gradient(135deg, rgba(30,41,59,0.95), rgba(15,23,42,0.95))';
     }
-    return `linear-gradient(110deg, rgba(8,11,30,0.88), rgba(8,11,30,0.56)), url(${score.beatmapset.covers.cover})`;
-  }, [score]);
+    return `linear-gradient(110deg, rgba(8,11,30,0.88), rgba(8,11,30,0.56)), url(${resolvedCoverUrl})`;
+  }, [resolvedCoverUrl]);
+
+  const accentTheme = useMemo(() => {
+    const accent = normalizeHex(score?.user?.profile_colour, '#22d3ee');
+    const accentRgbObj = hexToRgb(accent);
+    const accentRgb = `${accentRgbObj.r}, ${accentRgbObj.g}, ${accentRgbObj.b}`;
+    const accentSoft = blendHex(accent, '#60a5fa', 0.28);
+    const accentDeep = blendHex(accent, '#0ea5e9', 0.42);
+    const accuracyColor = blendHex(accent, '#ffffff', 0.14);
+    return {
+      accent,
+      accentRgb,
+      accentSoft,
+      accentDeep,
+      accuracyColor,
+    };
+  }, [score?.user?.profile_colour]);
 
   const handleDownloadReplay = async () => {
     if (!score) return;
@@ -191,11 +295,12 @@ const ScorePage: React.FC = () => {
         </button>
 
         <section
-          className="relative overflow-hidden rounded-3xl torii-liquid"
+          className="relative overflow-hidden rounded-3xl backdrop-blur-[2px] shadow-[0_20px_60px_rgba(0,0,0,0.38)] ring-1 ring-white/[0.06] ring-inset"
           style={{
             backgroundImage: heroBackground,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/35 to-transparent" />
@@ -272,7 +377,12 @@ const ScorePage: React.FC = () => {
                 type="button"
                 disabled={!score.has_replay || downloadingReplay}
                 onClick={handleDownloadReplay}
-                className="self-start lg:self-center px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-500 border border-white/25 text-white font-semibold hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_14px_30px_rgba(14,165,233,0.35)]"
+                className="self-start lg:self-center px-6 py-3 rounded-2xl border text-white font-semibold hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundImage: `linear-gradient(135deg, ${accentTheme.accentSoft}, ${accentTheme.accentDeep})`,
+                  borderColor: `rgba(${accentTheme.accentRgb},0.48)`,
+                  boxShadow: `0 14px 30px rgba(${accentTheme.accentRgb},0.32), 0 0 34px rgba(${accentTheme.accentRgb},0.24)`,
+                }}
               >
                 {downloadingReplay ? 'Downloading...' : 'Download Replay'}
               </button>
@@ -280,8 +390,8 @@ const ScorePage: React.FC = () => {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <section className="xl:col-span-1 rounded-3xl overflow-hidden torii-liquid">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+          <section className="xl:col-span-1 self-start rounded-3xl overflow-hidden torii-liquid">
             <div className="px-5 py-4 border-b border-white/10 bg-white/[0.03]">
               <h2 className="text-lg font-semibold text-white">Player</h2>
             </div>
@@ -315,19 +425,24 @@ const ScorePage: React.FC = () => {
             </div>
           </section>
 
-          <section className="xl:col-span-2 rounded-3xl overflow-hidden torii-liquid">
+          <section className="xl:col-span-2 self-start rounded-3xl overflow-hidden torii-liquid">
             <div className="px-5 py-4 border-b border-white/10 bg-white/[0.03]">
               <h2 className="text-lg font-semibold text-white">Performance</h2>
             </div>
             <div className="p-5 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="rounded-xl torii-liquid-soft px-4 py-4 border border-cyan-400/25">
+                <div
+                  className="rounded-xl torii-liquid-soft px-4 py-4 border"
+                  style={{ borderColor: `rgba(${accentTheme.accentRgb},0.28)` }}
+                >
                   <p className="text-[11px] uppercase tracking-wide text-slate-400">Accuracy</p>
-                  <p className="text-3xl font-semibold text-cyan-300">{accuracy}%</p>
+                  <p className="text-3xl font-semibold" style={{ color: accentTheme.accuracyColor }}>
+                    {accuracy}%
+                  </p>
                 </div>
                 <div className="rounded-xl torii-liquid-soft px-4 py-4 border border-emerald-400/25">
                   <p className="text-[11px] uppercase tracking-wide text-slate-400">PP</p>
-                  <p className="text-3xl font-semibold text-emerald-300">{pp}</p>
+                  <p className="text-3xl font-semibold torii-pp-gradient">{pp}</p>
                 </div>
                 <div className="rounded-xl torii-liquid-soft px-4 py-4 border border-white/15">
                   <p className="text-[11px] uppercase tracking-wide text-slate-400">Max Combo</p>
@@ -354,19 +469,42 @@ const ScorePage: React.FC = () => {
                 </div>
               </div>
 
-              <details className="rounded-xl border border-white/15 torii-liquid-soft">
-                <summary className="px-4 py-3 text-sm text-slate-200 cursor-pointer">
-                  Hit breakdown (optional details)
-                </summary>
-                <div className="px-4 pb-4 pt-1 grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {hitStats.map((stat) => (
-                    <div key={stat.label} className="rounded-xl torii-liquid-soft px-4 py-3 border border-white/10">
-                      <p className="text-[11px] uppercase tracking-wide text-slate-400">{stat.label}</p>
-                      <p className="text-xl font-semibold text-white">{stat.value.toLocaleString()}</p>
-                    </div>
-                  ))}
-                </div>
-              </details>
+              <div className="rounded-xl border border-white/15 torii-liquid-soft overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsHitBreakdownOpen((open) => !open)}
+                  className="w-full px-4 py-3 text-sm text-slate-200 flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <span>Hit breakdown</span>
+                  <motion.span
+                    animate={{ rotate: isHitBreakdownOpen ? 90 : 0 }}
+                    transition={{ duration: 0.14, ease: [0.4, 0, 0.2, 1] }}
+                    className="text-slate-300"
+                  >
+                    ▶
+                  </motion.span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isHitBreakdownOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.16, ease: [0.4, 0, 0.2, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pb-4 pt-1 grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {hitStats.map((stat) => (
+                          <div key={stat.label} className="rounded-xl torii-liquid-soft px-4 py-3 border border-white/10">
+                            <p className="text-[11px] uppercase tracking-wide text-slate-400">{stat.label}</p>
+                            <p className="text-xl font-semibold text-white">{stat.value.toLocaleString()}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </section>
         </div>

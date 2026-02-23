@@ -5,6 +5,7 @@ import LazyAvatar from '../UI/LazyAvatar';
 import LazyFlag from '../UI/LazyFlag';
 import { GAME_MODE_COLORS } from '../../types';
 import type { UserRanking, GameMode, RankingType } from '../../types';
+import { pickBestUserCoverUrl } from '../../utils/profileMedia';
 
 interface Props {
   ranking: UserRanking;
@@ -13,14 +14,7 @@ interface Props {
 }
 
 const TeamDetailUserCard: React.FC<Props> = ({ ranking, selectedMode, rankingType }) => {
-  // 过滤掉默认封面URL
-  const rawCoverUrl = ranking.user.cover_url || ranking.user.cover?.url || ranking.user.cover?.custom_url;
-  const defaultCoverUrls = [
-    'https://assets-ppy.g0v0.top/user-profile-covers/default.jpeg',
-    'https://assets.ppy.sh/user-profile-covers/default.jpeg',
-    // 其他可能的默认URL变体
-  ];
-  const coverUrl = rawCoverUrl && !defaultCoverUrls.includes(rawCoverUrl) ? rawCoverUrl : undefined;
+  const coverUrl = pickBestUserCoverUrl(ranking.user);
 
   // 根据是否有背景图片决定渲染方式
   if (!coverUrl) {

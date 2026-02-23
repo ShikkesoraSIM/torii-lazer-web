@@ -240,7 +240,7 @@ const ScoreCard: React.FC<{
           </div>
 
           <div className="absolute right-0 top-0 h-full flex items-center justify-center gap-2 pr-2">
-            <div className="text-sm font-bold text-profile-color drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+            <div className="text-sm font-bold torii-pp-gradient drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
               {originalPp} PP
             </div>
             {canEdit && (
@@ -313,7 +313,7 @@ const ScoreCard: React.FC<{
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-sm font-bold text-profile-color drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                  <div className="text-sm font-bold torii-pp-gradient drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                     {originalPp} PP
                   </div>
                   {canEdit && (

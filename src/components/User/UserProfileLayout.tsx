@@ -23,6 +23,7 @@ import { Tooltip } from 'react-tooltip';
 import { useAuth } from '../../hooks/useAuth';
 import { useUserPreferences } from '../../hooks/useUserPreferences';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
+import { isDefaultUserCoverUrl, pickBestUserCoverUrl } from '../../utils/profileMedia';
 
 interface UserProfileLayoutProps {
   user: User;
@@ -146,11 +147,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
       )
     : undefined;
 
-  const coverUrlRaw = user.cover_url || user.cover?.url || user.cover?.custom_url || undefined;
-  const coverUrl =
-    coverUrlRaw === "https://assets.ppy.sh/user-profile-covers/default.jpeg"
-      ? "/image/backgrounds/bgcover.jpg"
-      : coverUrlRaw;
+  const coverUrl = pickBestUserCoverUrl(user) || (isDefaultUserCoverUrl(user.cover_url) ? "/image/backgrounds/bgcover.jpg" : user.cover_url);
   const [isUpdatingMode] = useState(false);
 
   // 检查是否可以编辑（仅自己的页面）
@@ -218,17 +215,16 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
   };
 
   return (
-    <main className="relative max-w-7xl mx-auto px-0 md:px-4 lg:px-6 py-4 md:py-8 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[#030014]" />
-        <div className="absolute -top-44 left-1/2 h-[520px] w-[880px] -translate-x-1/2 rounded-full bg-[#8a2be2]/16 blur-[140px]" />
-        <div className="absolute top-24 -left-40 h-[420px] w-[420px] rounded-full bg-[#ff007f]/12 blur-[130px]" />
-        <div className="absolute bottom-0 right-0 h-[480px] w-[480px] rounded-full bg-[#ff7a18]/10 blur-[140px]" />
-        <div className="absolute top-[48%] left-1/2 h-[360px] w-[680px] -translate-x-1/2 rounded-full bg-[#ff5bbd]/10 blur-[150px]" />
-        <div className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.22)_1px,transparent_0)] [background-size:22px_22px]" />
+    <main className="torii-page-stage relative max-w-7xl mx-auto px-0 md:px-4 lg:px-6 py-4 md:py-8 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-28 -left-28 h-[340px] w-[340px] rounded-full bg-fuchsia-400/14 blur-[120px]" />
+        <div className="absolute -top-20 right-[-120px] h-[360px] w-[360px] rounded-full bg-cyan-300/12 blur-[126px]" />
+        <div className="absolute bottom-[-140px] left-[10%] h-[300px] w-[300px] rounded-full bg-orange-300/10 blur-[120px]" />
+        <div className="absolute bottom-[-90px] right-[8%] h-[280px] w-[280px] rounded-full bg-pink-400/10 blur-[120px]" />
+        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.24)_1px,transparent_0)] [background-size:24px_24px]" />
       </div>
 
-      <div className="rounded-[26px] border border-white/10 bg-[rgba(10,10,24,0.82)] backdrop-blur-xl shadow-[0_20px_70px_rgba(0,0,0,0.45)] overflow-hidden">
+      <div className="rounded-[26px] bg-[rgba(10,10,24,0.72)] backdrop-blur-xl shadow-[0_18px_52px_rgba(0,0,0,0.34)] ring-1 ring-white/[0.04] overflow-hidden">
         
         {/* 受限用户提示 - 仅管理员可见 */}
         {user.is_restricted && currentUser?.is_admin && (
@@ -364,18 +360,21 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
               </div>
 
               {/* 折线图 */}
-              <div className="w-full mt-[-45px]">
-                <RankHistoryChart
-                  rankHistory={user.rank_history}
-                  isUpdatingMode={isUpdatingMode}
-                  selectedModeColor={profileColor}
-                  delay={0.4}
-                  height="8rem"
-                />
+              <div className="relative w-full -mt-2">
+                <div className="relative z-10">
+                  <RankHistoryChart
+                    rankHistory={user.rank_history}
+                    isUpdatingMode={isUpdatingMode}
+                    selectedModeColor={profileColor}
+                    delay={0.4}
+                    height="8rem"
+                    fullBleed={false}
+                  />
+                </div>
               </div>
 
               {/* 附加信息（PP / 游戏时间 / 成绩徽章） */}
-              <div className="w-full mt-[-55px]">
+              <div className="relative z-20 w-full -mt-1">
                 <PlayerRankCard
                   stats={stats}
                   playTime={playTime}
@@ -387,8 +386,12 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
 
             {/* 右侧 1/4：统计信息 */}
             <div className="flex-1">
-              <div className="p-3 md:rounded-lg h-full flex flex-col justify-center md:stats-card-shadow" style={{ background: 'var(--bg-secondary)' }}>
-                <StatsCard stats={stats} />
+              <div className="relative p-3 rounded-2xl h-full flex flex-col justify-center torii-liquid-soft border border-white/12 shadow-[0_12px_34px_rgba(0,0,0,0.3)]">
+                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(150deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02)_35%,rgba(8,12,34,0.25))]" />
+                <div className="pointer-events-none absolute inset-0 rounded-2xl" style={{ background: `radial-gradient(100% 70% at 88% 0%, ${profileColor}1f 0%, transparent 52%)` }} />
+                <div className="relative z-10">
+                  <StatsCard stats={stats} />
+                </div>
               </div>
             </div>
           </div>

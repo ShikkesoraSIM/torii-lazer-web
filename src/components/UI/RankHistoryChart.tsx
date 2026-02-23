@@ -47,6 +47,7 @@ const RankHistoryChart: React.FC<RankHistoryChartProps> = ({
   }, [rankHistory?.data]);
 
   const total = chartData.length;
+  const accent = selectedModeColor || '#e91e63';
 
   // === 关键修复：为 Y 轴增加上下缓冲，避免极值处被裁半 ===
   const yDomain = React.useMemo<[number | 'auto', number | 'auto']>(() => {
@@ -64,10 +65,25 @@ const RankHistoryChart: React.FC<RankHistoryChartProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-card rounded-2xl p-6 outline-none focus:outline-none ring-0 focus:ring-0"
+      className="relative isolate overflow-hidden rounded-[22px] bg-[rgba(15,20,52,0.62)] p-6 backdrop-blur-xl shadow-[0_16px_44px_rgba(0,0,0,0.38)] outline-none focus:outline-none ring-0 focus:ring-0"
       style={{ outline: 'none' }}
     >
-      <div className={fullBleed ? '-mx-6' : ''} style={{ height }}>
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[linear-gradient(152deg,rgba(255,255,255,0.07),rgba(255,255,255,0.02)_38%,rgba(8,12,34,0.34))]" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(120% 82% at 76% 8%, ${accent}22 0%, transparent 46%),
+              radial-gradient(92% 70% at 88% 92%, rgba(80,180,255,0.12) 0%, transparent 54%),
+              radial-gradient(70% 70% at 56% 58%, rgba(255,255,255,0.04) 0%, transparent 62%)
+            `,
+          }}
+        />
+        <div className="absolute inset-y-0 right-[16%] w-[26%] bg-gradient-to-r from-transparent via-white/[0.05] to-transparent blur-2xl opacity-35" />
+      </div>
+
+      <div className={`relative z-10 ${fullBleed ? '-mx-6' : ''}`} style={{ height }}>
         {isUpdatingMode ? (
           <div className="h-full flex items-center justify-center">
             <div className="animate-pulse text-center" style={{ color: 'var(--text-muted)' }}>
@@ -132,10 +148,6 @@ const RankHistoryChart: React.FC<RankHistoryChartProps> = ({
           </div>
         )}
       </div>
-      <style>{`
-        *:focus { outline: none; }
-        textarea:focus, input:focus { outline: none; }
-      `}</style>
     </motion.div>
   );
 };

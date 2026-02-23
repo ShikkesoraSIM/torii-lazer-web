@@ -96,7 +96,7 @@ const TeamsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col xl:flex-row xl:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
+        <div className="relative z-30 flex flex-col xl:flex-row xl:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
           <div className="torii-liquid-soft rounded-2xl p-2">
             <GameModeSelector
               selectedMode={selectedMode}
@@ -116,7 +116,7 @@ const TeamsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="torii-liquid rounded-3xl p-3 sm:p-6">
+        <div className="relative z-10 torii-liquid rounded-3xl p-3 sm:p-6">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 sm:px-0">
               <LoadingSpinner size="lg" className="mb-4" />

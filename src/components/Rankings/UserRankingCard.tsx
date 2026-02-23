@@ -8,6 +8,7 @@ import LazyAvatar from '../UI/LazyAvatar';
 import LazyFlag from '../UI/LazyFlag';
 import { GAME_MODE_COLORS } from '../../types';
 import type { UserRanking, GameMode, RankingType } from '../../types';
+import { pickBestUserCoverUrl } from '../../utils/profileMedia';
 
 interface Props {
   ranking: UserRanking;
@@ -20,12 +21,7 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
   const { t } = useTranslation();
   const isTopThree = rank <= 3;
 
-  const rawCoverUrl = ranking.user.cover_url || ranking.user.cover?.url || ranking.user.cover?.custom_url;
-  const defaultCoverUrls = [
-    'https://assets-ppy.g0v0.top/user-profile-covers/default.jpeg',
-    'https://assets.ppy.sh/user-profile-covers/default.jpeg',
-  ];
-  const coverUrl = rawCoverUrl && !defaultCoverUrls.includes(rawCoverUrl) ? rawCoverUrl : undefined;
+  const coverUrl = pickBestUserCoverUrl(ranking.user);
 
   const profilePath = `/users/${ranking.user.id}?mode=${selectedMode}`;
 

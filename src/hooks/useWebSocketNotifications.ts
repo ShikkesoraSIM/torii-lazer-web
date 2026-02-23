@@ -233,7 +233,7 @@ export const useWebSocketNotifications = ({
           if (notificationTitle) {
             showCustomToast({
               title: notificationTitle,
-              message: '您有新的通知',
+              message: 'You have a new notification',
               sourceUserId: notification.source_user_id,
               type: 'default'
             });
@@ -254,53 +254,53 @@ export const useWebSocketNotifications = ({
             console.log(`检测到频道通知，类型: ${channelType}`, data);
             
             let notificationName = 'channel_message';
-            let defaultTitle = '频道消息';
+            let defaultTitle = 'Channel message';
             
             // 根据频道类型设置通知名称和默认标题
             switch (channelType) {
               case 'pm':
                 notificationName = 'channel_message';
-                defaultTitle = '私聊消息';
+                defaultTitle = 'Private message';
                 break;
               case 'team':
                 notificationName = 'channel_team';
-                defaultTitle = '团队消息';
+                defaultTitle = 'Team message';
                 break;
               case 'public':
                 notificationName = 'channel_public';
-                defaultTitle = '公共频道';
+                defaultTitle = 'Public channel';
                 break;
               case 'private':
                 notificationName = 'channel_private';
-                defaultTitle = '私有频道';
+                defaultTitle = 'Private channel';
                 break;
               case 'multiplayer':
                 notificationName = 'channel_multiplayer';
-                defaultTitle = '多人游戏';
+                defaultTitle = 'Multiplayer';
                 break;
               case 'spectator':
                 notificationName = 'channel_spectator';
-                defaultTitle = '观战频道';
+                defaultTitle = 'Spectator channel';
                 break;
               case 'temporary':
                 notificationName = 'channel_temporary';
-                defaultTitle = '临时频道';
+                defaultTitle = 'Temporary channel';
                 break;
               case 'group':
                 notificationName = 'channel_group';
-                defaultTitle = '群组频道';
+                defaultTitle = 'Group channel';
                 break;
               case 'system':
                 notificationName = 'channel_system';
-                defaultTitle = '系统频道';
+                defaultTitle = 'System channel';
                 break;
               case 'announce':
                 notificationName = 'channel_announce';
-                defaultTitle = '公告频道';
+                defaultTitle = 'Announcements';
                 break;
               default:
                 notificationName = 'channel_message';
-                defaultTitle = '频道消息';
+                defaultTitle = 'Channel message';
                 break;
             }
             
@@ -342,33 +342,33 @@ export const useWebSocketNotifications = ({
                 case 'pm':
                   // 显示实际的消息内容
                   const messageContent = data.details?.title as string;
-                  if (messageContent && messageContent.length > 0 && messageContent !== '来自用户') {
+                  if (messageContent && messageContent.length > 0 && messageContent !== 'From user') {
                     // 如果消息被截断，显示提示
                     if (messageContent.length >= 36) {
-                      toastMessage = `${messageContent}... (可能有更多内容)`;
+                      toastMessage = `${messageContent}... (possibly truncated)`;
                     } else {
                       toastMessage = messageContent;
                     }
                   } else {
-                    toastMessage = '发送了一条私聊消息';
+                    toastMessage = 'Sent you a private message';
                   }
                   break;
                 case 'team':
                   const teamMessage = data.details?.title as string;
-                  toastMessage = teamMessage || '在团队频道发送了消息';
+                  toastMessage = teamMessage || 'Sent a message in team chat';
                   break;
                 case 'public':
                   const publicMessage = data.details?.title as string;
-                  toastMessage = publicMessage || '在公共频道发送了消息';
+                  toastMessage = publicMessage || 'Sent a message in a public channel';
                   break;
                 default:
                   const generalMessage = data.details?.title as string;
-                  toastMessage = generalMessage || '发送了一条消息';
+                  toastMessage = generalMessage || 'Sent a message';
                   break;
               }
               
               showCustomToast({
-                title: channelType === 'pm' ? '新私聊消息' : notificationTitle,
+                title: channelType === 'pm' ? 'New private message' : notificationTitle,
                 message: toastMessage,
                 sourceUserId: notification.source_user_id,
                 type: toastType
@@ -405,7 +405,7 @@ export const useWebSocketNotifications = ({
             if (notificationTitle) {
               showCustomToast({
                 title: notificationTitle,
-                message: '您有新的通知',
+                message: 'You have a new notification',
                 sourceUserId: notification.source_user_id,
                 type: 'default'
               });
@@ -471,43 +471,43 @@ export const useWebSocketNotifications = ({
   const getNotificationTitle = (notification: APINotification): string => {
     switch (notification.name) {
       case 'team_application_store':
-        return `${notification.details.title} 申请加入团队`;
+        return `${notification.details.title} requested to join your team`;
       case 'team_application_accept':
-        return `您的团队申请已被接受`;
+        return 'Your team application was accepted';
       case 'team_application_reject':
-        return `您的团队申请已被拒绝`;
+        return 'Your team application was rejected';
       case 'channel_message':
         // 根据类型显示不同的标题
         if (notification.details?.type === 'pm') {
-          return `新私聊消息: ${notification.details.title || '来自用户'}`;
+          return `New private message: ${notification.details.title || 'From user'}`;
         } else if (notification.details?.type === 'team') {
-          return `新团队消息: ${notification.details.title || '团队频道'}`;
+          return `New team message: ${notification.details.title || 'Team channel'}`;
         }
-        return `新私聊消息`;
+        return 'New private message';
       case 'channel_team':
-        return `新团队消息: ${notification.details?.title || '团队频道'}`;
+        return `New team message: ${notification.details?.title || 'Team channel'}`;
       case 'channel_public':
-        return `新公共频道消息: ${notification.details?.title || '公共频道'}`;
+        return `New public channel message: ${notification.details?.title || 'Public channel'}`;
       case 'channel_private':
-        return `新私有频道消息: ${notification.details?.title || '私有频道'}`;
+        return `New private channel message: ${notification.details?.title || 'Private channel'}`;
       case 'channel_multiplayer':
-        return `新多人游戏消息: ${notification.details?.title || '多人游戏'}`;
+        return `New multiplayer message: ${notification.details?.title || 'Multiplayer'}`;
       case 'channel_spectator':
-        return `新观战频道消息: ${notification.details?.title || '观战频道'}`;
+        return `New spectator message: ${notification.details?.title || 'Spectator channel'}`;
       case 'channel_temporary':
-        return `新临时频道消息: ${notification.details?.title || '临时频道'}`;
+        return `New temporary channel message: ${notification.details?.title || 'Temporary channel'}`;
       case 'channel_group':
-        return `新群组消息: ${notification.details?.title || '群组频道'}`;
+        return `New group message: ${notification.details?.title || 'Group channel'}`;
       case 'channel_system':
-        return `新系统消息: ${notification.details?.title || '系统频道'}`;
+        return `New system message: ${notification.details?.title || 'System channel'}`;
       case 'channel_announce':
-        return `新公告: ${notification.details?.title || '公告频道'}`;
+        return `New announcement: ${notification.details?.title || 'Announcements'}`;
       default:
         // 尝试从details中获取更有意义的标题
         if (notification.details?.title) {
-          return `新通知: ${notification.details.title}`;
+          return `New notification: ${notification.details.title}`;
         }
-        return '新通知';
+        return 'New notification';
     }
   };
 
