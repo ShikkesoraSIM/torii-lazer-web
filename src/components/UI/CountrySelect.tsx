@@ -111,7 +111,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
             onFocus={() => setIsOpen(true)}
             placeholder={placeholder}
             disabled={isLoading}
-            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl bg-card text-gray-900 dark:text-white shadow-sm min-h-[44px] sm:min-h-[48px] focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 border border-white/15 rounded-2xl bg-[rgba(12,16,42,0.72)] text-white shadow-[0_10px_28px_rgba(0,0,0,0.3)] backdrop-blur-xl min-h-[44px] sm:min-h-[48px] focus:ring-2 focus:ring-profile-color/60 focus:border-white/30 font-medium text-sm sm:text-base placeholder:text-white/45 disabled:opacity-50 disabled:cursor-not-allowed"
           />
           
           {/* 国旗显示 */}
@@ -130,7 +130,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/80"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -142,7 +142,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
         {value && (
           <button
             onClick={handleClear}
-            className="px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-500 text-white rounded-lg sm:rounded-xl hover:bg-gray-600 transition-colors shadow-sm font-medium text-sm sm:text-base min-h-[44px] sm:min-h-[48px] flex items-center justify-center"
+            className="px-3 sm:px-4 py-2 sm:py-2.5 bg-white/12 text-white rounded-2xl border border-white/15 hover:bg-white/18 transition-colors shadow-[0_10px_24px_rgba(0,0,0,0.26)] font-medium text-sm sm:text-base min-h-[44px] sm:min-h-[48px] flex items-center justify-center"
           >
             清除
           </button>
@@ -151,10 +151,10 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
 
       {/* 下拉列表 */}
       {isOpen && (
-        <div className={`absolute z-50 w-full bg-card border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl shadow-lg max-h-60 overflow-y-auto ${dropdownPosition === 'bottom' ? 'mt-1' : 'mb-1 bottom-full'}`}>
+        <div className={`absolute z-50 w-full bg-[rgba(11,15,38,0.94)] border border-white/15 rounded-2xl shadow-[0_16px_42px_rgba(0,0,0,0.4)] backdrop-blur-xl max-h-60 overflow-y-auto ${dropdownPosition === 'bottom' ? 'mt-1' : 'mb-1 bottom-full'}`}>
           {isLoading ? (
-            <div className="px-3 py-4 text-gray-500 dark:text-gray-400 text-center">
-              <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"></div>
+            <div className="px-3 py-4 text-white/65 text-center">
+              <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white/70"></div>
               <span className="ml-2">加载中...</span>
             </div>
           ) : filteredCountries.length > 0 ? (
@@ -162,27 +162,27 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
               <button
                 key={country.code}
                 onClick={() => handleSelectCountry(country)}
-                className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none flex items-center gap-3"
+                className="w-full px-3 py-2 text-left hover:bg-white/8 focus:bg-white/8 focus:outline-none flex items-center gap-3"
               >
                 <img
                   src={`/image/flag/${country.code.toLowerCase()}.svg`}
                   alt={country.code}
                   className="w-5 h-4 rounded-sm"
                 />
-                <span className="text-gray-900 dark:text-white">
+                <span className="text-white">
                   {country.translatedName}
                 </span>
-                <span className="text-gray-500 dark:text-gray-400 text-sm">
+                <span className="text-white/60 text-sm">
                   {country.code}
                 </span>
               </button>
             ))
           ) : countries.length === 0 && !searchTerm ? (
-            <div className="px-3 py-2 text-gray-500 dark:text-gray-400 text-center">
+            <div className="px-3 py-2 text-white/60 text-center">
               暂无可用国家
             </div>
           ) : searchTerm ? (
-            <div className="px-3 py-2 text-gray-500 dark:text-gray-400 text-center">
+            <div className="px-3 py-2 text-white/60 text-center">
               未找到匹配的国家
             </div>
           ) : null}

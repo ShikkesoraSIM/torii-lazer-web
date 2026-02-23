@@ -23,6 +23,7 @@ import HowToJoinPage from './pages/HowToJoinPage';
 import BeatmapPage from './pages/BeatmapPage';
 import BeatmapsPage from './pages/BeatmapsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import ScorePage from './pages/ScorePage';
 import BBCodeTester from './components/BBCode/BBCodeTester';
 import AdminPanel from './pages/Admin/AdminPanel';
 import AdminBeatmap from './pages/Admin/AdminBeatmap';
@@ -58,6 +59,7 @@ function App() {
             <Route path="beatmaps/:beatmapId" element={<BeatmapPage />} />
             <Route path="beatmapsets/:beatmapsetId" element={<BeatmapPage />} />
             <Route path="beatmaps" element={<BeatmapsPage />} />
+            <Route path="scores/:scoreId" element={<ScorePage />} />
             <Route path="bbcode-test" element={<BBCodeTester />} />
             <Route path="admin" element={<AdminPanel />} />
             <Route path="admin/beatmaps" element={<AdminBeatmap />} />

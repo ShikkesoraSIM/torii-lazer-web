@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { userAPI, scoreAPI } from '../../utils/api';
 import type { BestScore, GameMode, User } from '../../types';
@@ -220,6 +221,12 @@ const ScoreCard: React.FC<{
                   <span className="text-gray-500 dark:text-gray-400">
                     {endedAt}
                   </span>
+                  <Link
+                    to={`/scores/${score.id}`}
+                    className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
+                  >
+                    View score
+                  </Link>
                 </div>
               </div>
             </div>
@@ -290,6 +297,12 @@ const ScoreCard: React.FC<{
                 <span className="text-gray-500 dark:text-gray-400">
                   {endedAt}
                 </span>
+                <Link
+                  to={`/scores/${score.id}`}
+                  className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
+                >
+                  View score
+                </Link>
               </div>
 
               <div className="flex items-center justify-between">

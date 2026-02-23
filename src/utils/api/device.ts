@@ -8,8 +8,6 @@ import type {
 } from '../../types/device';
 
 export const deviceAPI = {
-  // ========== 新的 API 端点 ==========
-  
   // 获取当前用户的登录会话列表
   getUserSessions: async (): Promise<SessionsResponse> => {
     console.log('获取用户登录会话列表');
@@ -36,8 +34,6 @@ export const deviceAPI = {
     await api.delete(`/api/private/admin/trusted-devices/${deviceId}`);
   },
 
-  // ========== 旧的 API 端点（保留以兼容现有代码）==========
-  
   // 获取活跃会话
   getSessions: async (): Promise<DeviceSession[]> => {
     console.log('获取设备会话列表');

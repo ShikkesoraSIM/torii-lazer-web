@@ -116,14 +116,14 @@ const RankingTypeSelector: React.FC<RankingTypeSelectorProps> = ({
         onClick={handleToggle}
         className={`
           flex items-center justify-between w-full px-3 sm:px-4 py-2 sm:py-2.5 
-          border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl
-          bg-card text-gray-900 dark:text-white 
-          shadow-sm min-h-[44px] sm:min-h-[48px] font-medium text-sm sm:text-base
+          border border-white/15 rounded-2xl
+          bg-[rgba(12,16,42,0.72)] text-white
+          shadow-[0_10px_28px_rgba(0,0,0,0.3)] backdrop-blur-xl min-h-[44px] sm:min-h-[48px] font-medium text-sm sm:text-base
           transition-all duration-200 transform group
           ${isClosing ? 'scale-95' : ''}
           ${isOpen
             ? 'ring-2 ring-profile-color border-transparent'
-            : 'hover:border-profile-color hover:ring-1 hover:ring-profile-color/50'
+            : 'hover:border-white/30 hover:ring-1 hover:ring-profile-color/50'
           }
         `}
         aria-label="Ranking Type Selector"
@@ -145,7 +145,7 @@ const RankingTypeSelector: React.FC<RankingTypeSelectorProps> = ({
             isOpen ? 'rotate-180' : 'rotate-0'
           }`}
         >
-          <FiChevronDown size={14} className="text-gray-500 dark:text-gray-400" />
+          <FiChevronDown size={14} className="text-white/65" />
         </div>
       </button>
 
@@ -154,8 +154,8 @@ const RankingTypeSelector: React.FC<RankingTypeSelectorProps> = ({
         <div
           className={`
             absolute left-0 right-0 z-50
-            bg-card border border-gray-200 dark:border-gray-700
-            rounded-lg sm:rounded-xl shadow-lg min-w-full
+            bg-[rgba(11,15,38,0.94)] border border-white/15
+            rounded-2xl shadow-[0_16px_42px_rgba(0,0,0,0.4)] backdrop-blur-xl min-w-full
             py-1 origin-top animate-in fade-in-0 zoom-in-95 duration-100
             ${dropdownPosition === 'bottom' ? 'top-full mt-1' : 'bottom-full mb-1'}
           `}
@@ -173,20 +173,20 @@ const RankingTypeSelector: React.FC<RankingTypeSelectorProps> = ({
                   transition-colors duration-150
                   flex items-center justify-between
                   ${isSelected
-                    ? 'bg-profile-color/10 text-profile-color'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    ? 'bg-profile-color/15 text-profile-color'
+                    : 'text-white/85 hover:bg-white/8'
                   }
                 `}
                 role="option"
                 aria-selected={isSelected}
               >
                 <div className="flex items-center space-x-2">
-                  <IconComponent size={16} className={isSelected ? 'text-profile-color' : 'text-gray-500'} />
+                  <IconComponent size={16} className={isSelected ? 'text-profile-color' : 'text-white/60'} />
                   <div className="flex flex-col">
                     <span className="font-medium text-sm sm:text-base">
                       {type.label}
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-xs text-white/55">
                       {type.description}
                     </span>
                   </div>

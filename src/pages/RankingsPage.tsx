@@ -145,7 +145,7 @@ const RankingsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+    <div className="min-h-screen torii-page-stage">
       <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 sm:py-8">
         {/* Page title */}
         <div className="mb-6 sm:mb-8">
@@ -157,11 +157,8 @@ const RankingsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Control panel: mode selection + tabs and filter options */}
         <div className="flex flex-col xl:flex-row xl:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
-          
-          {/* Game mode selection */}
-          <div className="bg-card rounded-lg shadow-sm border-card p-2">
+          <div className="torii-liquid-soft rounded-2xl p-2">
             <GameModeSelector
               selectedMode={selectedMode}
               onModeChange={setSelectedMode}
@@ -170,27 +167,25 @@ const RankingsPage: React.FC = () => {
             />
           </div>
 
-          {/* Tabs and filter options */}
           <div className="flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 xl:flex-1">
-          {/* Tab switching */}
           <div className="flex-1">
-            <div className="inline-flex bg-card rounded-lg sm:rounded-xl p-1.5 sm:p-2 shadow-sm border-card min-h-[44px] sm:min-h-[48px] items-center">
+            <div className="inline-flex torii-liquid-soft rounded-2xl p-1.5 sm:p-2 min-h-[44px] sm:min-h-[48px] items-center">
               <button
                 onClick={() => setSelectedTab('users')}
-                className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-md sm:rounded-lg font-medium transition-colors text-sm sm:text-base ${
+                className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium transition-all text-sm sm:text-base ${
                   selectedTab === 'users'
-                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    ? 'bg-white/14 text-white border border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.22)]'
+                    : 'text-white/70 hover:text-white hover:bg-white/8'
                 }`}
               >
                 {t('rankings.tabs.users')}
               </button>
               <button
                 onClick={() => setSelectedTab('countries')}
-                className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-md sm:rounded-lg font-medium transition-colors text-sm sm:text-base ${
+                className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium transition-all text-sm sm:text-base ${
                   selectedTab === 'countries'
-                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    ? 'bg-white/14 text-white border border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.22)]'
+                    : 'text-white/70 hover:text-white hover:bg-white/8'
                 }`}
               >
                 {t('rankings.tabs.countries')}
@@ -198,7 +193,6 @@ const RankingsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Filter options for user rankings */}
           {selectedTab === 'users' && (
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <div className="w-full sm:w-48">
@@ -222,8 +216,7 @@ const RankingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Rankings content */}
-        <div className="-mx-4 sm:mx-0 sm:bg-card sm:rounded-xl sm:shadow-sm sm:border-card sm:p-6">
+        <div className="torii-liquid rounded-3xl p-3 sm:p-6">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 sm:px-0">
               <LoadingSpinner size="lg" className="mb-4" />

@@ -23,7 +23,6 @@ interface UseWebSocketNotificationsProps {
   onNewNotification?: (notification: APINotification) => void;
 }
 
-// ---------------- 全局单例状态，防止重复建立多个 WebSocket 连接 ----------------
 let globalWsRef: WebSocket | null = null; // 共享连接
 let globalConnecting = false; // 连接中标记
 let globalIsConnected = false; // 全局连接状态

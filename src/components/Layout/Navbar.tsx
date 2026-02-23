@@ -28,10 +28,6 @@ import UserDropdown from '../UI/UserDropdown';
 import Avatar from '../UI/Avatar';
 import LanguageSelector from '../UI/LanguageSelector';
 import type { NavItem as NavItemType } from '../../types';
-
-// ------------------------------
-// Nav item
-// ------------------------------
 const NavItem = memo<{ item: NavItemType }>(({ item }) => {
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
@@ -101,10 +97,6 @@ const NavItem = memo<{ item: NavItemType }>(({ item }) => {
   );
 });
 NavItem.displayName = 'NavItem';
-
-// ------------------------------
-// Language menu section (kept exactly)
-// ------------------------------
 interface LanguageConfig {
   code: string;
   name: string;
@@ -180,10 +172,6 @@ const LanguageMenuSection = memo<{ i18n: any; t: any }>(({ i18n, t }) => {
   );
 });
 LanguageMenuSection.displayName = 'LanguageMenuSection';
-
-// ------------------------------
-// Mobile dropdown (kept, only reskinned)
-// ------------------------------
 const MobileMenuDropdown = memo<{
   items: NavItemType[];
   isAuthenticated: boolean;
@@ -343,10 +331,6 @@ const MobileMenuDropdown = memo<{
   );
 });
 MobileMenuDropdown.displayName = 'MobileMenuDropdown';
-
-// ------------------------------
-// Brand mark (NEW) â€” this is the "point B" glow wrapper
-// ------------------------------
 const BrandMark = memo<{ size?: number }>(({ size = 36 }) => {
   const inner = Math.max(18, Math.round(size * 0.78));
 
@@ -372,10 +356,6 @@ const BrandMark = memo<{ size?: number }>(({ size = 36 }) => {
   );
 });
 BrandMark.displayName = 'BrandMark';
-
-// ------------------------------
-// Main Navbar
-// ------------------------------
 const Navbar: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
@@ -391,7 +371,6 @@ const Navbar: React.FC = () => {
     isConnected = ctx.isConnected;
     chatConnected = ctx.chatConnected;
   } catch {
-    // ok if Provider not mounted
   }
 
   const isFullyConnected = isConnected && chatConnected;
@@ -423,19 +402,15 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* Desktop */}
       <header className="hidden md:flex fixed top-4 left-0 right-0 z-50 justify-center px-4">
         <div className="w-full max-w-7xl">
           <div
             className={[
-              'rounded-full border border-white/10',
-              'bg-[rgba(10,10,25,0.70)] backdrop-blur-xl',
-              'shadow-[0_8px_32px_rgba(0,0,0,0.30)]',
+              'rounded-full torii-nav-liquid',
               'px-5 py-3',
             ].join(' ')}
           >
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-              {/* Left brand */}
               <div className="flex items-center justify-start">
                 <Link to="/" className="flex items-center gap-3">
                   <BrandMark size={36} />
@@ -447,7 +422,6 @@ const Navbar: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Center nav */}
               <div className="flex items-center justify-center">
                 <div className="flex items-center gap-1">
                   {filteredNavItems.map((item) => (
@@ -456,7 +430,6 @@ const Navbar: React.FC = () => {
                 </div>
               </div>
 
-              {/* Right actions */}
               <div className="flex items-center justify-end gap-3">
                 {!isAuthenticated && <LanguageSelector variant="desktop" />}
 
@@ -510,9 +483,8 @@ const Navbar: React.FC = () => {
         </div>
       </header>
 
-      {/* Mobile */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-50 px-3 pt-3">
-        <div className="rounded-3xl border border-white/10 bg-[rgba(10,10,25,0.78)] backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+        <div className="rounded-3xl torii-nav-liquid">
           <div className="flex items-center justify-between px-4 py-3">
             <Link to="/" className="flex items-center gap-3">
               <BrandMark size={36} />
@@ -566,4 +538,5 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+
 

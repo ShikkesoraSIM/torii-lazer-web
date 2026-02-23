@@ -29,7 +29,7 @@ const UserRankingsList: React.FC<Props> = ({ rankings, currentPage, selectedMode
   const startRank = (currentPage - 1) * 50 + 1;
 
   return (
-    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+    <div className="space-y-3">
       {rankings.ranking.map((ranking: UserRanking, index: number) => (
         <UserRankingCard
           key={ranking.user.id}

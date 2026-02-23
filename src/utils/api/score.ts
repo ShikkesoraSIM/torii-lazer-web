@@ -8,6 +8,11 @@ export const scoreAPI = {
     return response.data;
   },
 
+  getScoreById: async (scoreId: number) => {
+    const response = await api.get(`/api/v2/scores/${scoreId}`);
+    return response.data;
+  },
+
   // 置顶成绩
   pinScore: async (scoreId: number) => {
     console.log('置顶成绩:', scoreId);

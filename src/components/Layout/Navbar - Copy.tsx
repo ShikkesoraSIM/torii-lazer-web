@@ -26,9 +26,6 @@ import Avatar from '../UI/Avatar';
 import LanguageSelector from '../UI/LanguageSelector';
 import type { NavItem as NavItemType } from '../../types';
 
-// ------------------------------
-// Nav item (kept exactly from yours)
-// ------------------------------
 const NavItem = memo<{ item: NavItemType }>(({ item }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [forceShowText, setForceShowText] = useState(false);
@@ -143,9 +140,6 @@ const NavItem = memo<{ item: NavItemType }>(({ item }) => {
 });
 NavItem.displayName = 'NavItem';
 
-// ------------------------------
-// Language menu section (kept exactly)
-// ------------------------------
 interface LanguageConfig {
   code: string;
   name: string;
@@ -222,9 +216,6 @@ const LanguageMenuSection = memo<{ i18n: any; t: any }>(({ i18n, t }) => {
 });
 LanguageMenuSection.displayName = 'LanguageMenuSection';
 
-// ------------------------------
-// Mobile dropdown (kept, only reskinned)
-// ------------------------------
 const MobileMenuDropdown = memo<{
   items: NavItemType[];
   isAuthenticated: boolean;
@@ -385,9 +376,6 @@ const MobileMenuDropdown = memo<{
 });
 MobileMenuDropdown.displayName = 'MobileMenuDropdown';
 
-// ------------------------------
-// Main Navbar
-// ------------------------------
 const Navbar: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
@@ -402,9 +390,7 @@ const Navbar: React.FC = () => {
     unreadCount = ctx.unreadCount;
     isConnected = ctx.isConnected;
     chatConnected = ctx.chatConnected;
-  } catch {
-    // ok if Provider not mounted
-  }
+  } catch {}
 
   const isFullyConnected = isConnected && chatConnected;
 
@@ -429,7 +415,6 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* Desktop - Shikkesora pill */}
       <header className="hidden md:flex fixed top-4 left-0 right-0 z-50 justify-center px-4">
         <div className="w-full max-w-7xl">
           <div
@@ -441,7 +426,6 @@ const Navbar: React.FC = () => {
             ].join(' ')}
           >
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-              {/* Left brand */}
               <div className="flex items-center justify-start">
                 <Link to="/" className="flex items-center gap-3">
                   <img
@@ -458,7 +442,6 @@ const Navbar: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Center nav */}
               <div className="flex items-center justify-center">
                 <div className="flex items-center gap-1">
                   {filteredNavItems.map((item) => (
@@ -467,7 +450,6 @@ const Navbar: React.FC = () => {
                 </div>
               </div>
 
-              {/* Right actions */}
               <div className="flex items-center justify-end gap-3">
                 {!isAuthenticated && <LanguageSelector variant="desktop" />}
 
@@ -533,7 +515,6 @@ const Navbar: React.FC = () => {
         </div>
       </header>
 
-      {/* Mobile - glass bar */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-50 px-3 pt-3">
         <div className="rounded-3xl border border-white/10 bg-[rgba(10,10,25,0.78)] backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
           <div className="flex items-center justify-between px-4 py-3">

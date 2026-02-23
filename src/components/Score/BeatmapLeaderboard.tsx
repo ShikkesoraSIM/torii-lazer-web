@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router-dom';
 import { scoreAPI } from '../../utils/api';
 import type { Beatmap } from '../../types';
 import type { BestScore } from '../../types/scores';
@@ -12,6 +13,7 @@ interface BeatmapLeaderboardProps {
 
 const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beatmap, limit = 50 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [scores, setScores] = useState<BestScore[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,8 @@ const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beat
       default: return '#999999';
     }
   };
+
+  const mode = beatmap?.mode || 'osu';
 
   if (loading) {
     return (
@@ -111,18 +115,40 @@ const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beat
           {scores.map((score, index) => (
             <tr
               key={score.id}
-              className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
+              onClick={() => navigate(`/scores/${score.id}`)}
+              onKeyDown={(event) => {
+                if (event.target !== event.currentTarget) return;
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  navigate(`/scores/${score.id}`);
+                }
+              }}
+              role="button"
+              tabIndex={0}
             >
               <td className="px-4 py-3 text-sm font-bold text-osu-pink">{index + 1}</td>
               <td className="px-4 py-3 text-sm">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={score.user.avatar_url}
-                    alt={score.user.username}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
+                  <Link
+                    to={`/users/${score.user.id}?mode=${mode}`}
+                    onClick={(event) => event.stopPropagation()}
+                    className="flex-shrink-0"
+                  >
+                    <img
+                      src={score.user.avatar_url}
+                      alt={score.user.username}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  </Link>
                   <div>
-                    <div className="font-semibold text-slate-900 dark:text-white">{score.user.username}</div>
+                    <Link
+                      to={`/users/${score.user.id}?mode=${mode}`}
+                      onClick={(event) => event.stopPropagation()}
+                      className="font-semibold text-slate-900 dark:text-white hover:text-osu-pink transition-colors"
+                    >
+                      {score.user.username}
+                    </Link>
                     <div className="text-xs text-slate-500 dark:text-slate-400">{score.user.country_code}</div>
                   </div>
                 </div>

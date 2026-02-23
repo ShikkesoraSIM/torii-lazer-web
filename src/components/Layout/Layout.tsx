@@ -9,21 +9,15 @@ const Layout: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();
   
-  // 检查是否在主页
-  const isHomePage = location.pathname === '/';
   // 登录/注册/找回密码页面不需要顶部内边距
   const noTopPaddingRoutes = ['/', '/login', '/register', '/password-reset'];
   const shouldApplyTopPadding = !noTopPaddingRoutes.includes(location.pathname);
 
   return (
     <NotificationProvider isAuthenticated={isAuthenticated} user={user}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900" style={{ 
-        background: 'var(--bg-primary)'
-      }}>
+      <div className="torii-app-shell min-h-screen bg-gray-50 dark:bg-gray-900">
         <Navbar />
-        <main className={shouldApplyTopPadding ? 'pt-[56px] md:pt-20' : ''} style={{
-          background: isHomePage ? 'transparent' : 'var(--bg-primary)'
-        }}>
+        <main className={`torii-page-stage ${shouldApplyTopPadding ? 'pt-[56px] md:pt-20' : ''}`}>
           <Outlet />
         </main>
         <Toaster

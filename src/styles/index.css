@@ -1033,3 +1033,206 @@ span.imagemap__link:hover {
   border-color: transparent;
   color: transparent;
 }
+
+:root {
+  --torii-bg-base: #030014;
+  --torii-blob-a: rgba(176, 69, 255, 0.2);
+  --torii-blob-b: rgba(66, 163, 255, 0.16);
+  --torii-blob-c: rgba(255, 91, 189, 0.14);
+  --torii-surface: linear-gradient(165deg, rgba(22, 26, 62, 0.78), rgba(12, 16, 42, 0.64));
+  --torii-surface-soft: linear-gradient(165deg, rgba(18, 22, 53, 0.62), rgba(10, 13, 35, 0.52));
+  --torii-nav-surface: linear-gradient(180deg, rgba(17, 20, 52, 0.9), rgba(9, 12, 34, 0.78));
+  --torii-border: rgba(255, 255, 255, 0.16);
+  --torii-border-soft: rgba(255, 255, 255, 0.08);
+  --torii-glow-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --torii-panel-bg: linear-gradient(165deg, rgba(20, 24, 60, 0.76), rgba(12, 16, 40, 0.62));
+  --torii-panel-soft-bg: linear-gradient(165deg, rgba(18, 22, 52, 0.58), rgba(11, 14, 34, 0.48));
+  --torii-panel-border: rgba(255, 255, 255, 0.12);
+  --torii-panel-border-strong: rgba(255, 255, 255, 0.18);
+  --torii-panel-shadow: 0 16px 42px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.dark {
+  --torii-panel-bg: linear-gradient(165deg, rgba(17, 20, 52, 0.8), rgba(10, 13, 34, 0.66));
+  --torii-panel-soft-bg: linear-gradient(165deg, rgba(16, 19, 46, 0.64), rgba(9, 12, 30, 0.54));
+}
+
+.torii-app-shell {
+  position: relative;
+  isolation: isolate;
+  background: var(--torii-bg-base);
+}
+
+.torii-app-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(48rem 48rem at -8% -14%, var(--torii-blob-a), transparent 70%),
+    radial-gradient(52rem 52rem at 108% 18%, var(--torii-blob-b), transparent 72%),
+    radial-gradient(44rem 44rem at 38% 108%, var(--torii-blob-c), transparent 70%),
+    linear-gradient(180deg, #030014 0%, #050a24 45%, #04081d 100%);
+}
+
+.torii-app-shell::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(3, 0, 20, 0.88), rgba(3, 0, 20, 0.45) 16rem, rgba(3, 0, 20, 0.2));
+}
+
+.torii-page-stage {
+  position: relative;
+  z-index: 1;
+}
+
+.torii-liquid {
+  background: var(--torii-surface) !important;
+  border: 1px solid var(--torii-border) !important;
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+  box-shadow: var(--torii-glow-shadow);
+}
+
+.torii-liquid-soft {
+  background: var(--torii-surface-soft) !important;
+  border: 1px solid var(--torii-border-soft) !important;
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+}
+
+.torii-nav-liquid {
+  background: var(--torii-nav-surface);
+  border: 1px solid var(--torii-border-soft);
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.dark .torii-app-shell [class~='dark:bg-slate-800'],
+.dark .torii-app-shell [class~='dark:bg-slate-900'],
+.dark .torii-app-shell [class~='dark:bg-slate-800/50'],
+.dark .torii-app-shell [class~='dark:bg-slate-700/50'] {
+  background: var(--torii-surface);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+}
+
+.dark .torii-app-shell [class~='dark:border-slate-700'],
+.dark .torii-app-shell [class~='dark:border-slate-600'],
+.dark .torii-app-shell [class~='dark:border-slate-700/50'] {
+  border-color: var(--torii-border-soft) !important;
+}
+
+.torii-page-stage > .min-h-screen,
+.torii-page-stage > .h-screen {
+  background: transparent !important;
+}
+
+.torii-page-stage > [class*='bg-gray-50 dark:bg-gray-900'],
+.torii-page-stage > [class*='bg-slate-50 dark:bg-slate-900'],
+.torii-page-stage > [class*='bg-[#030014]'] {
+  background: transparent !important;
+}
+
+.torii-app-shell .bg-card,
+.torii-app-shell .card,
+.torii-app-shell .card-base,
+.torii-app-shell .card-standard,
+.torii-app-shell .modal-card,
+.torii-app-shell .float-panel {
+  background: var(--torii-panel-bg) !important;
+  border-color: var(--torii-panel-border) !important;
+  box-shadow: var(--torii-panel-shadow);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+}
+
+.torii-app-shell [class*='bg-white dark:bg-slate-800'],
+.torii-app-shell [class*='bg-white dark:bg-gray-800'],
+.torii-app-shell [class*='bg-white/80 dark:bg-gray-800/80'],
+.torii-app-shell [class*='sm:bg-white sm:dark:bg-gray-800'],
+.torii-app-shell [class*='bg-gray-50 dark:bg-slate-700/50'],
+.torii-app-shell [class*='bg-gray-50 dark:bg-gray-800/50'],
+.torii-app-shell [class*='bg-slate-50 dark:bg-slate-800/50'],
+.torii-app-shell [class*='bg-slate-50 dark:bg-slate-900/50'] {
+  background: var(--torii-panel-bg) !important;
+  backdrop-filter: blur(14px) saturate(122%);
+  -webkit-backdrop-filter: blur(14px) saturate(122%);
+}
+
+.torii-app-shell [class*='bg-gray-100 dark:bg-gray-800'],
+.torii-app-shell [class*='bg-gray-100 dark:bg-gray-700'],
+.torii-app-shell [class*='bg-slate-100 dark:bg-slate-700'],
+.torii-app-shell [class*='dark:bg-slate-700/50'],
+.torii-app-shell [class*='dark:bg-gray-800/50'],
+.torii-app-shell [class*='dark:bg-slate-900/50'] {
+  background: var(--torii-panel-soft-bg) !important;
+}
+
+.torii-app-shell [class*='border-gray-200 dark:border-gray-700'],
+.torii-app-shell [class*='border-gray-300 dark:border-gray-600'],
+.torii-app-shell [class*='border-slate-200 dark:border-slate-700'],
+.torii-app-shell [class*='border-gray-200/50 dark:border-gray-700/50'],
+.torii-app-shell [class*='border-card'],
+.torii-app-shell [class*='dark:border-slate-700'],
+.torii-app-shell [class*='dark:border-gray-700'] {
+  border-color: var(--torii-panel-border) !important;
+}
+
+.torii-app-shell [class*='rounded-2xl shadow-xl'],
+.torii-app-shell [class*='rounded-xl shadow-2xl'],
+.torii-app-shell [class*='rounded-3xl shadow-xl'] {
+  border-color: var(--torii-panel-border-strong) !important;
+}
+
+html,
+body,
+main,
+section,
+article,
+div,
+p,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+li,
+td,
+th,
+code,
+pre {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+button,
+a,
+img,
+svg,
+video,
+[role='button'],
+input[type='checkbox'],
+input[type='radio'],
+input[type='range'] {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+input,
+textarea {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  user-select: text !important;
+}
