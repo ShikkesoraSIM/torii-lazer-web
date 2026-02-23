@@ -35,6 +35,8 @@ const shouldDebugCoverMedia = (): boolean => {
   return window.localStorage.getItem(MEDIA_DEBUG_FLAG) === '1';
 };
 
+export const isCoverDebugEnabled = (): boolean => shouldDebugCoverMedia();
+
 const debugCoverMedia = (
   message: string,
   payload: Record<string, unknown>

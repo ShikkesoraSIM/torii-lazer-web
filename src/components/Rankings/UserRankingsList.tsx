@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FiAward } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import UserRankingCard from './UserRankingCard';
-import type { TopUsersResponse, GameMode, RankingType, UserRanking } from '../../types';
+import { apiCache } from '../../utils/apiCache';
+import { isCoverDebugEnabled, pickUserCoverCandidates } from '../../utils/profileMedia';
+import type { TopUsersResponse, GameMode, RankingType, UserRanking, User } from '../../types';
 
 interface Props {
   rankings: TopUsersResponse | null;
@@ -13,7 +15,56 @@ interface Props {
 
 const UserRankingsList: React.FC<Props> = ({ rankings, currentPage, selectedMode, rankingType }) => {
   const { t } = useTranslation();
-  
+  const [hydratedUsers, setHydratedUsers] = useState<Map<number, User>>(new Map());
+
+  useEffect(() => {
+    let cancelled = false;
+    setHydratedUsers(new Map());
+
+    if (!rankings || !rankings.ranking.length) return;
+
+    const userIdsToHydrate = rankings.ranking
+      .filter((entry) => pickUserCoverCandidates(entry.user).length === 0)
+      .map((entry) => entry.user.id);
+
+    if (isCoverDebugEnabled()) {
+      console.info('[cover] rankings hydrate check', {
+        total: rankings.ranking.length,
+        missingCandidateCount: userIdsToHydrate.length,
+      });
+    }
+
+    if (userIdsToHydrate.length === 0) return;
+
+    apiCache
+      .getUsers(userIdsToHydrate)
+      .then((usersMap) => {
+        if (cancelled) return;
+        const next = new Map<number, User>();
+        usersMap.forEach((user, userId) => {
+          if (pickUserCoverCandidates(user).length > 0) {
+            next.set(userId, user);
+          }
+        });
+        setHydratedUsers(next);
+
+        if (isCoverDebugEnabled()) {
+          console.info('[cover] rankings hydrate result', {
+            requested: userIdsToHydrate.length,
+            resolvedWithCover: next.size,
+          });
+        }
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.warn('[cover] rankings hydrate failed', error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [rankings]);
+
   if (!rankings || !rankings.ranking.length) {
     return (
       <div className="text-center py-20 px-4 sm:px-0">
@@ -27,10 +78,25 @@ const UserRankingsList: React.FC<Props> = ({ rankings, currentPage, selectedMode
   }
 
   const startRank = (currentPage - 1) * 50 + 1;
+  const visibleRankings = useMemo(
+    () =>
+      rankings.ranking.map((ranking) => {
+        const hydrated = hydratedUsers.get(ranking.user.id);
+        if (!hydrated) return ranking;
+        return {
+          ...ranking,
+          user: {
+            ...ranking.user,
+            ...hydrated,
+          },
+        };
+      }),
+    [hydratedUsers, rankings.ranking]
+  );
 
   return (
     <div className="space-y-3">
-      {rankings.ranking.map((ranking: UserRanking, index: number) => (
+      {visibleRankings.map((ranking: UserRanking, index: number) => (
         <UserRankingCard
           key={ranking.user.id}
           ranking={ranking}
