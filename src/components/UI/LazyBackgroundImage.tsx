@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 interface LazyBackgroundImageProps {
   src?: string;
+  sources?: string[];
   fallback?: string;
   className?: string;
   children: React.ReactNode;
@@ -9,15 +10,29 @@ interface LazyBackgroundImageProps {
 
 const LazyBackgroundImage: React.FC<LazyBackgroundImageProps> = ({
   src,
+  sources,
   fallback,
   className = '',
-  children
+  children,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [showBackground, setShowBackground] = useState(false);
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  const [resolvedSrc, setResolvedSrc] = useState<string | undefined>(undefined);
   const elementRef = useRef<HTMLDivElement>(null);
+
+  const sourceCandidates = useMemo(() => {
+    const list = sources && sources.length > 0 ? sources : src ? [src] : [];
+    return Array.from(
+      new Set(
+        list
+          .map((candidate) => candidate?.trim())
+          .filter((candidate): candidate is string => Boolean(candidate))
+      )
+    );
+  }, [sources, src]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -29,7 +44,7 @@ const LazyBackgroundImage: React.FC<LazyBackgroundImageProps> = ({
       },
       {
         threshold: 0.1,
-        rootMargin: '50px'
+        rootMargin: '50px',
       }
     );
 
@@ -41,31 +56,46 @@ const LazyBackgroundImage: React.FC<LazyBackgroundImageProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!isInView || !src) return;
+    setCandidateIndex(0);
+    setResolvedSrc(undefined);
+    setIsLoaded(false);
+    setHasError(false);
+    setShowBackground(false);
+  }, [sourceCandidates]);
 
-    // 延迟加载背景图片，确保用户数据先显示
+  useEffect(() => {
+    if (!isInView || sourceCandidates.length === 0) return;
+    const activeSrc = sourceCandidates[candidateIndex];
+    if (!activeSrc) return;
+
     const timer = setTimeout(() => {
       const img = new Image();
       img.onload = () => {
+        setResolvedSrc(activeSrc);
         setIsLoaded(true);
         setHasError(false);
-        // 再延迟一点显示背景，让用户数据先渲染
         setTimeout(() => setShowBackground(true), 50);
       };
       img.onerror = () => {
+        const hasNextCandidate = candidateIndex < sourceCandidates.length - 1;
+        if (hasNextCandidate) {
+          setCandidateIndex((previous) => previous + 1);
+          return;
+        }
+        setResolvedSrc(undefined);
         setHasError(true);
         setIsLoaded(false);
       };
-      img.src = src;
-    }, 300); // 延迟300ms开始加载背景，确保用户数据先显示
+      img.src = activeSrc;
+    }, 300);
 
     return () => clearTimeout(timer);
-  }, [isInView, src]);
+  }, [candidateIndex, isInView, sourceCandidates]);
 
   const backgroundImage = (() => {
-    if (!showBackground || !src) return 'none';
+    if (!showBackground) return 'none';
     if (hasError && fallback) return `url(${fallback})`;
-    if (isLoaded) return `url(${src})`;
+    if (isLoaded && resolvedSrc) return `url(${resolvedSrc})`;
     return 'none';
   })();
 
@@ -73,7 +103,6 @@ const LazyBackgroundImage: React.FC<LazyBackgroundImageProps> = ({
 
   return (
     <div ref={elementRef} className={`relative ${className}`}>
-      {/* 背景图片层 - 只有背景渐变 */}
       <div
         className="absolute inset-0"
         style={{
@@ -82,14 +111,11 @@ const LazyBackgroundImage: React.FC<LazyBackgroundImageProps> = ({
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           opacity: backgroundOpacity,
-          transition: 'opacity 0.5s ease-in-out'
+          transition: 'opacity 0.5s ease-in-out',
         }}
       />
-      
-      {/* 内容层 - 立即显示 */}
-      <div className="relative">
-        {children}
-      </div>
+
+      <div className="relative">{children}</div>
     </div>
   );
 };

@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { scoreAPI } from '../../utils/api';
 import type { Beatmap } from '../../types';
 import type { BestScore } from '../../types/scores';
+import LazyBackgroundImage from '../UI/LazyBackgroundImage';
+import { pickUserCoverCandidates } from '../../utils/profileMedia';
 
 interface BeatmapLeaderboardProps {
   beatmapId: number;
@@ -54,6 +56,59 @@ const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beat
   };
 
   const mode = beatmap?.mode || 'osu';
+
+  const renderPlayerCell = (score: BestScore) => {
+    const profilePath = `/users/${score.user.id}?mode=${mode}`;
+    const coverCandidates = pickUserCoverCandidates(score.user);
+
+    const content = (
+      <div className="flex items-center gap-3">
+        <Link
+          to={profilePath}
+          onClick={(event) => event.stopPropagation()}
+          className="flex-shrink-0"
+        >
+          <img
+            src={score.user.avatar_url || '/default.jpg'}
+            alt={score.user.username}
+            className="w-8 h-8 rounded-full object-cover ring-1 ring-white/30"
+            onError={(e) => {
+              e.currentTarget.src = '/default.jpg';
+            }}
+          />
+        </Link>
+        <div className="min-w-0">
+          <Link
+            to={profilePath}
+            onClick={(event) => event.stopPropagation()}
+            className="font-semibold text-slate-900 dark:text-white hover:text-osu-pink transition-colors truncate block"
+          >
+            {score.user.username}
+          </Link>
+          <div className="text-xs text-slate-500 dark:text-slate-400">{score.user.country_code}</div>
+        </div>
+      </div>
+    );
+
+    if (coverCandidates.length === 0) {
+      return (
+        <div className="rounded-lg border border-slate-200/80 dark:border-white/10 px-3 py-2 bg-white/70 dark:bg-slate-900/45">
+          {content}
+        </div>
+      );
+    }
+
+    return (
+      <LazyBackgroundImage
+        sources={coverCandidates}
+        className="rounded-lg border border-slate-200/80 dark:border-white/10 overflow-hidden bg-slate-100 dark:bg-slate-900/45"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-white/88 via-white/82 to-white/70 dark:from-[#070b23ea] dark:via-[#070b23d9] dark:to-[#070b23ba]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-white/5" />
+        <div className="relative px-3 py-2">{content}</div>
+      </LazyBackgroundImage>
+    );
+  };
 
   if (loading) {
     return (
@@ -129,32 +184,7 @@ const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beat
             >
               <td className="px-4 py-3 text-sm font-bold text-osu-pink">{index + 1}</td>
               <td className="px-4 py-3 text-sm">
-                <div className="flex items-center gap-3">
-                  <Link
-                    to={`/users/${score.user.id}?mode=${mode}`}
-                    onClick={(event) => event.stopPropagation()}
-                    className="flex-shrink-0"
-                  >
-                    <img
-                      src={score.user.avatar_url || '/default.jpg'}
-                      alt={score.user.username}
-                      className="w-8 h-8 rounded-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = '/default.jpg';
-                      }}
-                    />
-                  </Link>
-                  <div>
-                    <Link
-                      to={`/users/${score.user.id}?mode=${mode}`}
-                      onClick={(event) => event.stopPropagation()}
-                      className="font-semibold text-slate-900 dark:text-white hover:text-osu-pink transition-colors"
-                    >
-                      {score.user.username}
-                    </Link>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">{score.user.country_code}</div>
-                  </div>
-                </div>
+                {renderPlayerCell(score)}
               </td>
               <td className="px-4 py-3 text-center">
                 <span

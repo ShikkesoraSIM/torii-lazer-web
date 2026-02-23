@@ -123,6 +123,13 @@ export interface BestScore {
   };
   user: {
     avatar_url: string;
+    avatar_nsfw?: boolean;
+    cover_nsfw?: boolean;
+    cover_url?: string;
+    cover?: {
+      url?: string;
+      custom_url?: string;
+    };
     country_code: string;
     default_group: string;
     id: number;

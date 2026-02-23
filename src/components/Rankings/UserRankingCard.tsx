@@ -8,7 +8,7 @@ import LazyAvatar from '../UI/LazyAvatar';
 import LazyFlag from '../UI/LazyFlag';
 import { GAME_MODE_COLORS } from '../../types';
 import type { UserRanking, GameMode, RankingType } from '../../types';
-import { pickBestUserCoverUrl } from '../../utils/profileMedia';
+import { pickUserCoverCandidates } from '../../utils/profileMedia';
 
 interface Props {
   ranking: UserRanking;
@@ -21,7 +21,7 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
   const { t } = useTranslation();
   const isTopThree = rank <= 3;
 
-  const coverUrl = pickBestUserCoverUrl(ranking.user);
+  const coverCandidates = pickUserCoverCandidates(ranking.user);
 
   const profilePath = `/users/${ranking.user.id}?mode=${selectedMode}`;
 
@@ -120,7 +120,7 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
     </div>
   );
 
-  if (!coverUrl) {
+  if (coverCandidates.length === 0) {
     return (
       <div className={`${cardBaseClass} bg-[linear-gradient(140deg,rgba(19,24,58,0.9),rgba(11,15,37,0.84))]`}>
         <div className="absolute inset-0 bg-gradient-to-r from-white/6 via-transparent to-transparent opacity-70" />
@@ -133,7 +133,10 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
   }
 
   return (
-    <LazyBackgroundImage src={coverUrl} className={`${cardBaseClass} bg-[#090d25]`}>
+    <LazyBackgroundImage
+      sources={coverCandidates}
+      className={`${cardBaseClass} bg-[#090d25]`}
+    >
       <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f2edd] via-[#0a0f2eb8] to-[#090d25e6] group-hover:from-[#080c24e6] group-hover:via-[#080c24c9] group-hover:to-[#080c24ee] transition-all duration-300" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-white/5" />
       {isTopThree && (

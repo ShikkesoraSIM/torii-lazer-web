@@ -1,9 +1,15 @@
-import type { User } from '../types';
-
 const DEFAULT_USER_COVER_MARKERS = [
   '/user-profile-covers/default.jpeg',
   '/user-profile-covers/default.jpg',
 ];
+
+type UserWithCover = {
+  cover?: {
+    url?: string | null;
+    custom_url?: string | null;
+  } | null;
+  cover_url?: string | null;
+};
 
 export const isDefaultUserCoverUrl = (value?: string | null): boolean => {
   if (!value) return true;
@@ -12,8 +18,35 @@ export const isDefaultUserCoverUrl = (value?: string | null): boolean => {
   return DEFAULT_USER_COVER_MARKERS.some((marker) => normalized.includes(marker));
 };
 
-export const pickBestUserCoverUrl = (user?: Partial<User> | null): string | undefined => {
-  if (!user) return undefined;
+export const normalizeMediaUrl = (value?: string | null): string | undefined => {
+  if (!value) return undefined;
+  const normalized = value.trim();
+  if (!normalized || normalized === 'null' || normalized === 'undefined') return undefined;
+
+  if (normalized.startsWith('/')) {
+    return normalized;
+  }
+
+  try {
+    const parsed = new URL(normalized);
+    const shouldUpgradeToHttps =
+      typeof window !== 'undefined' &&
+      window.location.protocol === 'https:' &&
+      parsed.protocol === 'http:';
+
+    if (shouldUpgradeToHttps) {
+      parsed.protocol = 'https:';
+      return parsed.toString();
+    }
+
+    return parsed.toString();
+  } catch {
+    return normalized;
+  }
+};
+
+export const pickUserCoverCandidates = (user?: UserWithCover | null): string[] => {
+  if (!user) return [];
 
   const candidates = [
     user.cover_url,
@@ -21,14 +54,18 @@ export const pickBestUserCoverUrl = (user?: Partial<User> | null): string | unde
     user.cover?.custom_url,
   ];
 
+  const uniqueCandidates = new Set<string>();
   for (const candidate of candidates) {
-    if (!candidate) continue;
-    const normalized = candidate.trim();
+    const normalized = normalizeMediaUrl(candidate);
     if (!normalized) continue;
     if (isDefaultUserCoverUrl(normalized)) continue;
-    return normalized;
+    uniqueCandidates.add(normalized);
   }
 
-  return undefined;
+  return Array.from(uniqueCandidates);
 };
 
+export const pickBestUserCoverUrl = (user?: UserWithCover | null): string | undefined => {
+  const candidates = pickUserCoverCandidates(user);
+  return candidates[0];
+};
