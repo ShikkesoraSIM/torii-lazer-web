@@ -123,6 +123,7 @@ const UserMappedBeatmaps: React.FC<UserMappedBeatmapsProps> = ({ userId, user, m
             const beatmapId = set.beatmaps?.[0]?.id;
             const href = beatmapId ? `/beatmapsets/${set.id}#osu/${beatmapId}` : `/beatmapsets/${set.id}`;
             const cover = set.covers?.card || set.covers?.cover || set.covers?.list || set.covers?.slimcover;
+            const displayStatus = set.status || set.beatmap_status;
 
             return (
               <a
@@ -139,8 +140,8 @@ const UserMappedBeatmaps: React.FC<UserMappedBeatmapsProps> = ({ userId, user, m
                   <div className="text-sm font-semibold text-gray-100 truncate">{set.title}</div>
                   <div className="text-xs text-gray-400 truncate">{set.artist}</div>
                 </div>
-                <span className={`text-xs px-2 py-1 rounded border ${statusChipClass(set.beatmap_status || set.status)}`}>
-                  {statusLabel(set.beatmap_status || set.status)}
+                <span className={`text-xs px-2 py-1 rounded border ${statusChipClass(displayStatus)}`}>
+                  {statusLabel(displayStatus)}
                 </span>
               </a>
             );
