@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import GameModeSelector from '../components/UI/GameModeSelector';
 import LazyBackgroundImage from '../components/UI/LazyBackgroundImage';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
@@ -23,10 +23,12 @@ const statusOptions = ['any', 'ranked', 'approved', 'qualified', 'loved', 'pendi
 const BeatmapsPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { profileColor } = useProfileColor();
+  const queryFromUrl = (searchParams.get('q') || '').trim();
 
   const [selectedMode, setSelectedMode] = useState<GameMode>('osu');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(queryFromUrl);
   const [status, setStatus] = useState<string>('any');
   const [isLocalOnly, setIsLocalOnly] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -34,6 +36,10 @@ const BeatmapsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    setSearchQuery((prev) => (prev === queryFromUrl ? prev : queryFromUrl));
+  }, [queryFromUrl]);
 
   const fetchBeatmaps = useCallback(async (q: string, mode: GameMode, s: string, local: boolean) => {
     if (abortControllerRef.current) {

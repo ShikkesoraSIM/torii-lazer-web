@@ -15,3 +15,4 @@ export { preferencesAPI } from './preferences';
 export { scoreAPI } from './score';
 export { oauthAPI } from './oauth';
 export { adminAPI } from './admin';
+export { searchAPI } from './search';

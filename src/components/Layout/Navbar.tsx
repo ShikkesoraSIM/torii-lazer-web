@@ -5,6 +5,7 @@ import {
   FiSun,
   FiMoon,
   FiBell,
+  FiSearch,
   FiMenu,
   FiX,
   FiSettings,
@@ -27,6 +28,7 @@ import { useNotificationContext } from '../../contexts/NotificationContext';
 import UserDropdown from '../UI/UserDropdown';
 import Avatar from '../UI/Avatar';
 import LanguageSelector from '../UI/LanguageSelector';
+import NavbarSearchOverlay from './NavbarSearchOverlay';
 import type { NavItem as NavItemType } from '../../types';
 const NavItem = memo<{ item: NavItemType }>(({ item }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -360,6 +362,7 @@ const Navbar: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
   const { t } = useTranslation();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   let unreadCount = { total: 0, team_requests: 0, private_messages: 0, friend_requests: 0 } as any;
   let isConnected = false;
@@ -399,6 +402,8 @@ const Navbar: React.FC = () => {
 
   const handleThemeToggle = useCallback(() => toggleTheme(), [toggleTheme]);
   const handleLogout = useCallback(() => logout(), [logout]);
+  const openSearch = useCallback(() => setIsSearchOpen(true), []);
+  const closeSearch = useCallback(() => setIsSearchOpen(false), []);
 
   return (
     <>
@@ -432,6 +437,20 @@ const Navbar: React.FC = () => {
 
               <div className="flex items-center justify-end gap-3">
                 {!isAuthenticated && <LanguageSelector variant="desktop" />}
+
+                <motion.button
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={openSearch}
+                  className={[
+                    'relative h-10 w-10 rounded-full',
+                    'border border-white/10 bg-white/5 hover:bg-white/10',
+                    'transition inline-flex items-center justify-center text-white/90',
+                  ].join(' ')}
+                  aria-label={t('common.search')}
+                >
+                  <FiSearch size={18} />
+                </motion.button>
 
                 {isAuthenticated && (
                   <Link to="/messages">
@@ -496,6 +515,20 @@ const Navbar: React.FC = () => {
             </Link>
 
             <div className="flex items-center gap-2">
+              <motion.button
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={openSearch}
+                className={[
+                  'h-10 w-10 rounded-full',
+                  'border border-white/10 bg-white/5 hover:bg-white/10',
+                  'text-white/90 transition inline-flex items-center justify-center',
+                ].join(' ')}
+                aria-label={t('common.search')}
+              >
+                <FiSearch size={18} />
+              </motion.button>
+
               {isAuthenticated && user ? (
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Link
@@ -533,6 +566,8 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       </header>
+
+      <NavbarSearchOverlay isOpen={isSearchOpen} onClose={closeSearch} />
     </>
   );
 };
