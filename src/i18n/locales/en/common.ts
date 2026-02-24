@@ -1,6 +1,6 @@
 export const common = {
-  brandName: 'Shikkesora',
-  brandAlt: 'Shikkesora logo',
+  brandName: 'Torii',
+  brandAlt: 'Torii logo',
   language: {
     label: 'Language',
     switch: 'Switch to {{language}}',

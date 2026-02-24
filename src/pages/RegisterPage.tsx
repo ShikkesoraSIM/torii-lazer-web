@@ -127,7 +127,8 @@ const RegisterPage: React.FC = () => {
         <div className="text-center">
           <div className="w-12 h-12 mx-auto flex items-center justify-center mb-2">
             <img
-              src="/image/logos/logo.svg"
+              src="/image/logos/logo.png"
+              srcSet="/image/logos/logo.png 1x, /image/logos/logo@2x.png 2x"
               alt={t('common.brandAlt')}
               className="w-12 h-12 object-contain"
             />

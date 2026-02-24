@@ -1,7 +1,7 @@
 export const auth = {
   login: {
     title: 'Sign in',
-    subtitle: 'Sign in to your Shikkesora account',
+    subtitle: 'Sign in to your Torii account',
     username: 'Username',
     password: 'Password',
     usernamePlaceholder: 'Enter username',
@@ -15,7 +15,7 @@ export const auth = {
   },
   register: {
     title: 'Sign up',
-    subtitle: 'Create your Shikkesora account',
+    subtitle: 'Create your Torii account',
     username: 'Username',
     email: 'Email',
     password: 'Password',
