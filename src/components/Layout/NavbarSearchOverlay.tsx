@@ -173,14 +173,14 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
           onMouseDown={handleClose}
         >
           <motion.div
-            className="mx-auto w-full max-w-6xl rounded-3xl border border-white/5 bg-[rgba(20,20,38,0.76)] backdrop-blur-xl shadow-[0_30px_100px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(255,255,255,0.08)] overflow-hidden"
+            className="mx-auto w-full max-w-6xl rounded-3xl bg-[rgba(20,20,38,0.76)] backdrop-blur-xl shadow-[0_30px_100px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(140,125,255,0.08)] overflow-hidden"
             initial={{ opacity: 0, y: -14, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.99 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             onMouseDown={(event) => event.stopPropagation()}
           >
-            <div className="px-6 py-5 border-b border-white/7 bg-white/[0.02]">
+            <div className="px-6 py-5 bg-white/[0.015]">
               <div className="flex items-center gap-4">
                 <FiSearch className="text-white/75 flex-shrink-0" size={27} />
                 <input
@@ -188,7 +188,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder={t('common.search') || 'Search'}
-                  className="w-full bg-transparent border-0 border-b border-white/25 pb-2 text-3xl md:text-4xl font-semibold text-white placeholder:text-white/40 focus:outline-none focus:border-white/45"
+                  className="w-full bg-transparent border-0 border-b border-violet-300/20 pb-2 text-3xl md:text-4xl font-semibold text-white placeholder:text-white/40 focus:outline-none focus:border-violet-300/40"
                 />
                 <button
                   type="button"
@@ -230,7 +230,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
                       <button
                         key={beatmapset.id}
                         type="button"
-                        className="w-full text-left flex items-center gap-3 rounded-2xl p-2.5 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] transition"
+                        className="w-full text-left flex items-center gap-3 rounded-2xl p-2.5 bg-white/[0.03] hover:bg-white/[0.08] shadow-[inset_0_0_0_1px_rgba(125,125,170,0.16)] transition"
                         onClick={() => {
                           navigate(`/beatmapsets/${beatmapset.id}`);
                           handleClose();
@@ -239,7 +239,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
                         <img
                           src={getBeatmapCover(beatmapset)}
                           alt={beatmapset.title}
-                          className="w-14 h-14 rounded-xl object-cover border border-white/10"
+                          className="w-14 h-14 rounded-xl object-cover shadow-[inset_0_0_0_1px_rgba(125,125,170,0.16)]"
                           loading="lazy"
                         />
                         <div className="min-w-0 flex-1">
@@ -255,7 +255,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
                     ))}
                     <button
                       type="button"
-                      className="w-full text-left flex items-center justify-between rounded-2xl p-3 border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] transition text-white/85"
+                      className="w-full text-left flex items-center justify-between rounded-2xl p-3 bg-white/[0.02] hover:bg-white/[0.06] shadow-[inset_0_0_0_1px_rgba(125,125,170,0.16)] transition text-white/85"
                       onClick={() => {
                         navigate(`/beatmaps?q=${encodeURIComponent(query.trim())}`);
                         handleClose();
@@ -276,7 +276,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
                       <button
                         key={searchUser.id}
                         type="button"
-                        className="w-full text-left flex items-center gap-3 rounded-2xl p-2.5 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] transition"
+                        className="w-full text-left flex items-center gap-3 rounded-2xl p-2.5 bg-white/[0.03] hover:bg-white/[0.08] shadow-[inset_0_0_0_1px_rgba(125,125,170,0.16)] transition"
                         onClick={() => {
                           navigate(`/users/${searchUser.id}`);
                           handleClose();
@@ -285,7 +285,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
                         <img
                           src={searchUser.avatar_url || '/default.jpg'}
                           alt={searchUser.username}
-                          className="w-12 h-12 rounded-xl object-cover border border-white/10"
+                          className="w-12 h-12 rounded-xl object-cover shadow-[inset_0_0_0_1px_rgba(125,125,170,0.16)]"
                           loading="lazy"
                         />
                         <div className="min-w-0 flex-1">
@@ -315,7 +315,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
                       <button
                         key={team.id}
                         type="button"
-                        className="w-full text-left flex items-center gap-3 rounded-2xl p-2.5 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] transition"
+                        className="w-full text-left flex items-center gap-3 rounded-2xl p-2.5 bg-white/[0.03] hover:bg-white/[0.08] shadow-[inset_0_0_0_1px_rgba(125,125,170,0.16)] transition"
                         onClick={() => {
                           navigate(`/teams/${team.id}`);
                           handleClose();
@@ -325,11 +325,11 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
                           <img
                             src={team.flag_url}
                             alt={team.name}
-                            className="w-12 h-12 rounded-xl object-cover border border-white/10"
+                            className="w-12 h-12 rounded-xl object-cover shadow-[inset_0_0_0_1px_rgba(125,125,170,0.16)]"
                             loading="lazy"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-xl border border-white/10 bg-white/10 text-white font-bold flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-xl bg-white/10 shadow-[inset_0_0_0_1px_rgba(125,125,170,0.16)] text-white font-bold flex items-center justify-center">
                             {team.short_name?.slice(0, 2) || team.name.slice(0, 2)}
                           </div>
                         )}
