@@ -6,6 +6,7 @@ import { FiChevronRight, FiSearch, FiX } from 'react-icons/fi';
 import type { Beatmapset } from '../../types/beatmap';
 import { beatmapAPI, searchAPI, userAPI } from '../../utils/api';
 import type { NavbarSearchTeam, NavbarSearchUser } from '../../utils/api/search';
+import { useProfileColor } from '../../contexts/ProfileColorContext';
 
 interface NavbarSearchOverlayProps {
   isOpen: boolean;
@@ -15,6 +16,29 @@ interface NavbarSearchOverlayProps {
 const MAX_BEATMAP_RESULTS = 6;
 const MAX_USER_RESULTS = 6;
 const MAX_TEAM_RESULTS = 6;
+
+const normalizeHex = (value: string, fallback = '#ED8EA6'): string => {
+  const raw = (value || '').trim();
+  const withHash = raw.startsWith('#') ? raw : `#${raw}`;
+  return /^#[0-9A-Fa-f]{6}$/.test(withHash) ? withHash : fallback;
+};
+
+const hexToRgb = (hex: string) => {
+  const clean = normalizeHex(hex).slice(1);
+  return {
+    r: parseInt(clean.slice(0, 2), 16),
+    g: parseInt(clean.slice(2, 4), 16),
+    b: parseInt(clean.slice(4, 6), 16),
+  };
+};
+
+const shadeHex = (hex: string, factor: number): string => {
+  const { r, g, b } = hexToRgb(hex);
+  const clamp = (n: number) => Math.max(0, Math.min(255, Math.round(n)));
+  return `#${[clamp(r * factor), clamp(g * factor), clamp(b * factor)]
+    .map((v) => v.toString(16).padStart(2, '0'))
+    .join('')}`;
+};
 
 const getBeatmapCover = (beatmapset: Beatmapset): string => {
   return (
@@ -28,6 +52,7 @@ const getBeatmapCover = (beatmapset: Beatmapset): string => {
 const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { profileColor } = useProfileColor();
   const inputRef = useRef<HTMLInputElement>(null);
   const fetchIdRef = useRef(0);
 
@@ -37,6 +62,11 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
   const [users, setUsers] = useState<NavbarSearchUser[]>([]);
   const [teams, setTeams] = useState<NavbarSearchTeam[]>([]);
   const [directorySearchUnavailable, setDirectorySearchUnavailable] = useState(false);
+
+  const buttonBaseColor = normalizeHex(profileColor);
+  const buttonColorDark = shadeHex(buttonBaseColor, 0.82);
+  const buttonColorLight = shadeHex(buttonBaseColor, 1.08);
+  const buttonRgb = hexToRgb(buttonBaseColor);
 
   const resetResults = () => {
     setBeatmaps([]);
@@ -193,7 +223,11 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8754ff] to-[#6d3cff] text-white font-semibold hover:brightness-110 transition"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-semibold hover:brightness-110 transition"
+                  style={{
+                    backgroundImage: `linear-gradient(135deg, ${buttonColorLight}, ${buttonColorDark})`,
+                    boxShadow: `0 10px 24px rgba(${buttonRgb.r}, ${buttonRgb.g}, ${buttonRgb.b}, 0.30)`,
+                  }}
                 >
                   <FiX size={16} />
                   <span>{t('common.close') || 'Close'}</span>
