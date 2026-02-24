@@ -173,14 +173,14 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
           onMouseDown={handleClose}
         >
           <motion.div
-            className="mx-auto w-full max-w-6xl rounded-3xl border border-white/12 bg-[rgba(20,20,38,0.93)] shadow-[0_30px_100px_rgba(0,0,0,0.52)] overflow-hidden"
+            className="mx-auto w-full max-w-6xl rounded-3xl border border-white/5 bg-[rgba(20,20,38,0.76)] backdrop-blur-xl shadow-[0_30px_100px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(255,255,255,0.08)] overflow-hidden"
             initial={{ opacity: 0, y: -14, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.99 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             onMouseDown={(event) => event.stopPropagation()}
           >
-            <div className="px-6 py-5 border-b border-white/10 bg-white/[0.03]">
+            <div className="px-6 py-5 border-b border-white/7 bg-white/[0.02]">
               <div className="flex items-center gap-4">
                 <FiSearch className="text-white/75 flex-shrink-0" size={27} />
                 <input
