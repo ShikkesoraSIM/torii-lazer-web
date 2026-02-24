@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
+import AdminModal from '../../components/Admin/AdminModal';
 
 interface DailyChallenge {
   date: string;
@@ -280,10 +281,13 @@ const AdminDailyChallenges: React.FC = () => {
         </div>
       )}
 
-      {(showCreateModal || editingChallenge) && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 dark:border-gray-700">
-            <div className="p-6">
+      <AdminModal
+        open={showCreateModal || !!editingChallenge}
+        title={editingChallenge ? 'Edit Daily Challenge' : 'Add Daily Challenge'}
+        onClose={closeModal}
+        maxWidthClass="max-w-3xl"
+      >
+            <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {editingChallenge ? 'Edit Daily Challenge' : 'Add Daily Challenge'}
@@ -291,11 +295,11 @@ const AdminDailyChallenges: React.FC = () => {
                 <button
                   onClick={closeModal}
                   className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
               </div>
 
               <form onSubmit={editingChallenge ? handleUpdate : handleCreate} className="space-y-4">
@@ -441,9 +445,7 @@ const AdminDailyChallenges: React.FC = () => {
                 </div>
               </form>
             </div>
-          </div>
-        </div>
-      )}
+      </AdminModal>
     </div>
   );
 };

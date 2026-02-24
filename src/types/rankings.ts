@@ -58,3 +58,10 @@ export interface TeamDetailResponse {
   team: Team;
   members: User[];
 }
+
+export interface TeamJoinRequest {
+  user_id: number;
+  team_id: number;
+  requested_at: string;
+  user: User;
+}

@@ -66,7 +66,7 @@ const AdminPanel: React.FC = () => {
   return (
     <main className="max-w-7xl mx-auto px-0 md:px-4 lg:px-6 py-4 md:py-6">
       {/* Statistics Dashboard - Similar to UserProfileLayout header */}
-      <div className="bg-card md:main-card-shadow md:rounded-t-2xl md:rounded-b-2xl overflow-hidden md:border md:border-card mb-6">
+      <div className="relative bg-card md:main-card-shadow md:rounded-t-2xl md:rounded-b-2xl md:border md:border-card mb-6 overflow-visible">
         <div className="relative z-10 bg-transparent md:bg-card px-4 md:px-6 py-3 md:py-4 flex items-center justify-between md:rounded-t-2xl border-b border-card">
           <div className="flex items-center gap-3">
             <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
@@ -167,10 +167,10 @@ const AdminPanel: React.FC = () => {
       </div>
 
       {/* Main Content with Side Panel - Following UserProfileLayout pattern */}
-      <div className="flex flex-col lg:flex-row gap-5">
+      <div className="relative z-0 flex flex-col lg:flex-row items-start gap-5">
           {/* Side Panel Navigation - Similar to UserProfileLayout sidebar */}
-          <div className="lg:w-60 flex-shrink-0">
-            <div className="bg-card/95 md:main-card-shadow md:rounded-2xl overflow-hidden md:border md:border-card backdrop-blur-sm">
+          <div className="lg:w-60 w-full flex-shrink-0">
+            <div className="bg-card/95 md:main-card-shadow md:rounded-2xl md:border md:border-card backdrop-blur-sm overflow-visible">
               <div className="bg-transparent md:bg-card px-3 md:px-6 py-3 md:py-4 border-b border-card">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
@@ -294,8 +294,8 @@ const AdminPanel: React.FC = () => {
           </div>
 
           {/* Content Area - Following UserProfileLayout card pattern */}
-          <div className="flex-1">
-            <div className="bg-card/95 md:main-card-shadow md:rounded-2xl overflow-hidden md:border md:border-card backdrop-blur-sm">
+          <div className="flex-1 min-w-0 w-full">
+            <div className="bg-card/95 md:main-card-shadow md:rounded-2xl md:border md:border-card backdrop-blur-sm overflow-visible">
               <div className="bg-transparent md:bg-card px-3 md:px-6 py-3 md:py-4 border-b border-card">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-6 bg-osu-pink rounded-full"></div>

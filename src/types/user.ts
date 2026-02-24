@@ -8,6 +8,14 @@ export interface Team {
   name: string;
   cover_url: string;
   leader_id: number;
+  description?: string | null;
+  playmode?: GameMode;
+  website?: string | null;
+  rank?: number;
+  pp?: number;
+  ranked_score?: number;
+  total_play_count?: number;
+  member_count?: number;
 }
 
 export interface UserStatistics {

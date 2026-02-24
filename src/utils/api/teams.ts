@@ -1,8 +1,10 @@
 import { api } from './client';
 
 export const teamsAPI = {
-  getTeam: async (teamId: number) => {
-    const response = await api.get(`/api/private/team/${teamId}`);
+  getTeam: async (teamId: number, mode?: string) => {
+    const response = await api.get(`/api/private/team/${teamId}`, {
+      params: mode ? { gamemode: mode } : undefined,
+    });
     return response.data;
   },
 
@@ -31,6 +33,21 @@ export const teamsAPI = {
 
   requestJoinTeam: async (teamId: number) => {
     const response = await api.post(`/api/private/team/${teamId}/request`);
+    return response.data;
+  },
+
+  cancelJoinRequest: async (teamId: number) => {
+    const response = await api.delete(`/api/private/team/${teamId}/request`);
+    return response.data;
+  },
+
+  getJoinRequestStatus: async (teamId: number) => {
+    const response = await api.get(`/api/private/team/${teamId}/request/status`);
+    return response.data as { has_pending_request: boolean };
+  },
+
+  getTeamRequests: async (teamId: number) => {
+    const response = await api.get(`/api/private/team/${teamId}/requests`);
     return response.data;
   },
 

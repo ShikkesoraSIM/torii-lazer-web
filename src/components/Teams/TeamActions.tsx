@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiEdit, FiTrash2, FiUserPlus, FiLogOut, FiMoreHorizontal } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiUserPlus, FiLogOut, FiMoreHorizontal, FiClock, FiX } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { teamsAPI, handleApiError } from '../../utils/api';
 import { useAuth } from '../../hooks/useAuth';
@@ -10,26 +10,40 @@ import type { Team, User } from '../../types';
 interface Props {
   team: Team;
   members: User[];
+  hasPendingJoinRequest?: boolean;
+  onJoinRequestStatusChange?: (pending: boolean) => void;
   onTeamUpdate?: () => void;
 }
 
-const TeamActions: React.FC<Props> = ({ team, members, onTeamUpdate }) => {
+const TeamActions: React.FC<Props> = ({
+  team,
+  members,
+  hasPendingJoinRequest = false,
+  onJoinRequestStatusChange,
+  onTeamUpdate,
+}) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showActions, setShowActions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingJoinRequest, setPendingJoinRequest] = useState(hasPendingJoinRequest);
+
+  useEffect(() => {
+    setPendingJoinRequest(hasPendingJoinRequest);
+  }, [hasPendingJoinRequest]);
 
   const isLeader = user?.id === team.leader_id;
-  const isMember = members.some(member => member.id === user?.id);
+  const isMember = members.some((member) => member.id === user?.id);
 
-  // 请求加入战队
   const handleJoinRequest = async () => {
     if (!user) return;
 
     setIsSubmitting(true);
     try {
       await teamsAPI.requestJoinTeam(team.id);
+      setPendingJoinRequest(true);
+      onJoinRequestStatusChange?.(true);
       toast.success(t('teams.detail.joinRequestSent'));
     } catch (error) {
       handleApiError(error);
@@ -38,7 +52,22 @@ const TeamActions: React.FC<Props> = ({ team, members, onTeamUpdate }) => {
     }
   };
 
-  // 退出战队
+  const handleCancelJoinRequest = async () => {
+    if (!user) return;
+
+    setIsSubmitting(true);
+    try {
+      await teamsAPI.cancelJoinRequest(team.id);
+      setPendingJoinRequest(false);
+      onJoinRequestStatusChange?.(false);
+      toast.success(t('teams.detail.joinRequestCanceled'));
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleLeaveTeam = async () => {
     if (!user || !confirm(t('teams.detail.confirmLeave'))) return;
 
@@ -54,7 +83,6 @@ const TeamActions: React.FC<Props> = ({ team, members, onTeamUpdate }) => {
     }
   };
 
-  // 删除战队
   const handleDeleteTeam = async () => {
     if (!confirm(t('teams.detail.confirmDelete'))) return;
 
@@ -74,10 +102,8 @@ const TeamActions: React.FC<Props> = ({ team, members, onTeamUpdate }) => {
 
   return (
     <div className="relative">
-      {/* 主要操作按钮 */}
       <div className="flex items-center gap-2">
-        {/* 加入战队按钮 */}
-        {!isMember && (
+        {!isMember && !pendingJoinRequest && (
           <button
             onClick={handleJoinRequest}
             disabled={isSubmitting}
@@ -88,7 +114,18 @@ const TeamActions: React.FC<Props> = ({ team, members, onTeamUpdate }) => {
           </button>
         )}
 
-        {/* 退出战队按钮 */}
+        {!isMember && pendingJoinRequest && (
+          <button
+            onClick={handleCancelJoinRequest}
+            disabled={isSubmitting}
+            className="inline-flex items-center px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title={t('teams.detail.joinRequestPending')}
+          >
+            {isSubmitting ? <FiX className="mr-2" /> : <FiClock className="mr-2" />}
+            {isSubmitting ? t('teams.detail.canceling') : t('teams.detail.cancelJoinRequest')}
+          </button>
+        )}
+
         {isMember && !isLeader && (
           <button
             onClick={handleLeaveTeam}
@@ -100,10 +137,8 @@ const TeamActions: React.FC<Props> = ({ team, members, onTeamUpdate }) => {
           </button>
         )}
 
-        {/* 队长操作菜单 */}
         {isLeader && (
           <>
-            {/* 编辑按钮 */}
             <Link
               to={`/teams/${team.id}/edit`}
               className="inline-flex items-center px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 transition-colors"
@@ -112,7 +147,6 @@ const TeamActions: React.FC<Props> = ({ team, members, onTeamUpdate }) => {
               {t('teams.detail.editTeam')}
             </Link>
 
-            {/* 更多操作按钮 */}
             <div className="relative">
               <button
                 onClick={() => setShowActions(!showActions)}
@@ -121,7 +155,6 @@ const TeamActions: React.FC<Props> = ({ team, members, onTeamUpdate }) => {
                 <FiMoreHorizontal className="w-5 h-5" />
               </button>
 
-              {/* 下拉菜单 */}
               {showActions && (
                 <div className="absolute left-auto right-0 top-full mt-2 w-48 bg-card border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-[9999]">
                   <div className="py-1">
@@ -144,13 +177,7 @@ const TeamActions: React.FC<Props> = ({ team, members, onTeamUpdate }) => {
         )}
       </div>
 
-      {/* 点击外部关闭菜单 */}
-      {showActions && (
-        <div
-          className="fixed inset-0 z-[9998]"
-          onClick={() => setShowActions(false)}
-        />
-      )}
+      {showActions && <div className="fixed inset-0 z-[9998]" onClick={() => setShowActions(false)} />}
     </div>
   );
 };

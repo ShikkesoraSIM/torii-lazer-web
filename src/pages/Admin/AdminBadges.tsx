@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
+import AdminModal from '../../components/Admin/AdminModal';
 
 interface Badge {
   id: number;
@@ -217,11 +218,14 @@ const AdminBadges: React.FC = () => {
             ))
           )}
         </div>
-      )/* Rest of the file... */}
-      {(showCreateModal || editingBadge) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full">
-            <div className="p-6">
+      )}
+      <AdminModal
+        open={showCreateModal || !!editingBadge}
+        title={editingBadge ? 'Edit Badge' : 'Create Badge'}
+        onClose={closeModal}
+        maxWidthClass="max-w-lg"
+      >
+            <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {editingBadge ? 'Edit Badge' : 'Create Badge'}
@@ -229,11 +233,11 @@ const AdminBadges: React.FC = () => {
                 <button
                   onClick={closeModal}
                   className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
               </div>
 
               <form onSubmit={editingBadge ? handleUpdate : handleCreate} className="space-y-4">
@@ -321,9 +325,7 @@ const AdminBadges: React.FC = () => {
                 </div>
               </form>
             </div>
-          </div>
-        </div>
-      )}
+      </AdminModal>
     </div>
   );
 };

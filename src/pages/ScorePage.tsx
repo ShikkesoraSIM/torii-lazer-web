@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useId, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
@@ -18,16 +18,246 @@ const RANK_ICON_MAP: Record<string, string> = {
   F: '/image/grades/F.svg',
 };
 
-const RANK_COLORS: Record<string, string> = {
-  XH: '#cfd2ff',
-  X: '#facc15',
-  SH: '#e2e8f0',
-  S: '#fde68a',
-  A: '#86efac',
-  B: '#93c5fd',
-  C: '#fdba74',
-  D: '#fda4af',
-  F: '#ef4444',
+const INNER_THRESHOLD_SEGMENTS = [
+  { start: 0, end: 70, color: '#fb7185' }, // D
+  { start: 70, end: 80, color: '#d946ef' }, // C
+  { start: 80, end: 90, color: '#f59e0b' }, // B
+  { start: 90, end: 95, color: '#34d399' }, // A
+  { start: 95, end: 100, color: '#22d3ee' }, // S
+];
+
+type RingGradientStop = {
+  offset: string;
+  color: string;
+};
+
+type RingGradientConfig = {
+  x1: string;
+  y1: string;
+  x2: string;
+  y2: string;
+  stops: RingGradientStop[];
+};
+
+const OUTER_RING_GRADIENTS: Record<string, RingGradientConfig> = {
+  // SS Silver: cool metallic + icy highlight.
+  XH: {
+    x1: '100%',
+    y1: '0%',
+    x2: '0%',
+    y2: '100%',
+    stops: [
+      { offset: '0%', color: '#f8fafc' },
+      { offset: '26%', color: '#dbe5ef' },
+      { offset: '56%', color: '#9caec3' },
+      { offset: '82%', color: '#e2e8f0' },
+      { offset: '100%', color: '#7dd3fc' },
+    ],
+  },
+  // SS: warm gold spectrum.
+  X: {
+    x1: '0%',
+    y1: '100%',
+    x2: '100%',
+    y2: '0%',
+    stops: [
+      { offset: '0%', color: '#fef3c7' },
+      { offset: '28%', color: '#facc15' },
+      { offset: '56%', color: '#f59e0b' },
+      { offset: '82%', color: '#fde68a' },
+      { offset: '100%', color: '#f97316' },
+    ],
+  },
+  SH: {
+    x1: '12%',
+    y1: '0%',
+    x2: '88%',
+    y2: '100%',
+    stops: [
+      { offset: '0%', color: '#bae6fd' },
+      { offset: '45%', color: '#22d3ee' },
+      { offset: '100%', color: '#34d399' },
+    ],
+  },
+  S: {
+    x1: '0%',
+    y1: '0%',
+    x2: '100%',
+    y2: '100%',
+    stops: [
+      { offset: '0%', color: '#34d399' },
+      { offset: '45%', color: '#67e8f9' },
+      { offset: '100%', color: '#38bdf8' },
+    ],
+  },
+  A: {
+    x1: '0%',
+    y1: '0%',
+    x2: '100%',
+    y2: '100%',
+    stops: [
+      { offset: '0%', color: '#86efac' },
+      { offset: '48%', color: '#4ade80' },
+      { offset: '100%', color: '#22d3ee' },
+    ],
+  },
+  // B: non-linear warm blend so it doesn't look flat.
+  B: {
+    x1: '8%',
+    y1: '0%',
+    x2: '92%',
+    y2: '100%',
+    stops: [
+      { offset: '0%', color: '#fde047' },
+      { offset: '22%', color: '#facc15' },
+      { offset: '52%', color: '#f59e0b' },
+      { offset: '74%', color: '#fb923c' },
+      { offset: '100%', color: '#fbbf24' },
+    ],
+  },
+  C: {
+    x1: '0%',
+    y1: '100%',
+    x2: '100%',
+    y2: '0%',
+    stops: [
+      { offset: '0%', color: '#f472b6' },
+      { offset: '46%', color: '#e879f9' },
+      { offset: '100%', color: '#a78bfa' },
+    ],
+  },
+  D: {
+    x1: '0%',
+    y1: '0%',
+    x2: '100%',
+    y2: '100%',
+    stops: [
+      { offset: '0%', color: '#fb7185' },
+      { offset: '52%', color: '#f43f5e' },
+      { offset: '100%', color: '#ec4899' },
+    ],
+  },
+  F: {
+    x1: '0%',
+    y1: '0%',
+    x2: '100%',
+    y2: '100%',
+    stops: [
+      { offset: '0%', color: '#f43f5e' },
+      { offset: '52%', color: '#ef4444' },
+      { offset: '100%', color: '#fb7185' },
+    ],
+  },
+};
+
+const AccuracyRing: React.FC<{
+  accuracyPercent: number;
+  rank: string;
+  rankIcon: string;
+}> = ({ accuracyPercent, rank, rankIcon }) => {
+  const ringId = useId().replace(/:/g, '');
+  const size = 176;
+  const center = size / 2;
+  const outerRadius = 75;
+  const thresholdRadius = 63;
+  const coreRadius = 52;
+  const outerStrokeWidth = 12;
+  const thresholdStrokeWidth = 4;
+  const outerCircumference = 2 * Math.PI * outerRadius;
+  const clampedAccuracy = Math.max(0, Math.min(100, accuracyPercent));
+  const progress = clampedAccuracy / 100;
+  const gradientConfig =
+    OUTER_RING_GRADIENTS[(rank || '').toUpperCase()] || OUTER_RING_GRADIENTS.F;
+
+  return (
+    <div className="relative w-44 h-44">
+      <svg
+        viewBox={`0 0 ${size} ${size}`}
+        className="w-full h-full drop-shadow-[0_0_22px_rgba(0,0,0,0.35)]"
+        role="img"
+        aria-label={`Accuracy ${clampedAccuracy.toFixed(2)} percent`}
+      >
+        <defs>
+          <linearGradient
+            id={`acc-progress-${ringId}`}
+            x1={gradientConfig.x1}
+            y1={gradientConfig.y1}
+            x2={gradientConfig.x2}
+            y2={gradientConfig.y2}
+          >
+            {gradientConfig.stops.map((stop) => (
+              <stop key={`${stop.offset}-${stop.color}`} offset={stop.offset} stopColor={stop.color} />
+            ))}
+          </linearGradient>
+        </defs>
+
+        <circle
+          cx={center}
+          cy={center}
+          r={outerRadius}
+          fill="none"
+          stroke="rgba(15, 23, 42, 0.62)"
+          strokeWidth={outerStrokeWidth}
+        />
+
+        <circle
+          cx={center}
+          cy={center}
+          r={outerRadius}
+          fill="none"
+          stroke={`url(#acc-progress-${ringId})`}
+          strokeWidth={outerStrokeWidth}
+          strokeLinecap="butt"
+          strokeDasharray={`${progress * outerCircumference} ${outerCircumference}`}
+          transform={`rotate(-90 ${center} ${center})`}
+        />
+
+        <circle
+          cx={center}
+          cy={center}
+          r={thresholdRadius}
+          fill="none"
+          stroke="rgba(15, 23, 42, 0.72)"
+          strokeWidth={thresholdStrokeWidth}
+        />
+
+        <g transform={`rotate(-90 ${center} ${center})`}>
+          {INNER_THRESHOLD_SEGMENTS.map((segment) => {
+            const segmentLength = ((segment.end - segment.start) / 100) * (2 * Math.PI * thresholdRadius);
+            const dashOffset = -((segment.start / 100) * (2 * Math.PI * thresholdRadius));
+            return (
+              <circle
+                key={`${segment.start}-${segment.end}`}
+                cx={center}
+                cy={center}
+                r={thresholdRadius}
+                fill="none"
+                stroke={segment.color}
+                strokeOpacity={0.95}
+                strokeWidth={thresholdStrokeWidth}
+                strokeLinecap="butt"
+                strokeDasharray={`${segmentLength} ${2 * Math.PI * thresholdRadius}`}
+                strokeDashoffset={dashOffset}
+              />
+            );
+          })}
+        </g>
+
+        <circle
+          cx={center}
+          cy={center}
+          r={coreRadius}
+          fill="rgba(6, 10, 30, 0.84)"
+        />
+      </svg>
+
+      <img
+        src={rankIcon}
+        alt={rank}
+        className="pointer-events-none absolute left-1/2 top-1/2 w-20 h-20 object-contain -translate-x-1/2 -translate-y-1/2"
+      />
+    </div>
+  );
 };
 
 const formatMode = (mode?: string) => {
@@ -290,9 +520,9 @@ const ScorePage: React.FC = () => {
     );
   }
 
-  const rankColor = RANK_COLORS[score.rank] || '#cbd5e1';
   const scoreValue = safeInt(score.total_score || score.classic_total_score).toLocaleString();
-  const accuracy = ((score.accuracy || 0) * 100).toFixed(2);
+  const accuracyValue = (score.accuracy || 0) * 100;
+  const accuracy = accuracyValue.toFixed(2);
   const pp = (score.pp || 0).toFixed(0);
   const mode = score.beatmap?.mode || 'osu';
   const beatmapPath = getBeatmapPath(score);
@@ -339,16 +569,11 @@ const ScorePage: React.FC = () => {
           <div className="relative p-6 lg:p-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
               <div className="flex items-center gap-6 flex-wrap">
-                <div
-                  className="w-36 h-36 rounded-full border-[10px] flex items-center justify-center bg-black/35 backdrop-blur-sm shadow-[0_0_32px_rgba(0,0,0,0.45)]"
-                  style={{ borderColor: rankColor, boxShadow: `0 0 0 1px ${rankColor}66` }}
-                >
-                  <img
-                    src={RANK_ICON_MAP[score.rank] || RANK_ICON_MAP.F}
-                    alt={score.rank}
-                    className="w-20 h-20 object-contain"
-                  />
-                </div>
+                <AccuracyRing
+                  accuracyPercent={accuracyValue}
+                  rank={score.rank}
+                  rankIcon={RANK_ICON_MAP[score.rank] || RANK_ICON_MAP.F}
+                />
 
                 <div className="text-white">
                   <p className="text-5xl lg:text-6xl font-light tracking-tight">{scoreValue}</p>
