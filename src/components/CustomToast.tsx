@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { userAPI } from '../utils/api';
+import { apiCache } from '../utils/apiCache';
 import { FiMessageCircle, FiUsers, FiBell, FiX } from 'react-icons/fi';
 
 interface CustomToastProps {
@@ -29,10 +29,25 @@ export const CustomToast: React.FC<CustomToastProps> = ({
 
   // 获取用户信息
   useEffect(() => {
-    if (sourceUserId && !username && !avatar) {
+    if (sourceUserId === 2 && !username && !avatar) {
+      setUserInfo({
+        username: 'Torii',
+        avatar_url: '/default.jpg'
+      });
+      return;
+    }
+
+    if (sourceUserId && sourceUserId > 0 && !username && !avatar) {
       setIsLoading(true);
-      userAPI.getUser(sourceUserId)
+      apiCache.getUser(sourceUserId)
         .then(user => {
+          if (!user) {
+            setUserInfo({
+              username: t('common.unknownUser'),
+              avatar_url: '/default.jpg'
+            });
+            return;
+          }
           setUserInfo({
             username: user.username,
             avatar_url: user.avatar_url || '/default.jpg'
@@ -49,7 +64,7 @@ export const CustomToast: React.FC<CustomToastProps> = ({
           setIsLoading(false);
         });
     }
-  }, [sourceUserId, username, avatar]);
+  }, [sourceUserId, username, avatar, t]);
 
   const getIcon = () => {
     switch (type) {
