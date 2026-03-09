@@ -1,17 +1,51 @@
 import toast from 'react-hot-toast';
 
+type ApiIssue = {
+  msg?: string;
+};
+
+type ApiErrorPayload = {
+  error_description?: string;
+  message?: string;
+  detail?: unknown;
+};
+
 export const handleApiError = (error: unknown) => {
   const err = error as {
-    response?: { data?: { error_description?: string; message?: string } };
+    response?: { data?: ApiErrorPayload };
     message?: string;
   };
-  if (err.response?.data?.error_description) {
-    toast.error(err.response.data.error_description);
-  } else if (err.response?.data?.message) {
-    toast.error(err.response.data.message);
-  } else if (err.message) {
-    toast.error(err.message);
-  } else {
-    toast.error('发生意外错误');
+
+  const data = err.response?.data;
+  const detail = data?.detail;
+
+  if (typeof detail === 'string' && detail.trim()) {
+    toast.error(detail);
+    return;
   }
+
+  if (Array.isArray(detail) && detail.length > 0) {
+    const firstIssue = detail[0] as ApiIssue;
+    if (firstIssue?.msg) {
+      toast.error(firstIssue.msg);
+      return;
+    }
+  }
+
+  if (data?.error_description) {
+    toast.error(data.error_description);
+    return;
+  }
+
+  if (data?.message) {
+    toast.error(data.message);
+    return;
+  }
+
+  if (err.message) {
+    toast.error(err.message);
+    return;
+  }
+
+  toast.error('An unexpected error occurred');
 };

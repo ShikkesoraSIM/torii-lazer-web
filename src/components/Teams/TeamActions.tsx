@@ -103,7 +103,7 @@ const TeamActions: React.FC<Props> = ({
   return (
     <div className="relative">
       <div className="flex items-center gap-2">
-        {!isMember && !pendingJoinRequest && (
+        {!isLeader && !isMember && !pendingJoinRequest && (
           <button
             onClick={handleJoinRequest}
             disabled={isSubmitting}
@@ -114,7 +114,7 @@ const TeamActions: React.FC<Props> = ({
           </button>
         )}
 
-        {!isMember && pendingJoinRequest && (
+        {!isLeader && !isMember && pendingJoinRequest && (
           <button
             onClick={handleCancelJoinRequest}
             disabled={isSubmitting}

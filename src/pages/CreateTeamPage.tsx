@@ -96,6 +96,7 @@ const CreateTeamPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     if (isEditing && !canEditTeam && !user?.is_admin) {
       toast.error(t('teams.create.notLeader'));
