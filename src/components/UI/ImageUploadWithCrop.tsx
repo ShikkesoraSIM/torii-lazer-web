@@ -26,7 +26,7 @@ const ImageUploadWithCrop: React.FC<ImageUploadWithCropProps> = ({
   maxWidth = 1200,
   maxHeight = 800,
   maxFileSize = 10,
-  acceptedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
+  acceptedTypes = ['image/png', 'image/jpeg', 'image/gif'],
   placeholder = 'Select image',
   description,
   icon,

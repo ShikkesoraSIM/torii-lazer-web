@@ -1,4 +1,5 @@
-﻿import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
 import type { Crop, PixelCrop } from 'react-image-crop';
 import { FiX, FiCheck, FiRotateCw } from 'react-icons/fi';
@@ -189,10 +190,10 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
     setRotation((prev) => (prev + 90) % 360);
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+  return createPortal(
+    <div className="fixed inset-0 z-[1200] bg-black/75 p-3 sm:p-4 overflow-y-auto">
+      <div className="mx-auto my-auto bg-card rounded-xl shadow-2xl max-w-5xl w-full max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden">
+        <div className="shrink-0 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Crop Image
           </h3>
@@ -205,7 +206,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           </button>
         </div>
 
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="shrink-0 flex flex-wrap items-center justify-between gap-3 p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -223,8 +224,8 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto p-4">
-          <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex-1 min-h-0 overflow-auto p-3 sm:p-4">
+          <div className="flex items-center justify-center min-h-[220px]">
             <ReactCrop
               crop={crop}
               onChange={(c) => setCrop(c)}
@@ -239,7 +240,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
                 src={src}
                 alt="Crop preview"
                 onLoad={onImageLoad}
-                className="max-w-full max-h-[500px] object-contain"
+                className="max-w-full max-h-[55vh] object-contain"
                 style={{
                   transform: `rotate(${rotation}deg)`,
                   transition: 'transform 0.3s ease',
@@ -249,7 +250,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="shrink-0 flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-card">
           <button
             type="button"
             onClick={onCancel}
@@ -282,7 +283,8 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

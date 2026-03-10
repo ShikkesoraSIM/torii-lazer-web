@@ -117,6 +117,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(cachedData.user);
         setIsAuthenticated(cachedData.isAuthenticated);
         setIsLoading(false);
+
+        // Revalidate in the background so team/mode/profile changes show up quickly.
+        void (async () => {
+          try {
+            const freshUser = await userAPI.getMe();
+            setUser(freshUser);
+            setIsAuthenticated(true);
+            CacheUtil.saveUserCache(freshUser);
+          } catch (error) {
+            const err = error as { response?: { status?: number } };
+            if (err.response?.status === 401) {
+              setUser(null);
+              setIsAuthenticated(false);
+              CacheUtil.clearCache();
+            } else {
+              console.error('Background auth revalidation failed:', error);
+            }
+          }
+        })();
+
         return;
       }
 

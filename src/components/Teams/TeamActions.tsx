@@ -23,7 +23,7 @@ const TeamActions: React.FC<Props> = ({
   onTeamUpdate,
 }) => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, updateUser, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [showActions, setShowActions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,6 +74,11 @@ const TeamActions: React.FC<Props> = ({
     setIsSubmitting(true);
     try {
       await teamsAPI.removeMember(team.id, user.id);
+      updateUser({
+        ...user,
+        team: undefined,
+      });
+      void refreshUser();
       toast.success(t('teams.detail.leftTeam'));
       onTeamUpdate?.();
     } catch (error) {
@@ -89,6 +94,13 @@ const TeamActions: React.FC<Props> = ({
     setIsSubmitting(true);
     try {
       await teamsAPI.deleteTeam(team.id);
+      if (user?.team?.id === team.id) {
+        updateUser({
+          ...user,
+          team: undefined,
+        });
+      }
+      void refreshUser();
       toast.success(t('teams.detail.teamDeleted'));
       navigate('/teams');
     } catch (error) {

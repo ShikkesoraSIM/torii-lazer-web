@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 import ImageUploadWithCrop from '../components/UI/ImageUploadWithCrop';
 import MemberSelector from '../components/UI/MemberSelector';
 import toast from 'react-hot-toast';
-import { GAME_MODE_NAMES, type User, type TeamDetailResponse, type GameMode } from '../types';
+import { GAME_MODE_NAMES, type User, type Team, type TeamDetailResponse, type GameMode } from '../types';
 
 const TEAM_MODE_OPTIONS: GameMode[] = ['osu', 'taiko', 'fruits', 'mania', 'osurx', 'osuap', 'taikorx', 'fruitsrx'];
 
@@ -15,7 +15,7 @@ const CreateTeamPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { teamId } = useParams<{ teamId: string }>();
-  const { user } = useAuth();
+  const { user, refreshUser, updateUser } = useAuth();
   const isEditing = Boolean(teamId);
 
   const [formData, setFormData] = useState({
@@ -178,17 +178,34 @@ const CreateTeamPage: React.FC = () => {
       }
 
       if (isEditing) {
-        if (user?.is_admin) {
-          await adminAPI.updateTeam(parseInt(teamId!, 10), data);
-        } else {
-          await teamsAPI.updateTeam(parseInt(teamId!, 10), data);
+        const updatedTeam = (user?.is_admin
+          ? await adminAPI.updateTeam(parseInt(teamId!, 10), data)
+          : await teamsAPI.updateTeam(parseInt(teamId!, 10), data)) as Team;
+
+        if (user && user.team?.id === updatedTeam.id) {
+          updateUser({
+            ...user,
+            team: {
+              ...user.team,
+              ...updatedTeam,
+            },
+          });
         }
+
+        void refreshUser();
         toast.success(t('teams.create.updateSuccess'));
         navigate(`/teams/${teamId}`);
       } else {
-        const result = await teamsAPI.createTeam(data);
+        const createdTeam = (await teamsAPI.createTeam(data)) as Team;
+        if (user) {
+          updateUser({
+            ...user,
+            team: createdTeam,
+          });
+        }
+        void refreshUser();
         toast.success(t('teams.create.createSuccess'));
-        navigate(`/teams/${result.id}`);
+        navigate(`/teams/${createdTeam.id}`);
       }
     } catch (error) {
       handleApiError(error);
@@ -364,7 +381,7 @@ const CreateTeamPage: React.FC = () => {
                 placeholder={t('teams.create.selectFlag')}
                 description={t('teams.create.flagDescription')}
                 icon={<FiFlag className="mr-2" />}
-                acceptedTypes={['image/png', 'image/jpeg', 'image/gif', 'image/webp']}
+                acceptedTypes={['image/png', 'image/jpeg', 'image/gif']}
                 isUploading={isSubmitting}
                 uploadingText={t('teams.create.creatingTeam')}
               />
@@ -383,7 +400,7 @@ const CreateTeamPage: React.FC = () => {
                 placeholder={t('teams.create.selectCover')}
                 description={t('teams.create.coverDescription')}
                 icon={<FiImage className="mr-2" />}
-                acceptedTypes={['image/png', 'image/jpeg', 'image/gif', 'image/webp']}
+                acceptedTypes={['image/png', 'image/jpeg', 'image/gif']}
                 isUploading={isSubmitting}
                 uploadingText={t('teams.create.creatingTeam')}
               />

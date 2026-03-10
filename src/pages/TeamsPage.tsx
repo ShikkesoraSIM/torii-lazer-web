@@ -17,7 +17,7 @@ import type {
 
 const TeamsPage: React.FC = () => {
   const { t } = useTranslation();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, refreshUser } = useAuth();
   const [selectedMode, setSelectedMode] = useState<GameMode>('osu');
   const [rankingType, setRankingType] = useState<RankingType>('performance');
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,6 +46,11 @@ const TeamsPage: React.FC = () => {
     setCurrentPage(1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [selectedMode, rankingType]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    void refreshUser();
+  }, [isAuthenticated, refreshUser]);
 
   useEffect(() => {
     loadTeamRankings();
