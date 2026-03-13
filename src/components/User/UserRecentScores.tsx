@@ -8,6 +8,7 @@ import LoadingSpinner from '../UI/LoadingSpinner';
 import LazyBackgroundImage from '../UI/LazyBackgroundImage';
 import BeatmapLink from '../UI/BeatmapLink';
 import ScoreModsDisplay from './ScoreModsDisplay';
+import { formatScoreClientVersion } from '../../utils/clientVersion';
 
 interface UserRecentScoresProps {
   userId: number;
@@ -76,6 +77,7 @@ const ScoreCard: React.FC<{ score: BestScore; t: any; profileColor: string; show
   const accuracy = (score.accuracy * 100).toFixed(2); // 命中率（百分比）
   const originalPp = Math.round(score.pp || 0); // 原始pp
   const mods = score.mods || []; // MOD列表
+  const clientVersionLabel = formatScoreClientVersion(score.client_version);
   const passed = score.passed; // 是否通过
 
   const beatmapUrl = score.beatmap?.url || '#';
@@ -158,6 +160,14 @@ const ScoreCard: React.FC<{ score: BestScore; t: any; profileColor: string; show
                   <span className="text-gray-500 dark:text-gray-400">
                     {endedAt}
                   </span>
+                  {clientVersionLabel && (
+                    <span
+                      className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]"
+                      title={clientVersionLabel}
+                    >
+                      {clientVersionLabel}
+                    </span>
+                  )}
                   <Link
                     to={`/scores/${score.id}`}
                     className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
@@ -233,6 +243,14 @@ const ScoreCard: React.FC<{ score: BestScore; t: any; profileColor: string; show
                 <span className="text-gray-500 dark:text-gray-400">
                   {endedAt}
                 </span>
+                {clientVersionLabel && (
+                  <span
+                    className="text-gray-500 dark:text-gray-400 truncate max-w-[160px]"
+                    title={clientVersionLabel}
+                  >
+                    {clientVersionLabel}
+                  </span>
+                )}
                 <Link
                   to={`/scores/${score.id}`}
                   className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"

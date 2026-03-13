@@ -10,6 +10,7 @@ import LazyBackgroundImage from '../UI/LazyBackgroundImage';
 import BeatmapLink from '../UI/BeatmapLink';
 import ScoreActionsMenu from '../Score/ScoreActionsMenu';
 import ScoreModsDisplay from './ScoreModsDisplay';
+import { formatScoreClientVersion } from '../../utils/clientVersion';
 
 interface UserBestScoresProps {
   userId: number;
@@ -95,6 +96,7 @@ const ScoreCard: React.FC<{
   const accuracy = (score.accuracy * 100).toFixed(2); // 命中率（百分比）
   const originalPp = Math.round(score.pp || 0); // 原始pp
   const mods = score.mods || []; // MOD列表
+  const clientVersionLabel = formatScoreClientVersion(score.client_version);
   const isPinned = score.current_user_attributes?.pin?.is_pinned || false; // 是否已置顶
   const hasReplay = score.has_replay || false; // 是否有回放
 
@@ -172,6 +174,14 @@ const ScoreCard: React.FC<{
                   <span className="text-gray-500 dark:text-gray-400">
                     {endedAt}
                   </span>
+                  {clientVersionLabel && (
+                    <span
+                      className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]"
+                      title={clientVersionLabel}
+                    >
+                      {clientVersionLabel}
+                    </span>
+                  )}
                   <Link
                     to={`/scores/${score.id}`}
                     className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
@@ -250,6 +260,14 @@ const ScoreCard: React.FC<{
                 <span className="text-gray-500 dark:text-gray-400">
                   {endedAt}
                 </span>
+                {clientVersionLabel && (
+                  <span
+                    className="text-gray-500 dark:text-gray-400 truncate max-w-[160px]"
+                    title={clientVersionLabel}
+                  >
+                    {clientVersionLabel}
+                  </span>
+                )}
                 <Link
                   to={`/scores/${score.id}`}
                   className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"

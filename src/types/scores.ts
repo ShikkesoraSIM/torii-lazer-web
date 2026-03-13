@@ -40,6 +40,7 @@ export interface BestScore {
   user_id: number;
   accuracy: number;
   build_id: number | null;
+  client_version: string | null;
   ended_at: string;
   has_replay: boolean;
   is_perfect_combo: boolean;
