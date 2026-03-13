@@ -124,6 +124,8 @@ export const profilePage = {
       saving: 'Saving...',
       saveSuccess: 'Personal page saved successfully!',
       saveError: 'Save failed, please try again',
+      draftRestored: 'Recovered your unsaved draft from a previous session.',
+      saveVerificationFailed: 'Save response was received, but verification failed. Your draft is still kept. Please try saving again.',
       hasUnsavedChanges: 'You have unsaved changes',
       confirmDiscard: 'You have unsaved changes, are you sure you want to discard editing?',
       noEditPermission: 'You do not have permission to edit this user\'s page',

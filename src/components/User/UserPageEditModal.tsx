@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaTimes, FaSave } from 'react-icons/fa';
-import type { User } from '../../types';
-import BBCodeEditor from './BBCodeEditor';
-import { userAPI } from '../../utils/api';
+import { FaSave, FaTimes } from 'react-icons/fa';
+
 import { useAuth } from '../../hooks/useAuth';
+import type { User } from '../../types';
+import { userAPI } from '../../utils/api';
+import BBCodeEditor from './BBCodeEditor';
 
 interface UserPageEditModalProps {
   isOpen: boolean;
@@ -12,6 +13,29 @@ interface UserPageEditModalProps {
   user: User;
   onSave: (updatedUser: User) => void;
 }
+
+interface UserPageDraftPayload {
+  content: string;
+  updatedAt: number;
+}
+
+const normaliseText = (value: string): string => value.replace(/\r\n/g, '\n');
+
+const getDraftStorageKey = (userId: number): string => `userpage_draft_${userId}`;
+
+const readDraftContent = (raw: string | null): string | null => {
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as string | UserPageDraftPayload;
+    if (typeof parsed === 'string') return parsed;
+    if (parsed && typeof parsed.content === 'string') return parsed.content;
+  } catch {
+    return raw;
+  }
+
+  return null;
+};
 
 const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
   isOpen,
@@ -21,94 +45,160 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
+
   const [content, setContent] = useState('');
+  const [initialContent, setInitialContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
+
+  const [mouseDownTarget, setMouseDownTarget] = useState<EventTarget | null>(null);
+  const [mouseDownTime, setMouseDownTime] = useState<number>(0);
+  const [mouseDownPosition, setMouseDownPosition] = useState<{ x: number; y: number } | null>(null);
+
+  const canEdit = currentUser?.id === user.id;
+  const hasUnsavedChanges = normaliseText(content) !== normaliseText(initialContent);
+  const draftStorageKey = useMemo(() => getDraftStorageKey(user.id), [user.id]);
+
+  const requestClose = useCallback((): boolean => {
+    if (hasUnsavedChanges && !isSaving) {
+      const shouldClose = window.confirm(t('profile.userPage.confirmDiscard'));
+      if (!shouldClose) return false;
+    }
+
+    onClose();
+    return true;
+  }, [hasUnsavedChanges, isSaving, onClose, t]);
 
   useEffect(() => {
-    if (isOpen) {
-      setContent(user.page?.raw || '');
-      // 防止背景滚动
-      document.body.style.overflow = 'hidden';
-      
-      // 添加全局键盘事件监听，仅处理Escape键
-      const handleGlobalKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && !e.defaultPrevented) {
-          onClose();
-        }
-      };
-      
-      document.addEventListener('keydown', handleGlobalKeyDown);
-      
-      return () => {
-        document.removeEventListener('keydown', handleGlobalKeyDown);
-        document.body.style.overflow = 'unset';
-      };
-    } else {
-      // 恢复背景滚动
+    if (!isOpen) {
       document.body.style.overflow = 'unset';
+      return;
     }
-  }, [isOpen, user.page?.raw, onClose]);
+
+    const baseContent = user.page?.raw || '';
+    const draft = readDraftContent(localStorage.getItem(draftStorageKey));
+    const restoredFromDraft =
+      !!draft && normaliseText(draft) !== normaliseText(baseContent);
+
+    setContent(restoredFromDraft ? draft : baseContent);
+    setInitialContent(baseContent);
+    setSaveError(null);
+    setInfoMessage(
+      restoredFromDraft
+        ? t('profile.userPage.draftRestored', {
+            defaultValue: 'Recovered your unsaved draft from a previous session.',
+          })
+        : null,
+    );
+
+    document.body.style.overflow = 'hidden';
+
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      e.preventDefault();
+      requestClose();
+    };
+
+    document.addEventListener('keydown', handleGlobalKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleGlobalKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, user.page?.raw, draftStorageKey, t, requestClose]);
+
+  useEffect(() => {
+    if (!isOpen || !canEdit) return;
+
+    const timer = window.setTimeout(() => {
+      try {
+        if (!hasUnsavedChanges || !content.trim()) {
+          localStorage.removeItem(draftStorageKey);
+          return;
+        }
+
+        const payload: UserPageDraftPayload = {
+          content,
+          updatedAt: Date.now(),
+        };
+
+        localStorage.setItem(draftStorageKey, JSON.stringify(payload));
+      } catch (error) {
+        console.warn('Failed to persist user page draft:', error);
+      }
+    }, 450);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [isOpen, canEdit, hasUnsavedChanges, content, draftStorageKey]);
+
+  useEffect(() => {
+    if (!isOpen || !hasUnsavedChanges || isSaving) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isOpen, hasUnsavedChanges, isSaving]);
 
   const handleSave = async () => {
-    if (!currentUser || currentUser.id !== user.id) return;
+    if (!canEdit || !currentUser || currentUser.id !== user.id) return;
 
     setIsSaving(true);
+    setSaveError(null);
+    setInfoMessage(null);
+
     try {
-      const response = await userAPI.updateUserPage(currentUser.id, content);
-      
-      // 尝试获取渲染后的HTML
-      let html = '';
-      if (response.html) {
-        html = response.html;
-      } else if (response.data?.html) {
-        html = response.data.html;
-      } else if (response.preview?.html) {
-        html = response.preview.html;
-      } else {
-        // 如果没有HTML，尝试验证BBCode获取预览
-        try {
-          const validationResult = await userAPI.validateBBCode(content);
-          if (validationResult.preview?.html) {
-            html = validationResult.preview.html;
-          }
-        } catch (validationError) {
-          console.warn('BBCode验证失败:', validationError);
-          // 使用原始内容作为HTML（不理想但至少显示内容）
-          html = content.replace(/\n/g, '<br>');
-        }
+      await userAPI.updateUserPage(currentUser.id, content);
+
+      // Verify canonical persisted state from backend before claiming success.
+      const latestUser = await userAPI.getMe();
+      const persistedRaw = normaliseText(latestUser?.page?.raw || '');
+      const submittedRaw = normaliseText(content);
+
+      if (persistedRaw !== submittedRaw) {
+        setSaveError(
+          t('profile.userPage.saveVerificationFailed', {
+            defaultValue:
+              'Save response was received, but verification failed. Your draft is still kept. Please try saving again.',
+          }),
+        );
+        return;
       }
-      
-      // 更新用户数据
-      const updatedUser = {
-        ...user,
-        page: {
-          raw: content,
-          html: html,
-        }
-      };
-      
-      // 通知父组件更新
-      onSave(updatedUser);
+
+      localStorage.removeItem(draftStorageKey);
+      setInitialContent(content);
+      setInfoMessage(t('profile.userPage.saveSuccess'));
+      onSave(latestUser);
       onClose();
-    } catch (error) {
-      console.error('Save failed:', error);
-      // Error notification can be added here
+    } catch (error: any) {
+      console.error('Failed to save user page:', error);
+      const backendError =
+        error?.response?.data?.detail?.error ||
+        error?.response?.data?.error ||
+        error?.message ||
+        t('profile.userPage.saveError');
+      setSaveError(backendError);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleCancel = () => {
-    setContent(user.page?.raw || '');
-    onClose();
+    requestClose();
   };
 
-  // 阻止模态框内部的事件冒泡
   const handleModalContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
 
-  // 阻止模态框内部的鼠标事件冒泡
   const handleModalContentMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
@@ -117,11 +207,6 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
     e.stopPropagation();
   };
 
-  // 处理鼠标按下事件，记录按下位置和时间
-  const [mouseDownTarget, setMouseDownTarget] = useState<EventTarget | null>(null);
-  const [mouseDownTime, setMouseDownTime] = useState<number>(0);
-  const [mouseDownPosition, setMouseDownPosition] = useState<{x: number, y: number} | null>(null);
-  
   const handleBackdropMouseDown = (e: React.MouseEvent) => {
     setMouseDownTarget(e.target);
     setMouseDownTime(Date.now());
@@ -130,25 +215,25 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
 
   const handleBackdropMouseUp = (e: React.MouseEvent) => {
     const timeDiff = Date.now() - mouseDownTime;
-    const isQuickClick = timeDiff < 200; // 少于200ms认为是点击而非拖拽
-    
-    // 计算鼠标移动距离
-    const distance = mouseDownPosition ? 
-      Math.sqrt(
-        Math.pow(e.clientX - mouseDownPosition.x, 2) + 
-        Math.pow(e.clientY - mouseDownPosition.y, 2)
-      ) : 0;
-    
-    const isStationary = distance < 5; // 移动距离小于5px认为是点击
-    
-    // 只有在同一个元素上按下和松开，且是快速点击或静止点击，且是背景层时，才关闭模态框
-    if (e.target === e.currentTarget && 
-        mouseDownTarget === e.target && 
-        (isQuickClick || isStationary)) {
-      onClose();
+    const isQuickClick = timeDiff < 200;
+
+    const distance = mouseDownPosition
+      ? Math.sqrt(
+          Math.pow(e.clientX - mouseDownPosition.x, 2) +
+            Math.pow(e.clientY - mouseDownPosition.y, 2),
+        )
+      : 0;
+
+    const isStationary = distance < 5;
+
+    if (
+      e.target === e.currentTarget &&
+      mouseDownTarget === e.target &&
+      (isQuickClick || isStationary)
+    ) {
+      requestClose();
     }
-    
-    // 重置状态
+
     setMouseDownTarget(null);
     setMouseDownTime(0);
     setMouseDownPosition(null);
@@ -157,42 +242,57 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 md:p-4"
       onMouseDown={handleBackdropMouseDown}
       onMouseUp={handleBackdropMouseUp}
     >
-      <div 
+      <div
         className="bg-card rounded-lg shadow-xl w-full max-w-7xl h-[95vh] overflow-hidden flex flex-col"
         onClick={handleModalContentClick}
         onMouseDown={handleModalContentMouseDown}
         onMouseUp={handleModalContentMouseUp}
       >
-        {/* 头部 */}
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             {t('profile.userPage.editTitle')}
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
             <FaTimes className="w-5 h-5" />
           </button>
         </div>
 
-        {/* 内容 */}
         <div className="p-4 md:p-6 overflow-y-auto flex-1">
           <BBCodeEditor
             title={t('profile.userPage.title')}
             value={content}
-            onChange={setContent}
+            onChange={(nextContent) => {
+              setContent(nextContent);
+              setSaveError(null);
+            }}
             placeholder={t('profile.userPage.placeholder')}
             className="min-h-[60vh] h-full"
           />
+
+          {(saveError || infoMessage) && (
+            <div className="mt-4 space-y-2">
+              {saveError && (
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                  {saveError}
+                </div>
+              )}
+              {infoMessage && !saveError && (
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+                  {infoMessage}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* 底部按钮 */}
         <div className="flex items-center justify-end gap-3 p-4 md:p-6 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
           <button
             onClick={handleCancel}
@@ -203,7 +303,7 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
           </button>
           <button
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || !hasUnsavedChanges || content.length > 60000}
             className="flex items-center gap-2 px-6 py-2 bg-osu-pink hover:opacity-90 text-white rounded-lg transition-colors disabled:opacity-50"
           >
             {isSaving ? (
