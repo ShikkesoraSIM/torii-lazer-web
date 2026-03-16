@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { FaSave, FaTimes } from 'react-icons/fa';
 
@@ -51,6 +52,7 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
 
   const [mouseDownTarget, setMouseDownTarget] = useState<EventTarget | null>(null);
   const [mouseDownTime, setMouseDownTime] = useState<number>(0);
@@ -71,8 +73,13 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
   }, [hasUnsavedChanges, isSaving, onClose, t]);
 
   useEffect(() => {
+    setPortalTarget(document.body);
+  }, []);
+
+  useEffect(() => {
     if (!isOpen) {
       document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
       return;
     }
 
@@ -93,6 +100,7 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
     );
 
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape' || e.defaultPrevented) return;
@@ -105,6 +113,7 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
     return () => {
       document.removeEventListener('keydown', handleGlobalKeyDown);
       document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
     };
   }, [isOpen, user.page?.raw, draftStorageKey, t, requestClose]);
 
@@ -240,15 +249,16 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
   };
 
   if (!isOpen) return null;
+  if (!portalTarget) return null;
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 md:p-4"
+      className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-[2px] flex items-start md:items-center justify-center p-2 md:p-4 overflow-y-auto"
       onMouseDown={handleBackdropMouseDown}
       onMouseUp={handleBackdropMouseUp}
     >
       <div
-        className="bg-card rounded-lg shadow-xl w-full max-w-7xl h-[95vh] overflow-hidden flex flex-col"
+        className="bg-card rounded-xl shadow-2xl w-full max-w-7xl max-h-[calc(100dvh-1rem)] md:max-h-[calc(100dvh-2rem)] min-h-0 overflow-hidden flex flex-col my-2 md:my-auto ring-1 ring-white/10"
         onClick={handleModalContentClick}
         onMouseDown={handleModalContentMouseDown}
         onMouseUp={handleModalContentMouseUp}
@@ -265,7 +275,7 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
           </button>
         </div>
 
-        <div className="p-4 md:p-6 overflow-y-auto flex-1">
+        <div className="p-4 md:p-6 overflow-y-auto overscroll-contain flex-1 min-h-0">
           <BBCodeEditor
             title={t('profile.userPage.title')}
             value={content}
@@ -274,7 +284,7 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
               setSaveError(null);
             }}
             placeholder={t('profile.userPage.placeholder')}
-            className="min-h-[60vh] h-full"
+            className="min-h-0"
           />
 
           {(saveError || infoMessage) && (
@@ -293,7 +303,7 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-4 md:p-6 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div className="flex items-center justify-end gap-3 p-4 md:p-6 border-t border-gray-200 dark:border-gray-700 flex-shrink-0 bg-card/95 supports-[backdrop-filter]:bg-card/80 backdrop-blur">
           <button
             onClick={handleCancel}
             disabled={isSaving}
@@ -322,6 +332,8 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, portalTarget);
 };
 
 export default UserPageEditModal;

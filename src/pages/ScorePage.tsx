@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { beatmapAPI, handleApiError, scoreAPI, userAPI } from '../utils/api';
 import type { BestScore } from '../types';
-import { formatScoreClientVersion } from '../utils/clientVersion';
+import { parseScoreClientVersion } from '../utils/clientVersion';
 
 const RANK_ICON_MAP: Record<string, string> = {
   XH: '/image/grades/SS-Silver.svg',
@@ -529,7 +529,7 @@ const ScorePage: React.FC = () => {
   const beatmapPath = getBeatmapPath(score);
   const globalRank = score.rank_global || score.position || null;
   const countryRank = score.rank_country || null;
-  const clientVersionLabel = formatScoreClientVersion(score.client_version);
+  const clientInfo = parseScoreClientVersion(score.client_version);
   const comboText = `${safeInt(score.max_combo).toLocaleString()}${
     score.beatmap?.max_combo ? ` / ${score.beatmap.max_combo.toLocaleString()}` : ''
   }`;
@@ -589,9 +589,18 @@ const ScorePage: React.FC = () => {
                     </Link>
                   </p>
                   <p className="text-sm text-slate-300">Submitted on {formatDateTime(score.ended_at)}</p>
-                  {clientVersionLabel && (
+                  {clientInfo && (
                     <p className="text-xs text-slate-300 mt-1">
-                      Client: <span className="text-slate-100 font-medium">{clientVersionLabel}</span>
+                      Client: <span className="text-slate-100 font-medium">{clientInfo.clientName}</span>
+                    </p>
+                  )}
+                  {clientInfo?.version && (
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      Version:{' '}
+                      <span className="text-slate-200">
+                        {clientInfo.version}
+                        {clientInfo.os ? ` • ${clientInfo.os}` : ''}
+                      </span>
                     </p>
                   )}
                   <div className="flex flex-wrap gap-2 mt-4">

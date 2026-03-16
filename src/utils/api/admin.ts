@@ -254,4 +254,37 @@ export const adminAPI = {
     const response = await api.post('/api/private/admin/global-announcement', payload);
     return response.data;
   },
+
+  // Login audit
+  getLoginLogs: async (params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    user_id?: number;
+    login_success?: boolean;
+    login_method?: string;
+  }) => {
+    const response = await api.get('/api/private/admin/login-logs', { params });
+    return response.data;
+  },
+
+  getUnknownClientHashes: async (params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+  }) => {
+    const response = await api.get('/api/private/admin/client-hashes/unknown', { params });
+    return response.data;
+  },
+
+  assignClientHash: async (payload: {
+    client_hash: string;
+    client_name: string;
+    version?: string;
+    os?: string;
+    remove_from_unknown?: boolean;
+  }) => {
+    const response = await api.post('/api/private/admin/client-hashes/assign', payload);
+    return response.data;
+  },
 };

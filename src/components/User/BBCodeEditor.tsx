@@ -277,6 +277,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
   const insertSize = useCallback((size: number) => {
     insertBBCode(`[size=${size}]`, '[/size]', `${size}px ${t('profile.bbcodeEditor.insertText.text')}`);
   }, [insertBBCode, t]);
+  const editorPaneHeightClass = 'h-[clamp(200px,34vh,420px)]';
 
   return (
     <div className={`${className}`}>
@@ -426,7 +427,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
       <div className="relative">
         {isPreviewMode ? (
           /* 预览模式 */
-          <div className="p-4 min-h-[300px] h-[50vh] overflow-y-auto">
+          <div className={`p-4 min-h-[220px] ${editorPaneHeightClass} overflow-y-auto`}>
             {validationLoading ? (
               <div className="flex items-center justify-center py-8">
                 <LoadingSpinner size="sm" />
@@ -457,7 +458,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
             placeholder={defaultPlaceholder}
             disabled={disabled}
             maxLength={maxLength}
-            className="w-full p-4 min-h-[300px] h-[50vh] resize-none bg-transparent border-none outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full p-4 min-h-[220px] ${editorPaneHeightClass} resize-none bg-transparent border-none outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed`}
             style={{ lineHeight: '1.6' }}
           />
         )}

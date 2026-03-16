@@ -10,12 +10,14 @@ import LazyBackgroundImage from '../UI/LazyBackgroundImage';
 import BeatmapLink from '../UI/BeatmapLink';
 import ScoreActionsMenu from '../Score/ScoreActionsMenu';
 import ScoreModsDisplay from './ScoreModsDisplay';
-import { formatScoreClientVersion } from '../../utils/clientVersion';
+import ClientVersionDisplay from './ClientVersionDisplay';
+import type { ScoreClientDisplayMode } from '../../utils/clientVersion';
 
 interface UserBestScoresProps {
   userId: number;
   selectedMode: GameMode;
   user?: User;
+  clientDisplayMode?: ScoreClientDisplayMode;
   className?: string;
   refreshRef?: React.MutableRefObject<(() => void) | null>;
   onPinnedListRefresh?: () => void;
@@ -82,11 +84,12 @@ const ScoreCard: React.FC<{
   score: BestScore; 
   t: any; 
   profileColor: string;
+  clientDisplayMode?: ScoreClientDisplayMode;
   canEdit?: boolean;
   onPinChange?: (scoreId: number, isPinned: boolean) => void;
   onPinnedListChange?: () => void;
   className?: string;
-}> = ({ score, t, profileColor, canEdit = false, onPinChange, onPinnedListChange, className = '' }) => {
+}> = ({ score, t, profileColor, clientDisplayMode = 'icon', canEdit = false, onPinChange, onPinnedListChange, className = '' }) => {
   // 必取字段处理
   const rank = score.rank; // 等级徽章（S/A/B/C/D/F）
   const title = score.beatmapset?.title_unicode || score.beatmapset?.title || 'Unknown Title';
@@ -96,7 +99,6 @@ const ScoreCard: React.FC<{
   const accuracy = (score.accuracy * 100).toFixed(2); // 命中率（百分比）
   const originalPp = Math.round(score.pp || 0); // 原始pp
   const mods = score.mods || []; // MOD列表
-  const clientVersionLabel = formatScoreClientVersion(score.client_version);
   const isPinned = score.current_user_attributes?.pin?.is_pinned || false; // 是否已置顶
   const hasReplay = score.has_replay || false; // 是否有回放
 
@@ -174,14 +176,11 @@ const ScoreCard: React.FC<{
                   <span className="text-gray-500 dark:text-gray-400">
                     {endedAt}
                   </span>
-                  {clientVersionLabel && (
-                    <span
-                      className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]"
-                      title={clientVersionLabel}
-                    >
-                      {clientVersionLabel}
-                    </span>
-                  )}
+                  <ClientVersionDisplay
+                    clientVersion={score.client_version}
+                    mode={clientDisplayMode}
+                    className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]"
+                  />
                   <Link
                     to={`/scores/${score.id}`}
                     className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
@@ -260,14 +259,11 @@ const ScoreCard: React.FC<{
                 <span className="text-gray-500 dark:text-gray-400">
                   {endedAt}
                 </span>
-                {clientVersionLabel && (
-                  <span
-                    className="text-gray-500 dark:text-gray-400 truncate max-w-[160px]"
-                    title={clientVersionLabel}
-                  >
-                    {clientVersionLabel}
-                  </span>
-                )}
+                <ClientVersionDisplay
+                  clientVersion={score.client_version}
+                  mode={clientDisplayMode}
+                  className="text-gray-500 dark:text-gray-400 truncate max-w-[160px]"
+                />
                 <Link
                   to={`/scores/${score.id}`}
                   className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
@@ -308,7 +304,17 @@ const ScoreCard: React.FC<{
   );
 };
 
-const UserBestScores: React.FC<UserBestScoresProps> = ({ userId, selectedMode, user, className = '', refreshRef, onPinnedListRefresh, pinActionRef, bestScoresActionRef }) => {
+const UserBestScores: React.FC<UserBestScoresProps> = ({
+  userId,
+  selectedMode,
+  user,
+  clientDisplayMode = 'icon',
+  className = '',
+  refreshRef,
+  onPinnedListRefresh,
+  pinActionRef,
+  bestScoresActionRef,
+}) => {
   const { t } = useTranslation();
   const { profileColor } = useProfileColor();
   const { user: currentUser } = useAuth();
@@ -529,6 +535,7 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({ userId, selectedMode, u
                 score={score}
                 t={t}
                 profileColor={profileColor}
+                clientDisplayMode={clientDisplayMode}
                 canEdit={canEdit}
                 onPinChange={handlePinChange}
                 onPinnedListChange={onPinnedListRefresh}

@@ -11,6 +11,11 @@ import { useProfileColor } from '../../contexts/ProfileColorContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiCache } from '../../utils/apiCache';
 import ConfirmationDialog from '../UI/ConfirmationDialog';
+import {
+  getScoreClientDisplayMode,
+  SCORE_CLIENT_DISPLAY_MODE_KEY,
+  type ScoreClientDisplayMode,
+} from '../../utils/clientVersion';
 import type { 
   UserPreferences, 
   BeatmapsetCardSize, 
@@ -187,6 +192,17 @@ const UserPreferencesSection: React.FC = () => {
     }
 
     await updateAndSave('profile_media_show_nsfw', nextValue);
+  };
+
+  const scoreClientDisplayMode = getScoreClientDisplayMode(preferences.extra);
+
+  const handleScoreClientDisplayModeChange = async (value: ScoreClientDisplayMode) => {
+    const nextExtra = {
+      ...(preferences.extra || {}),
+      [SCORE_CLIENT_DISPLAY_MODE_KEY]: value,
+    };
+
+    await updateAndSave('extra', nextExtra);
   };
 
   // 使用 ref 来存储最新的颜色值，避免频繁更新状态
@@ -382,6 +398,25 @@ const UserPreferencesSection: React.FC = () => {
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-osu-pink/20 dark:peer-focus:ring-osu-pink/40 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-osu-pink peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
             </label>
+          </div>
+
+          {/* Score client display mode */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              {t('settings.preferences.profile.scoreClientDisplay')}
+            </label>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+              {t('settings.preferences.profile.scoreClientDisplayDescription')}
+            </p>
+            <CustomSelect
+              value={scoreClientDisplayMode}
+              onChange={(value) => handleScoreClientDisplayModeChange(value as ScoreClientDisplayMode)}
+              disabled={savingFields.has('extra')}
+              options={[
+                { value: 'icon', label: t('settings.preferences.profile.scoreClientDisplayIcon') },
+                { value: 'name', label: t('settings.preferences.profile.scoreClientDisplayName') },
+              ]}
+            />
           </div>
 
           {/* Show NSFW profile media */}

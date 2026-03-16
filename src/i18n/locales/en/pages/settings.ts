@@ -352,6 +352,10 @@ export const settingsPage = {
         legacyScoreOnlyDescription: 'Only display legacy scoring system scores',
         coverExpanded: 'Cover Expanded',
         coverExpandedDescription: 'Expand profile cover by default',
+        scoreClientDisplay: 'Score Client Display',
+        scoreClientDisplayDescription: 'How the client used for scores is shown in profile score cards.',
+        scoreClientDisplayIcon: 'Icon only',
+        scoreClientDisplayName: 'Name + icon',
         colour: 'Profile Color',
         colourDescription: 'Customize profile theme color'
       },

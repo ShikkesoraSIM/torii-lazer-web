@@ -352,6 +352,10 @@ export const settingsPage = {
         legacyScoreOnlyDescription: '仅显示旧版计分系统的分数',
         coverExpanded: '展开头图',
         coverExpandedDescription: '默认展开个人资料头图',
+        scoreClientDisplay: '成绩客户端显示',
+        scoreClientDisplayDescription: '设置在个人资料成绩卡片中如何显示提交客户端。',
+        scoreClientDisplayIcon: '仅图标',
+        scoreClientDisplayName: '名称 + 图标',
         colour: '个人资料颜色',
         colourDescription: '自定义个人资料主题色'
       },

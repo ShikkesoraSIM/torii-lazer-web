@@ -24,6 +24,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useUserPreferences } from '../../hooks/useUserPreferences';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
 import { isDefaultUserCoverUrl, pickBestUserCoverUrl } from '../../utils/profileMedia';
+import { getScoreClientDisplayMode } from '../../utils/clientVersion';
 
 interface UserProfileLayoutProps {
   user: User;
@@ -118,6 +119,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
   const { refreshUser, user: currentUser } = useAuth();
   const { preferences, updatePreference } = useUserPreferences();
   const { profileColor, setProfileColorLocal, resetProfileColor } = useProfileColor();
+  const scoreClientDisplayMode = getScoreClientDisplayMode(preferences.extra);
   
   // 用于跨组件刷新的 ref
   const pinnedScoresRefreshRef = useRef<(() => void) | null>(null);
@@ -432,6 +434,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
             userId={user.id} 
             selectedMode={selectedMode} 
             user={user}
+            clientDisplayMode={scoreClientDisplayMode}
             refreshRef={pinnedScoresRefreshRef}
             onPinActionRef={pinActionRef}
             bestScoresActionRef={bestScoresActionRef}
@@ -444,6 +447,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
             userId={user.id} 
             selectedMode={selectedMode} 
             user={user}
+            clientDisplayMode={scoreClientDisplayMode}
             refreshRef={bestScoresRefreshRef}
             onPinnedListRefresh={() => pinnedScoresRefreshRef.current?.()}
             pinActionRef={pinActionRef}
@@ -457,7 +461,12 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
 
         {/* 用户最近成绩 */}
         <div className="bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
-          <UserRecentScores userId={user.id} selectedMode={selectedMode} user={user} />
+          <UserRecentScores
+            userId={user.id}
+            selectedMode={selectedMode}
+            user={user}
+            clientDisplayMode={scoreClientDisplayMode}
+          />
         </div>
 
         <div className="bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">

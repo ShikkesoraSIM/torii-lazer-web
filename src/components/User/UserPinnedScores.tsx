@@ -10,7 +10,8 @@ import LazyBackgroundImage from '../UI/LazyBackgroundImage';
 import BeatmapLink from '../UI/BeatmapLink';
 import ScoreActionsMenu from '../Score/ScoreActionsMenu';
 import ScoreModsDisplay from './ScoreModsDisplay';
-import { formatScoreClientVersion } from '../../utils/clientVersion';
+import ClientVersionDisplay from './ClientVersionDisplay';
+import type { ScoreClientDisplayMode } from '../../utils/clientVersion';
 import {
   DndContext,
   closestCenter,
@@ -34,6 +35,7 @@ interface UserPinnedScoresProps {
   userId: number;
   selectedMode: GameMode;
   user?: User;
+  clientDisplayMode?: ScoreClientDisplayMode;
   className?: string;
   refreshRef?: React.MutableRefObject<(() => void) | null>;
   onPinActionRef?: React.MutableRefObject<{
@@ -93,9 +95,10 @@ const SortableScoreCard: React.FC<{
   score: BestScore;
   t: any;
   profileColor: string;
+  clientDisplayMode?: ScoreClientDisplayMode;
   canEdit?: boolean;
   onPinChange?: (scoreId: number, isPinned: boolean) => void;
-}> = ({ score, t, profileColor, canEdit, onPinChange }) => {
+}> = ({ score, t, profileColor, clientDisplayMode = 'icon', canEdit, onPinChange }) => {
   const {
     attributes,
     listeners,
@@ -117,6 +120,7 @@ const SortableScoreCard: React.FC<{
         score={score}
         t={t}
         profileColor={profileColor}
+        clientDisplayMode={clientDisplayMode}
         canEdit={canEdit}
         onPinChange={onPinChange}
         dragHandleProps={canEdit ? { ...attributes, ...listeners } : undefined}
@@ -130,11 +134,12 @@ const ScoreCard: React.FC<{
   score: BestScore; 
   t: any; 
   profileColor: string;
+  clientDisplayMode?: ScoreClientDisplayMode;
   canEdit?: boolean;
   onPinChange?: (scoreId: number, isPinned: boolean) => void;
   dragHandleProps?: any;
   className?: string;
-}> = ({ score, t, profileColor, canEdit = false, onPinChange, dragHandleProps, className = '' }) => {
+}> = ({ score, t, profileColor, clientDisplayMode = 'icon', canEdit = false, onPinChange, dragHandleProps, className = '' }) => {
   const rank = score.rank;
   const title = score.beatmapset?.title_unicode || score.beatmapset?.title || 'Unknown Title';
   const artist = score.beatmapset?.artist_unicode || score.beatmapset?.artist || 'Unknown Artist';
@@ -143,7 +148,6 @@ const ScoreCard: React.FC<{
   const accuracy = (score.accuracy * 100).toFixed(2);
   const originalPp = Math.round(score.pp || 0);
   const mods = score.mods || [];
-  const clientVersionLabel = formatScoreClientVersion(score.client_version);
   const isPinned = score.current_user_attributes?.pin?.is_pinned || false;
   const hasReplay = score.has_replay || false;
 
@@ -223,14 +227,11 @@ const ScoreCard: React.FC<{
                   <span className="text-gray-500 dark:text-gray-400">
                     {endedAt}
                   </span>
-                  {clientVersionLabel && (
-                    <span
-                      className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]"
-                      title={clientVersionLabel}
-                    >
-                      {clientVersionLabel}
-                    </span>
-                  )}
+                  <ClientVersionDisplay
+                    clientVersion={score.client_version}
+                    mode={clientDisplayMode}
+                    className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]"
+                  />
                   <Link
                     to={`/scores/${score.id}`}
                     className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
@@ -307,14 +308,11 @@ const ScoreCard: React.FC<{
                 <span className="text-gray-500 dark:text-gray-400">
                   {endedAt}
                 </span>
-                {clientVersionLabel && (
-                  <span
-                    className="text-gray-500 dark:text-gray-400 truncate max-w-[160px]"
-                    title={clientVersionLabel}
-                  >
-                    {clientVersionLabel}
-                  </span>
-                )}
+                <ClientVersionDisplay
+                  clientVersion={score.client_version}
+                  mode={clientDisplayMode}
+                  className="text-gray-500 dark:text-gray-400 truncate max-w-[160px]"
+                />
                 <Link
                   to={`/scores/${score.id}`}
                   className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
@@ -352,7 +350,15 @@ const ScoreCard: React.FC<{
   );
 };
 
-const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({ userId, selectedMode, className = '', refreshRef, onPinActionRef, bestScoresActionRef }) => {
+const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
+  userId,
+  selectedMode,
+  clientDisplayMode = 'icon',
+  className = '',
+  refreshRef,
+  onPinActionRef,
+  bestScoresActionRef,
+}) => {
   const { t } = useTranslation();
   const { profileColor } = useProfileColor();
   const { user: currentUser } = useAuth();
@@ -619,6 +625,7 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({ userId, selectedMod
                   score={score} 
                   t={t} 
                   profileColor={profileColor}
+                  clientDisplayMode={clientDisplayMode}
                   canEdit={canEdit}
                   onPinChange={handlePinChangeFromMenu}
                 />

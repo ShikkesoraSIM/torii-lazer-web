@@ -10,9 +10,18 @@ import AdminBadges from './AdminBadges';
 import AdminTeams from './AdminTeams';
 import AdminDailyChallenges from './AdminDailyChallenges';
 import AdminAnnouncements from './AdminAnnouncements';
+import AdminLoginAudit from './AdminLoginAudit';
 
 
-type AdminTab = 'users' | 'beatmaps' | 'beatmap-list' | 'badges' | 'teams' | 'daily-challenges' | 'announcements';
+type AdminTab =
+  | 'users'
+  | 'beatmaps'
+  | 'beatmap-list'
+  | 'badges'
+  | 'teams'
+  | 'daily-challenges'
+  | 'announcements'
+  | 'login-audit';
 
 interface AdminStats {
   total_users: number;
@@ -289,6 +298,22 @@ const AdminPanel: React.FC = () => {
                     <span>Announcements</span>
                   </div>
                 </button>
+
+                <button
+                  onClick={() => setActiveTab('login-audit')}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                    activeTab === 'login-audit'
+                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                    </svg>
+                    <span>Login Audit</span>
+                  </div>
+                </button>
               </nav>
             </div>
           </div>
@@ -307,6 +332,7 @@ const AdminPanel: React.FC = () => {
                     {activeTab === 'teams' && 'Team Management'}
                     {activeTab === 'daily-challenges' && 'Daily Challenge Management'}
                     {activeTab === 'announcements' && 'Global Announcements'}
+                    {activeTab === 'login-audit' && 'Login Audit & Client Hashes'}
                   </div>
                 </div>
               </div>
@@ -318,6 +344,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'teams' && <AdminTeams />}
                 {activeTab === 'daily-challenges' && <AdminDailyChallenges />}
                 {activeTab === 'announcements' && <AdminAnnouncements />}
+                {activeTab === 'login-audit' && <AdminLoginAudit />}
               </div>
             </div>
           </div>

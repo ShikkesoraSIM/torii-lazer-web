@@ -8,12 +8,14 @@ import LoadingSpinner from '../UI/LoadingSpinner';
 import LazyBackgroundImage from '../UI/LazyBackgroundImage';
 import BeatmapLink from '../UI/BeatmapLink';
 import ScoreModsDisplay from './ScoreModsDisplay';
-import { formatScoreClientVersion } from '../../utils/clientVersion';
+import ClientVersionDisplay from './ClientVersionDisplay';
+import type { ScoreClientDisplayMode } from '../../utils/clientVersion';
 
 interface UserRecentScoresProps {
   userId: number;
   selectedMode: GameMode;
   user?: User;
+  clientDisplayMode?: ScoreClientDisplayMode;
   className?: string;
 }
 
@@ -67,7 +69,14 @@ const getRankIcon = (rank: string) => {
 
 
 // 单个成绩卡片组件 - 基于 osu! 官方设计
-const ScoreCard: React.FC<{ score: BestScore; t: any; profileColor: string; showPP?: boolean; className?: string }> = ({ score, t, profileColor, showPP = true, className = '' }) => {
+const ScoreCard: React.FC<{
+  score: BestScore;
+  t: any;
+  profileColor: string;
+  showPP?: boolean;
+  clientDisplayMode?: ScoreClientDisplayMode;
+  className?: string;
+}> = ({ score, t, profileColor, showPP = true, clientDisplayMode = 'icon', className = '' }) => {
   // 必取字段处理
   const rank = score.rank; // 等级徽章（S/A/B/C/D/F）
   const title = score.beatmapset?.title_unicode || score.beatmapset?.title || 'Unknown Title';
@@ -77,7 +86,6 @@ const ScoreCard: React.FC<{ score: BestScore; t: any; profileColor: string; show
   const accuracy = (score.accuracy * 100).toFixed(2); // 命中率（百分比）
   const originalPp = Math.round(score.pp || 0); // 原始pp
   const mods = score.mods || []; // MOD列表
-  const clientVersionLabel = formatScoreClientVersion(score.client_version);
   const passed = score.passed; // 是否通过
 
   const beatmapUrl = score.beatmap?.url || '#';
@@ -160,14 +168,11 @@ const ScoreCard: React.FC<{ score: BestScore; t: any; profileColor: string; show
                   <span className="text-gray-500 dark:text-gray-400">
                     {endedAt}
                   </span>
-                  {clientVersionLabel && (
-                    <span
-                      className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]"
-                      title={clientVersionLabel}
-                    >
-                      {clientVersionLabel}
-                    </span>
-                  )}
+                  <ClientVersionDisplay
+                    clientVersion={score.client_version}
+                    mode={clientDisplayMode}
+                    className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]"
+                  />
                   <Link
                     to={`/scores/${score.id}`}
                     className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
@@ -243,14 +248,11 @@ const ScoreCard: React.FC<{ score: BestScore; t: any; profileColor: string; show
                 <span className="text-gray-500 dark:text-gray-400">
                   {endedAt}
                 </span>
-                {clientVersionLabel && (
-                  <span
-                    className="text-gray-500 dark:text-gray-400 truncate max-w-[160px]"
-                    title={clientVersionLabel}
-                  >
-                    {clientVersionLabel}
-                  </span>
-                )}
+                <ClientVersionDisplay
+                  clientVersion={score.client_version}
+                  mode={clientDisplayMode}
+                  className="text-gray-500 dark:text-gray-400 truncate max-w-[160px]"
+                />
                 <Link
                   to={`/scores/${score.id}`}
                   className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
@@ -281,7 +283,12 @@ const ScoreCard: React.FC<{ score: BestScore; t: any; profileColor: string; show
   );
 };
 
-const UserRecentScores: React.FC<UserRecentScoresProps> = ({ userId, selectedMode, className = '' }) => {
+const UserRecentScores: React.FC<UserRecentScoresProps> = ({
+  userId,
+  selectedMode,
+  clientDisplayMode = 'icon',
+  className = '',
+}) => {
   const { t } = useTranslation();
   const { profileColor } = useProfileColor();
   const [scores, setScores] = useState<BestScore[]>([]);
@@ -411,6 +418,7 @@ const UserRecentScores: React.FC<UserRecentScoresProps> = ({ userId, selectedMod
                 t={t}
                 profileColor={profileColor}
                 showPP={score.passed}
+                clientDisplayMode={clientDisplayMode}
               />
             ))}
           </div>
