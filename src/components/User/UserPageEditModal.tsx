@@ -102,6 +102,15 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
 
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
+    };
+  }, [isOpen, user.page?.raw, draftStorageKey, t]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape' || e.defaultPrevented) return;
       e.preventDefault();
@@ -109,13 +118,10 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
     };
 
     document.addEventListener('keydown', handleGlobalKeyDown);
-
     return () => {
       document.removeEventListener('keydown', handleGlobalKeyDown);
-      document.body.style.overflow = 'unset';
-      document.documentElement.style.overflow = 'unset';
     };
-  }, [isOpen, user.page?.raw, draftStorageKey, t, requestClose]);
+  }, [isOpen, requestClose]);
 
   useEffect(() => {
     if (!isOpen || !canEdit) return;
