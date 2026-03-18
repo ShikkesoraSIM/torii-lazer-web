@@ -191,7 +191,10 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[1200] bg-black/75 p-3 sm:p-4 overflow-y-auto">
+    <div
+      className="fixed inset-0 z-[1200] bg-black/75 p-3 sm:p-4 overflow-y-auto"
+      style={{ zIndex: 1000002 }}
+    >
       <div className="mx-auto my-auto bg-card rounded-xl shadow-2xl max-w-5xl w-full max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden">
         <div className="shrink-0 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
