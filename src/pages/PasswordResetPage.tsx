@@ -120,11 +120,12 @@ const PasswordResetPage: React.FC = () => {
       if (turnstileRef.current) {
         turnstileRef.current.reset();
       }
-      
-      // 如果是请求过于频繁的错误，说明验证码已发送，直接跳转到重置步骤
-      if (error.response?.data?.error === '请求过于频繁，请稍后再试' || 
-          error.response?.data?.detail?.includes('频繁') ||
-          error.response?.status === 429) {
+      // If request is rate-limited, a code is usually already active.
+      const errorMessage = String(error?.response?.data?.error || '').toLowerCase();
+      const isRateLimited = error?.response?.status === 429 || errorMessage.includes('too many requests');
+
+      // A rate-limited request usually means a valid code was recently requested.
+      if (isRateLimited) {
         toast.success(t('auth.passwordReset.codeSent'));
         setStep('reset');
         setResendCountdown(60);

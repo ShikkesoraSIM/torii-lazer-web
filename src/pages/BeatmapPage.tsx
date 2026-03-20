@@ -215,7 +215,7 @@ const BeatmapPage: React.FC = () => {
     : 'linear-gradient(rgba(15,23,42,0.85), rgba(15,23,42,0.95))';
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://torii.local';
   const selectedMode = selectedBeatmap?.mode || 'osu';
-  const localBeatmapsetUrl = `${window.location.origin}/beatmapsets/${beatmapset.id}#${selectedMode}/${selectedBeatmap.id}`;
+  const osuBeatmapsetUrl = `https://osu.ppy.sh/beatmapsets/${beatmapset.id}#${selectedMode}/${selectedBeatmap.id}`;
   const downloadUrl = `${apiBaseUrl}/api/v2/beatmapsets/${beatmapset.id}/download?noVideo=true`;
 
   return (
@@ -595,7 +595,7 @@ const BeatmapPage: React.FC = () => {
                   </a>
                 )}
                 <a
-                  href={localBeatmapsetUrl}
+                  href={osuBeatmapsetUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full text-center px-4 py-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg transform hover:scale-[1.02]"

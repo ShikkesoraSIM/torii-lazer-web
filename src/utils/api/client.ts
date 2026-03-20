@@ -124,7 +124,6 @@ api.interceptors.response.use(
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         clearAuthCache(); // 清除缓存
-        window.location.href = '/login';
         return Promise.reject(error);
       }
 
@@ -161,12 +160,11 @@ api.interceptors.response.use(
         // 重新发送原始请求
         return api(originalRequest);
       } catch (refreshError) {
-        // Token 刷新失败，清除所有 token 并重定向到登录页
+        // Token 刷新失败，清除本地 token 与认证缓存，由页面自行处理状态
         processQueue(new Error('Token refresh failed'));
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         clearAuthCache(); // 清除缓存
-        window.location.href = '/login';
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

@@ -21,6 +21,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   const isOwnMessage = message.sender_id === currentUser?.id;
   const timestamp = new Date(message.timestamp);
   const locale = i18n.language || (typeof navigator !== 'undefined' ? navigator.language : 'en');
+  const formattedTimestamp = timestamp.toLocaleString(locale, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
 
   return (
     <motion.div
@@ -50,10 +58,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
               {isOwnMessage ? t('messages.chat.you') : message.sender?.username}
             </span>
             <span className="text-xs text-gray-500 dark:text-gray-400">
-              {timestamp.toLocaleTimeString(locale, {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
+              {formattedTimestamp}
             </span>
           </div>
         )}

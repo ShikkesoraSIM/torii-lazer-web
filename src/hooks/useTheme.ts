@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import type { Theme } from '../types';
 
 export const useTheme = () => {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('dark');
 
   useEffect(() => {
     // Check localStorage first
     const savedTheme = localStorage.getItem('theme') as Theme;
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
     const applyTheme = (themeToApply: Theme) => {
       setTheme(themeToApply);
@@ -17,28 +16,10 @@ export const useTheme = () => {
     if (savedTheme) {
       applyTheme(savedTheme);
     } else {
-      // Check system preference
-      const systemTheme = mediaQuery.matches ? 'dark' : 'light';
-      applyTheme(systemTheme);
+      // Torii design assumes a dark baseline. Keep dark by default for consistency
+      // across browsers (Safari in light mode can otherwise produce unreadable text).
+      applyTheme('dark');
     }
-
-    // Listen for system theme changes (only if user hasn't manually set a preference)
-    const handleSystemThemeChange = (e: MediaQueryListEvent) => {
-      const savedTheme = localStorage.getItem('theme');
-      if (!savedTheme) {
-        // Only update if user hasn't set a manual preference
-        const systemTheme = e.matches ? 'dark' : 'light';
-        applyTheme(systemTheme);
-      }
-    };
-
-    // Add listener for system theme changes
-    mediaQuery.addEventListener('change', handleSystemThemeChange);
-
-    // Cleanup listener on unmount
-    return () => {
-      mediaQuery.removeEventListener('change', handleSystemThemeChange);
-    };
   }, []);
 
   const toggleTheme = () => {
