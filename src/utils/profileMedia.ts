@@ -1,3 +1,5 @@
+import { API_BASE_ORIGIN } from './apiBaseUrl';
+
 const DEFAULT_USER_COVER_MARKERS = [
   '/user-profile-covers/default.jpeg',
   '/user-profile-covers/default.jpg',
@@ -19,15 +21,7 @@ type CoverDebugContext = {
   username?: string;
 };
 
-const getApiBaseOrigin = (): string | undefined => {
-  const rawBaseUrl = String(import.meta.env.VITE_API_BASE_URL || '').trim();
-  if (!rawBaseUrl) return undefined;
-  try {
-    return new URL(rawBaseUrl).origin;
-  } catch {
-    return undefined;
-  }
-};
+const getApiBaseOrigin = (): string | undefined => API_BASE_ORIGIN;
 
 const shouldDebugCoverMedia = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -145,3 +139,4 @@ export const pickBestUserCoverUrl = (user?: UserWithCover | null): string | unde
   const candidates = pickUserCoverCandidates(user);
   return candidates[0];
 };
+
