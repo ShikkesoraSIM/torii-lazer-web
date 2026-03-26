@@ -85,7 +85,7 @@ const HeroSection: React.FC = () => {
             <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] tracking-[0.22em] uppercase text-white/55 backdrop-blur-xl">
               <span className="inline-flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/80 shadow-[0_0_18px_rgba(52,211,153,0.45)]" />
-                Singapore Node
+                Europe Node
               </span>
               <span className="text-white/20">•</span>
               <span className="text-white/45">osu!lazer private server</span>
