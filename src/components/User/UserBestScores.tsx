@@ -331,14 +331,49 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
 
   const canEdit = currentUser?.id === userId;
   const currentScoresKey = `${userId}:${selectedMode}`;
+  const cacheKey = `best_scores_${userId}_${selectedMode}`;
 
-  const loadScores = async (reset = false) => {
+  const loadFromCache = useCallback((): BestScore[] | null => {
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (!cached) return null;
+
+      const parsed = JSON.parse(cached) as { scores?: BestScore[]; timestamp?: number };
+      if (!Array.isArray(parsed.scores) || !parsed.timestamp) return null;
+      if (Date.now() - parsed.timestamp > 5 * 60 * 1000) return null;
+
+      return parsed.scores;
+    } catch (e) {
+      console.error('Failed to load best scores from cache:', e);
+      return null;
+    }
+  }, [cacheKey]);
+
+  const saveToCache = useCallback((nextScores: BestScore[]) => {
+    try {
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          scores: nextScores,
+          timestamp: Date.now(),
+        }),
+      );
+    } catch (e) {
+      console.error('Failed to save best scores to cache:', e);
+    }
+  }, [cacheKey]);
+
+  const loadScores = useCallback(async (reset = false, silentRefresh = false) => {
     try {
       const currentOffset = reset ? 0 : offset;
 
       if (reset) {
-        setLoading(true);
-        setError(null);
+        if (!silentRefresh) {
+          setLoading(true);
+        }
+        if (!silentRefresh) {
+          setError(null);
+        }
         setHasMore(true);
       } else {
         setLoadingMore(true);
@@ -353,6 +388,7 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
         hasMoreData = newScores.length === 6;
         setScores(newScores);
         setOffset(newScores.length);
+        saveToCache(newScores);
       } else {
         const totalScores = user?.scores_best_count || 0;
         const currentTotal = scores.length + newScores.length;
@@ -364,13 +400,17 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
       setHasMore(hasMoreData);
     } catch (err) {
       console.error('Failed to load user best scores:', err);
-      setError(t('profile.bestScores.loadFailed'));
-      setHasMore(false);
+      if (!silentRefresh) {
+        setError(t('profile.bestScores.loadFailed'));
+        setHasMore(false);
+      }
     } finally {
-      setLoading(false);
+      if (!silentRefresh) {
+        setLoading(false);
+      }
       setLoadingMore(false);
     }
-  };
+  }, [offset, saveToCache, scores.length, t, selectedMode, user?.scores_best_count, userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -382,23 +422,33 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
       setScores(initialScores);
       setHasMore(initialScores.length === 6);
       setOffset(initialScores.length);
+      saveToCache(initialScores);
       setLoading(false);
+      return;
+    }
+
+    const cachedScores = loadFromCache();
+    if (cachedScores) {
+      setScores(cachedScores);
+      setHasMore(cachedScores.length === 6);
+      setOffset(cachedScores.length);
+      setLoading(false);
+      void loadScores(true, true);
       return;
     }
 
     setScores([]);
     setHasMore(true);
-    loadScores(true);
-  }, [userId, selectedMode, initialScores, initialScoresKey]);
+    void loadScores(true);
+  }, [currentScoresKey, initialScores, initialScoresKey, loadFromCache, loadScores, saveToCache, userId]);
   const handleLoadMore = () => {
     if (!loadingMore && hasMore) {
-      loadScores(false);
+      void loadScores(false);
     }
   };
 
   const handleRefresh = () => {
-    // 刷新当前页面的成绩
-    loadScores(true);
+    void loadScores(true);
   };
 
   // 将刷新函数暴露给父组件
@@ -410,9 +460,9 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
 
   // 更新成绩的置顶状态（供置顶列表调用）
   const updatePinStatus = (scoreId: number, isPinned: boolean) => {
-    setScores(prevScores => 
-      prevScores.map(s => 
-        s.id === scoreId 
+    setScores(prevScores => {
+      const nextScores = prevScores.map(s =>
+        s.id === scoreId
           ? {
               ...s,
               current_user_attributes: {
@@ -424,8 +474,10 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
               }
             }
           : s
-      )
-    );
+      );
+      saveToCache(nextScores);
+      return nextScores;
+    });
   };
 
   // 暴露 updatePinStatus 给置顶列表
@@ -460,9 +512,11 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
     };
 
     // 3. 更新本地状态
-    setScores(prevScores => 
-      prevScores.map(s => s.id === scoreId ? updatedScore : s)
-    );
+    setScores(prevScores => {
+      const nextScores = prevScores.map(s => s.id === scoreId ? updatedScore : s);
+      saveToCache(nextScores);
+      return nextScores;
+    });
 
     // 4. 同步更新置顶列表（在状态更新之外）
     if (pinActionRef?.current) {
