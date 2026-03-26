@@ -213,7 +213,7 @@ const BeatmapPage: React.FC = () => {
   const heroBackground = coverUrl
     ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${coverUrl})`
     : 'linear-gradient(rgba(15,23,42,0.85), rgba(15,23,42,0.95))';
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://torii.local';
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://lazer-api.shikkesora.com';
   const selectedMode = selectedBeatmap?.mode || 'osu';
   const osuBeatmapsetUrl = `https://osu.ppy.sh/beatmapsets/${beatmapset.id}#${selectedMode}/${selectedBeatmap.id}`;
   const downloadUrl = `${apiBaseUrl}/api/v2/beatmapsets/${beatmapset.id}/download?noVideo=true`;

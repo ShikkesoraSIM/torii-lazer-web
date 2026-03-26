@@ -6,7 +6,7 @@ import RankHistoryChart from '../UI/RankHistoryChart';
 import PlayerRankCard from '../User/PlayerRankCard';
 import StatsCard from '../User/StatsCard';
 import LevelProgress from '../UI/LevelProgress';
-import { type User, type GameMode } from '../../types';
+import { type User, type GameMode, type BestScore } from '../../types';
 import FriendStats from './FriendStats';
 import UserRecentActivity from './UserRecentActivity';
 import UserPinnedScores from './UserPinnedScores';
@@ -30,7 +30,9 @@ interface UserProfileLayoutProps {
   user: User;
   selectedMode: GameMode;
   onModeChange: (mode: GameMode) => void;
-  onUserUpdate?: (user: User) => void; // 添加用户更新回调
+  onUserUpdate?: (user: User) => void;
+  initialBestScores?: BestScore[] | null;
+  initialBestScoresKey?: string | null;
 }
 
 const formatPlayTime = (seconds: number | undefined): string => {
@@ -114,7 +116,14 @@ const CoverImage: React.FC<{ src?: string; alt?: string; isExpanded: boolean }> 
   );
 };
 
-const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMode, onModeChange, onUserUpdate }) => {
+const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
+  user,
+  selectedMode,
+  onModeChange,
+  onUserUpdate,
+  initialBestScores,
+  initialBestScoresKey,
+}) => {
   const { t } = useTranslation();
   const { refreshUser, user: currentUser } = useAuth();
   const { preferences, updatePreference } = useUserPreferences();
@@ -447,6 +456,8 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
             userId={user.id} 
             selectedMode={selectedMode} 
             user={user}
+            initialScores={initialBestScores}
+            initialScoresKey={initialBestScoresKey}
             clientDisplayMode={scoreClientDisplayMode}
             refreshRef={bestScoresRefreshRef}
             onPinnedListRefresh={() => pinnedScoresRefreshRef.current?.()}
@@ -493,3 +504,6 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ user, selectedMod
 };
 
 export default UserProfileLayout;
+
+
+
