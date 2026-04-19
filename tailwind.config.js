@@ -53,6 +53,7 @@ export default {
         'slide-up': 'slideUp 0.3s ease-out',
         'bounce-slow': 'bounce 2s infinite',
         'pulse-slow': 'pulse 3s infinite',
+        'title-glow': 'titleGlow 2.4s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -62,6 +63,10 @@ export default {
         slideUp: {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        titleGlow: {
+          '0%, 100%': { opacity: '1', filter: 'brightness(1)' },
+          '50%': { opacity: '0.75', filter: 'brightness(1.5)' },
         },
       },
       backgroundImage: {

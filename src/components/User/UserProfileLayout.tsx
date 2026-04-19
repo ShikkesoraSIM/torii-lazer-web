@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import Avatar from '../UI/Avatar';
 import GameModeSelector from '../UI/GameModeSelector';
 import RankHistoryChart from '../UI/RankHistoryChart';
@@ -15,6 +16,7 @@ import UserRecentScores from './UserRecentScores';
 import UserPageDisplay from './UserPageDisplay';
 import RestrictedBanner from './RestrictedBanner';
 import Badges from './Badges';
+import { UserTitleBadges } from './TitleBadge';
 import Achievements from './Achievements';
 import UserMostPlayedBeatmaps from './UserMostPlayedBeatmaps';
 import UserMappedBeatmaps from './UserMappedBeatmaps';
@@ -289,47 +291,59 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
           </div>
           {/* 用户名 + 国家 + 团队旗帜 */}
           <div className="flex-1">
-            <h1 className="mt-[-12px] md:mt-[-15px] ml-0 md:ml-[-10px] text-xl md:text-3xl font-heading font-bold mb-3 md:mb-2 text-gray-900 dark:text-gray-100 tracking-wide">
+            <h1 className="mt-[-12px] md:mt-[-15px] ml-0 md:ml-[-10px] text-xl md:text-3xl font-heading font-bold mb-1 md:mb-1 text-gray-900 dark:text-gray-100 tracking-wide">
               {user.username}
             </h1>
+            {/* Torii title badges (groups) */}
+            {(user as any).groups?.length > 0 && (
+              <div className="mb-1.5 ml-0 md:ml-[-8px]">
+                <UserTitleBadges groups={(user as any).groups} size="md" />
+              </div>
+            )}
             <div className="mb-2 md:mb-3 ml-0 md:ml-[-8px]">
               <Badges badges={user.badges} />
             </div>
             <div className="flex mt-[-10px] items-center gap-2 md:gap-4 md:mt-[10px] md:ml-[-8px] flex-wrap">
               {/* 国旗和国家名 */}
               {user.country?.code && (
-                <div className="flex items-center gap-2">
+                <Link
+                  to={`/rankings?tab=users&mode=${selectedMode}&country=${encodeURIComponent(user.country.code)}`}
+                  className="group flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                >
                   <img
                     src={`/image/flag/${user.country.code.toLowerCase()}.svg`}
                     alt={user.country.name}
-                    className="h-[20px] md:h-[25px] w-auto rounded-sm object-contain cursor-help"
+                    className="h-[20px] md:h-[25px] w-auto rounded-sm object-contain"
                     loading="lazy"
                     decoding="async"
                     data-tooltip-id="country-tooltip"
-                    data-tooltip-content={user.country?.name || '国家'}
+                    data-tooltip-content={user.country?.name || 'Country'}
                   />
-                  <span className="text-gray-600 dark:text-gray-300 text-sm md:text-base">
-                    {user.country?.code || '国家'}
+                  <span className="text-gray-600 dark:text-gray-300 text-sm md:text-base group-hover:text-primary transition-colors">
+                    {user.country?.code || 'Country'}
                   </span>
-                </div>
+                </Link>
               )}
 
               {/* 团队旗帜和名称 */}
               {user.team && (
-                <div className="flex items-center gap-2">
+                <Link
+                  to={`/teams/${user.team.id}`}
+                  className="group flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                >
                   <img
                     src={user.team.flag_url}
-                    alt="团队旗帜"
-                    className="h-[20px] md:h-[25px] w-auto rounded-sm object-contain cursor-help"
+                    alt="Team flag"
+                    className="h-[20px] md:h-[25px] w-auto rounded-sm object-contain"
                     loading="lazy"
                     decoding="async"
                     data-tooltip-id="team-tooltip"
                     data-tooltip-content={user.team.name}
                   />
-                  <span className="text-gray-600 dark:text-gray-300 text-sm md:text-base">
+                  <span className="text-gray-600 dark:text-gray-300 text-sm md:text-base group-hover:text-primary transition-colors">
                     {user.team.short_name || user.team.name}
                   </span>
-                </div>
+                </Link>
               )}
             </div>
           </div>
@@ -504,6 +518,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
 };
 
 export default UserProfileLayout;
+
 
 
 

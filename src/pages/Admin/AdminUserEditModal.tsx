@@ -5,6 +5,30 @@ import toast from 'react-hot-toast';
 import type { User } from '../../types';
 import CountrySelect from '../../components/UI/CountrySelect';
 
+// ─── Torii title definitions (mirrors g0v0-server/app/models/torii_groups.py) ──
+interface ToriiTitleDef {
+  key: string
+  label: string
+  shortName: string
+  colour: string
+  isElite?: boolean
+}
+
+const TORII_TITLES: ToriiTitleDef[] = [
+  { key: 'admin',         label: 'Torii Admin',       shortName: 'ADM', colour: '#FF3B3B', isElite: true },
+  { key: 'dev',           label: 'Developer',          shortName: 'DEV', colour: '#00E5FF', isElite: true },
+  { key: 'mod',           label: 'Moderator',          shortName: 'MOD', colour: '#4A90E2' },
+  { key: 'qat',           label: 'Quality Assurance',  shortName: 'QAT', colour: '#FFD700' },
+  { key: 'pooler',        label: 'Map Pooler',         shortName: 'MAP', colour: '#B24BF3' },
+  { key: 'tournament',    label: 'Tournament Staff',   shortName: 'TRN', colour: '#3F51B5' },
+  { key: 'advisor-osu',   label: 'osu! Advisor',       shortName: 'ADV', colour: '#FF66AA' },
+  { key: 'advisor-taiko', label: 'Taiko Advisor',      shortName: 'ADV', colour: '#FF6B35' },
+  { key: 'advisor-catch', label: 'Catch Advisor',      shortName: 'ADV', colour: '#26C6A6' },
+  { key: 'advisor-mania', label: 'Mania Advisor',      shortName: 'ADV', colour: '#E91E8C' },
+  { key: 'alumni',        label: 'Alumni',             shortName: 'ALM', colour: '#9E9E9E' },
+  { key: 'supporter',     label: 'Torii Supporter',    shortName: 'SUP', colour: '#FFCA28' },
+];
+
 interface AdminUserEditModalProps {
   user: User;
   countries: Array<{ code: string; name: string }>;
@@ -19,6 +43,7 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, countries
     is_gmt: user.is_gmt || false,
     is_admin: user.is_admin || false,
     selectedBadgeId: null as number | null,
+    torii_titles: ((user as any).torii_titles as string[]) || [],
   });
   const [userBadges, setUserBadges] = useState<any[]>(user.badges || []);
   const [loading, setLoading] = useState(false);
@@ -121,6 +146,7 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, countries
         is_qat: formData.is_qat,
         is_gmt: formData.is_gmt,
         is_admin: formData.is_admin,
+        torii_titles: formData.torii_titles,
       };
 
       await adminAPI.updateUser(user.id, updateData);
@@ -209,6 +235,57 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, countries
                 />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Admin</span>
               </label>
+            </div>
+
+            {/* ── Torii Titles ─────────────────────────────────────────────── */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Torii Titles
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {TORII_TITLES.map((t) => {
+                  const active = formData.torii_titles.includes(t.key);
+                  const toggle = () => {
+                    const next = active
+                      ? formData.torii_titles.filter((k) => k !== t.key)
+                      : [...formData.torii_titles, t.key];
+                    setFormData({ ...formData, torii_titles: next });
+                  };
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={toggle}
+                      title={t.label}
+                      className={`
+                        inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wide
+                        border transition-all duration-150 select-none
+                        ${active ? 'opacity-100' : 'opacity-40 hover:opacity-70'}
+                      `}
+                      style={{
+                        color: t.colour,
+                        borderColor: active ? `${t.colour}88` : `${t.colour}33`,
+                        background: active ? `${t.colour}22` : `${t.colour}0a`,
+                        boxShadow: active && t.isElite ? `0 0 8px ${t.colour}44` : undefined,
+                      }}
+                    >
+                      <span
+                        className="inline-block w-2 h-2 rounded-full shrink-0"
+                        style={{ background: t.colour, opacity: active ? 1 : 0.6 }}
+                      />
+                      {t.shortName}
+                      <span className="font-normal normal-case tracking-normal text-[10px] opacity-75">
+                        {t.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {formData.torii_titles.length > 0 && (
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                  Active: {formData.torii_titles.join(', ')}
+                </p>
+              )}
             </div>
 
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
