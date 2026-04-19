@@ -89,19 +89,28 @@ const AdminDailyChallenges: React.FC = () => {
     }
   };
 
+  // Normalise mods from the API response to a string[] of acronyms for the form.
+  // The server stores mods as APIMod objects [{acronym: "HD"}, ...] but the
+  // form only needs the acronym strings.
+  const parseModsToAcronyms = (raw: string): string[] => {
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map((item: unknown) => {
+        if (typeof item === 'string') return item;
+        if (typeof item === 'object' && item !== null && 'acronym' in item) {
+          return (item as { acronym: string }).acronym;
+        }
+        return null;
+      }).filter(Boolean) as string[];
+    } catch {
+      return [];
+    }
+  };
+
   const handleEdit = (challenge: DailyChallenge) => {
-    let required_mods = [];
-    let allowed_mods = [];
-    try {
-      required_mods = JSON.parse(challenge.required_mods);
-    } catch (e) {
-      console.error('Failed to parse required_mods:', e);
-    }
-    try {
-      allowed_mods = JSON.parse(challenge.allowed_mods);
-    } catch (e) {
-      console.error('Failed to parse allowed_mods:', e);
-    }
+    const required_mods = parseModsToAcronyms(challenge.required_mods);
+    const allowed_mods = parseModsToAcronyms(challenge.allowed_mods);
 
     setEditingChallenge(challenge);
     setFormData({
