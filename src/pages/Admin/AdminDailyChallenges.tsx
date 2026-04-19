@@ -20,19 +20,150 @@ interface DailyChallenge {
   };
 }
 
-const AVAILABLE_MODS = [
-  { acronym: 'NF', name: 'No Fail' },
-  { acronym: 'EZ', name: 'Easy' },
-  { acronym: 'HD', name: 'Hidden' },
-  { acronym: 'HR', name: 'Hard Rock' },
-  { acronym: 'SD', name: 'Sudden Death' },
-  { acronym: 'DT', name: 'Double Time' },
-  { acronym: 'HT', name: 'Half Time' },
-  { acronym: 'NC', name: 'Nightcore' },
-  { acronym: 'FL', name: 'Flashlight' },
-  { acronym: 'SO', name: 'Spun Out' },
-  { acronym: 'PF', name: 'Perfect' },
-];
+type ModEntry = { acronym: string; name: string };
+
+const MODS_BY_RULESET: Record<number, ModEntry[]> = {
+  // osu!
+  0: [
+    { acronym: 'NF', name: 'No Fail' },
+    { acronym: 'EZ', name: 'Easy' },
+    { acronym: 'HT', name: 'Half Time' },
+    { acronym: 'DC', name: 'Daycore' },
+    { acronym: 'HR', name: 'Hard Rock' },
+    { acronym: 'SD', name: 'Sudden Death' },
+    { acronym: 'PF', name: 'Perfect' },
+    { acronym: 'HD', name: 'Hidden' },
+    { acronym: 'DT', name: 'Double Time' },
+    { acronym: 'NC', name: 'Nightcore' },
+    { acronym: 'FL', name: 'Flashlight' },
+    { acronym: 'BL', name: 'Blinds' },
+    { acronym: 'ST', name: 'Strict Tracking' },
+    { acronym: 'AC', name: 'Accuracy Challenge' },
+    { acronym: 'SO', name: 'Spun Out' },
+    { acronym: 'AP', name: 'Autopilot' },
+    { acronym: 'RX', name: 'Relax' },
+    { acronym: 'MU', name: 'Muted' },
+    { acronym: 'NS', name: 'No Scope' },
+    { acronym: 'MG', name: 'Magnetised' },
+    { acronym: 'RP', name: 'Repel' },
+    { acronym: 'AS', name: 'Adaptive Speed' },
+    { acronym: 'FR', name: 'Freeze Frame' },
+    { acronym: 'BU', name: 'Bubbles' },
+    { acronym: 'SY', name: 'Synesthesia' },
+    { acronym: 'WU', name: 'Wind Up' },
+    { acronym: 'WD', name: 'Wind Down' },
+    { acronym: 'SI', name: 'Spin In' },
+    { acronym: 'GR', name: 'Grow' },
+    { acronym: 'DF', name: 'Deflate' },
+    { acronym: 'WG', name: 'Wiggle' },
+    { acronym: 'BR', name: 'Barrel Roll' },
+    { acronym: 'DP', name: 'Depth' },
+    { acronym: 'TR', name: 'Transform' },
+    { acronym: 'AD', name: 'Approach Different' },
+    { acronym: 'TD', name: 'Touch Device' },
+    { acronym: 'TC', name: 'Taps Count' },
+    { acronym: 'AL', name: 'Alternate' },
+    { acronym: 'SG', name: 'Single Tap' },
+    { acronym: 'CL', name: 'Classic' },
+    { acronym: 'DA', name: 'Difficulty Adjust' },
+    { acronym: 'MR', name: 'Mirror' },
+    { acronym: 'RD', name: 'Random' },
+    { acronym: 'TP', name: 'Target Practice' },
+    { acronym: 'BM', name: 'Bloom' },
+  ],
+  // osu!taiko
+  1: [
+    { acronym: 'NF', name: 'No Fail' },
+    { acronym: 'EZ', name: 'Easy' },
+    { acronym: 'HT', name: 'Half Time' },
+    { acronym: 'DC', name: 'Daycore' },
+    { acronym: 'HR', name: 'Hard Rock' },
+    { acronym: 'SD', name: 'Sudden Death' },
+    { acronym: 'PF', name: 'Perfect' },
+    { acronym: 'HD', name: 'Hidden' },
+    { acronym: 'DT', name: 'Double Time' },
+    { acronym: 'NC', name: 'Nightcore' },
+    { acronym: 'FL', name: 'Flashlight' },
+    { acronym: 'AC', name: 'Accuracy Challenge' },
+    { acronym: 'RX', name: 'Relax' },
+    { acronym: 'MU', name: 'Muted' },
+    { acronym: 'SW', name: 'Swap' },
+    { acronym: 'SG', name: 'Single Tap' },
+    { acronym: 'CL', name: 'Classic' },
+    { acronym: 'CS', name: 'Constant Speed' },
+    { acronym: 'DA', name: 'Difficulty Adjust' },
+    { acronym: 'RD', name: 'Random' },
+    { acronym: 'SR', name: 'Simplified Rhythm' },
+    { acronym: 'AS', name: 'Adaptive Speed' },
+    { acronym: 'WU', name: 'Wind Up' },
+    { acronym: 'WD', name: 'Wind Down' },
+  ],
+  // osu!catch
+  2: [
+    { acronym: 'NF', name: 'No Fail' },
+    { acronym: 'EZ', name: 'Easy' },
+    { acronym: 'HT', name: 'Half Time' },
+    { acronym: 'DC', name: 'Daycore' },
+    { acronym: 'HR', name: 'Hard Rock' },
+    { acronym: 'SD', name: 'Sudden Death' },
+    { acronym: 'PF', name: 'Perfect' },
+    { acronym: 'HD', name: 'Hidden' },
+    { acronym: 'DT', name: 'Double Time' },
+    { acronym: 'NC', name: 'Nightcore' },
+    { acronym: 'FL', name: 'Flashlight' },
+    { acronym: 'AC', name: 'Accuracy Challenge' },
+    { acronym: 'RX', name: 'Relax' },
+    { acronym: 'MU', name: 'Muted' },
+    { acronym: 'NS', name: 'No Scope' },
+    { acronym: 'MR', name: 'Mirror' },
+    { acronym: 'CL', name: 'Classic' },
+    { acronym: 'DA', name: 'Difficulty Adjust' },
+    { acronym: 'FF', name: 'Floating Fruits' },
+    { acronym: 'MF', name: 'Moving Fast' },
+    { acronym: 'WU', name: 'Wind Up' },
+    { acronym: 'WD', name: 'Wind Down' },
+  ],
+  // osu!mania
+  3: [
+    { acronym: 'NF', name: 'No Fail' },
+    { acronym: 'EZ', name: 'Easy' },
+    { acronym: 'HT', name: 'Half Time' },
+    { acronym: 'DC', name: 'Daycore' },
+    { acronym: 'NR', name: 'No Release' },
+    { acronym: 'HR', name: 'Hard Rock' },
+    { acronym: 'SD', name: 'Sudden Death' },
+    { acronym: 'PF', name: 'Perfect' },
+    { acronym: 'HD', name: 'Hidden' },
+    { acronym: 'FI', name: 'Fade In' },
+    { acronym: 'CO', name: 'Cover' },
+    { acronym: 'FL', name: 'Flashlight' },
+    { acronym: 'DT', name: 'Double Time' },
+    { acronym: 'NC', name: 'Nightcore' },
+    { acronym: 'AC', name: 'Accuracy Challenge' },
+    { acronym: 'MU', name: 'Muted' },
+    { acronym: 'IN', name: 'Invert' },
+    { acronym: 'MR', name: 'Mirror' },
+    { acronym: 'RD', name: 'Random' },
+    { acronym: 'DA', name: 'Difficulty Adjust' },
+    { acronym: 'CL', name: 'Classic' },
+    { acronym: 'CS', name: 'Constant Speed' },
+    { acronym: 'DS', name: 'Dual Stages' },
+    { acronym: 'HO', name: 'Hold Off' },
+    { acronym: 'AS', name: 'Adaptive Speed' },
+    { acronym: 'WU', name: 'Wind Up' },
+    { acronym: 'WD', name: 'Wind Down' },
+    { acronym: '1K', name: '1K' },
+    { acronym: '2K', name: '2K' },
+    { acronym: '3K', name: '3K' },
+    { acronym: '4K', name: '4K' },
+    { acronym: '5K', name: '5K' },
+    { acronym: '6K', name: '6K' },
+    { acronym: '7K', name: '7K' },
+    { acronym: '8K', name: '8K' },
+    { acronym: '9K', name: '9K' },
+    { acronym: '10K', name: '10K' },
+  ],
+};
 
 const AdminDailyChallenges: React.FC = () => {
   const [challenges, setChallenges] = useState<DailyChallenge[]>([]);
@@ -48,6 +179,9 @@ const AdminDailyChallenges: React.FC = () => {
     max_attempts: '',
     time_limit: '',
   });
+
+  // Mods available for the currently selected ruleset
+  const availableMods = MODS_BY_RULESET[Number(formData.ruleset_id)] ?? MODS_BY_RULESET[0];
 
   useEffect(() => {
     loadChallenges();
@@ -346,7 +480,7 @@ const AdminDailyChallenges: React.FC = () => {
                     </label>
                     <select
                       value={formData.ruleset_id}
-                      onChange={(e) => setFormData({ ...formData, ruleset_id: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, ruleset_id: e.target.value, required_mods: [], allowed_mods: [] })}
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-osu-pink/20 focus:border-osu-pink outline-none"
                       required
                     >
@@ -362,8 +496,8 @@ const AdminDailyChallenges: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Required Mods
                   </label>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-                    {AVAILABLE_MODS.map((mod) => (
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-gray-600 max-h-48 overflow-y-auto">
+                    {availableMods.map((mod) => (
                       <label key={mod.acronym} className="flex items-center gap-2 cursor-pointer group">
                         <input
                           type="checkbox"
@@ -388,8 +522,8 @@ const AdminDailyChallenges: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Allowed Mods
                   </label>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-                    {AVAILABLE_MODS.map((mod) => (
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-gray-600 max-h-48 overflow-y-auto">
+                    {availableMods.map((mod) => (
                       <label key={mod.acronym} className="flex items-center gap-2 cursor-pointer group">
                         <input
                           type="checkbox"
