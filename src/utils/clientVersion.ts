@@ -22,7 +22,8 @@ const detectClientName = (text: string, version: string | null): string => {
   const lower = text.toLowerCase();
   const versionLower = (version || '').toLowerCase();
 
-  if (lower.includes('shigetiro') || versionLower.includes('shigetiro')) return 'Shigetiro Client';
+  if (lower.includes('torii') || versionLower.includes('torii')) return 'Torii Client';
+  if (lower.includes('shigetiro') || versionLower.includes('shigetiro')) return 'Torii Client'; // legacy builds
   if (lower.includes('tachyon') || versionLower.includes('tachyon')) return 'Tachyon Client';
   if (lower.includes('osu!') || lower.includes('osulazer') || lower.includes('osu lazer')) return 'osu!lazer';
 

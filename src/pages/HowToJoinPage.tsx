@@ -1,8 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
-const SHIGETIRO_PORTABLE_URL =
-  "https://github.com/shigetiro/osu/releases/latest/download/osulazer-win-Portable.zip";
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const TORII_CLIENT_URL =
+  "https://github.com/ShikkesoraSIM/torii-osu/releases/latest";
 
 const INJECTOR_RELEASES_URL =
   "https://github.com/MingxuanGame/LazerAuthlibInjection/releases/latest";
@@ -11,9 +13,13 @@ const SERVER_HOST = "lazer-api.shikkesora.com";
 const API_URL = "https://lazer-api.shikkesora.com";
 const WEBSITE_URL = "https://lazer.shikkesora.com";
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function cx(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
+
+// ─── Small reusable pieces ────────────────────────────────────────────────────
 
 function CopyButton({
   value,
@@ -29,24 +35,17 @@ function CopyButton({
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(value);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 900);
     } catch {
-      // fallback: select + execCommand
       const ta = document.createElement("textarea");
       ta.value = value;
       ta.style.position = "fixed";
       ta.style.left = "-9999px";
       document.body.appendChild(ta);
       ta.select();
-      try {
-        document.execCommand("copy");
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 900);
-      } finally {
-        document.body.removeChild(ta);
-      }
+      try { document.execCommand("copy"); } finally { document.body.removeChild(ta); }
     }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 900);
   };
 
   return (
@@ -60,10 +59,8 @@ function CopyButton({
         accent === "violet" && "hover:border-violet-400/30",
         className
       )}
-      aria-label="Copy to clipboard"
-      title="Copy"
     >
-      {copied ? "Copied" : "Copy"}
+      {copied ? "Copied ✓" : "Copy"}
     </button>
   );
 }
@@ -78,494 +75,614 @@ function CodeBox({
   accent?: "fuchsia" | "violet";
 }) {
   return (
-    <div
-      className={cx(
-        "mt-3 rounded-2xl border bg-black/30 p-4",
-        accent === "fuchsia" && "border-fuchsia-400/20",
-        accent === "violet" && "border-violet-400/20"
-      )}
-    >
+    <div className={cx("mt-3 rounded-2xl border bg-black/30 p-4", accent === "fuchsia" ? "border-fuchsia-400/20" : "border-violet-400/20")}>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="text-xs uppercase tracking-wider text-white/40">
-          {label}
-        </div>
+        <div className="text-xs uppercase tracking-wider text-white/40">{label}</div>
         <CopyButton value={value} accent={accent} />
       </div>
-
-      <code
-        className={cx(
-          "block select-text break-all rounded-xl border border-white/10 bg-black/20 px-3 py-2 font-mono text-sm",
-          accent === "fuchsia" && "text-fuchsia-200",
-          accent === "violet" && "text-violet-200"
-        )}
-      >
+      <code className={cx("block select-text break-all rounded-xl border border-white/10 bg-black/20 px-3 py-2 font-mono text-sm", accent === "fuchsia" ? "text-fuchsia-200" : "text-violet-200")}>
         {value}
       </code>
-
-      <div className="mt-2 text-[11px] text-white/35">
-        Tip: you can also click-drag to select.
-      </div>
     </div>
   );
 }
 
+// ─── Feature card data ────────────────────────────────────────────────────────
+
+interface FeatureItem {
+  icon: string;
+  title: string;
+  tag: string;
+  tagColor: string;
+  description: string;
+  preview: React.ReactNode;
+}
+
+const FEATURES: FeatureItem[] = [
+  {
+    icon: "📊",
+    title: "pp-dev calculations",
+    tag: "osu! standard",
+    tagColor: "fuchsia",
+    description:
+      "Torii runs the latest pp-dev algorithm — the bleeding-edge version of the pp system before it ships to stable. Your scores reflect the most up-to-date skill weighting.",
+    preview: (
+      <div className="mt-3 rounded-xl border border-fuchsia-400/20 bg-black/30 p-3 text-xs font-mono">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="rounded bg-fuchsia-500/20 border border-fuchsia-400/30 px-2 py-0.5 text-fuchsia-200 text-[11px] font-bold tracking-wide">PP-DEV</span>
+          <span className="text-white/50">enabled</span>
+        </div>
+        <div className="text-white/50 text-[11px]">Using latest pp-dev calculations.</div>
+        <div className="mt-2 flex items-center gap-2">
+          <span className="text-white/40">pp</span>
+          <span className="text-fuchsia-300 font-bold text-base">492pp</span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    icon: "📋",
+    title: "Daily Briefing",
+    tag: "exclusive",
+    tagColor: "pink",
+    description:
+      "Every time you open the client, Torii shows a smart daily summary: rank changes, pp gained or lost from recalculations, your top-gaining and worst-losing scores, and more.",
+    preview: (
+      <div className="mt-3 rounded-xl border border-pink-400/20 bg-black/30 p-3 text-xs">
+        <div className="text-[10px] uppercase tracking-widest text-pink-400 mb-1">Rank Pulse</div>
+        <div className="text-white font-semibold text-sm mb-0.5">Your rank held steady</div>
+        <div className="text-white/50 text-[11px] mb-3">#100 → #100 / 693pp (+0.00pp)</div>
+        <div className="text-[10px] uppercase tracking-widest text-pink-400 mb-1">Recalculation Watch</div>
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5">
+            <span className="text-green-400 text-[10px]">▲</span>
+            <span className="text-green-300 text-[11px]">+17.36pp</span>
+            <span className="text-white/40 text-[11px] truncate">Party Favor - Booty Loose...</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-red-400 text-[10px]">▼</span>
+            <span className="text-red-300 text-[11px]">-9.37pp</span>
+            <span className="text-white/40 text-[11px] truncate">Erika - I Don't Know...</span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    icon: "🎨",
+    title: "Custom UI hue",
+    tag: "exclusive",
+    tagColor: "pink",
+    description:
+      "Dial in the exact color you want for the entire client — menus, overlays, song select, settings panel. One slider, full 360° control. Apply it everywhere or just in specific places.",
+    preview: (
+      <div className="mt-3 rounded-xl border border-purple-400/20 bg-black/30 p-3 text-xs">
+        <div className="text-white/50 text-[11px] mb-2">Custom UI hue</div>
+        <div className="flex items-center gap-3">
+          <div className="h-2 flex-1 rounded-full" style={{ background: "linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)" }} />
+          <span className="text-white font-bold text-sm rounded-lg px-2 py-1" style={{ background: "#7c3aed" }}>280°</span>
+        </div>
+        <div className="mt-2 text-white/40 text-[10px]">Applied to: menus · overlays · settings panel</div>
+      </div>
+    ),
+  },
+  {
+    icon: "🔀",
+    title: "Multi-server in one click",
+    tag: "exclusive",
+    tagColor: "pink",
+    description:
+      "Switch between Torii, g0v0, vipsu, m1pp and other compatible servers directly from the settings panel. No manual URL editing — just tap and reconnect.",
+    preview: (
+      <div className="mt-3 rounded-xl border border-blue-400/20 bg-black/30 p-3 text-xs">
+        <div className="text-white/50 text-[11px] mb-2">Popular Torii-compatible servers</div>
+        <div className="flex flex-wrap gap-1.5">
+          {(["Torii", "g0v0", "vipsu", "m1pp"] as const).map((s, i) => (
+            <span key={s} className={cx("rounded-full px-3 py-1 text-[11px] font-semibold border", i === 0 ? "bg-fuchsia-500/20 border-fuchsia-400/40 text-fuchsia-200" : "bg-white/5 border-white/10 text-white/60")}>{s}</span>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    icon: "🥁",
+    title: "Mania & Taiko Sunny rework",
+    tag: "mania / taiko",
+    tagColor: "yellow",
+    description:
+      "Updated pp calculations for osu!mania and Taiko based on the Sunny algorithm — a more accurate model for column-based, jack, stream, and LN gameplay.",
+    preview: (
+      <div className="mt-3 rounded-xl border border-yellow-400/20 bg-black/30 p-3 text-xs">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="rounded bg-yellow-500/20 border border-yellow-400/30 px-2 py-0.5 text-yellow-200 text-[11px] font-bold">Mania</span>
+          <span className="text-white/40 text-[11px]">Sunny rework active</span>
+        </div>
+        <div className="text-white/55 text-[11px]">Skill-based weighting for 4K–8K, jack, stream, and LN patterns.</div>
+      </div>
+    ),
+  },
+  {
+    icon: "🎯",
+    title: "CTB & Taiko Relax leaderboards",
+    tag: "new",
+    tagColor: "green",
+    description:
+      "osu!catch RX and Taiko RX have fully separate leaderboards and stats. Relax scores no longer share the same board as base mode.",
+    preview: (
+      <div className="mt-3 rounded-xl border border-green-400/20 bg-black/30 p-3 text-xs">
+        <div className="space-y-1.5">
+          {(["osu!catch → Catch RX", "osu!taiko → Taiko RX"] as const).map(line => (
+            <div key={line} className="text-white/60 text-[11px]">
+              {line.split(" → ").map((part, i) => (
+                <span key={i}>
+                  {i > 0 && <span className="text-white/30 mx-1">→</span>}
+                  {i === 1
+                    ? <span className="rounded bg-green-500/15 border border-green-400/25 px-1.5 py-0.5 text-green-300">{part}</span>
+                    : part}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    icon: "💾",
+    title: "Zero-loss migration",
+    tag: "setup",
+    tagColor: "sky",
+    description:
+      "The built-in setup wizard detects your existing osu! install and migrates maps, skins, scores, and settings automatically. No manual copying. No starting from scratch.",
+    preview: (
+      <div className="mt-3 rounded-xl border border-sky-400/20 bg-black/30 p-3 text-xs">
+        <div className="space-y-1.5 text-[11px]">
+          {["Maps & beatmaps", "Skins", "Settings & keybinds", "Local scores"].map(item => (
+            <div key={item} className="flex items-center gap-2">
+              <span className="text-green-400 font-bold">✓</span>
+              <span className="text-white/60">{item} migrated automatically</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    icon: "⚡",
+    title: "Performance extras",
+    tag: "performance",
+    tagColor: "orange",
+    description:
+      "Unlimited FPS, NVIDIA Reflex support, AMD Anti-Lag 2 — the performance-first extras baked right into the Torii client.",
+    preview: (
+      <div className="mt-3 rounded-xl border border-orange-400/20 bg-black/30 p-3 text-xs">
+        <div className="space-y-1.5 text-[11px]">
+          {["Unlimited FPS", "NVIDIA Reflex", "AMD Anti-Lag 2"].map(item => (
+            <div key={item} className="flex items-center gap-2">
+              <span className="text-orange-400">⚡</span>
+              <span className="text-white/70">{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+];
+
+const TAG_COLORS: Record<string, string> = {
+  fuchsia: "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200",
+  pink: "border-pink-400/30 bg-pink-500/10 text-pink-200",
+  violet: "border-violet-400/30 bg-violet-500/10 text-violet-200",
+  yellow: "border-yellow-400/30 bg-yellow-500/10 text-yellow-200",
+  green: "border-green-400/30 bg-green-500/10 text-green-200",
+  sky: "border-sky-400/30 bg-sky-500/10 text-sky-200",
+  orange: "border-orange-400/30 bg-orange-500/10 text-orange-200",
+};
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
 export default function HowToJoinPage() {
-  const portableRef = useRef<HTMLDivElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const toriiSetupRef = useRef<HTMLDivElement>(null);
   const injectorRef = useRef<HTMLDivElement>(null);
 
-  // Fix the “harsh top edge under navbar” by ensuring the document background matches this page.
   useEffect(() => {
-    const prevBodyBg = document.body.style.background;
-    const prevHtmlBg = document.documentElement.style.background;
-
+    const prev = document.body.style.background;
+    const prevHtml = document.documentElement.style.background;
     document.body.style.background = "#030014";
     document.documentElement.style.background = "#030014";
-
     return () => {
-      document.body.style.background = prevBodyBg;
-      document.documentElement.style.background = prevHtmlBg;
+      document.body.style.background = prev;
+      document.documentElement.style.background = prevHtml;
     };
   }, []);
 
-  const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
+  const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) =>
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const Card = ({
-    children,
-    onClick,
-    className,
-  }: {
-    children: React.ReactNode;
-    onClick?: () => void;
-    className?: string;
-  }) => (
-    <div
-      onClick={onClick}
-      className={cx(
-        "rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur",
-        onClick && "cursor-pointer transition hover:bg-white/10",
-        className
-      )}
-      role={onClick ? "button" : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={
-        onClick
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") onClick();
-            }
-          : undefined
-      }
-    >
-      {children}
-    </div>
-  );
-
-  const CTAButton = ({
-    children,
-    accent = "neutral",
-  }: {
-    children: React.ReactNode;
-    accent?: "neutral" | "fuchsia" | "violet";
-  }) => (
-    <div className="mt-6">
-      <div
-        className={cx(
-          "inline-flex w-full items-center justify-center rounded-2xl border px-4 py-3 text-sm font-semibold transition",
-          "border-white/10 bg-black/30 text-white hover:border-white/20 hover:bg-black/40",
-          accent === "fuchsia" && "hover:border-fuchsia-400/30",
-          accent === "violet" && "hover:border-violet-400/30"
-        )}
-      >
-        {children}
-      </div>
-    </div>
-  );
-
-  const Title = useMemo(
-    () => ({
-      title: "Join Shikkesora (osu!lazer private server)",
-      subtitle:
-        "Pick a method. The Shigetiro portable client is a separate performance-focused build. The injector method uses your normal osu!lazer install so you keep all your maps, skins and data — and you can switch back anytime.",
-    }),
-    []
-  );
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#030014]">
-      {/* Shikkesora-style background blobs */}
+      {/* Background blobs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-56 -left-56 h-[640px] w-[640px] rounded-full bg-fuchsia-500/20 blur-[150px]" />
         <div className="absolute top-1/3 -right-56 h-[640px] w-[640px] rounded-full bg-violet-500/20 blur-[150px]" />
         <div className="absolute bottom-[-260px] left-1/3 h-[640px] w-[640px] rounded-full bg-sky-400/10 blur-[160px]" />
-
-        {/* Soft top fade to avoid any harsh banding near the navbar area */}
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#030014] via-[#030014]/80 to-transparent" />
       </div>
 
-      {/* Slightly more top padding so it never feels “cut” under nav */}
-      <div className="relative mx-auto max-w-6xl px-6 pb-24 pt-20 md:pt-24">
-        {/* Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 18 }}
+      <div className="relative mx-auto max-w-6xl px-6 pb-32 pt-20 md:pt-24">
+
+        {/* ── Hero ─────────────────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 text-center text-4xl font-bold tracking-tight text-white md:text-5xl"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
         >
-          {Title.title}
-        </motion.h1>
+          <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-4 py-1.5 text-sm text-fuchsia-200 mb-6">
+            <span>🎌</span>
+            <span>Play on Torii</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
+            Join the Torii server
+          </h1>
+          <p className="mx-auto max-w-2xl text-white/60 text-lg">
+            Pick a method. The{" "}
+            <span className="text-fuchsia-300 font-medium">Torii osu! client</span>{" "}
+            is recommended — it comes with exclusive features and migrates your existing data automatically. The injector lets you use your current osu!lazer install instead.
+          </p>
+        </motion.div>
 
-        <p className="mx-auto mb-14 max-w-3xl text-center text-white/70">
-          {Title.subtitle}
-        </p>
+        {/* ── Two option cards ──────────────────────────────────────────── */}
+        <div className="grid gap-6 md:grid-cols-2 mb-8">
 
-        {/* Two big option cards */}
-        <div className="grid gap-8 md:grid-cols-2">
-          {/* Portable (Shigetiro) */}
-          <Card
-            onClick={() => scrollTo(portableRef)}
-            className="flex h-full flex-col hover:border-fuchsia-400/40"
+          {/* Torii Client (recommended) */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.1 }}
+            onClick={() => scrollTo(featuresRef)}
+            className="relative cursor-pointer rounded-3xl border border-fuchsia-400/30 bg-gradient-to-br from-fuchsia-950/60 via-purple-950/40 to-black/40 p-8 backdrop-blur transition hover:border-fuchsia-400/60 group flex flex-col"
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") scrollTo(featuresRef); }}
           >
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <h2 className="text-2xl font-semibold leading-tight text-white">
-                Shigetiro portable custom client
-              </h2>
-              <span className="shrink-0 rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-3 py-1 text-xs text-fuchsia-200">
-                Performance build
-              </span>
+            {/* Hover glow */}
+            <div className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ boxShadow: "0 0 60px rgba(232,72,229,0.10) inset" }} />
+
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-fuchsia-400/40 bg-fuchsia-500/15 px-3 py-1 text-xs font-semibold text-fuchsia-200 mb-3">
+                  ✨ Recommended
+                </span>
+                <h2 className="text-2xl font-bold text-white leading-tight">
+                  Torii osu! Client
+                </h2>
+              </div>
+              <div className="text-4xl select-none">🎌</div>
             </div>
 
-            <p className="mb-5 text-white/70">
-              Standalone portable build by Shigetiro. Best if you want the extra
-              performance features and don’t mind using a separate install.
+            <p className="text-white/65 mb-6 leading-relaxed text-sm">
+              A custom build of osu!lazer made for Torii. Comes with exclusive features and a setup wizard that automatically migrates your maps, skins, and settings from your existing osu! install — no starting from scratch.
             </p>
 
-            <div className="mb-6 rounded-2xl border border-white/10 bg-black/20 p-5">
-              <p className="mb-3 text-sm font-semibold text-white">Features</p>
-              <ul className="space-y-2 text-sm text-white/70">
-                <li>• Unlimited FPS (no artificial cap)</li>
-                <li>• NVIDIA Reflex support</li>
-                <li>• AMD Anti-Lag 2 support</li>
-                <li>• Portable install (runs from its own folder)</li>
-              </ul>
+            {/* Feature pills */}
+            <div className="flex flex-wrap gap-1.5 mb-6">
+              {["pp-dev calculations", "Daily briefing", "Custom UI hue", "Multi-server", "Mania Sunny rework", "Zero-loss migration", "Unlimited FPS"].map(f => (
+                <span key={f} className="rounded-full border border-fuchsia-400/20 bg-fuchsia-500/5 px-2.5 py-1 text-xs text-fuchsia-200/75">{f}</span>
+              ))}
             </div>
 
-            <div className="rounded-2xl border border-red-400/20 bg-red-500/5 p-5">
-              <p className="mb-3 text-sm font-semibold text-white">
-                Downsides / things to know
-              </p>
-              <ul className="space-y-2 text-sm text-white/70">
-                <li className="text-red-300">
-                  • You won’t have your existing maps, skins, settings, or local
-                  data by default (it’s a separate install).
-                </li>
-                <li className="text-red-300">
-                  • If you want your maps/skins here too, you’ll need to
-                  import/copy them manually.
-                </li>
-                <li className="text-red-300">
-                  • This build may not always be perfectly in-sync with the
-                  latest official osu!lazer features/updates.
-                </li>
-              </ul>
+            <div className="mt-auto">
+              <div className="flex items-center justify-center gap-2 w-full rounded-2xl border border-fuchsia-400/40 bg-fuchsia-500/15 px-4 py-3 text-sm font-semibold text-white transition group-hover:bg-fuchsia-500/25 group-hover:border-fuchsia-400/60">
+                <span>Explore features & setup</span>
+                <motion.span
+                  animate={{ y: [0, 3, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                  className="text-fuchsia-300"
+                >↓</motion.span>
+              </div>
+              <p className="mt-2 text-xs text-white/30 text-center">Click to see what's inside</p>
             </div>
-
-            {/* Push CTA + hint to the bottom so both cards align */}
-            <div className="mt-auto pt-6">
-              <CTAButton accent="fuchsia">Choose portable</CTAButton>
-              <p className="mt-3 text-xs text-white/40">
-                Click to view setup steps ↓
-              </p>
-            </div>
-          </Card>
+          </motion.div>
 
           {/* Injector */}
-          <Card
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.2 }}
             onClick={() => scrollTo(injectorRef)}
-            className="flex h-full flex-col hover:border-violet-400/40"
+            className="cursor-pointer rounded-3xl border border-white/8 bg-white/3 p-8 backdrop-blur transition hover:border-violet-400/30 hover:bg-white/5 group flex flex-col"
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") scrollTo(injectorRef); }}
           >
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <h2 className="text-2xl font-semibold leading-tight text-white">
-                Injector (keep your normal osu!lazer install)
-              </h2>
-              <span className="shrink-0 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1 text-xs text-violet-200">
-                Official-like
-              </span>
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-200 mb-3">
+                  Official-compatible
+                </span>
+                <h2 className="text-2xl font-bold text-white leading-tight">
+                  Injector method
+                </h2>
+              </div>
+              <div className="text-4xl select-none">💉</div>
             </div>
 
-            <p className="mb-5 text-white/70">
-              Connect using an injector with your existing osu!lazer. This keeps
-              your maps, skins, settings and data, and works with the latest
-              official builds.
+            <p className="text-white/65 mb-6 leading-relaxed text-sm">
+              Use an auth injector with your current osu!lazer install. Your maps, skins, settings, and local scores stay exactly where they are. Works with official builds.
             </p>
 
-            <div className="mb-6 rounded-2xl border border-white/10 bg-black/20 p-5">
-              <p className="mb-3 text-sm font-semibold text-white">
-                What you get
-              </p>
-              <ul className="space-y-2 text-sm text-white/70">
-                <li>
-                  • Keeps all your maps, skins, settings and local data (no
-                  separate install)
-                </li>
-                <li>
-                  • Works with the most up-to-date official osu!lazer versions
-                </li>
-                <li>
-                  • Switch between Shikkesora and the official servers whenever
-                  you want
-                </li>
+            <div className="rounded-2xl border border-white/8 bg-black/20 p-5 mb-6">
+              <p className="mb-3 text-sm font-semibold text-white">What you get</p>
+              <ul className="space-y-2 text-sm text-white/55">
+                <li>• Keeps all your existing maps, skins, settings & scores</li>
+                <li>• Works with the latest official osu!lazer builds</li>
+                <li>• Switch back to official servers any time</li>
               </ul>
             </div>
 
-            <div className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-5">
-              <p className="mb-3 text-sm font-semibold text-white">Tradeoffs</p>
-              <ul className="space-y-2 text-sm text-white/70">
-                <li className="text-amber-200">
-                  • You don’t get the portable-client-only performance
-                  toggles/features
-                </li>
-              </ul>
+            <div className="mt-auto">
+              <div className="flex items-center justify-center gap-2 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm font-semibold text-white/80 transition group-hover:border-violet-400/25">
+                View setup steps ↓
+              </div>
             </div>
-
-            <div className="mt-auto pt-6">
-              <CTAButton accent="violet">Choose injector</CTAButton>
-              <p className="mt-3 text-xs text-white/40">
-                Click to view setup steps ↓
-              </p>
-            </div>
-          </Card>
+          </motion.div>
         </div>
 
-        {/* Portable instructions */}
-        <section ref={portableRef} className="mt-28 scroll-mt-28">
-          <h3 className="mb-6 text-3xl font-semibold text-white">
-            Portable client setup (Shigetiro build)
-          </h3>
-
-          <Card>
-            <p className="mb-6 text-white/70">
-              This method uses a separate portable build. You ONLY need to set
-              the Server Address — you do NOT need to set a Website URL for this
-              method.
+        {/* ── Features showcase ─────────────────────────────────────────── */}
+        <div ref={featuresRef} className="scroll-mt-24 mt-28">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              What's inside the Torii client
+            </h2>
+            <p className="text-white/50 max-w-xl mx-auto text-sm">
+              These are actual features you get from day one — not promises.
             </p>
+          </motion.div>
 
-            <ol className="space-y-5 text-white/70">
-              <li>
-                <span className="font-semibold text-white">
-                  1) Download the portable build
-                </span>
-                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <a
-                    className="break-all text-fuchsia-300 underline"
-                    href={SHIGETIRO_PORTABLE_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {SHIGETIRO_PORTABLE_URL}
-                  </a>
-                  <CopyButton value={SHIGETIRO_PORTABLE_URL} accent="fuchsia" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {FEATURES.map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+                className="rounded-2xl border border-white/8 bg-white/3 p-5 backdrop-blur hover:border-white/14 hover:bg-white/5 transition flex flex-col"
+              >
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <span className="text-2xl select-none">{f.icon}</span>
+                  <span className={cx("rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide shrink-0", TAG_COLORS[f.tagColor])}>
+                    {f.tag}
+                  </span>
                 </div>
-              </li>
+                <h3 className="text-white font-semibold text-sm mb-2">{f.title}</h3>
+                <p className="text-white/50 text-xs leading-relaxed">{f.description}</p>
+                {f.preview}
+              </motion.div>
+            ))}
+          </div>
 
-              <li>
-                <span className="font-semibold text-white">
-                  2) Extract and launch
-                </span>
-                <div className="mt-2 text-sm text-white/60">
-                  Unzip it anywhere you like and run osu!lazer from that folder.
-                </div>
-              </li>
+          {/* CTA below features */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="mt-10 text-center"
+          >
+            <button
+              onClick={() => scrollTo(toriiSetupRef)}
+              className="inline-flex items-center gap-2 rounded-2xl border border-fuchsia-400/40 bg-fuchsia-500/15 px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-fuchsia-500/25 hover:border-fuchsia-400/60"
+            >
+              Set up the Torii client
+              <span className="text-fuchsia-300">↓</span>
+            </button>
+          </motion.div>
+        </div>
 
-              <li>
-                <span className="font-semibold text-white">
-                  3) Set the server address
-                </span>
-                <div className="mt-2 text-sm text-white/60">
-                  In the connection/server settings, set Server Address to the
-                  value below.
-                </div>
-
-                <CodeBox
-                  label="Server Address"
-                  value={SERVER_HOST}
-                  accent="fuchsia"
-                />
-
-                <div className="mt-3 text-sm text-white/60">
-                  Portable method: Website is NOT required — only Server Address.
-                </div>
-              </li>
-
-              <li>
-                <span className="font-semibold text-white">
-                  4) Apply + restart
-                </span>
-                <div className="mt-2 text-sm text-white/60">
-                  Press Apply, then fully restart osu!lazer for the change to
-                  take effect.
-                </div>
-              </li>
-            </ol>
-
-            <div className="mt-8 rounded-2xl border border-red-400/20 bg-red-500/5 p-6">
-              <p className="mb-2 text-sm font-semibold text-white">
-                Why do I not see my maps/skins?
-              </p>
-              <p className="text-sm text-white/70">
-                Because portable is a separate install with its own data folder.
-                It won’t automatically include your existing osu!lazer
-                maps/skins/settings unless you import them.
-              </p>
+        {/* ── Torii client setup ────────────────────────────────────────── */}
+        <div ref={toriiSetupRef} className="scroll-mt-24 mt-24">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-3xl select-none">🎌</span>
+              <h3 className="text-3xl font-bold text-white">Torii osu! Client — setup</h3>
             </div>
-          </Card>
-        </section>
+            <p className="text-white/45 mb-8 ml-12">Download, run, done. The wizard handles the rest.</p>
 
-        {/* Injector instructions */}
-        <section ref={injectorRef} className="mt-28 scroll-mt-28">
-          <h3 className="mb-6 text-3xl font-semibold text-white">
-            Injector setup (recommended for most people)
-          </h3>
+            <div className="rounded-3xl border border-fuchsia-400/15 bg-white/3 p-8 backdrop-blur">
+              <ol className="space-y-10 text-white/70">
 
-          <Card>
-            <p className="mb-6 text-white/70">
-              This method keeps your normal osu!lazer installation and data.
-              You’ll download the injector, place the .dll into your osu! folder,
-              restart, then set API + Website and restart once more.
-            </p>
-
-            <ol className="space-y-5 text-white/70">
-              <li>
-                <span className="font-semibold text-white">
-                  1) Download the injector (.dll)
-                </span>
-                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <a
-                    className="break-all text-violet-300 underline"
-                    href={INJECTOR_RELEASES_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {INJECTOR_RELEASES_URL}
-                  </a>
-                  <CopyButton value={INJECTOR_RELEASES_URL} accent="violet" />
-                </div>
-
-                <div className="mt-2 text-sm text-white/60">
-                  Download the latest release from the project page, then grab
-                  the .dll from the release assets.
-                </div>
-              </li>
-
-              <li>
-                <span className="font-semibold text-white">
-                  2) Open your osu! folder
-                </span>
-                <div className="mt-2 text-sm text-white/60">
-                  Open osu!lazer, then use the menu option “Open osu! folder”.
-                </div>
-              </li>
-
-              <li>
-                <span className="font-semibold text-white">
-                  3) Place the .dll into the ruleset folder
-                </span>
-                <div className="mt-2 text-sm text-white/60">
-                  Inside the osu! folder, find the “ruleset” folder and put the
-                  .dll file there.
-                </div>
-
-                <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-white/70">
-                  <div>
-                    <div className="text-xs uppercase tracking-wider text-white/40">
-                      Folder
-                    </div>
-                    <code className="select-text font-mono">ruleset</code>
-                  </div>
-                  <CopyButton value={"ruleset"} accent="violet" />
-                </div>
-              </li>
-
-              <li>
-                <span className="font-semibold text-white">
-                  4) Restart osu!lazer (first restart)
-                </span>
-                <div className="mt-2 text-sm text-white/60">
-                  Completely close osu!lazer and open it again so the injector
-                  loads.
-                </div>
-              </li>
-
-              <li>
-                <span className="font-semibold text-white">
-                  5) Open Settings → Rulesets → API + Website
-                </span>
-                <div className="mt-2 text-sm text-white/60">
-                  Go to Rulesets and set the API and Website URLs exactly like
-                  below.
-                </div>
-
-                <div className="mt-3 grid gap-3 md:grid-cols-2">
-                  <CodeBox label="API" value={API_URL} accent="violet" />
-                  <CodeBox label="Website" value={WEBSITE_URL} accent="violet" />
-                </div>
-              </li>
-
-              <li>
-                <span className="font-semibold text-white">6) Press Apply</span>
-                <div className="mt-2 text-sm text-white/60">
-                  Press Apply to save the values (this step matters both to
-                  connect AND to disconnect).
-                </div>
-              </li>
-
-              <li>
-                <span className="font-semibold text-white">
-                  7) Restart osu!lazer (second restart)
-                </span>
-                <div className="mt-2 text-sm text-white/60">
-                  Restart again to ensure the connection settings fully apply.
-                </div>
-              </li>
-            </ol>
-
-            {/* Safety notice */}
-            <div className="mt-8 rounded-2xl border border-violet-400/25 bg-violet-500/10 p-6">
-              <p className="mb-2 text-sm font-semibold text-white">
-                Important notice (account safety)
-              </p>
-              <p className="text-sm text-white/70">
-                You’re NOT going to get banned from osu! and your account isn’t
-                at risk. osu! explicitly allows custom rulesets. This is simply
-                osu!lazer connecting to a different server, and you can switch
-                back to the official servers at any time.
-              </p>
-            </div>
-
-            {/* Switch back */}
-            <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-6">
-              <p className="mb-2 text-sm font-semibold text-white">
-                Switching back to the official osu! servers
-              </p>
-              <p className="mb-4 text-sm text-white/70">
-                To go back to the normal osu! servers, remove the custom values
-                you set and apply the change.
-              </p>
-
-              <ol className="space-y-3 text-sm text-white/70">
                 <li>
-                  1) Clear the fields you changed (set them back to
-                  empty/default):
-                  <ul className="ml-6 mt-2 list-disc text-white/60">
-                    <li>API</li>
-                    <li>Website</li>
-                  </ul>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-sm font-bold text-fuchsia-200">1</span>
+                    <span className="font-semibold text-white text-lg">Download the Torii client</span>
+                  </div>
+                  <div className="ml-11">
+                    <p className="text-sm mb-3 text-white/55">Head to the latest GitHub release and grab the Windows portable build.</p>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-fuchsia-400/20 bg-black/30 p-4">
+                      <a className="break-all text-fuchsia-300 underline text-sm" href={TORII_CLIENT_URL} target="_blank" rel="noreferrer">
+                        {TORII_CLIENT_URL}
+                      </a>
+                      <CopyButton value={TORII_CLIENT_URL} accent="fuchsia" />
+                    </div>
+                  </div>
                 </li>
-                <li>2) Press Apply.</li>
-                <li>3) Restart osu!lazer.</li>
+
+                <li>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-sm font-bold text-fuchsia-200">2</span>
+                    <span className="font-semibold text-white text-lg">Extract and run</span>
+                  </div>
+                  <div className="ml-11 text-sm text-white/55">
+                    Unzip anywhere and launch <code className="text-fuchsia-200 bg-fuchsia-500/10 rounded px-1.5 py-0.5">osu!.exe</code>. The setup wizard appears on first launch.
+                  </div>
+                </li>
+
+                <li>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-sm font-bold text-fuchsia-200">3</span>
+                    <span className="font-semibold text-white text-lg">Follow the setup wizard</span>
+                  </div>
+                  <div className="ml-11">
+                    <p className="text-sm mb-3 text-white/55">The wizard asks if you want to import from an existing osu! install. Point it at your current osu! folder — it migrates maps, skins, and settings automatically.</p>
+                    <div className="rounded-2xl border border-sky-400/20 bg-sky-500/5 p-4 text-sm">
+                      <p className="text-sky-200 font-semibold mb-1">💡 Tip</p>
+                      <p className="text-white/55">Skipped the wizard? Run it later from <span className="text-white/75 font-medium">Settings → Torii → Manage Torii data source</span>.</p>
+                    </div>
+                  </div>
+                </li>
+
+                <li>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-sm font-bold text-fuchsia-200">4</span>
+                    <span className="font-semibold text-white text-lg">Server is pre-configured</span>
+                  </div>
+                  <div className="ml-11">
+                    <p className="text-sm mb-3 text-white/55">The Torii client points to the server by default. If you ever need to set it manually (e.g. switching servers), go to <span className="text-white/75">Settings → Torii → Server</span>:</p>
+                    <CodeBox label="Server Address" value={SERVER_HOST} accent="fuchsia" />
+                  </div>
+                </li>
+
+                <li>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-sm font-bold text-fuchsia-200">5</span>
+                    <span className="font-semibold text-white text-lg">Log in and play</span>
+                  </div>
+                  <div className="ml-11 text-sm text-white/55">
+                    Log in with your Torii account (or register one) and you're ready. All exclusive features are active by default.
+                  </div>
+                </li>
+
               </ol>
             </div>
-          </Card>
-        </section>
+          </motion.div>
+        </div>
+
+        {/* ── Injector setup ────────────────────────────────────────────── */}
+        <div ref={injectorRef} className="scroll-mt-24 mt-24">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-3xl select-none">💉</span>
+              <h3 className="text-3xl font-bold text-white">Injector method</h3>
+            </div>
+            <p className="text-white/45 mb-8 ml-12">Keep your existing osu!lazer. Works with official builds.</p>
+
+            <div className="rounded-3xl border border-white/8 bg-white/3 p-8 backdrop-blur">
+              <p className="text-white/55 mb-8 text-sm">
+                This patches auth into your existing osu!lazer so it connects to Torii. Your maps, skins, and settings stay exactly as they are. You'll set API + Website URLs in settings, then restart twice.
+              </p>
+
+              <ol className="space-y-10 text-white/70">
+
+                <li>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-500/20 border border-violet-400/30 text-sm font-bold text-violet-200">1</span>
+                    <span className="font-semibold text-white text-lg">Download the injector (.dll)</span>
+                  </div>
+                  <div className="ml-11">
+                    <p className="text-sm mb-3 text-white/55">Download the latest release and grab the <code className="text-violet-200 bg-violet-500/10 rounded px-1.5 py-0.5">.dll</code> from the release assets.</p>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-violet-400/20 bg-black/30 p-4">
+                      <a className="break-all text-violet-300 underline text-sm" href={INJECTOR_RELEASES_URL} target="_blank" rel="noreferrer">
+                        {INJECTOR_RELEASES_URL}
+                      </a>
+                      <CopyButton value={INJECTOR_RELEASES_URL} accent="violet" />
+                    </div>
+                  </div>
+                </li>
+
+                <li>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-500/20 border border-violet-400/30 text-sm font-bold text-violet-200">2</span>
+                    <span className="font-semibold text-white text-lg">Open your osu! folder</span>
+                  </div>
+                  <div className="ml-11 text-sm text-white/55">
+                    Open osu!lazer → hamburger menu → <span className="text-white/75">Open osu! folder</span>.
+                  </div>
+                </li>
+
+                <li>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-500/20 border border-violet-400/30 text-sm font-bold text-violet-200">3</span>
+                    <span className="font-semibold text-white text-lg">Place .dll into the rulesets folder</span>
+                  </div>
+                  <div className="ml-11 text-sm text-white/55">
+                    Inside the osu! folder, find <code className="text-violet-200 bg-violet-500/10 rounded px-1.5 py-0.5">rulesets/</code> and drop the .dll file there.
+                  </div>
+                </li>
+
+                <li>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-500/20 border border-violet-400/30 text-sm font-bold text-violet-200">4</span>
+                    <span className="font-semibold text-white text-lg">Restart osu!lazer (first restart)</span>
+                  </div>
+                  <div className="ml-11 text-sm text-white/55">
+                    Fully close and reopen osu!lazer so the injector loads.
+                  </div>
+                </li>
+
+                <li>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-500/20 border border-violet-400/30 text-sm font-bold text-violet-200">5</span>
+                    <span className="font-semibold text-white text-lg">Set API + Website in Settings → Rulesets</span>
+                  </div>
+                  <div className="ml-11">
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <CodeBox label="API" value={API_URL} accent="violet" />
+                      <CodeBox label="Website" value={WEBSITE_URL} accent="violet" />
+                    </div>
+                  </div>
+                </li>
+
+                <li>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-500/20 border border-violet-400/30 text-sm font-bold text-violet-200">6</span>
+                    <span className="font-semibold text-white text-lg">Press Apply, then restart once more</span>
+                  </div>
+                  <div className="ml-11 text-sm text-white/55">
+                    Click Apply to save — then restart osu!lazer a second time for the connection to fully apply.
+                  </div>
+                </li>
+              </ol>
+
+              {/* Safety notice */}
+              <div className="mt-10 rounded-2xl border border-violet-400/20 bg-violet-500/8 p-6">
+                <p className="mb-2 text-sm font-semibold text-white">Account safety</p>
+                <p className="text-sm text-white/55">
+                  osu! explicitly permits custom rulesets and custom servers. This is simply osu!lazer connecting to a different server — your osu! account is not at risk. You can switch back to the official servers any time by clearing the fields and pressing Apply.
+                </p>
+              </div>
+
+              {/* Switch back */}
+              <div className="mt-4 rounded-2xl border border-white/8 bg-black/20 p-6">
+                <p className="mb-2 text-sm font-semibold text-white">Switching back to official osu!</p>
+                <ol className="space-y-2 text-sm text-white/55">
+                  <li>1) Clear the API and Website fields (leave them empty)</li>
+                  <li>2) Press Apply</li>
+                  <li>3) Restart osu!lazer</li>
+                </ol>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
       </div>
     </div>
   );
