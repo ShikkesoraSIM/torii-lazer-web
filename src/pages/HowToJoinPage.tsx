@@ -155,18 +155,20 @@ const FEATURES: FeatureItem[] = [
     ),
   },
   {
-    icon: "🔀",
-    title: "Multi-server in one click",
-    tag: "exclusive",
-    tagColor: "pink",
+    icon: "⚡",
+    title: "Performance extras",
+    tag: "performance",
+    tagColor: "orange",
     description:
-      "Switch between Torii, g0v0, vipsu, m1pp and other compatible servers directly from the settings panel. No manual URL editing — just tap and reconnect.",
+      "Unlimited FPS, NVIDIA Reflex support, AMD Anti-Lag 2 — the performance-first extras baked right into the Torii client.",
     preview: (
-      <div className="mt-3 rounded-xl border border-blue-400/20 bg-black/30 p-3 text-xs">
-        <div className="text-white/50 text-[11px] mb-2">Popular Torii-compatible servers</div>
-        <div className="flex flex-wrap gap-1.5">
-          {(["Torii", "g0v0", "vipsu", "m1pp"] as const).map((s, i) => (
-            <span key={s} className={cx("rounded-full px-3 py-1 text-[11px] font-semibold border", i === 0 ? "bg-fuchsia-500/20 border-fuchsia-400/40 text-fuchsia-200" : "bg-white/5 border-white/10 text-white/60")}>{s}</span>
+      <div className="mt-3 rounded-xl border border-orange-400/20 bg-black/30 p-3 text-xs">
+        <div className="space-y-1.5 text-[11px]">
+          {["Unlimited FPS", "NVIDIA Reflex", "AMD Anti-Lag 2"].map(item => (
+            <div key={item} className="flex items-center gap-2">
+              <span className="text-orange-400">⚡</span>
+              <span className="text-white/70">{item}</span>
+            </div>
           ))}
         </div>
       </div>
@@ -190,28 +192,30 @@ const FEATURES: FeatureItem[] = [
     ),
   },
   {
-    icon: "🎯",
-    title: "CTB & Taiko Relax leaderboards",
-    tag: "new",
-    tagColor: "green",
+    icon: "🏅",
+    title: "User title badges",
+    tag: "exclusive",
+    tagColor: "violet",
     description:
-      "osu!catch RX and Taiko RX have fully separate leaderboards and stats. Relax scores no longer share the same board as base mode.",
+      "Server groups and roles show up as colored badges next to usernames throughout the client — in chat, leaderboards, and profiles. Each badge has its own color and style.",
     preview: (
-      <div className="mt-3 rounded-xl border border-green-400/20 bg-black/30 p-3 text-xs">
-        <div className="space-y-1.5">
-          {(["osu!catch → Catch RX", "osu!taiko → Taiko RX"] as const).map(line => (
-            <div key={line} className="text-white/60 text-[11px]">
-              {line.split(" → ").map((part, i) => (
-                <span key={i}>
-                  {i > 0 && <span className="text-white/30 mx-1">→</span>}
-                  {i === 1
-                    ? <span className="rounded bg-green-500/15 border border-green-400/25 px-1.5 py-0.5 text-green-300">{part}</span>
-                    : part}
-                </span>
-              ))}
-            </div>
+      <div className="mt-3 rounded-xl border border-violet-400/20 bg-black/30 p-3 text-xs">
+        <div className="flex flex-wrap gap-1.5">
+          {([
+            { label: "NYA", color: "#f472b6" },
+            { label: "DEV", color: "#818cf8" },
+            { label: "MOD", color: "#34d399" },
+          ] as const).map(({ label, color }) => (
+            <span
+              key={label}
+              className="rounded px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide border"
+              style={{ color, borderColor: `${color}55`, background: `${color}18` }}
+            >
+              {label}
+            </span>
           ))}
         </div>
+        <div className="mt-2 text-white/40 text-[10px]">Visible in chat, leaderboards & profiles.</div>
       </div>
     ),
   },
@@ -236,20 +240,18 @@ const FEATURES: FeatureItem[] = [
     ),
   },
   {
-    icon: "⚡",
-    title: "Performance extras",
-    tag: "performance",
-    tagColor: "orange",
+    icon: "🔀",
+    title: "Multi-server in one click",
+    tag: "exclusive",
+    tagColor: "pink",
     description:
-      "Unlimited FPS, NVIDIA Reflex support, AMD Anti-Lag 2 — the performance-first extras baked right into the Torii client.",
+      "Switch between Torii, g0v0, vipsu, m1pp and other compatible servers directly from the settings panel. No manual URL editing — just tap and reconnect.",
     preview: (
-      <div className="mt-3 rounded-xl border border-orange-400/20 bg-black/30 p-3 text-xs">
-        <div className="space-y-1.5 text-[11px]">
-          {["Unlimited FPS", "NVIDIA Reflex", "AMD Anti-Lag 2"].map(item => (
-            <div key={item} className="flex items-center gap-2">
-              <span className="text-orange-400">⚡</span>
-              <span className="text-white/70">{item}</span>
-            </div>
+      <div className="mt-3 rounded-xl border border-blue-400/20 bg-black/30 p-3 text-xs">
+        <div className="text-white/50 text-[11px] mb-2">Popular Torii-compatible servers</div>
+        <div className="flex flex-wrap gap-1.5">
+          {(["Torii", "g0v0", "vipsu", "m1pp"] as const).map((s, i) => (
+            <span key={s} className={cx("rounded-full px-3 py-1 text-[11px] font-semibold border", i === 0 ? "bg-fuchsia-500/20 border-fuchsia-400/40 text-fuchsia-200" : "bg-white/5 border-white/10 text-white/60")}>{s}</span>
           ))}
         </div>
       </div>
