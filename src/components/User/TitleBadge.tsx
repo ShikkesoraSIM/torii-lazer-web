@@ -1,5 +1,3 @@
-import React from 'react'
-
 export interface UserGroup {
   id: number
   identifier: string

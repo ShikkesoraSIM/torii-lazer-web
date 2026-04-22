@@ -201,7 +201,7 @@ const RankingsPage: React.FC = () => {
         </div>
 
         <div className="relative z-30 flex flex-col xl:flex-row xl:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
-          <div className="torii-liquid-soft rounded-2xl p-2">
+          <div className="torii-liquid-soft rounded-2xl p-2 relative z-[20]">
             <GameModeSelector
               selectedMode={selectedMode}
               onModeChange={setSelectedMode}
