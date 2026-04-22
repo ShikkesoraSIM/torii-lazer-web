@@ -95,7 +95,7 @@ interface FeatureItem {
   tag: string;
   tagColor: string;
   description: string;
-  preview: React.ReactNode;
+  preview: React.ReactNode | null;
 }
 
 const FEATURES: FeatureItem[] = [
@@ -105,20 +105,8 @@ const FEATURES: FeatureItem[] = [
     tag: "osu! standard",
     tagColor: "fuchsia",
     description:
-      "Torii runs the latest pp-dev algorithm — the bleeding-edge version of the pp system before it ships to stable. Your scores reflect the most up-to-date skill weighting.",
-    preview: (
-      <div className="mt-3 rounded-xl border border-fuchsia-400/20 bg-black/30 p-3 text-xs font-mono">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="rounded bg-fuchsia-500/20 border border-fuchsia-400/30 px-2 py-0.5 text-fuchsia-200 text-[11px] font-bold tracking-wide">PP-DEV</span>
-          <span className="text-white/50">enabled</span>
-        </div>
-        <div className="text-white/50 text-[11px]">Using latest pp-dev calculations.</div>
-        <div className="mt-2 flex items-center gap-2">
-          <span className="text-white/40">pp</span>
-          <span className="text-fuchsia-300 font-bold text-base">492pp</span>
-        </div>
-      </div>
-    ),
+      "Torii uses the latest pp-dev algorithm — more up-to-date than what bancho osu! runs. It's the newest version of the pp system, period.",
+    preview: null,
   },
   {
     icon: "📋",
@@ -185,12 +173,12 @@ const FEATURES: FeatureItem[] = [
     ),
   },
   {
-    icon: "🥁",
-    title: "Mania & Taiko Sunny rework",
-    tag: "mania / taiko",
+    icon: "🎹",
+    title: "Mania Sunny rework",
+    tag: "osu!mania",
     tagColor: "yellow",
     description:
-      "Updated pp calculations for osu!mania and Taiko based on the Sunny algorithm — a more accurate model for column-based, jack, stream, and LN gameplay.",
+      "osu!mania pp runs the Sunny algorithm rework — a more accurate model for key-based gameplay that better captures jack, stream, and LN difficulty.",
     preview: (
       <div className="mt-3 rounded-xl border border-yellow-400/20 bg-black/30 p-3 text-xs">
         <div className="flex items-center gap-2 mb-2">
@@ -368,7 +356,7 @@ export default function HowToJoinPage() {
 
             {/* Feature pills */}
             <div className="flex flex-wrap gap-1.5 mb-6">
-              {["pp-dev calculations", "Daily briefing", "Custom UI hue", "Multi-server", "Mania Sunny rework", "Zero-loss migration", "Unlimited FPS"].map(f => (
+              {["pp-dev calculations", "Daily briefing", "Custom UI hue", "Multi-server", "Mania Sunny rework", "CTB & Taiko RX leaderboards", "Zero-loss migration", "Unlimited FPS"].map(f => (
                 <span key={f} className="rounded-full border border-fuchsia-400/20 bg-fuchsia-500/5 px-2.5 py-1 text-xs text-fuchsia-200/75">{f}</span>
               ))}
             </div>
