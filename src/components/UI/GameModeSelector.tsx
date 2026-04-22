@@ -12,6 +12,7 @@ import { useProfileColor } from '../../contexts/ProfileColorContext';
 
 interface ModeDropdownProps {
   mainMode: MainGameMode;
+  modes: GameMode[];
   isOpen: boolean;
   onClose: () => void;
   selectedMode: GameMode;
@@ -21,7 +22,7 @@ interface ModeDropdownProps {
 }
 
 const ModeDropdown: React.FC<ModeDropdownProps> = ({
-  mainMode,
+  modes,
   isOpen,
   onClose,
   selectedMode,
@@ -57,7 +58,7 @@ const ModeDropdown: React.FC<ModeDropdownProps> = ({
         border: '1px solid var(--border-color)',
       }}
     >
-      {GAME_MODE_GROUPS[mainMode].map((mode, index) => (
+      {modes.map((mode, index) => (
         <motion.button
           key={mode}
           onClick={() => {
@@ -88,6 +89,7 @@ interface GameModeSelectorProps {
   className?: string;
   variant?: 'compact' | 'full';
   mainModesOnly?: boolean;
+  excludeModes?: GameMode[];
 }
 
 const GameModeSelector: React.FC<GameModeSelectorProps> = ({
@@ -95,7 +97,8 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
   onModeChange,
   className = '',
   variant = 'full',
-  mainModesOnly = false
+  mainModesOnly = false,
+  excludeModes = [],
 }) => {
   const [showSubModes, setShowSubModes] = useState<MainGameMode | null>(null);
   const [hoveredMode, setHoveredMode] = useState<MainGameMode | null>(null);
@@ -130,14 +133,9 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
   }, []);
 
   const handleMainModeClick = (mainMode: MainGameMode) => {
-    if (mainModesOnly) {
-      onModeChange(GAME_MODE_GROUPS[mainMode][0]);
-      return;
-    }
-
-    const hasSubModes = GAME_MODE_GROUPS[mainMode].length > 1;
-    if (!hasSubModes) {
-      onModeChange(GAME_MODE_GROUPS[mainMode][0]);
+    const filtered = GAME_MODE_GROUPS[mainMode].filter(m => !excludeModes.includes(m));
+    if (mainModesOnly || filtered.length <= 1) {
+      onModeChange(filtered[0] ?? GAME_MODE_GROUPS[mainMode][0]);
       return;
     }
     setShowSubModes(showSubModes === mainMode ? null : mainMode);
@@ -150,7 +148,8 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
           {(Object.keys(GAME_MODE_GROUPS) as MainGameMode[]).map((mainMode) => {
             const isActive = selectedMainMode === mainMode;
             const isHovered = hoveredMode === mainMode;
-            const hasSubModes = !mainModesOnly && GAME_MODE_GROUPS[mainMode].length > 1;
+            const filteredSubModes = GAME_MODE_GROUPS[mainMode].filter(m => !excludeModes.includes(m));
+            const hasSubModes = !mainModesOnly && filteredSubModes.length > 1;
             const isExpanded = showSubModes === mainMode;
             const shouldExpand = isExpanded || (isHovered && hasSubModes && !showSubModes) || (isActive && hasSubModes);
 
@@ -226,6 +225,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
                 {hasSubModes && (
                   <ModeDropdown
                     mainMode={mainMode}
+                    modes={filteredSubModes}
                     isOpen={showSubModes === mainMode}
                     onClose={() => setShowSubModes(null)}
                     selectedMode={selectedMode}

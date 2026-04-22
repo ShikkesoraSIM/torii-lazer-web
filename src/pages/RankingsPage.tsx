@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { rankingsAPI, handleApiError } from '../utils/api';
 import CountrySelect from '../components/UI/CountrySelect';
 import RankingTypeSelector from '../components/UI/RankingTypeSelector';
@@ -20,14 +21,33 @@ import type {
 
 const RankingsPage: React.FC = () => {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // osuap has no separate leaderboard — excluded from rankings
+  const allowedModes: GameMode[] = ['osu', 'taiko', 'fruits', 'mania', 'osurx', 'taikorx', 'fruitsrx'];
+  const allowedTabs: TabType[] = ['users', 'countries'];
+  const allowedRankingTypes: RankingType[] = ['performance', 'score'];
+
+  const initialMode = searchParams.get('mode') as GameMode | null;
+  const initialTab = searchParams.get('tab') as TabType | null;
+  const initialRankingType = searchParams.get('type') as RankingType | null;
+  const initialCountry = searchParams.get('country') || '';
+  const initialPageRaw = Number(searchParams.get('page'));
+  const initialPage = Number.isFinite(initialPageRaw) && initialPageRaw > 0 ? Math.floor(initialPageRaw) : 1;
+
   const pageTitle = t('rankings.title');
   const pageSubtitle = t('nav.rankings');
   const showSubtitle = pageSubtitle.trim().toLowerCase() !== pageTitle.trim().toLowerCase();
-  const [selectedMode, setSelectedMode] = useState<GameMode>('osu');
-  const [selectedTab, setSelectedTab] = useState<TabType>('users');
-  const [rankingType, setRankingType] = useState<RankingType>('performance');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [selectedMode, setSelectedMode] = useState<GameMode>(
+    initialMode && allowedModes.includes(initialMode) ? initialMode : 'osu'
+  );
+  const [selectedTab, setSelectedTab] = useState<TabType>(
+    initialTab && allowedTabs.includes(initialTab) ? initialTab : 'users'
+  );
+  const [rankingType, setRankingType] = useState<RankingType>(
+    initialRankingType && allowedRankingTypes.includes(initialRankingType) ? initialRankingType : 'performance'
+  );
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [selectedCountry, setSelectedCountry] = useState<string>(initialCountry.toUpperCase());
   
   const [userRankings, setUserRankings] = useState<TopUsersResponse | null>(null);
   const [countryRankings, setCountryRankings] = useState<CountryResponse | null>(null);
@@ -139,6 +159,23 @@ const RankingsPage: React.FC = () => {
     };
   }, [selectedTab, loadUserRankings]);
 
+  useEffect(() => {
+    const next: Record<string, string> = {
+      tab: selectedTab,
+      mode: selectedMode,
+      page: String(currentPage),
+    };
+
+    if (selectedTab === 'users') {
+      next.type = rankingType;
+      if (selectedCountry) {
+        next.country = selectedCountry.toUpperCase();
+      }
+    }
+
+    setSearchParams(next, { replace: true });
+  }, [selectedTab, selectedMode, rankingType, selectedCountry, currentPage, setSearchParams]);
+
   // 页面切换时滚动到顶部
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -169,6 +206,7 @@ const RankingsPage: React.FC = () => {
               selectedMode={selectedMode}
               onModeChange={setSelectedMode}
               variant="compact"
+              excludeModes={['osuap']}
               className=""
             />
           </div>
