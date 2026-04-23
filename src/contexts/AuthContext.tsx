@@ -93,7 +93,10 @@ const CacheUtil = {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // isLoading tracks active login / register operations only — it starts false so
+  // the login form is immediately interactive regardless of how long the initial
+  // auth-check takes.
+  const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { t } = useTranslation();
 
@@ -102,11 +105,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const checkAuth = async () => {
       const token = localStorage.getItem('access_token');
       const refreshToken = localStorage.getItem('refresh_token');
-      
+
       // 如果没有 token，直接返回
       if (!token && !refreshToken) {
         CacheUtil.clearCache();
-        setIsLoading(false);
         return;
       }
 
@@ -116,7 +118,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log(t('auth.context.cache.usingCachedState'));
         setUser(cachedData.user);
         setIsAuthenticated(cachedData.isAuthenticated);
-        setIsLoading(false);
 
         // Revalidate in the background so team/mode/profile changes show up quickly.
         void (async () => {
@@ -140,7 +141,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      // 缓存无效或不存在，请求 API
+      // 缓存无效或不存在，请求 API — run without blocking isLoading so the
+      // login form stays interactive while we wait for the server.
       try {
         console.log(t('auth.context.cache.fetchingFromApi'));
         const userData = await userAPI.getMe();
@@ -152,7 +154,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // 如果获取用户信息失败，axios 拦截器会自动尝试刷新 token
         // 这里只需要处理刷新失败的情况
         const err = error as { response?: { status?: number } };
-        
+
         // 如果是 401 错误且已经重定向到登录页，说明刷新失败
         // 否则可能是网络错误或其他问题，不应该清除 token
         if (err.response?.status === 401) {
@@ -164,8 +166,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // 其他错误，保持登录状态，可能是网络问题
           console.error('Failed to fetch user data:', error);
         }
-      } finally {
-        setIsLoading(false);
       }
     };
 
