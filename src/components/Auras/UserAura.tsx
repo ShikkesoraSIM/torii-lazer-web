@@ -1,5 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { getAuraPreset } from './registry';
+import Particle from './Particle';
+import type { ParticleConfig } from './types';
 import './auras.css';
 
 interface UserAuraProps {
@@ -13,60 +15,78 @@ interface UserAuraProps {
 }
 
 /**
- * Wraps any inline content (a username, typically) and renders the user's
- * aura particle layer behind it. Used both globally — wherever a username
- * appears in the web app — and inside the settings preview cards.
+ * Renders the equipped aura's particle effect behind any inline content.
  *
- * The implementation drives a spawn loop with `setInterval`; each spawn
- * appends a DOM element with CSS-keyframe animation that removes itself
- * on `animationend`. Cap on simultaneously-alive particles is enforced by
- * counting children. No state lives in React for the particles themselves
- * — DOM is the source of truth, and React only owns mount/unmount of the
- * host container.
+ * The spawn loop runs in JS (setInterval), maintains a small array of
+ * live particles in React state, and lets each <Particle> component
+ * fade/translate via CSS keyframes that consume per-instance CSS
+ * variables. When a particle's drift animation finishes, the component
+ * fires onDone and the array entry is dropped.
+ *
+ * `mix-blend-mode: screen` on the host gives the additive-glow look the
+ * C# client gets from BlendingParameters.Additive — particles bloom into
+ * each other and into the underlying name without per-particle blur.
+ *
+ * Falls through to rendering children unchanged when auraId is null —
+ * non-elite users pay zero DOM overhead.
  */
 const UserAura: React.FC<UserAuraProps> = ({ auraId, children, className }) => {
-  const hostRef = useRef<HTMLDivElement | null>(null);
   const preset = getAuraPreset(auraId);
+  const [particles, setParticles] = useState<ParticleConfig[]>([]);
+  const nextIdRef = useRef(1);
 
   useEffect(() => {
-    const host = hostRef.current;
-    if (!host || !preset) return;
+    if (!preset) return;
 
-    // Mount the persistent background (if the preset has one).
-    const bg = preset.background?.() ?? null;
-    if (bg) host.appendChild(bg);
-
-    // Schedule particles. We use setInterval rather than requestAnimationFrame
-    // because spawn cadence is in the 200-600ms range — far below RAF
-    // resolution requirements, and setInterval pauses while the tab is
-    // backgrounded which is the right battery-saving behaviour.
     let cancelled = false;
+    let timer: number;
+
     const tick = () => {
       if (cancelled) return;
-      // Hard cap. Count only particle children, ignore the optional bg.
-      const aliveCount = host.querySelectorAll('.aura-particle').length;
-      if (aliveCount < preset.maxAlive) preset.emit(host);
+      // Cap simultaneously-alive particles. We use functional updates
+      // so we read the latest particles count without re-binding the
+      // closure on every state change.
+      setParticles(curr => {
+        if (curr.length >= preset.maxAlive) return curr;
+        const config = preset.emit(nextIdRef.current++);
+        return [...curr, config];
+      });
       const next = preset.spawnIntervalMs + Math.random() * preset.spawnJitterMs;
       timer = window.setTimeout(tick, next);
     };
-    let timer = window.setTimeout(tick, preset.spawnIntervalMs);
+    timer = window.setTimeout(tick, preset.spawnIntervalMs);
 
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
-      // Drop everything the preset added, including the background.
-      while (host.firstChild) host.removeChild(host.firstChild);
+      // Drop any remaining particles when the aura swaps so we don't
+      // animate ghosts of the previous preset for their full lifetime.
+      setParticles([]);
     };
   }, [preset]);
 
+  const handleParticleDone = (id: number) => {
+    setParticles(curr => curr.filter(p => p.id !== id));
+  };
+
   if (!preset) {
-    // Cheap path — no DOM nodes for users with no aura.
+    // Cheap path — no DOM nodes, no spawn loop.
     return <>{children}</>;
   }
 
   return (
     <span className={`relative inline-block ${className ?? ''}`}>
-      <div ref={hostRef} className="aura-host" aria-hidden="true" />
+      <div className="aura-host" aria-hidden="true">
+        {preset.hasHalo && (
+          <div
+            className="aura-halo"
+            style={{ background: preset.haloColor }}
+          />
+        )}
+        {particles.map(config => (
+          <Particle key={config.id} config={config} onDone={handleParticleDone} />
+        ))}
+      </div>
       <span className="relative">{children}</span>
     </span>
   );

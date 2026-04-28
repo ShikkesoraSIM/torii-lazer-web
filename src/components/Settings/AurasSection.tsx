@@ -137,9 +137,13 @@ const AurasSection: React.FC = () => {
           {opts.matchesCurrent && <FiCheck className="text-osu-pink" />}
         </div>
         <div className="text-xs text-gray-400 mb-3 min-h-[2lh]">{opts.subtitle}</div>
-        <div className="relative h-16 rounded bg-gradient-to-r from-black/70 via-black/50 to-black/70 flex items-center justify-center overflow-hidden">
+        <div className="relative h-24 rounded bg-black/80 flex items-center justify-center overflow-hidden">
+          {/* Bumped from h-16 → h-24: gives particles more vertical space
+              to be visible (admin sparks rise ~1x text height, leaves drift
+              around it). Pure black plate for max contrast against the
+              additive-blend particles. */}
           <UserAura auraId={opts.previewAuraId}>
-            <span className="text-base font-semibold text-white">{username}</span>
+            <span className="text-lg font-semibold text-white">{username}</span>
           </UserAura>
         </div>
       </button>
