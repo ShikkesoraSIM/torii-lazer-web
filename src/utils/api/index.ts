@@ -16,3 +16,4 @@ export { scoreAPI } from './score';
 export { oauthAPI } from './oauth';
 export { adminAPI } from './admin';
 export { searchAPI } from './search';
+export { aurasAPI } from './auras';

@@ -16,6 +16,7 @@ import TrustedDeviceManagement from '../components/Device/TrustedDeviceManagemen
 import PasswordResetSection from '../components/Settings/PasswordResetSection';
 import UserPreferencesSection from '../components/Settings/UserPreferencesSection';
 import OAuthAppsSection from '../components/Settings/OAuthAppsSection';
+import AurasSection from '../components/Settings/AurasSection';
 
 const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -473,6 +474,16 @@ const SettingsPage: React.FC = () => {
         </div>
 
         <UserPreferencesSection />
+      </motion.div>
+
+      {/* User Aura cosmetic picker */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.29 }}
+        className="bg-card rounded-xl shadow-lg p-6"
+      >
+        <AurasSection />
       </motion.div>
 
       {/* 设备管理 */}
