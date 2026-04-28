@@ -3,7 +3,7 @@ import { FiHeart } from 'react-icons/fi';
 
 // Public Ko-fi page — kept inline so the footer stays self-contained.
 // If the URL changes, also update SupportButton.tsx (the navbar heart).
-const KOFI_URL = 'https://ko-fi.com/shikkesora';
+const KOFI_URL = 'https://ko-fi.com/toriiserver';
 
 const HomeFooter: React.FC = () => {
   return (

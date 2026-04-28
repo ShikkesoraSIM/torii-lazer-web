@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
  * var just to render a heart icon. If the page slug ever changes, edit
  * here.
  */
-const KOFI_URL = 'https://ko-fi.com/shikkesora';
+const KOFI_URL = 'https://ko-fi.com/toriiserver';
 
 /**
  * Small "Support Torii" affordance for the navbar.
