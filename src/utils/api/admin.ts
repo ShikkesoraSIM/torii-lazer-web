@@ -287,4 +287,27 @@ export const adminAPI = {
     const response = await api.post('/api/private/admin/client-hashes/assign', payload);
     return response.data;
   },
+
+  // Donations
+  getDonations: async (params?: {
+    status?: 'unmatched' | 'matched' | 'all';
+    limit?: number;
+    offset?: number;
+  }) => {
+    const response = await api.get('/api/private/admin/donations', { params });
+    return response.data;
+  },
+
+  getDonationStats: async () => {
+    const response = await api.get('/api/private/admin/donations/stats');
+    return response.data;
+  },
+
+  matchDonation: async (donationId: number, payload: { username?: string; user_id?: number }) => {
+    const response = await api.post(
+      `/api/private/admin/donations/${donationId}/match`,
+      payload,
+    );
+    return response.data;
+  },
 };
