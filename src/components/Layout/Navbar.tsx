@@ -29,6 +29,7 @@ import UserDropdown from '../UI/UserDropdown';
 import Avatar from '../UI/Avatar';
 import LanguageSelector from '../UI/LanguageSelector';
 import NavbarSearchOverlay from './NavbarSearchOverlay';
+import SupportButton from './SupportButton';
 import type { NavItem as NavItemType } from '../../types';
 const NavItem = memo<{ item: NavItemType }>(({ item }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -452,6 +453,12 @@ const Navbar: React.FC = () => {
                   <FiSearch size={18} />
                 </motion.button>
 
+                {/* Heart button — same shape as the other nav pills but
+                    in supporter pink so it reads as "support the game"
+                    without needing the label osu! has. Mirrors the
+                    pattern users already know from osu.ppy.sh. */}
+                <SupportButton variant="desktop" />
+
                 {isAuthenticated && (
                   <Link to="/messages">
                     <motion.button
@@ -528,6 +535,11 @@ const Navbar: React.FC = () => {
               >
                 <FiSearch size={18} />
               </motion.button>
+
+              {/* Compact heart for the mobile bar — same popover, just
+                  pinned next to the search button so it's reachable
+                  without opening the hamburger menu. */}
+              <SupportButton variant="icon" />
 
               {isAuthenticated && user ? (
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

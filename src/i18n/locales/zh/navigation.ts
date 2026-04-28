@@ -7,6 +7,7 @@ export const navigation = {
   profile: '个人资料',
   join: '加入服务器',
   settings: '设置',
+  support: '支持 Torii',
   login: '登录',
   register: '注册',
   logout: '退出登录',
