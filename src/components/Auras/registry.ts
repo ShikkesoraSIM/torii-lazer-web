@@ -3,7 +3,12 @@ import { adminPreset } from './presets/admin';
 import { devPreset } from './presets/dev';
 import { modPreset } from './presets/mod';
 import { qatPreset } from './presets/qat';
-import { supporterPreset } from './presets/supporter';
+import {
+  supporterPreset,
+  supporterBronzePreset,
+  supporterSilverPreset,
+  supporterGoldPreset,
+} from './presets/supporter';
 import { goofPreset } from './presets/goof';
 
 /**
@@ -18,7 +23,14 @@ export const AURA_PRESETS: Record<string, AuraPresetSpec> = {
   [devPreset.id]: devPreset,
   [modPreset.id]: modPreset,
   [qatPreset.id]: qatPreset,
+  // Supporter tier family — same heart motion, escalating palette.
+  // Each tier-aura key matches the C# preset's AuraId 1:1 so a user
+  // who equips e.g. 'supporter-hearts-gold' gets the same visual on
+  // both the web and the lazer client.
   [supporterPreset.id]: supporterPreset,
+  [supporterBronzePreset.id]: supporterBronzePreset,
+  [supporterSilverPreset.id]: supporterSilverPreset,
+  [supporterGoldPreset.id]: supporterGoldPreset,
   [goofPreset.id]: goofPreset,
 };
 
