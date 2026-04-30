@@ -35,10 +35,12 @@ const RULESET_OPTIONS: { value: number; label: string }[] = [
   { value: 7, label: 'fruits!rx' },
 ];
 
-const POOL_TYPE_OPTIONS: { value: MatchmakingPoolType; label: string }[] = [
-  { value: 'quick_play', label: 'Quick Play (free-for-all)' },
-  { value: 'ranked_play', label: 'Ranked Play (1v1)' },
-];
+// Type discriminator removed from the admin UI: every matchmaking pool
+// is treated as ranked-play (the upstream osu! direction since quick-
+// play got merged into ranked). The DB column still exists for
+// backward compat with the spectator's enum, but we hardcode it on
+// create and don't expose it for editing.
+const DEFAULT_POOL_TYPE: MatchmakingPoolType = 'ranked_play';
 
 const RULESET_LABEL: Record<number, string> = Object.fromEntries(
   RULESET_OPTIONS.map((o) => [o.value, o.label]),
@@ -60,7 +62,7 @@ const DEFAULT_POOL_FORM: PoolFormState = {
   ruleset_id: 0,
   name: '',
   description: '',
-  type: 'quick_play',
+  type: DEFAULT_POOL_TYPE,
   active: false,
   lobby_size: 8,
   rating_search_radius: 200,
@@ -384,15 +386,6 @@ const AdminMatchmaking: React.FC = () => {
                       <h3 className="font-semibold text-gray-900 dark:text-white truncate">
                         {pool.name}
                       </h3>
-                      <span
-                        className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
-                          pool.type === 'ranked_play'
-                            ? 'bg-pink-500/15 text-pink-400'
-                            : 'bg-blue-500/15 text-blue-400'
-                        }`}
-                      >
-                        {pool.type === 'ranked_play' ? 'Ranked' : 'Quick'}
-                      </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
                       {RULESET_LABEL[pool.ruleset_id] ?? `mode ${pool.ruleset_id}`} · lobby{' '}
@@ -462,21 +455,6 @@ const AdminMatchmaking: React.FC = () => {
                             onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                             className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm"
                           />
-                        </FormField>
-                        <FormField label="Type">
-                          <select
-                            value={editForm.type}
-                            onChange={(e) =>
-                              setEditForm({ ...editForm, type: e.target.value as MatchmakingPoolType })
-                            }
-                            className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm"
-                          >
-                            {POOL_TYPE_OPTIONS.map((o) => (
-                              <option key={o.value} value={o.value}>
-                                {o.label}
-                              </option>
-                            ))}
-                          </select>
                         </FormField>
                         <FormField label="Lobby size">
                           <input
@@ -854,21 +832,6 @@ const AdminMatchmaking: React.FC = () => {
                   className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm"
                 >
                   {RULESET_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </FormField>
-              <FormField label="Type">
-                <select
-                  value={createForm.type}
-                  onChange={(e) =>
-                    setCreateForm({ ...createForm, type: e.target.value as MatchmakingPoolType })
-                  }
-                  className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm"
-                >
-                  {POOL_TYPE_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
                     </option>
