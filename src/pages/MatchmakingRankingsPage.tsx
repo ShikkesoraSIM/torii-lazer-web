@@ -7,8 +7,10 @@ import {
   type MatchmakingLeaderboardEntry,
   type MatchmakingPool,
   type MatchmakingPoolBeatmap,
+  type MatchmakingUserPoolStats,
 } from '../utils/api';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
+import { useAuth } from '../hooks/useAuth';
 
 /**
  * Public matchmaking rankings page (`/rankings/matchmaking`).
@@ -65,6 +67,7 @@ const formatLengthSeconds = (s: number | null | undefined): string => {
 };
 
 const MatchmakingRankingsPage: React.FC = () => {
+  const { user: currentUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [pools, setPools] = useState<MatchmakingPool[] | null>(null);
   const [poolsError, setPoolsError] = useState<string | null>(null);
@@ -79,6 +82,11 @@ const MatchmakingRankingsPage: React.FC = () => {
   const [leaderboard, setLeaderboard] = useState<MatchmakingLeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
+
+  // The signed-in user's own placement inside the selected pool. Driven by
+  // /users/{id}/matchmaking/stats which already computes rank inline so we
+  // get the "you are #23" pill without scanning the leaderboard rows.
+  const [myPoolStats, setMyPoolStats] = useState<MatchmakingUserPoolStats | null>(null);
 
   const [poolBeatmaps, setPoolBeatmaps] = useState<MatchmakingPoolBeatmap[]>([]);
   const [poolBeatmapsLoading, setPoolBeatmapsLoading] = useState(false);
@@ -114,12 +122,25 @@ const MatchmakingRankingsPage: React.FC = () => {
     setLeaderboardLoading(true);
     setLeaderboardError(null);
     setPoolBeatmapsLoading(true);
+    setMyPoolStats(null);
+
+    // The own-stats request is fired in parallel but is allowed to fail
+    // silently — anonymous users get a 401 here and we just don't render
+    // the "your placement" pill.
+    const myStatsPromise =
+      currentUser?.id != null
+        ? matchmakingAPI
+            .getUserStats(currentUser.id, selectedPoolId)
+            .then((rows) => rows.find((r) => r.pool_id === selectedPoolId) ?? null)
+            .catch(() => null)
+        : Promise.resolve(null);
 
     Promise.allSettled([
       matchmakingAPI.getPoolLeaderboard(selectedPoolId, { limit: 50 }),
       matchmakingAPI.listPoolBeatmaps(selectedPoolId, { limit: 100 }),
+      myStatsPromise,
     ])
-      .then(([leaderboardRes, beatmapsRes]) => {
+      .then(([leaderboardRes, beatmapsRes, myStatsRes]) => {
         if (cancelled) return;
         if (leaderboardRes.status === 'fulfilled') {
           setLeaderboard(leaderboardRes.value);
@@ -135,6 +156,9 @@ const MatchmakingRankingsPage: React.FC = () => {
           setPoolBeatmaps(sorted);
         } else {
           setPoolBeatmaps([]);
+        }
+        if (myStatsRes.status === 'fulfilled') {
+          setMyPoolStats(myStatsRes.value);
         }
       })
       .finally(() => {
@@ -300,6 +324,41 @@ const MatchmakingRankingsPage: React.FC = () => {
                   </span>
                 </header>
 
+                {/*
+                  "Your placement" pill — shown between the header and the
+                  leaderboard rows when the signed-in user has stats in this
+                  pool. Hyperlinks to their profile so the breadcrumb back
+                  to "see my full history" is one click.
+                */}
+                {myPoolStats && (
+                  <Link
+                    to={`/users/${myPoolStats.user_id}`}
+                    className="block mx-3 mt-3 px-4 py-3 rounded-xl bg-gradient-to-r from-osu-pink/10 via-osu-pink/5 to-transparent border border-osu-pink/30 hover:border-osu-pink/60 transition-all group"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="px-2 py-0.5 rounded text-xs font-bold tracking-wider uppercase bg-osu-pink/20 text-osu-pink">
+                          Your placement
+                        </span>
+                        <span className="text-sm text-foreground font-semibold truncate">
+                          {myPoolStats.rank ? `#${myPoolStats.rank}` : 'unranked'}
+                          <span className="ml-2 text-gray-400 font-normal">
+                            · {myPoolStats.plays} play{myPoolStats.plays === 1 ? '' : 's'}
+                          </span>
+                        </span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Rating</p>
+                        <p
+                          className={`font-mono font-bold text-base ${ratingTier(myPoolStats.rating).color}`}
+                        >
+                          {myPoolStats.rating}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+
                 {leaderboardLoading ? (
                   <div className="py-10 flex justify-center">
                     <LoadingSpinner size="md" />
@@ -318,11 +377,24 @@ const MatchmakingRankingsPage: React.FC = () => {
                     {leaderboard.map((entry, idx) => {
                       const rankBadge = RANK_BADGES[entry.rank];
                       const tier = ratingTier(entry.rating);
+                      const isMe = currentUser?.id === entry.user_id;
                       return (
                         <li
                           key={entry.user_id}
-                          className="px-5 py-3 flex items-center gap-4 hover:bg-card-hover/40 transition-colors"
+                          className={`relative px-5 py-3 flex items-center gap-4 transition-colors ${
+                            isMe
+                              ? 'bg-osu-pink/10 ring-1 ring-inset ring-osu-pink/40'
+                              : 'hover:bg-card-hover/40'
+                          }`}
                         >
+                          {/* "you" stripe — left edge accent so the row stands
+                              out at a glance even before you read the badge */}
+                          {isMe && (
+                            <span
+                              className="absolute left-0 top-0 bottom-0 w-1 bg-osu-pink"
+                              aria-hidden
+                            />
+                          )}
                           {/* rank cell */}
                           <div
                             className={`w-10 flex items-center justify-center text-lg font-bold ${
@@ -340,14 +412,25 @@ const MatchmakingRankingsPage: React.FC = () => {
                               <img
                                 src={entry.user.avatar_url}
                                 alt=""
-                                className="w-10 h-10 rounded-full object-cover ring-2 ring-card-hover group-hover:ring-osu-pink/60 transition-all"
+                                className={`w-10 h-10 rounded-full object-cover ring-2 transition-all ${
+                                  isMe
+                                    ? 'ring-osu-pink/70 shadow-[0_0_12px_rgba(236,72,153,0.5)]'
+                                    : 'ring-card-hover group-hover:ring-osu-pink/60'
+                                }`}
                               />
                             ) : (
                               <div className="w-10 h-10 rounded-full bg-card-hover" />
                             )}
                             <div className="min-w-0">
-                              <p className="font-semibold text-foreground truncate group-hover:text-osu-pink transition-colors">
-                                {entry.user?.username ?? `user ${entry.user_id}`}
+                              <p className="font-semibold text-foreground truncate group-hover:text-osu-pink transition-colors flex items-center gap-2">
+                                <span className="truncate">
+                                  {entry.user?.username ?? `user ${entry.user_id}`}
+                                </span>
+                                {isMe && (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-osu-pink/20 text-osu-pink shrink-0">
+                                    you
+                                  </span>
+                                )}
                               </p>
                               <p className={`text-xs ${tier.color}`}>{tier.label}</p>
                             </div>

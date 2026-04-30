@@ -189,15 +189,35 @@ const RankingsPage: React.FC = () => {
     <div className="min-h-screen torii-page-stage">
       <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 sm:py-8">
         {/* Page title */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            {pageTitle}
-          </h1>
-          {showSubtitle && (
-            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
-              {pageSubtitle}
-            </p>
-          )}
+        <div className="mb-6 sm:mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              {pageTitle}
+            </h1>
+            {showSubtitle && (
+              <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
+                {pageSubtitle}
+              </p>
+            )}
+          </div>
+          {/*
+            Discoverability: matchmaking has its own dedicated rankings
+            page with a different layout (per-pool tabs + map rotation),
+            so surface it as a sibling rather than cramming a third tab
+            into this page's mode/country selector.
+          */}
+          <a
+            href="/rankings/matchmaking"
+            className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-osu-pink/15 to-fuchsia-500/10 border border-osu-pink/40 hover:border-osu-pink/80 hover:shadow-[0_0_18px_rgba(236,72,153,0.35)] transition-all"
+          >
+            <span className="text-osu-pink text-lg">🏆</span>
+            <span className="text-sm font-semibold text-foreground">
+              Matchmaking ladder
+            </span>
+            <span className="text-xs text-gray-400 group-hover:text-osu-pink transition-colors">
+              →
+            </span>
+          </a>
         </div>
 
         <div className="relative z-30 flex flex-col xl:flex-row xl:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">

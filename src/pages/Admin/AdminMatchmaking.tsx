@@ -6,6 +6,7 @@ import {
   type MatchmakingPoolBeatmap,
   type MatchmakingPoolType,
   type BulkBeatmapAddResponse,
+  type BulkBeatmapsetAddResponse,
 } from '../../utils/api';
 
 /**
@@ -103,6 +104,22 @@ const AdminMatchmaking: React.FC = () => {
   const [bulkInitialRating, setBulkInitialRating] = useState(1500);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [lastBulkResult, setLastBulkResult] = useState<BulkBeatmapAddResponse | null>(null);
+
+  // Mapset bulk-import — paste mapset ids and let the backend expand each
+  // into all matching diffs in the SR/length window. Variables prefixed
+  // `mapset` (not `set`) to avoid colliding with React's setter names.
+  const [mapsetBulkInput, setMapsetBulkInput] = useState('');
+  const [mapsetMinSr, setMapsetMinSr] = useState(2.5);
+  const [mapsetMaxSr, setMapsetMaxSr] = useState(6.5);
+  const [mapsetMinLen, setMapsetMinLen] = useState(60);
+  const [mapsetMaxLen, setMapsetMaxLen] = useState(300);
+  const [mapsetBulkBusy, setMapsetBulkBusy] = useState(false);
+  const [lastMapsetBulkResult, setLastMapsetBulkResult] = useState<BulkBeatmapsetAddResponse | null>(null);
+
+  // Free-text filter applied to the existing beatmap table. Matches against
+  // beatmap_id, version, and the artist/title concatenation. 60-row pools
+  // are tedious to scan otherwise.
+  const [beatmapFilter, setBeatmapFilter] = useState('');
 
   // ────────── data loaders ──────────
 
@@ -252,6 +269,49 @@ const AdminMatchmaking: React.FC = () => {
       toast.error(err?.response?.data?.detail ?? 'Bulk add failed.');
     } finally {
       setBulkBusy(false);
+    }
+  };
+
+  const handleBulkAddSets = async () => {
+    if (editingPoolId == null) return;
+    const ids = parseBeatmapIds(mapsetBulkInput);
+    if (ids.length === 0) {
+      toast.error('Paste at least one beatmapset id.');
+      return;
+    }
+    if (ids.length > 200) {
+      toast.error('Up to 200 mapsets per request. Split into batches.');
+      return;
+    }
+    setMapsetBulkBusy(true);
+    try {
+      const res = await matchmakingAPI.bulkAddBeatmapsets(editingPoolId, {
+        beatmapset_ids: ids,
+        initial_rating: bulkInitialRating,
+        min_sr: mapsetMinSr,
+        max_sr: mapsetMaxSr,
+        min_length_seconds: mapsetMinLen,
+        max_length_seconds: mapsetMaxLen,
+      });
+      setLastMapsetBulkResult(res);
+      toast.success(
+        `Added ${res.added.length} diffs from ${ids.length} mapset${ids.length === 1 ? '' : 's'} ` +
+          `(${res.skipped_already_in_pool.length} dupes, ` +
+          `${res.skipped_outside_window.length} outside window, ` +
+          `${res.mapsets_not_found.length} mapsets unresolved)`,
+      );
+      await loadPoolBeatmaps(editingPoolId);
+      if (
+        res.mapsets_not_found.length === 0 &&
+        res.skipped_outside_window.length === 0 &&
+        res.skipped_wrong_mode.length === 0
+      ) {
+        setMapsetBulkInput('');
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail ?? 'Bulk add (mapsets) failed.');
+    } finally {
+      setMapsetBulkBusy(false);
     }
   };
 
@@ -526,13 +586,117 @@ const AdminMatchmaking: React.FC = () => {
                       )}
                     </div>
 
+                    {/* Bulk import by beatmapset id — expand each into its
+                        ranked diffs that fit the SR / length window. */}
+                    <div className="rounded-xl bg-card-hover/40 border border-card p-4">
+                      <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-1">
+                        Add whole mapsets
+                      </h4>
+                      <p className="text-xs text-gray-500 mb-3">
+                        Paste beatmapset ids — the number after <code>/beatmapsets/</code> on the
+                        osu.ppy.sh URL. The backend expands each into its ranked diffs that match
+                        the pool's mode AND your SR / length window, so you don't have to copy
+                        every individual difficulty id.
+                      </p>
+                      <textarea
+                        value={mapsetBulkInput}
+                        onChange={(e) => setMapsetBulkInput(e.target.value)}
+                        placeholder={'2347\n3289\n7028'}
+                        rows={3}
+                        className="w-full px-3 py-2 rounded-lg bg-card border border-card focus:border-osu-pink/60 focus:outline-none text-sm font-mono"
+                      />
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                        <label className="text-xs text-gray-400">
+                          Min SR
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={mapsetMinSr}
+                            onChange={(e) => setMapsetMinSr(Number(e.target.value) || 0)}
+                            className="mt-1 w-full px-2 py-1 rounded bg-card border border-card text-sm font-mono"
+                          />
+                        </label>
+                        <label className="text-xs text-gray-400">
+                          Max SR
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={mapsetMaxSr}
+                            onChange={(e) => setMapsetMaxSr(Number(e.target.value) || 0)}
+                            className="mt-1 w-full px-2 py-1 rounded bg-card border border-card text-sm font-mono"
+                          />
+                        </label>
+                        <label className="text-xs text-gray-400">
+                          Min length (s)
+                          <input
+                            type="number"
+                            value={mapsetMinLen}
+                            onChange={(e) => setMapsetMinLen(Number(e.target.value) || 0)}
+                            className="mt-1 w-full px-2 py-1 rounded bg-card border border-card text-sm font-mono"
+                          />
+                        </label>
+                        <label className="text-xs text-gray-400">
+                          Max length (s)
+                          <input
+                            type="number"
+                            value={mapsetMaxLen}
+                            onChange={(e) => setMapsetMaxLen(Number(e.target.value) || 0)}
+                            className="mt-1 w-full px-2 py-1 rounded bg-card border border-card text-sm font-mono"
+                          />
+                        </label>
+                      </div>
+                      <button
+                        disabled={mapsetBulkBusy}
+                        onClick={handleBulkAddSets}
+                        className="mt-3 px-4 py-2 bg-osu-pink/90 text-white rounded-lg hover:bg-osu-pink disabled:opacity-60 transition-colors text-sm"
+                      >
+                        {mapsetBulkBusy
+                          ? 'Importing…'
+                          : `Import ${parseBeatmapIds(mapsetBulkInput).length || ''} mapsets`.trim()}
+                      </button>
+
+                      {lastMapsetBulkResult && (
+                        <div className="mt-3 grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
+                          <ResultPill
+                            label="Diffs added"
+                            count={lastMapsetBulkResult.added.length}
+                            tone="green"
+                          />
+                          <ResultPill
+                            label="Already in pool"
+                            count={lastMapsetBulkResult.skipped_already_in_pool.length}
+                            tone="amber"
+                          />
+                          <ResultPill
+                            label="Outside window"
+                            count={lastMapsetBulkResult.skipped_outside_window.length}
+                            tone="amber"
+                          />
+                          <ResultPill
+                            label="Mapsets unresolved"
+                            count={lastMapsetBulkResult.mapsets_not_found.length}
+                            tone="red"
+                            ids={lastMapsetBulkResult.mapsets_not_found}
+                          />
+                        </div>
+                      )}
+                    </div>
+
                     {/* Existing beatmaps table */}
                     <div>
-                      <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-3 flex items-center justify-between">
+                      <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-3 flex items-center justify-between gap-3">
                         <span>Pool rotation ({poolBeatmaps.length})</span>
-                        {poolBeatmapsLoading && (
-                          <span className="text-xs text-gray-500">refreshing…</span>
-                        )}
+                        <span className="flex items-center gap-2">
+                          {poolBeatmapsLoading && (
+                            <span className="text-xs text-gray-500">refreshing…</span>
+                          )}
+                          <input
+                            value={beatmapFilter}
+                            onChange={(e) => setBeatmapFilter(e.target.value)}
+                            placeholder="filter by id / artist / title / version"
+                            className="px-3 py-1.5 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm text-foreground placeholder-gray-500 w-64 max-w-full"
+                          />
+                        </span>
                       </h4>
                       {poolBeatmaps.length === 0 ? (
                         <p className="text-sm text-gray-500 italic">
@@ -553,7 +717,34 @@ const AdminMatchmaking: React.FC = () => {
                               </tr>
                             </thead>
                             <tbody>
-                              {poolBeatmaps.map((bm) => (
+                              {(() => {
+                                const q = beatmapFilter.trim().toLowerCase();
+                                const filtered = q
+                                  ? poolBeatmaps.filter((bm) => {
+                                      const haystack = [
+                                        String(bm.beatmap_id),
+                                        bm.artist ?? '',
+                                        bm.title ?? '',
+                                        bm.version ?? '',
+                                      ]
+                                        .join(' ')
+                                        .toLowerCase();
+                                      return haystack.includes(q);
+                                    })
+                                  : poolBeatmaps;
+                                if (filtered.length === 0) {
+                                  return (
+                                    <tr>
+                                      <td
+                                        colSpan={7}
+                                        className="py-6 text-center text-sm text-gray-500 italic"
+                                      >
+                                        No maps match "{q}".
+                                      </td>
+                                    </tr>
+                                  );
+                                }
+                                return filtered.map((bm) => (
                                 <tr
                                   key={bm.id}
                                   className="border-t border-card/50 hover:bg-card-hover/40"
@@ -594,7 +785,8 @@ const AdminMatchmaking: React.FC = () => {
                                     </button>
                                   </td>
                                 </tr>
-                              ))}
+                                ));
+                              })()}
                             </tbody>
                           </table>
                         </div>

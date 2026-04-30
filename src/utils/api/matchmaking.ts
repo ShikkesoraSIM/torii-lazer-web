@@ -148,6 +148,24 @@ export interface BulkBeatmapAddResponse {
   skipped_wrong_mode: number[];
 }
 
+export interface BulkBeatmapsetAddRequest {
+  beatmapset_ids: number[];
+  initial_rating?: number;
+  initial_rating_sig?: number;
+  min_sr?: number;
+  max_sr?: number;
+  min_length_seconds?: number;
+  max_length_seconds?: number;
+}
+
+export interface BulkBeatmapsetAddResponse {
+  added: number[];
+  skipped_already_in_pool: number[];
+  skipped_outside_window: number[];
+  skipped_wrong_mode: number[];
+  mapsets_not_found: number[];
+}
+
 export const matchmakingAPI = {
   /** List pools the user can queue into. By default only `active=true`. */
   listPools: async (params: ListPoolsParams = {}): Promise<MatchmakingPool[]> => {
@@ -195,6 +213,22 @@ export const matchmakingAPI = {
   ): Promise<BulkBeatmapAddResponse> => {
     const response = await api.post<BulkBeatmapAddResponse>(
       `/api/v2/matchmaking/pools/${poolId}/beatmaps`,
+      payload,
+    );
+    return response.data;
+  },
+
+  /**
+   * Admin only — bulk add every difficulty from each provided mapset id
+   * that fits the pool's mode AND the request's SR / length window.
+   * Saves the operator from copying every individual diff id.
+   */
+  bulkAddBeatmapsets: async (
+    poolId: number,
+    payload: BulkBeatmapsetAddRequest,
+  ): Promise<BulkBeatmapsetAddResponse> => {
+    const response = await api.post<BulkBeatmapsetAddResponse>(
+      `/api/v2/matchmaking/pools/${poolId}/beatmapsets`,
       payload,
     );
     return response.data;

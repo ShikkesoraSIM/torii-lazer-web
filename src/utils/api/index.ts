@@ -30,4 +30,6 @@ export {
   type MatchmakingPoolUpdate,
   type BulkBeatmapAddRequest,
   type BulkBeatmapAddResponse,
+  type BulkBeatmapsetAddRequest,
+  type BulkBeatmapsetAddResponse,
 } from './matchmaking';

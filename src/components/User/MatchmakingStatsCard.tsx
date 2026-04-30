@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaTrophy, FaChartLine, FaUsers } from 'react-icons/fa';
 import {
@@ -7,6 +8,7 @@ import {
   type MatchmakingPool,
   type MatchmakingUserPoolStats,
 } from '../../utils/api';
+import { apiCache } from '../../utils/apiCache';
 
 /**
  * Profile-page section that surfaces a user's matchmaking activity:
@@ -58,6 +60,12 @@ const MatchmakingStatsCard: React.FC<MatchmakingStatsCardProps> = ({ userId }) =
   // once with include_inactive=true so users who once played in a now-
   // disabled pool still see the pool name on their history.
   const [poolsById, setPoolsById] = useState<Map<number, MatchmakingPool>>(new Map());
+  // Opponent username lookup populated from history.opponent_id batch.
+  // Falls back to "user N" when the user has been deleted / can't be
+  // hydrated. The cached lookups are shared with the rest of the app
+  // via apiCache so navigating from leaderboard → profile won't redo
+  // the same fetches.
+  const [opponentNames, setOpponentNames] = useState<Map<number, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,6 +86,26 @@ const MatchmakingStatsCard: React.FC<MatchmakingStatsCardProps> = ({ userId }) =
         const map = new Map<number, MatchmakingPool>();
         for (const p of poolsRes) map.set(p.id, p);
         setPoolsById(map);
+
+        // Kick off the opponent-username hydration — never blocks the
+        // primary render. apiCache.getUsers de-dupes inflight requests
+        // and caches for 5 min so this is cheap on repeat visits.
+        const opponentIds = Array.from(new Set(historyRes.map((h) => h.opponent_id)));
+        if (opponentIds.length > 0) {
+          apiCache
+            .getUsers(opponentIds)
+            .then((usersMap) => {
+              if (cancelled) return;
+              const lookup = new Map<number, string>();
+              usersMap.forEach((u, id) => {
+                if (u?.username) lookup.set(id, u.username);
+              });
+              setOpponentNames(lookup);
+            })
+            .catch(() => {
+              // Best effort — fall back to "user N" placeholder.
+            });
+        }
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -151,19 +179,33 @@ const MatchmakingStatsCard: React.FC<MatchmakingStatsCardProps> = ({ userId }) =
                   return (
                     <tr
                       key={`${s.user_id}-${s.pool_id}`}
-                      className="border-t border-gray-100 dark:border-gray-700"
+                      className="border-t border-gray-100 dark:border-gray-700 hover:bg-osu-pink/5 transition-colors group"
                     >
                       <td className="py-2 pr-4 text-gray-900 dark:text-white">
-                        {pool ? (
-                          <span>
-                            {pool.name}
-                            <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">
-                              · {POOL_TYPE_LABEL[pool.type]}
-                            </span>
+                        {/*
+                          Each per-pool stats row deep-links to that pool's
+                          public leaderboard. Anchors the discoverability —
+                          a user landing here from their profile clicks
+                          straight into the ranking they care about.
+                        */}
+                        <Link
+                          to={`/rankings/matchmaking?pool=${s.pool_id}`}
+                          className="inline-flex items-center gap-1 group-hover:text-osu-pink transition-colors"
+                        >
+                          {pool ? (
+                            <>
+                              <span>{pool.name}</span>
+                              <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">
+                                · {POOL_TYPE_LABEL[pool.type]}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-gray-500">Pool #{s.pool_id}</span>
+                          )}
+                          <span className="text-osu-pink opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+                            →
                           </span>
-                        ) : (
-                          <span className="text-gray-500">Pool #{s.pool_id}</span>
-                        )}
+                        </Link>
                       </td>
                       <td className="py-2 pr-4 text-right font-mono font-semibold">
                         {s.rating}
@@ -196,22 +238,29 @@ const MatchmakingStatsCard: React.FC<MatchmakingStatsCardProps> = ({ userId }) =
             {history.map((h) => {
               const pool = poolsById.get(h.pool_id);
               const deltaSign = h.elo_delta >= 0 ? '+' : '';
+              const opponentName = opponentNames.get(h.opponent_id);
               return (
                 <li
                   key={h.id}
                   className="flex items-center justify-between text-sm py-1.5 border-t border-gray-100 dark:border-gray-700"
                 >
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 min-w-0">
                     <span
-                      className={`uppercase text-xs font-bold tracking-wider ${RESULT_COLORS[h.result]}`}
+                      className={`uppercase text-xs font-bold tracking-wider shrink-0 ${RESULT_COLORS[h.result]}`}
                     >
                       {h.result}
                     </span>
-                    <span className="text-gray-700 dark:text-gray-300">
+                    <span className="text-gray-700 dark:text-gray-300 truncate">
                       {pool ? pool.name : `Pool #${h.pool_id}`}
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      vs #{h.opponent_id}
+                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      vs{' '}
+                      <Link
+                        to={`/users/${h.opponent_id}`}
+                        className="hover:text-osu-pink transition-colors"
+                      >
+                        {opponentName ?? `user ${h.opponent_id}`}
+                      </Link>
                     </span>
                   </span>
                   <span className="flex items-center gap-3">
