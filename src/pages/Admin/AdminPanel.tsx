@@ -12,6 +12,7 @@ import AdminDailyChallenges from './AdminDailyChallenges';
 import AdminAnnouncements from './AdminAnnouncements';
 import AdminLoginAudit from './AdminLoginAudit';
 import AdminDonations from './AdminDonations';
+import AdminMatchmaking from './AdminMatchmaking';
 
 
 type AdminTab =
@@ -21,6 +22,7 @@ type AdminTab =
   | 'badges'
   | 'teams'
   | 'daily-challenges'
+  | 'matchmaking'
   | 'announcements'
   | 'login-audit'
   | 'donations';
@@ -286,6 +288,23 @@ const AdminPanel: React.FC = () => {
                 </button>
 
                 <button
+                  onClick={() => setActiveTab('matchmaking')}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                    activeTab === 'matchmaking'
+                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Trophy glyph — matches the public matchmaking page hero. */}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 00-2 2v2a4 4 0 004 4h1m11-8a2 2 0 012 2v2a4 4 0 01-4 4h-1m-6 0v3m0 0a3 3 0 003 3h0a3 3 0 003-3m-6 0a3 3 0 01-3-3v-3m6 6h.01M9 13V7a3 3 0 016 0v6" />
+                    </svg>
+                    <span>Matchmaking Pools</span>
+                  </div>
+                </button>
+
+                <button
                   onClick={() => setActiveTab('announcements')}
                   className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
                     activeTab === 'announcements'
@@ -352,6 +371,7 @@ const AdminPanel: React.FC = () => {
                     {activeTab === 'badges' && 'Badge Management'}
                     {activeTab === 'teams' && 'Team Management'}
                     {activeTab === 'daily-challenges' && 'Daily Challenge Management'}
+                    {activeTab === 'matchmaking' && 'Matchmaking Pool Management'}
                     {activeTab === 'announcements' && 'Global Announcements'}
                     {activeTab === 'login-audit' && 'Login Audit & Client Hashes'}
                     {activeTab === 'donations' && 'Donations'}
@@ -365,6 +385,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'badges' && <AdminBadges />}
                 {activeTab === 'teams' && <AdminTeams />}
                 {activeTab === 'daily-challenges' && <AdminDailyChallenges />}
+                {activeTab === 'matchmaking' && <AdminMatchmaking />}
                 {activeTab === 'announcements' && <AdminAnnouncements />}
                 {activeTab === 'login-audit' && <AdminLoginAudit />}
                 {activeTab === 'donations' && <AdminDonations />}

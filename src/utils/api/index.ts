@@ -25,4 +25,9 @@ export {
   type MatchmakingUserPoolStats,
   type MatchmakingHistoryEntry,
   type MatchmakingResult,
+  type MatchmakingPoolBeatmap,
+  type MatchmakingPoolCreate,
+  type MatchmakingPoolUpdate,
+  type BulkBeatmapAddRequest,
+  type BulkBeatmapAddResponse,
 } from './matchmaking';

@@ -98,6 +98,56 @@ const buildQuery = (params: Record<string, unknown>): string => {
   return s ? `?${s}` : '';
 };
 
+/** Beatmap row enriched with the join-through to beatmaps + beatmapsets. */
+export interface MatchmakingPoolBeatmap {
+  id: number;
+  pool_id: number;
+  beatmap_id: number;
+  rating: number;
+  rating_sig: number;
+  selection_count: number;
+  mode: string | null;
+  version: string | null;
+  artist: string | null;
+  title: string | null;
+  difficulty_rating: number | null;
+  total_length: number | null;
+}
+
+export interface MatchmakingPoolCreate {
+  ruleset_id: number;
+  name: string;
+  type?: MatchmakingPoolType;
+  active?: boolean;
+  lobby_size?: number;
+  rating_search_radius?: number;
+  rating_search_radius_max?: number;
+  rating_search_radius_exp?: number;
+}
+
+export interface MatchmakingPoolUpdate {
+  name?: string;
+  type?: MatchmakingPoolType;
+  active?: boolean;
+  lobby_size?: number;
+  rating_search_radius?: number;
+  rating_search_radius_max?: number;
+  rating_search_radius_exp?: number;
+}
+
+export interface BulkBeatmapAddRequest {
+  beatmap_ids: number[];
+  initial_rating?: number;
+  initial_rating_sig?: number;
+}
+
+export interface BulkBeatmapAddResponse {
+  added: number[];
+  skipped_already_in_pool: number[];
+  skipped_not_found: number[];
+  skipped_wrong_mode: number[];
+}
+
 export const matchmakingAPI = {
   /** List pools the user can queue into. By default only `active=true`. */
   listPools: async (params: ListPoolsParams = {}): Promise<MatchmakingPool[]> => {
@@ -105,6 +155,54 @@ export const matchmakingAPI = {
       `/api/v2/matchmaking/pools${buildQuery({ ...params })}`,
     );
     return response.data;
+  },
+
+  /** Beatmaps currently in a pool (paginated, joined with beatmaps + beatmapsets). */
+  listPoolBeatmaps: async (
+    poolId: number,
+    params: PaginationParams = {},
+  ): Promise<MatchmakingPoolBeatmap[]> => {
+    const response = await api.get<MatchmakingPoolBeatmap[]>(
+      `/api/v2/matchmaking/pools/${poolId}/beatmaps${buildQuery({ ...params })}`,
+    );
+    return response.data;
+  },
+
+  /** Admin only — create a new pool. */
+  createPool: async (payload: MatchmakingPoolCreate): Promise<MatchmakingPool> => {
+    const response = await api.post<MatchmakingPool>('/api/v2/matchmaking/pools', payload);
+    return response.data;
+  },
+
+  /** Admin only — edit pool config in-place (any subset of fields). */
+  updatePool: async (poolId: number, payload: MatchmakingPoolUpdate): Promise<MatchmakingPool> => {
+    const response = await api.put<MatchmakingPool>(
+      `/api/v2/matchmaking/pools/${poolId}`,
+      payload,
+    );
+    return response.data;
+  },
+
+  /** Admin only — delete a pool. 409 if there's any audit history attached. */
+  deletePool: async (poolId: number): Promise<void> => {
+    await api.delete(`/api/v2/matchmaking/pools/${poolId}`);
+  },
+
+  /** Admin only — bulk add beatmaps by id. Skips dupes/missing/wrong-mode. */
+  bulkAddBeatmaps: async (
+    poolId: number,
+    payload: BulkBeatmapAddRequest,
+  ): Promise<BulkBeatmapAddResponse> => {
+    const response = await api.post<BulkBeatmapAddResponse>(
+      `/api/v2/matchmaking/pools/${poolId}/beatmaps`,
+      payload,
+    );
+    return response.data;
+  },
+
+  /** Admin only — remove a single beatmap from a pool. */
+  removePoolBeatmap: async (poolId: number, beatmapId: number): Promise<void> => {
+    await api.delete(`/api/v2/matchmaking/pools/${poolId}/beatmaps/${beatmapId}`);
   },
 
   /** Top users in a pool ranked by rating (plays > 0 only). */
