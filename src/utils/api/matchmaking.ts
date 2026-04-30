@@ -19,12 +19,22 @@ export interface MatchmakingPool {
   id: number;
   ruleset_id: number;
   name: string;
+  /** Admin-editable blurb shown under the pool name on the public page. */
+  description: string | null;
   type: MatchmakingPoolType;
   active: boolean;
   lobby_size: number;
   rating_search_radius: number;
   rating_search_radius_max: number;
   rating_search_radius_exp: number;
+  /**
+   * Activity counters populated when the request includes
+   * `with_activity=true` (default for the public ranking page). Null for
+   * admin clients that explicitly opt out to skip the COUNT queries.
+   */
+  unique_players?: number | null;
+  matches_today?: number | null;
+  matches_this_week?: number | null;
 }
 
 export interface MatchmakingMinimalUser {

@@ -130,7 +130,14 @@ const MatchmakingStatsCard: React.FC<MatchmakingStatsCardProps> = ({ userId }) =
 
   // Hide the section entirely when there's nothing to show. Keeps the
   // profile clean for the 99% of users who haven't queued yet.
-  if (!loading && !error && (!stats || stats.length === 0) && (!history || history.length === 0)) {
+  //
+  // ALSO suppressed during the initial load: a brief skeleton flash
+  // followed by the section disappearing (because the user has no
+  // matchmaking activity) reads as a layout glitch. Better to fade in
+  // late for the small fraction of users with activity than to flash
+  // every profile open.
+  if (loading) return null;
+  if (!error && (!stats || stats.length === 0) && (!history || history.length === 0)) {
     return null;
   }
 
@@ -146,11 +153,10 @@ const MatchmakingStatsCard: React.FC<MatchmakingStatsCardProps> = ({ userId }) =
         <h2 className="text-lg font-bold text-gray-900 dark:text-white">Matchmaking</h2>
       </div>
 
-      {loading && (
-        <div className="flex items-center justify-center py-6 text-gray-400">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-osu-pink" />
-        </div>
-      )}
+      {/* No loading state rendered — see the early-return above. The
+          card waits to mount until we know the user actually has
+          matchmaking activity, so non-queueing profiles never flash a
+          placeholder. */}
 
       {error && !loading && (
         <p className="text-sm text-red-500">{error}</p>

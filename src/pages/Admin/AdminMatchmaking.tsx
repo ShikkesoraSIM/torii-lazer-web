@@ -8,6 +8,7 @@ import {
   type BulkBeatmapAddResponse,
   type BulkBeatmapsetAddResponse,
 } from '../../utils/api';
+import { AdminPoolRowSkeleton } from '../../components/Matchmaking/MatchmakingSkeletons';
 
 /**
  * Admin matchmaking management page.
@@ -46,6 +47,7 @@ const RULESET_LABEL: Record<number, string> = Object.fromEntries(
 interface PoolFormState {
   ruleset_id: number;
   name: string;
+  description: string;
   type: MatchmakingPoolType;
   active: boolean;
   lobby_size: number;
@@ -57,6 +59,7 @@ interface PoolFormState {
 const DEFAULT_POOL_FORM: PoolFormState = {
   ruleset_id: 0,
   name: '',
+  description: '',
   type: 'quick_play',
   active: false,
   lobby_size: 8,
@@ -166,6 +169,7 @@ const AdminMatchmaking: React.FC = () => {
     setEditForm({
       ruleset_id: pool.ruleset_id,
       name: pool.name,
+      description: pool.description ?? '',
       type: pool.type,
       active: pool.active,
       lobby_size: pool.lobby_size,
@@ -350,9 +354,11 @@ const AdminMatchmaking: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-osu-pink" />
-        </div>
+        <ul className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <AdminPoolRowSkeleton key={i} />
+          ))}
+        </ul>
       ) : pools.length === 0 ? (
         <div className="text-center py-12 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
           No pools yet. Create one to get started.
@@ -435,7 +441,21 @@ const AdminMatchmaking: React.FC = () => {
                       <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-3">
                         Pool config
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {/* Description sits ABOVE the grid so it can use the
+                          full row width — matches what players see on the
+                          public ranking page. */}
+                      <FormField label="Description (shown to players)">
+                        <textarea
+                          value={editForm.description}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, description: e.target.value })
+                          }
+                          placeholder="e.g. Warm-up pool · 3-5★ classics · 2-min rounds"
+                          rows={2}
+                          className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm leading-relaxed"
+                        />
+                      </FormField>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
                         <FormField label="Name">
                           <input
                             value={editForm.name}
@@ -805,15 +825,26 @@ const AdminMatchmaking: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-card backdrop-blur-md rounded-2xl border border-card shadow-2xl max-w-xl w-full p-6 space-y-4">
             <h3 className="text-xl font-bold text-foreground">Create matchmaking pool</h3>
+            <FormField label="Name">
+              <input
+                value={createForm.name}
+                onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                placeholder="e.g. osu! standard 2K-3K"
+                className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm"
+              />
+            </FormField>
+            <FormField label="Description (optional, shown to players)">
+              <textarea
+                value={createForm.description}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, description: e.target.value })
+                }
+                placeholder="e.g. Warm-up pool · 3-5★ classics"
+                rows={2}
+                className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm leading-relaxed"
+              />
+            </FormField>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <FormField label="Name">
-                <input
-                  value={createForm.name}
-                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                  placeholder="e.g. osu! standard 2K-3K"
-                  className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm"
-                />
-              </FormField>
               <FormField label="Ruleset">
                 <select
                   value={createForm.ruleset_id}

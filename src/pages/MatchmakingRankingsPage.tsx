@@ -9,8 +9,12 @@ import {
   type MatchmakingPoolBeatmap,
   type MatchmakingUserPoolStats,
 } from '../utils/api';
-import LoadingSpinner from '../components/UI/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
+import {
+  BeatmapRowSkeleton,
+  LeaderboardRowSkeleton,
+  PoolTabsSkeleton,
+} from '../components/Matchmaking/MatchmakingSkeletons';
 
 /**
  * Public matchmaking rankings page (`/rankings/matchmaking`).
@@ -200,9 +204,56 @@ const MatchmakingRankingsPage: React.FC = () => {
   }
 
   if (pools === null) {
+    // Initial-load skeleton screen — renders the same shape as the live
+    // page (hero, tabs, two-column body) so first paint feels instant
+    // and there's no layout jump when the data lands.
     return (
-      <div className="torii-page-stage min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+      <div className="torii-page-stage min-h-screen">
+        <main className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10 space-y-6">
+          <div className="bg-card backdrop-blur-md rounded-3xl shadow-2xl border border-card p-6 md:p-8 animate-pulse">
+            <div
+              className="h-3 w-24 rounded mb-3"
+              style={{ background: 'var(--card-bg-hover)', opacity: 0.6 }}
+            />
+            <div
+              className="h-9 w-48 rounded mb-3"
+              style={{ background: 'var(--card-bg-hover)', opacity: 0.6 }}
+            />
+            <div
+              className="h-3 w-2/3 max-w-md rounded"
+              style={{ background: 'var(--card-bg-hover)', opacity: 0.5 }}
+            />
+          </div>
+          <PoolTabsSkeleton />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <section className="lg:col-span-2 bg-card backdrop-blur-md rounded-2xl border border-card shadow-xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-card flex items-center justify-between">
+                <div
+                  className="h-5 w-44 rounded animate-pulse"
+                  style={{ background: 'var(--card-bg-hover)', opacity: 0.6 }}
+                />
+              </div>
+              <ul>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <LeaderboardRowSkeleton key={i} />
+                ))}
+              </ul>
+            </section>
+            <section className="bg-card backdrop-blur-md rounded-2xl border border-card shadow-xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-card">
+                <div
+                  className="h-5 w-32 rounded animate-pulse"
+                  style={{ background: 'var(--card-bg-hover)', opacity: 0.6 }}
+                />
+              </div>
+              <ul>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <BeatmapRowSkeleton key={i} />
+                ))}
+              </ul>
+            </section>
+          </div>
+        </main>
       </div>
     );
   }
@@ -263,6 +314,12 @@ const MatchmakingRankingsPage: React.FC = () => {
           {pools.map((p) => {
             const active = p.id === selectedPoolId;
             const accent = POOL_TYPE_ACCENT[p.type];
+            // Activity badge — shows "live" pulse next to pools with
+            // recent matches so the user has a sense of which pool to
+            // queue into. Bare "matches_today" is plenty of signal: if
+            // the count is 0 the pool feels dormant, if > 0 the dot
+            // pulses softly to communicate "people just played here."
+            const liveCount = p.matches_today ?? 0;
             return (
               <button
                 key={p.id}
@@ -287,6 +344,18 @@ const MatchmakingRankingsPage: React.FC = () => {
                   >
                     {POOL_TYPE_LABEL[p.type]}
                   </span>
+                  {liveCount > 0 && (
+                    <span
+                      className="ml-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-500/15 text-green-300"
+                      title={`${liveCount} matches in the last 24h`}
+                    >
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-400" />
+                      </span>
+                      {liveCount}
+                    </span>
+                  )}
                 </div>
                 {active && (
                   <motion.div
@@ -312,16 +381,62 @@ const MatchmakingRankingsPage: React.FC = () => {
             >
               {/* Leaderboard — left two columns on lg */}
               <section className="lg:col-span-2 bg-card backdrop-blur-md rounded-2xl border border-card shadow-xl overflow-hidden">
-                <header className="px-5 py-4 border-b border-card flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <FaTrophy className="text-osu-pink" />
-                    <h2 className="font-bold text-foreground">
-                      {selectedPool.name}
-                    </h2>
+                <header className="px-5 py-4 border-b border-card">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <FaTrophy className="text-osu-pink" />
+                      <h2 className="font-bold text-foreground">
+                        {selectedPool.name}
+                      </h2>
+                    </div>
+                    <span className="text-xs text-gray-500 uppercase tracking-wider">
+                      Top players
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-500 uppercase tracking-wider">
-                    Top players
-                  </span>
+                  {/* Admin-curated description (optional) — preserves
+                      whitespace/newlines so a multi-paragraph blurb
+                      reads cleanly. */}
+                  {selectedPool.description && (
+                    <p className="mt-2 text-sm text-gray-400 leading-relaxed whitespace-pre-line">
+                      {selectedPool.description}
+                    </p>
+                  )}
+                  {/* Live activity strip — only renders when there's
+                      *something* to show. Three counters at most so the
+                      strip stays compact even on mobile. */}
+                  {(selectedPool.unique_players != null ||
+                    selectedPool.matches_today != null ||
+                    selectedPool.matches_this_week != null) && (
+                    <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs">
+                      {selectedPool.unique_players != null && (
+                        <span className="flex items-center gap-1.5 text-gray-400">
+                          <FaUsers className="text-osu-pink/70" />
+                          <span className="font-mono font-semibold text-gray-200">
+                            {selectedPool.unique_players.toLocaleString()}
+                          </span>{' '}
+                          {selectedPool.unique_players === 1 ? 'player' : 'players'} ever
+                        </span>
+                      )}
+                      {selectedPool.matches_today != null && (
+                        <span className="flex items-center gap-1.5 text-gray-400">
+                          <FaFire className="text-amber-400/80" />
+                          <span className="font-mono font-semibold text-gray-200">
+                            {selectedPool.matches_today.toLocaleString()}
+                          </span>{' '}
+                          today
+                        </span>
+                      )}
+                      {selectedPool.matches_this_week != null && (
+                        <span className="text-gray-500">
+                          (
+                          <span className="font-mono font-semibold text-gray-300">
+                            {selectedPool.matches_this_week.toLocaleString()}
+                          </span>{' '}
+                          this week)
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </header>
 
                 {/*
@@ -360,9 +475,14 @@ const MatchmakingRankingsPage: React.FC = () => {
                 )}
 
                 {leaderboardLoading ? (
-                  <div className="py-10 flex justify-center">
-                    <LoadingSpinner size="md" />
-                  </div>
+                  // Skeleton-row treatment: keeps the panel height stable
+                  // when switching tabs so the user's eye stays put while
+                  // the new pool's data lands.
+                  <ul>
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <LeaderboardRowSkeleton key={i} />
+                    ))}
+                  </ul>
                 ) : leaderboardError ? (
                   <p className="px-5 py-8 text-center text-red-400 text-sm">{leaderboardError}</p>
                 ) : leaderboard.length === 0 ? (
@@ -481,9 +601,11 @@ const MatchmakingRankingsPage: React.FC = () => {
                 </header>
 
                 {poolBeatmapsLoading ? (
-                  <div className="py-10 flex justify-center">
-                    <LoadingSpinner size="md" />
-                  </div>
+                  <ul>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <BeatmapRowSkeleton key={i} />
+                    ))}
+                  </ul>
                 ) : poolBeatmaps.length === 0 ? (
                   <p className="px-5 py-12 text-center text-sm text-gray-400">
                     No beatmaps in this pool yet.
