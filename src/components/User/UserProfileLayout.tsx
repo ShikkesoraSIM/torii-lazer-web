@@ -20,6 +20,7 @@ import { UserTitleBadges } from './TitleBadge';
 import Achievements from './Achievements';
 import UserMostPlayedBeatmaps from './UserMostPlayedBeatmaps';
 import UserMappedBeatmaps from './UserMappedBeatmaps';
+import MatchmakingStatsCard from './MatchmakingStatsCard';
 import { FaTools, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { Tooltip } from 'react-tooltip';
 import { useAuth } from '../../hooks/useAuth';
@@ -482,6 +483,16 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
 
         <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
           <UserMostPlayedBeatmaps userId={user.id} user={user} />
+        </div>
+
+        {/*
+          Matchmaking — only renders if the user has any matchmaking
+          stats / history rows. Component self-hides for users who
+          haven't queued, so this slot is invisible for the majority
+          of profiles.
+        */}
+        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
+          <MatchmakingStatsCard userId={user.id} />
         </div>
 
         {/* 用户最近成绩 */}
