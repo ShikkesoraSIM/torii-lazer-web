@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
 import type { User } from '../../types';
-import CountrySelect from '../../components/UI/CountrySelect';
+import AdminCountryPicker from './AdminCountryPicker';
 
 // ─── Torii title definitions (mirrors g0v0-server/app/models/torii_groups.py) ──
 //
@@ -61,11 +61,14 @@ const TITLE_CATEGORY_ORDER: ToriiTitleDef['category'][] = ['staff', 'mapping', '
 
 interface AdminUserEditModalProps {
   user: User;
-  countries: Array<{ code: string; name: string }>;
+  // Note: the old `countries` prop has been removed. The country picker now
+  // uses the canonical ISO 3166 list bundled in src/data/iso3166Countries.ts
+  // instead of scraping the rankings (which only listed countries with at
+  // least one ranked player and made many flags unselectable).
   onClose: () => void;
 }
 
-const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, countries, onClose }) => {
+const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, onClose }) => {
   const [formData, setFormData] = useState({
     username: user.username,
     country_code: user.country_code,
@@ -228,10 +231,9 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, countries
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Country/Flag
               </label>
-              <CountrySelect
+              <AdminCountryPicker
                 value={formData.country_code}
                 onChange={(value) => setFormData({ ...formData, country_code: value })}
-                countries={countries}
               />
             </div>
 

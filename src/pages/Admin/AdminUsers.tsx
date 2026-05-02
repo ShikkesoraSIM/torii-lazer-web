@@ -3,15 +3,16 @@ import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
 import type { User } from '../../types';
 import AdminUserEditModal from './AdminUserEditModal';
-import { useAvailableCountries } from '../../hooks/useAvailableCountries';
-import type { GameMode } from '../../types';
+
+// Country list used to come from `useAvailableCountries('osu')` (rankings
+// scrape). The admin modal now bundles its own canonical ISO list, so this
+// page no longer needs to fetch anything country-related.
 
 const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const { countries } = useAvailableCountries('osu' as GameMode);
 
   useEffect(() => {
     loadUsers();
@@ -247,7 +248,6 @@ const AdminUsers: React.FC = () => {
       {editingUser && (
         <AdminUserEditModal
           user={editingUser}
-          countries={countries}
           onClose={handleCloseEdit}
         />
       )}
