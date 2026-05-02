@@ -6,28 +6,58 @@ import type { User } from '../../types';
 import CountrySelect from '../../components/UI/CountrySelect';
 
 // ─── Torii title definitions (mirrors g0v0-server/app/models/torii_groups.py) ──
+//
+// Kept aligned with TORII_GROUPS server-side. When adding a new group there:
+// 1. add a matching entry below
+// 2. set hasAura: true if torii_auras.py also has an entry whose
+//    owning_groups contains this title's key (so admins know at a glance
+//    which titles grant a particle aura, not just a badge).
+// 3. set the appropriate `category` so the picker groups visually.
 interface ToriiTitleDef {
   key: string
   label: string
   shortName: string
   colour: string
+  category: 'staff' | 'mapping' | 'honorary' | 'cosmetic'
   isElite?: boolean
+  hasAura?: boolean
 }
 
 const TORII_TITLES: ToriiTitleDef[] = [
-  { key: 'admin',         label: 'Torii Admin',       shortName: 'ADM', colour: '#FF3B3B', isElite: true },
-  { key: 'dev',           label: 'Developer',          shortName: 'DEV', colour: '#00E5FF', isElite: true },
-  { key: 'mod',           label: 'Moderator',          shortName: 'MOD', colour: '#4A90E2' },
-  { key: 'qat',           label: 'Quality Assurance',  shortName: 'QAT', colour: '#FFD700' },
-  { key: 'pooler',        label: 'Map Pooler',         shortName: 'MAP', colour: '#B24BF3' },
-  { key: 'tournament',    label: 'Tournament Staff',   shortName: 'TRN', colour: '#3F51B5' },
-  { key: 'advisor-osu',   label: 'osu! Advisor',       shortName: 'ADV', colour: '#FF66AA' },
-  { key: 'advisor-taiko', label: 'Taiko Advisor',      shortName: 'ADV', colour: '#FF6B35' },
-  { key: 'advisor-catch', label: 'Catch Advisor',      shortName: 'ADV', colour: '#26C6A6' },
-  { key: 'advisor-mania', label: 'Mania Advisor',      shortName: 'ADV', colour: '#E91E8C' },
-  { key: 'alumni',        label: 'Alumni',             shortName: 'ALM', colour: '#9E9E9E' },
-  { key: 'supporter',     label: 'Torii Supporter',    shortName: 'SUP', colour: '#FFCA28' },
+  // Staff — gameplay moderation, server operations.
+  { key: 'admin',         label: 'Torii Admin',        shortName: 'ADM', colour: '#FF3B3B', category: 'staff', isElite: true, hasAura: true },
+  { key: 'dev',           label: 'Developer',          shortName: 'DEV', colour: '#00E5FF', category: 'staff', isElite: true, hasAura: true },
+  { key: 'mod',           label: 'Moderator',          shortName: 'MOD', colour: '#4A90E2', category: 'staff', hasAura: true },
+  { key: 'qat',           label: 'Quality Assurance',  shortName: 'QAT', colour: '#FFD700', category: 'staff', hasAura: true },
+  // Mapping & competitive roles.
+  { key: 'pooler',        label: 'Map Pooler',         shortName: 'MAP', colour: '#B24BF3', category: 'mapping' },
+  { key: 'tournament',    label: 'Tournament Staff',   shortName: 'TRN', colour: '#3F51B5', category: 'mapping' },
+  { key: 'advisor-osu',   label: 'osu! Advisor',       shortName: 'ADV', colour: '#FF66AA', category: 'mapping' },
+  { key: 'advisor-taiko', label: 'Taiko Advisor',      shortName: 'ADV', colour: '#FF6B35', category: 'mapping' },
+  { key: 'advisor-catch', label: 'Catch Advisor',      shortName: 'ADV', colour: '#26C6A6', category: 'mapping' },
+  { key: 'advisor-mania', label: 'Mania Advisor',      shortName: 'ADV', colour: '#E91E8C', category: 'mapping' },
+  // Honorary recognition.
+  { key: 'alumni',        label: 'Alumni',             shortName: 'ALM', colour: '#9E9E9E', category: 'honorary' },
+  { key: 'supporter',     label: 'Torii Supporter',    shortName: 'SUP', colour: '#FF7FC8', category: 'honorary', hasAura: true },
+  // Cosmetic / community recognition. Free to assign, all carry an aura.
+  // Goof and Bug Finder were missing from the picker — admins couldn't
+  // grant them via the UI, only via a manual SQL update against
+  // lazer_users.torii_titles. Adding them here closes that gap.
+  { key: 'goof',          label: 'Goofball',           shortName: 'GOOF', colour: '#9CE5A0', category: 'cosmetic', hasAura: true },
+  { key: 'bug-finder',    label: 'Bug Finder',         shortName: 'BUG', colour: '#8CE0C5', category: 'cosmetic', hasAura: true },
 ];
+
+// Visual section labels in admin-panel order. donator is intentionally
+// excluded — that group is auto-granted server-side from has_supported
+// and has no manual admin action.
+const TITLE_CATEGORY_LABELS: Record<ToriiTitleDef['category'], string> = {
+  staff:    'Staff',
+  mapping:  'Mapping & Competitive',
+  honorary: 'Honorary',
+  cosmetic: 'Cosmetic / Community',
+};
+
+const TITLE_CATEGORY_ORDER: ToriiTitleDef['category'][] = ['staff', 'mapping', 'honorary', 'cosmetic'];
 
 interface AdminUserEditModalProps {
   user: User;
@@ -239,48 +269,89 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, countries
 
             {/* ── Torii Titles ─────────────────────────────────────────────── */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Torii Titles
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {TORII_TITLES.map((t) => {
-                  const active = formData.torii_titles.includes(t.key);
-                  const toggle = () => {
-                    const next = active
-                      ? formData.torii_titles.filter((k) => k !== t.key)
-                      : [...formData.torii_titles, t.key];
-                    setFormData({ ...formData, torii_titles: next });
-                  };
-                  return (
-                    <button
-                      key={t.key}
-                      type="button"
-                      onClick={toggle}
-                      title={t.label}
-                      className={`
-                        inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wide
-                        border transition-all duration-150 select-none
-                        ${active ? 'opacity-100' : 'opacity-40 hover:opacity-70'}
-                      `}
-                      style={{
-                        color: t.colour,
-                        borderColor: active ? `${t.colour}88` : `${t.colour}33`,
-                        background: active ? `${t.colour}22` : `${t.colour}0a`,
-                        boxShadow: active && t.isElite ? `0 0 8px ${t.colour}44` : undefined,
-                      }}
-                    >
-                      <span
-                        className="inline-block w-2 h-2 rounded-full shrink-0"
-                        style={{ background: t.colour, opacity: active ? 1 : 0.6 }}
-                      />
-                      {t.shortName}
-                      <span className="font-normal normal-case tracking-normal text-[10px] opacity-75">
-                        {t.label}
-                      </span>
-                    </button>
-                  );
-                })}
+              <div className="flex items-baseline justify-between mb-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Torii Titles
+                </label>
+                {/* Legend explaining the aura indicator on the right of the
+                    section heading. Without this admins had to mentally map
+                    "which titles also grant a particle aura" against the
+                    server-side torii_auras catalog — confusing UX, and the
+                    user explicitly asked us to normalise this. */}
+                <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                  <span className="text-purple-400">✦</span> grants user aura
+                </span>
               </div>
+
+              {/* Render one block per category so the picker reads as
+                  "staff, then mapping, then honorary, then cosmetic"
+                  rather than a flat blur of identically-styled chips. */}
+              {TITLE_CATEGORY_ORDER.map((category) => {
+                const titlesInCategory = TORII_TITLES.filter((t) => t.category === category);
+                if (titlesInCategory.length === 0) return null;
+
+                return (
+                  <div key={category} className="mb-3 last:mb-0">
+                    <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-500 mb-1.5">
+                      {TITLE_CATEGORY_LABELS[category]}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {titlesInCategory.map((t) => {
+                        const active = formData.torii_titles.includes(t.key);
+                        const toggle = () => {
+                          const next = active
+                            ? formData.torii_titles.filter((k) => k !== t.key)
+                            : [...formData.torii_titles, t.key];
+                          setFormData({ ...formData, torii_titles: next });
+                        };
+                        return (
+                          <button
+                            key={t.key}
+                            type="button"
+                            onClick={toggle}
+                            title={t.hasAura
+                              ? `${t.label} — grants particle aura`
+                              : t.label}
+                            className={`
+                              inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wide
+                              border transition-all duration-150 select-none
+                              ${active ? 'opacity-100' : 'opacity-40 hover:opacity-70'}
+                            `}
+                            style={{
+                              color: t.colour,
+                              borderColor: active ? `${t.colour}88` : `${t.colour}33`,
+                              background: active ? `${t.colour}22` : `${t.colour}0a`,
+                              boxShadow: active && t.isElite ? `0 0 8px ${t.colour}44` : undefined,
+                            }}
+                          >
+                            <span
+                              className="inline-block w-2 h-2 rounded-full shrink-0"
+                              style={{ background: t.colour, opacity: active ? 1 : 0.6 }}
+                            />
+                            {t.shortName}
+                            <span className="font-normal normal-case tracking-normal text-[10px] opacity-75">
+                              {t.label}
+                            </span>
+                            {/* ✦ marker for titles that also grant a
+                                user aura (via torii_auras owning_groups).
+                                Tiny purple sparkle so it doesn't visually
+                                fight the per-title colour. */}
+                            {t.hasAura && (
+                              <span
+                                className="text-purple-400 text-[11px] leading-none"
+                                aria-label="grants user aura"
+                              >
+                                ✦
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
               {formData.torii_titles.length > 0 && (
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                   Active: {formData.torii_titles.join(', ')}
