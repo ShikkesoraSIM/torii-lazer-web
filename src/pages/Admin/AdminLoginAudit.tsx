@@ -84,6 +84,22 @@ const AdminLoginAudit: React.FC = () => {
 
   const [unknownHashes, setUnknownHashes] = useState<UnknownHashItem[]>([]);
   const [loadingHashes, setLoadingHashes] = useState(false);
+
+  // Click-to-expand state for the user-agent / notes column. We hold a
+  // Set rather than per-row component state so toggling stays cheap
+  // and easy to reset from a future "collapse all" affordance.
+  const [expandedRowIds, setExpandedRowIds] = useState<Set<number>>(() => new Set());
+  const toggleRowExpanded = (id: number) => {
+    setExpandedRowIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
   const [assigningHash, setAssigningHash] = useState<string | null>(null);
   const [manualAssignLoading, setManualAssignLoading] = useState(false);
   const [assignForm, setAssignForm] = useState({
@@ -285,67 +301,103 @@ const AdminLoginAudit: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {logs.map((row) => (
-                <tr key={row.id} className="border-t border-card/60 align-top">
-                  <td className="p-3 whitespace-nowrap text-xs md:text-sm">{new Date(row.login_time).toLocaleString()}</td>
-                  <td className="p-3">
-                    {row.user_id > 0 ? (
-                      <Link to={`/users/${row.user_id}`} className="font-medium text-cyan-300 hover:text-cyan-200">
-                        {row.username || `User #${row.user_id}`}
-                      </Link>
-                    ) : (
-                      <div className="font-medium">{row.username || `User #${row.user_id}`}</div>
-                    )}
-                    <div className="text-xs text-gray-400">ID {row.user_id}</div>
-                  </td>
-                  <td className="p-3">
-                    <span className={row.login_success ? 'text-green-400' : 'text-red-400'}>
-                      {row.login_success ? 'Success' : 'Failed'}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <div className="max-w-[140px] leading-tight break-all text-xs md:text-sm" title={row.login_method}>
-                      {row.login_method}
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <div
-                      className="max-w-[250px] leading-tight break-words text-xs text-gray-300"
-                      title={row.client_label || '-'}
+              {logs.map((row) => {
+                const isExpanded = expandedRowIds.has(row.id);
+                const decodedUA = tryDecodeMojibake(row.user_agent);
+                const decodedNotes = row.notes ? tryDecodeMojibake(row.notes) : '';
+                // Heuristic: a row is "long" if either field exceeds the
+                // visual budget of one collapsed row. We only show the
+                // expand affordance when there's actually more to see —
+                // otherwise the chevron is noise.
+                const hasLongContent =
+                  (decodedUA?.length ?? 0) > 90 ||
+                  (decodedNotes?.length ?? 0) > 90;
+                return (
+                  <React.Fragment key={row.id}>
+                    <tr
+                      className={`border-t border-card/60 align-top ${
+                        hasLongContent ? 'cursor-pointer hover:bg-white/[0.02]' : ''
+                      }`}
+                      onClick={hasLongContent ? () => toggleRowExpanded(row.id) : undefined}
                     >
-                      {row.client_label || '-'}
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <div className="font-mono text-xs text-gray-300 break-all leading-tight" title={row.client_hash || '-'}>
-                      {row.client_hash || '-'}
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <div>{row.ip_address}</div>
-                    <div className="text-xs text-gray-400">{formatLocation(row)}</div>
-                    {row.organization ? (
-                      <div className="text-xs text-gray-500">{row.organization}</div>
-                    ) : null}
-                  </td>
-                  <td className="p-3">
-                    <div
-                      className="leading-tight break-words text-xs text-gray-300"
-                      title={tryDecodeMojibake(row.user_agent)}
-                    >
-                      {tryDecodeMojibake(row.user_agent)}
-                    </div>
-                    {row.notes ? (
-                      <div
-                        className="leading-tight break-words text-xs text-gray-500 mt-1"
-                        title={tryDecodeMojibake(row.notes)}
-                      >
-                        {tryDecodeMojibake(row.notes)}
-                      </div>
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
+                      <td className="p-3 whitespace-nowrap text-xs md:text-sm">{new Date(row.login_time).toLocaleString()}</td>
+                      <td className="p-3">
+                        {row.user_id > 0 ? (
+                          <Link
+                            to={`/users/${row.user_id}`}
+                            className="font-medium text-cyan-300 hover:text-cyan-200"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {row.username || `User #${row.user_id}`}
+                          </Link>
+                        ) : (
+                          <div className="font-medium">{row.username || `User #${row.user_id}`}</div>
+                        )}
+                        <div className="text-xs text-gray-400">ID {row.user_id}</div>
+                      </td>
+                      <td className="p-3">
+                        <span className={row.login_success ? 'text-green-400' : 'text-red-400'}>
+                          {row.login_success ? 'Success' : 'Failed'}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <div className="max-w-[140px] leading-tight break-all text-xs md:text-sm" title={row.login_method}>
+                          {row.login_method}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div
+                          className="max-w-[250px] leading-tight break-words text-xs text-gray-300"
+                          title={row.client_label || '-'}
+                        >
+                          {row.client_label || '-'}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="font-mono text-xs text-gray-300 break-all leading-tight" title={row.client_hash || '-'}>
+                          {row.client_hash || '-'}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div>{row.ip_address}</div>
+                        <div className="text-xs text-gray-400">{formatLocation(row)}</div>
+                        {row.organization ? (
+                          <div className="text-xs text-gray-500">{row.organization}</div>
+                        ) : null}
+                      </td>
+                      <td className="p-3">
+                        {/*
+                          When the row is collapsed, clamp to two lines
+                          so the table stays uniform. Expanded rows get
+                          the full text in a follow-up <tr> below so
+                          the column widths don't reflow on toggle.
+                        */}
+                        <div
+                          className={`leading-tight break-words text-xs text-gray-300 ${
+                            isExpanded ? '' : 'line-clamp-2'
+                          }`}
+                        >
+                          {decodedUA}
+                        </div>
+                        {decodedNotes ? (
+                          <div
+                            className={`leading-tight break-words text-xs text-gray-500 mt-1 ${
+                              isExpanded ? '' : 'line-clamp-2'
+                            }`}
+                          >
+                            {decodedNotes}
+                          </div>
+                        ) : null}
+                        {hasLongContent && (
+                          <div className="text-[10px] text-osu-pink mt-1 select-none">
+                            {isExpanded ? '▲ collapse' : '▼ click row to expand'}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  </React.Fragment>
+                );
+              })}
               {!loadingLogs && logs.length === 0 ? (
                 <tr>
                   <td className="p-6 text-center text-gray-400" colSpan={8}>
