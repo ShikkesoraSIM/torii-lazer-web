@@ -13,6 +13,7 @@ import AdminAnnouncements from './AdminAnnouncements';
 import AdminLoginAudit from './AdminLoginAudit';
 import AdminDonations from './AdminDonations';
 import AdminMatchmaking from './AdminMatchmaking';
+import AdminMaintenance from './AdminMaintenance';
 
 
 type AdminTab =
@@ -25,7 +26,8 @@ type AdminTab =
   | 'matchmaking'
   | 'announcements'
   | 'login-audit'
-  | 'donations';
+  | 'donations'
+  | 'maintenance';
 
 interface AdminStats {
   total_users: number;
@@ -354,6 +356,24 @@ const AdminPanel: React.FC = () => {
                     <span>Donations</span>
                   </div>
                 </button>
+
+                <button
+                  onClick={() => setActiveTab('maintenance')}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                    activeTab === 'maintenance'
+                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Wrench glyph — operational tool, distinct from
+                        the donation/users icons so the row is scannable. */}
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M22.7 19.3l-7.7-7.7c.7-1.9.3-4.1-1.2-5.6-1.6-1.6-4-2-6-1.1l3.6 3.6-2.8 2.8L4.9 7.7C4 9.7 4.4 12.1 6 13.7c1.5 1.5 3.7 1.9 5.6 1.2l7.7 7.7c.4.4 1 .4 1.4 0l2-2c.4-.4.4-1 0-1.3z"/>
+                    </svg>
+                    <span>Maintenance</span>
+                  </div>
+                </button>
               </nav>
             </div>
           </div>
@@ -375,6 +395,7 @@ const AdminPanel: React.FC = () => {
                     {activeTab === 'announcements' && 'Global Announcements'}
                     {activeTab === 'login-audit' && 'Login Audit & Client Hashes'}
                     {activeTab === 'donations' && 'Donations'}
+                    {activeTab === 'maintenance' && 'Maintenance Mode'}
                   </div>
                 </div>
               </div>
@@ -389,6 +410,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'announcements' && <AdminAnnouncements />}
                 {activeTab === 'login-audit' && <AdminLoginAudit />}
                 {activeTab === 'donations' && <AdminDonations />}
+                {activeTab === 'maintenance' && <AdminMaintenance />}
               </div>
             </div>
           </div>

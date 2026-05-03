@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
+import MaintenanceBanner from './MaintenanceBanner';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
 import { NotificationProvider } from '../../contexts/NotificationContext';
@@ -17,6 +18,13 @@ const Layout: React.FC = () => {
     <NotificationProvider isAuthenticated={isAuthenticated} user={user}>
       <div className="torii-app-shell min-h-screen bg-gray-50 dark:bg-gray-900">
         <Navbar />
+        {/*
+          Maintenance banner sits between the fixed navbar and the page
+          content. The banner self-hides when the server is operating
+          normally, so on the happy path it's a no-op (single fetch on
+          mount + a 30s interval that returns {maintenance: false}).
+        */}
+        <MaintenanceBanner />
         <main className={`torii-page-stage ${shouldApplyTopPadding ? 'pt-[56px] md:pt-20' : ''}`}>
           <Outlet />
         </main>
