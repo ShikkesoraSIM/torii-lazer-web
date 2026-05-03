@@ -87,65 +87,90 @@ const AdminUsers: React.FC = () => {
     user.id.toString().includes(searchTerm)
   );
 
+  // Quick stats above the table — total / active / banned / staff. Cheap
+  // to derive client-side; mirrors the StatTile pattern used in the new
+  // AdminBeatmapBlacklist redesign so the admin panel reads cohesively.
+  const stats = {
+    total: users.length,
+    banned: users.filter((u) => u.is_restricted).length,
+    staff: users.filter((u) => u.is_admin || u.is_gmt || u.is_qat).length,
+  };
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">User Management</h2>
-        <div className="flex gap-2">
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-2xl font-bold text-white">User Management</h2>
+        <div className="flex gap-2 flex-wrap">
           <input
             type="text"
-            placeholder="Search users..."
+            placeholder="Search by username or ID…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            className="min-w-[240px] px-3 py-2 rounded-xl bg-[rgba(12,16,42,0.72)] border border-white/15 text-white text-sm focus:ring-2 focus:ring-profile-color/60 placeholder:text-white/40"
           />
           <button
             onClick={loadUsers}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-osu-pink hover:bg-osu-pink/90 text-white rounded-xl font-medium transition-colors"
           >
             Refresh
           </button>
         </div>
       </div>
 
+      {/* Quick stats */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="rounded-xl px-4 py-3 border border-white/10 bg-white/5">
+          <div className="text-[11px] uppercase tracking-wider text-white/55">Total users</div>
+          <div className="text-2xl font-bold text-white tabular-nums">{stats.total.toLocaleString()}</div>
+        </div>
+        <div className="rounded-xl px-4 py-3 border border-white/10 bg-red-500/10">
+          <div className="text-[11px] uppercase tracking-wider text-white/55">Banned</div>
+          <div className="text-2xl font-bold text-white tabular-nums">{stats.banned.toLocaleString()}</div>
+        </div>
+        <div className="rounded-xl px-4 py-3 border border-white/10 bg-purple-500/10">
+          <div className="text-[11px] uppercase tracking-wider text-white/55">Staff (admin / GMT / QAT)</div>
+          <div className="text-2xl font-bold text-white tabular-nums">{stats.staff.toLocaleString()}</div>
+        </div>
+      </div>
+
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-osu-pink" />
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-2xl border border-white/10">
           <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">ID</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Username</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Country</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Status</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Roles</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Actions</th>
+            <thead className="bg-white/[0.03]">
+              <tr className="border-b border-white/10">
+                <th className="text-left py-3 px-4 text-[11px] uppercase tracking-wider font-semibold text-white/55">ID</th>
+                <th className="text-left py-3 px-4 text-[11px] uppercase tracking-wider font-semibold text-white/55">Username</th>
+                <th className="text-left py-3 px-4 text-[11px] uppercase tracking-wider font-semibold text-white/55">Country</th>
+                <th className="text-left py-3 px-4 text-[11px] uppercase tracking-wider font-semibold text-white/55">Status</th>
+                <th className="text-left py-3 px-4 text-[11px] uppercase tracking-wider font-semibold text-white/55">Roles</th>
+                <th className="text-right py-3 px-4 text-[11px] uppercase tracking-wider font-semibold text-white/55">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    No users found
+                  <td colSpan={6} className="text-center py-8 text-gray-400">
+                    {searchTerm ? `No users match "${searchTerm}".` : 'No users found.'}
                   </td>
                 </tr>
               ) : (
                 filteredUsers.map((user) => (
                   <tr
                     key={user.id}
-                    className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    className="border-b border-white/5 hover:bg-white/[0.03] transition-colors"
                   >
-                    <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{user.id}</td>
+                    <td className="py-3 px-4 text-gray-400 font-mono text-xs">{user.id}</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         {user.avatar_url ? (
                           <img
                             src={user.avatar_url}
                             alt={user.username}
-                            className="w-8 h-8 rounded-full"
+                            className="w-8 h-8 rounded-full ring-1 ring-white/10"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               if (target.src === 'https://lazer-data.g0v0.top/default.jpg' || target.src.includes('default.jpg')) {
@@ -157,10 +182,10 @@ const AdminUsers: React.FC = () => {
                           <img
                             src="https://osuherz.ddns.net/default.jpg"
                             alt={user.username}
-                            className="w-8 h-8 rounded-full"
+                            className="w-8 h-8 rounded-full ring-1 ring-white/10"
                           />
                         )}
-                        <span className="font-medium text-gray-900 dark:text-white">{user.username}</span>
+                        <span className="font-medium text-white">{user.username}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
@@ -169,19 +194,19 @@ const AdminUsers: React.FC = () => {
                           <img
                             src={`/image/flag/${user.country_code.toLowerCase()}.svg`}
                             alt={user.country_code}
-                            className="w-5 h-4"
+                            className="w-5 h-4 rounded-sm"
                           />
                         )}
-                        <span className="text-gray-600 dark:text-gray-400">{user.country_code || 'N/A'}</span>
+                        <span className="text-gray-300 text-sm">{user.country_code || '—'}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       {user.is_restricted ? (
-                        <span className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded text-sm font-medium">
+                        <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-red-500/15 text-red-300 border-red-500/40">
                           Banned
                         </span>
                       ) : (
-                        <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded text-sm font-medium">
+                        <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/40">
                           Active
                         </span>
                       )}
@@ -189,17 +214,17 @@ const AdminUsers: React.FC = () => {
                     <td className="py-3 px-4">
                       <div className="flex flex-wrap gap-1">
                         {user.is_admin && (
-                          <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded text-xs">
+                          <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-purple-500/15 text-purple-300 border-purple-500/40">
                             Admin
                           </span>
                         )}
                         {user.is_gmt && (
-                          <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs">
+                          <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-blue-500/15 text-blue-300 border-blue-500/40">
                             GMT
                           </span>
                         )}
                         {user.is_qat && (
-                          <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded text-xs">
+                          <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-amber-500/15 text-amber-300 border-amber-500/40">
                             QAT
                           </span>
                         )}
@@ -209,13 +234,13 @@ const AdminUsers: React.FC = () => {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEdit(user)}
-                          className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                          className="px-3 py-1 bg-osu-pink hover:bg-osu-pink/90 text-white rounded-lg transition-colors text-xs font-medium"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleWipe(user.id)}
-                          className="px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors text-sm"
+                          className="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors text-xs font-medium"
                           title="Wipe user statistics"
                         >
                           Wipe
@@ -223,14 +248,14 @@ const AdminUsers: React.FC = () => {
                         {user.is_restricted ? (
                           <button
                             onClick={() => handleUnban(user.id)}
-                            className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm"
+                            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-xs font-medium"
                           >
                             Unban
                           </button>
                         ) : (
                           <button
                             onClick={() => handleBan(user.id)}
-                            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
+                            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-xs font-medium"
                           >
                             Ban
                           </button>
