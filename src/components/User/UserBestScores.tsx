@@ -440,7 +440,17 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
     setScores([]);
     setHasMore(true);
     void loadScores(true);
-  }, [currentScoresKey, initialScores, initialScoresKey, loadFromCache, loadScores, saveToCache, userId]);
+    // Intentionally omits loadScores / loadFromCache / saveToCache from
+    // the deps list. Those callbacks are recreated whenever `offset`
+    // changes (offset is in loadScores' useCallback deps), so including
+    // them here made this effect re-fire after every "Show more" load —
+    // it would re-read the cached initial-six items and clobber the
+    // freshly-fetched additional pages, leaving the list visually stuck
+    // at 6 entries no matter how many times the user clicked Show more.
+    // The effect should only kick when the *user* or *mode* actually
+    // changes (currentScoresKey or userId).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScoresKey, initialScores, initialScoresKey, userId]);
   const handleLoadMore = () => {
     if (!loadingMore && hasMore) {
       void loadScores(false);
