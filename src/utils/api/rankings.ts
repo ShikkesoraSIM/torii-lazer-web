@@ -34,4 +34,16 @@ export const rankingsAPI = {
     const response = await api.get(`/api/v2/rankings/${ruleset}/team/${sort}?${params}`);
     return response.data;
   },
+
+  /**
+   * Top plays across the whole server, ordered by PP descending.
+   * Backed by /api/private/top-scores/{ruleset} (despite the "private"
+   * path, the endpoint is unauthenticated — the prefix is just the
+   * server's internal-API namespace). Returns an array of score dicts;
+   * 50 per page; an empty array means we've walked off the end.
+   */
+  getTopPlays: async (ruleset: string, page: number = 1) => {
+    const response = await api.get(`/api/private/top-scores/${ruleset}?page=${page}`);
+    return response.data as Array<Record<string, unknown>>;
+  },
 };

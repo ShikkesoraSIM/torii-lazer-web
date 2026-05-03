@@ -26,6 +26,7 @@ const UserPage = lazy(() => import('./pages/UserPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const RankingsPage = lazy(() => import('./pages/RankingsPage'));
 const MatchmakingRankingsPage = lazy(() => import('./pages/MatchmakingRankingsPage'));
+const TopPlaysPage = lazy(() => import('./pages/TopPlaysPage'));
 const TeamsPage = lazy(() => import('./pages/TeamsPage'));
 const TeamDetailPage = lazy(() => import('./pages/TeamDetailPage'));
 const CreateTeamPage = lazy(() => import('./pages/CreateTeamPage'));
@@ -70,6 +71,7 @@ function App() {
                     <Route path="settings" element={<SettingsPage />} />
                     <Route path="rankings" element={<RankingsPage />} />
                     <Route path="rankings/matchmaking" element={<MatchmakingRankingsPage />} />
+                    <Route path="rankings/top-plays" element={<TopPlaysPage />} />
                     <Route path="teams" element={<TeamsPage />} />
                     <Route path="teams/create" element={<CreateTeamPage />} />
                     <Route path="teams/:teamId" element={<TeamDetailPage />} />
