@@ -30,6 +30,7 @@ import { useUserPreferences } from '../../hooks/useUserPreferences';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
 import { isDefaultUserCoverUrl, pickBestUserCoverUrl } from '../../utils/profileMedia';
 import { getScoreClientDisplayMode } from '../../utils/clientVersion';
+import { formatRelativeTime } from '../../utils/format';
 
 interface UserProfileLayoutProps {
   user: User;
@@ -366,6 +367,45 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
                 </Link>
               )}
             </div>
+
+            {/*
+              Join date + last seen — small caption row below the
+              country/team flags. Both fields ship on every User
+              payload (see g0v0-server's user.py — join_date,
+              last_visit). Tooltip on each value shows the absolute
+              timestamp; the visible text is the relative form
+              ("3 months ago", "2 hours ago") for at-a-glance scan.
+              Self-hides if the backend somehow returns no values
+              for either, so we don't render an empty row.
+            */}
+            {(user.join_date || user.last_visit) && (
+              <div className="flex items-center gap-3 mt-2 ml-0 md:ml-[-8px] text-xs text-gray-500 dark:text-gray-400 flex-wrap">
+                {user.join_date && (
+                  <span
+                    className="inline-flex items-center gap-1.5"
+                    title={new Date(user.join_date).toLocaleString()}
+                  >
+                    <svg className="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Joined {formatRelativeTime(user.join_date)}</span>
+                  </span>
+                )}
+                {user.last_visit && (
+                  <span
+                    className="inline-flex items-center gap-1.5"
+                    title={new Date(user.last_visit).toLocaleString()}
+                  >
+                    <svg className="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Last seen {formatRelativeTime(user.last_visit)}</span>
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* 展开/收起按钮 - 移到右侧 */}

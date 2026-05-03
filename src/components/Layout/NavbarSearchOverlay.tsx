@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FiChevronRight, FiSearch, FiX } from 'react-icons/fi';
 import type { Beatmapset } from '../../types/beatmap';
@@ -52,6 +52,7 @@ const getBeatmapCover = (beatmapset: Beatmapset): string => {
 const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { profileColor } = useProfileColor();
   const inputRef = useRef<HTMLInputElement>(null);
   const fetchIdRef = useRef(0);
@@ -79,6 +80,26 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
     resetResults();
     onClose();
   };
+
+  // Auto-close whenever the URL changes -- catches the "I clicked a
+  // result, navigated, but the overlay stayed visible" failure mode
+  // some users were hitting. Belt-and-suspenders alongside the
+  // explicit handleClose() the result handlers already call: if any
+  // future result handler forgets to close, this still does.
+  // Intentionally watches `location.pathname + search` (not the whole
+  // location object) so a re-render that doesn't actually change the
+  // URL can't trigger a spurious close.
+  const lastPathRef = useRef<string>(location.pathname + location.search);
+  useEffect(() => {
+    const currentPath = location.pathname + location.search;
+    if (currentPath !== lastPathRef.current) {
+      lastPathRef.current = currentPath;
+      if (isOpen) {
+        handleClose();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -200,7 +221,17 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onMouseDown={handleClose}
+          // Use onClick (not onMouseDown) so a click that starts inside
+          // the inner card and drifts outside doesn't accidentally
+          // close. onClick fires only when mousedown + mouseup land on
+          // the same element. Combined with the inner stopPropagation
+          // below, this is the standard "click outside the card to
+          // close" pattern that doesn't fight nested buttons.
+          onClick={(event) => {
+            // Only close when the click actually lands on the backdrop
+            // itself, not on something that bubbled up from inside.
+            if (event.target === event.currentTarget) handleClose();
+          }}
         >
           <motion.div
             className="mx-auto w-full max-w-6xl rounded-3xl bg-[rgba(20,20,38,0.76)] backdrop-blur-xl shadow-[0_30px_100px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(140,125,255,0.08)] overflow-hidden"
@@ -208,7 +239,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.99 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
           >
             <div className="px-6 py-5 bg-white/[0.015]">
               <div className="flex items-center gap-4">
