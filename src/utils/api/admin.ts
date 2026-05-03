@@ -92,13 +92,30 @@ export const adminAPI = {
     return response.data;
   },
 
-  addBlacklistedBeatmap: async (beatmapsetId: number) => {
+  // Bans every difficulty in the set. Backend inserts one BannedBeatmaps
+  // row per beatmap, all sharing this beatmapset_id. Use removeBlacklistedBeatmapSet
+  // to undo as a unit.
+  addBlacklistedBeatmapSet: async (beatmapsetId: number) => {
     const response = await api.post('/api/private/admin/beatmaps/blacklist', { beatmapset_id: beatmapsetId });
     return response.data;
   },
 
-  removeBlacklistedBeatmap: async (beatmapsetId: number) => {
+  // Bans a single difficulty. Coexists fine with set-level bans (same
+  // table, just one row instead of N).
+  addBlacklistedBeatmap: async (beatmapId: number) => {
+    const response = await api.post('/api/private/admin/beatmaps/blacklist', { beatmap_id: beatmapId });
+    return response.data;
+  },
+
+  // Removes every banned difficulty whose beatmapset_id matches.
+  removeBlacklistedBeatmapSet: async (beatmapsetId: number) => {
     const response = await api.delete(`/api/private/admin/beatmaps/blacklist/${beatmapsetId}`);
+    return response.data;
+  },
+
+  // Removes one specific difficulty.
+  removeBlacklistedSingleBeatmap: async (beatmapId: number) => {
+    const response = await api.delete(`/api/private/admin/beatmaps/blacklist/beatmap/${beatmapId}`);
     return response.data;
   },
 
