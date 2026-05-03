@@ -170,6 +170,18 @@ const AdminDailyChallenges: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<DailyChallenge | null>(null);
+
+  // Random-pick modal state. Two-stage flow: roll first, preview the
+  // result, then confirm to persist (or roll again).
+  const [showRandomModal, setShowRandomModal] = useState(false);
+  const [randomFilters, setRandomFilters] = useState({
+    date: '',
+    ruleset_id: 0,
+    min_difficulty: '' as string,
+    max_difficulty: '' as string,
+  });
+  const [randomPreview, setRandomPreview] = useState<Awaited<ReturnType<typeof adminAPI.pickRandomDailyChallenge>>['beatmap'] | null>(null);
+  const [randomBusy, setRandomBusy] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     beatmap_id: '',
@@ -333,6 +345,16 @@ const AdminDailyChallenges: React.FC = () => {
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-600/90 transition-colors whitespace-nowrap"
           >
             Trigger Next
+          </button>
+          <button
+            onClick={() => {
+              setRandomPreview(null);
+              setShowRandomModal(true);
+            }}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors whitespace-nowrap"
+            title="Roll a random ranked beatmap and preview it before committing"
+          >
+            🎲 Random Pick
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
@@ -588,6 +610,166 @@ const AdminDailyChallenges: React.FC = () => {
                 </div>
               </form>
             </div>
+      </AdminModal>
+
+      {/*
+        Random-pick modal. Two-stage flow:
+          1. Pick filters (mode + optional star range + optional date)
+             then click Roll. Server returns a beatmap preview (no DB
+             write). Loops back here so admin can roll again or cancel.
+          2. Click "Create with this beatmap" to re-call the endpoint
+             with create_challenge=true and persist.
+      */}
+      <AdminModal
+        open={showRandomModal}
+        onClose={() => {
+          setShowRandomModal(false);
+          setRandomPreview(null);
+        }}
+        title="🎲 Random Pick"
+      >
+        <div className="p-6 space-y-4">
+          <p className="text-sm text-gray-300">
+            Roll a random ranked / approved / loved beatmap matching your filters. Preview the
+            result before committing it as a daily challenge.
+          </p>
+
+          {/* Filters */}
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className="text-xs text-gray-400">Date (optional)</span>
+              <input
+                type="date"
+                value={randomFilters.date}
+                onChange={(e) => setRandomFilters((f) => ({ ...f, date: e.target.value }))}
+                className="mt-1 w-full px-3 py-2 rounded-lg bg-[rgba(12,16,42,0.72)] border border-white/15 text-white text-sm"
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs text-gray-400">Ruleset</span>
+              <select
+                value={randomFilters.ruleset_id}
+                onChange={(e) => setRandomFilters((f) => ({ ...f, ruleset_id: parseInt(e.target.value, 10) }))}
+                className="mt-1 w-full px-3 py-2 rounded-lg bg-[rgba(12,16,42,0.72)] border border-white/15 text-white text-sm"
+              >
+                <option value={0}>osu!</option>
+                <option value={1}>Taiko</option>
+                <option value={2}>Catch</option>
+                <option value={3}>Mania</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-xs text-gray-400">Min ★</span>
+              <input
+                type="number"
+                step="0.1"
+                value={randomFilters.min_difficulty}
+                onChange={(e) => setRandomFilters((f) => ({ ...f, min_difficulty: e.target.value }))}
+                placeholder="any"
+                className="mt-1 w-full px-3 py-2 rounded-lg bg-[rgba(12,16,42,0.72)] border border-white/15 text-white text-sm"
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs text-gray-400">Max ★</span>
+              <input
+                type="number"
+                step="0.1"
+                value={randomFilters.max_difficulty}
+                onChange={(e) => setRandomFilters((f) => ({ ...f, max_difficulty: e.target.value }))}
+                placeholder="any"
+                className="mt-1 w-full px-3 py-2 rounded-lg bg-[rgba(12,16,42,0.72)] border border-white/15 text-white text-sm"
+              />
+            </label>
+          </div>
+
+          {/* Preview card */}
+          {randomPreview && (
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-1">
+              <div className="text-xs uppercase text-emerald-300 tracking-wider">Rolled</div>
+              <div className="font-semibold text-white">
+                {randomPreview.artist} — {randomPreview.title}
+              </div>
+              <div className="text-sm text-gray-300">
+                [{randomPreview.version}] · ★{randomPreview.difficulty_rating.toFixed(2)} · {randomPreview.mode}
+                {' · '}id {randomPreview.beatmap_id}
+              </div>
+              {randomPreview.creator && (
+                <div className="text-xs text-gray-400">mapped by {randomPreview.creator}</div>
+              )}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-wrap gap-3 pt-2">
+            <button
+              type="button"
+              disabled={randomBusy}
+              onClick={async () => {
+                setRandomBusy(true);
+                try {
+                  const minD = randomFilters.min_difficulty.trim();
+                  const maxD = randomFilters.max_difficulty.trim();
+                  const result = await adminAPI.pickRandomDailyChallenge({
+                    date: randomFilters.date || undefined,
+                    ruleset_id: randomFilters.ruleset_id,
+                    min_difficulty: minD === '' ? null : Number(minD),
+                    max_difficulty: maxD === '' ? null : Number(maxD),
+                    create_challenge: false,
+                  });
+                  setRandomPreview(result.beatmap);
+                } catch (error: any) {
+                  toast.error(error?.response?.data?.detail || 'Failed to roll random beatmap');
+                } finally {
+                  setRandomBusy(false);
+                }
+              }}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg disabled:opacity-50"
+            >
+              {randomPreview ? 'Roll again' : 'Roll'}
+            </button>
+            {randomPreview && (
+              <button
+                type="button"
+                disabled={randomBusy}
+                onClick={async () => {
+                  setRandomBusy(true);
+                  try {
+                    const minD = randomFilters.min_difficulty.trim();
+                    const maxD = randomFilters.max_difficulty.trim();
+                    const result = await adminAPI.pickRandomDailyChallenge({
+                      date: randomFilters.date || undefined,
+                      ruleset_id: randomFilters.ruleset_id,
+                      min_difficulty: minD === '' ? null : Number(minD),
+                      max_difficulty: maxD === '' ? null : Number(maxD),
+                      create_challenge: true,
+                    });
+                    toast.success(`Daily challenge created for ${result.date || 'today'}`);
+                    setShowRandomModal(false);
+                    setRandomPreview(null);
+                    loadChallenges();
+                  } catch (error: any) {
+                    toast.error(error?.response?.data?.detail || 'Failed to create challenge');
+                  } finally {
+                    setRandomBusy(false);
+                  }
+                }}
+                className="px-4 py-2 bg-osu-pink hover:bg-osu-pink/90 text-white rounded-lg font-medium disabled:opacity-50"
+              >
+                Create with this beatmap
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setShowRandomModal(false);
+                setRandomPreview(null);
+              }}
+              className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </AdminModal>
     </div>
   );

@@ -207,6 +207,46 @@ export const adminAPI = {
     return response.data;
   },
 
+  /**
+   * Roll a random ranked beatmap for a daily challenge.
+   * - With `create_challenge: false` (default): preview only, returns
+   *   the rolled beatmap so the admin can confirm before committing.
+   * - With `create_challenge: true`: persists a DailyChallenge row for
+   *   the given date (or today UTC if `date` omitted) using the
+   *   rolled beatmap.
+   *
+   * Errors:
+   *   404 — no beatmap matched the filters; loosen the star range.
+   *   409 — a challenge already exists for that date.
+   */
+  pickRandomDailyChallenge: async (payload: {
+    date?: string; // YYYY-MM-DD; defaults to today UTC server-side.
+    ruleset_id?: number; // 0=osu, 1=taiko, 2=fruits, 3=mania
+    min_difficulty?: number | null;
+    max_difficulty?: number | null;
+    required_mods?: string;
+    allowed_mods?: string;
+    create_challenge?: boolean;
+  }) => {
+    const response = await api.post('/api/private/admin/daily-challenge/random', payload);
+    return response.data as {
+      created: boolean;
+      date?: string;
+      beatmap: {
+        beatmap_id: number;
+        beatmapset_id: number;
+        version: string;
+        difficulty_rating: number;
+        mode: string;
+        total_length: number;
+        bpm?: number;
+        title?: string;
+        artist?: string;
+        creator?: string;
+      };
+    };
+  },
+
   getDailyChallengeStats: async (userId: number) => {
     const response = await api.get(`/api/private/admin/daily-challenge/stats/${userId}`);
     return response.data;
