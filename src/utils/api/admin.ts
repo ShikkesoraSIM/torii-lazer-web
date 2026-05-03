@@ -267,6 +267,10 @@ export const adminAPI = {
     also_send_pm: boolean;
     online_only: boolean;
     sender_username?: string;
+    // When true the backend ALSO emits a synthetic UserAchievementUnlock
+    // per recipient, which the lazer client renders via its medal-popup
+    // overlay -- a much louder UX than the regular notifications drawer.
+    show_popup?: boolean;
   }) => {
     const response = await api.post('/api/private/admin/global-announcement', payload);
     return response.data;

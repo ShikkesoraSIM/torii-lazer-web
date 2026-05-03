@@ -10,6 +10,14 @@ const AdminAnnouncements: React.FC = () => {
   const [severity, setSeverity] = useState<Severity>('warning');
   const [onlineOnly, setOnlineOnly] = useState(true);
   const [alsoSendPm, setAlsoSendPm] = useState(true);
+  // When true the backend additionally emits a synthetic
+  // UserAchievementUnlock per recipient so the lazer client renders
+  // the announcement via its medal-popup overlay -- a much louder UX
+  // than the regular notification drawer entry. Default ON because
+  // most admin announcements are something users should actually see
+  // mid-play (maintenance windows, etc.); flip off for low-priority
+  // info that shouldn't interrupt gameplay.
+  const [showPopup, setShowPopup] = useState(true);
   const [senderUsername, setSenderUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [lastResult, setLastResult] = useState<{
@@ -34,6 +42,7 @@ const AdminAnnouncements: React.FC = () => {
         also_send_pm: alsoSendPm,
         online_only: onlineOnly,
         sender_username: senderUsername.trim() || undefined,
+        show_popup: showPopup,
       });
       setLastResult({
         sent_to: result.sent_to ?? 0,
@@ -130,6 +139,20 @@ const AdminAnnouncements: React.FC = () => {
           >
             <span className={`inline-block h-2.5 w-2.5 rounded-full ${alsoSendPm ? 'bg-blue-300 animate-pulse' : 'bg-slate-400'}`} />
             Also send PM
+          </button>
+
+          <button
+            type="button"
+            title="Pops the announcement up via lazer's medal-unlock overlay so it visually interrupts whatever the user is on. Off = regular notifications drawer entry only."
+            className={`relative inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold border transition-all duration-200 active:scale-[0.98] ${
+              showPopup
+                ? 'bg-osu-pink/20 border-osu-pink/40 text-osu-pink shadow-[0_0_0_2px_rgba(237,142,166,0.15)]'
+                : 'bg-slate-700/30 border-white/10 text-slate-200 hover:border-white/25'
+            }`}
+            onClick={() => setShowPopup((prev) => !prev)}
+          >
+            <span className={`inline-block h-2.5 w-2.5 rounded-full ${showPopup ? 'bg-osu-pink animate-pulse' : 'bg-slate-400'}`} />
+            Show as popup
           </button>
         </div>
 
