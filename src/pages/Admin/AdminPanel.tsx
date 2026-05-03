@@ -14,6 +14,7 @@ import AdminLoginAudit from './AdminLoginAudit';
 import AdminDonations from './AdminDonations';
 import AdminMatchmaking from './AdminMatchmaking';
 import AdminMaintenance from './AdminMaintenance';
+import AdminChangelogEditor from './AdminChangelogEditor';
 
 
 type AdminTab =
@@ -27,7 +28,8 @@ type AdminTab =
   | 'announcements'
   | 'login-audit'
   | 'donations'
-  | 'maintenance';
+  | 'maintenance'
+  | 'changelog';
 
 interface AdminStats {
   total_users: number;
@@ -374,6 +376,25 @@ const AdminPanel: React.FC = () => {
                     <span>Maintenance</span>
                   </div>
                 </button>
+
+                <button
+                  onClick={() => setActiveTab('changelog')}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                    activeTab === 'changelog'
+                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Document/text-list glyph — natural fit for a
+                        changelog (versioned notes / release entries). */}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h8m-8 4h6"/>
+                    </svg>
+                    <span>Changelog</span>
+                  </div>
+                </button>
               </nav>
             </div>
           </div>
@@ -396,6 +417,7 @@ const AdminPanel: React.FC = () => {
                     {activeTab === 'login-audit' && 'Login Audit & Client Hashes'}
                     {activeTab === 'donations' && 'Donations'}
                     {activeTab === 'maintenance' && 'Maintenance Mode'}
+                    {activeTab === 'changelog' && 'Changelog Editor'}
                   </div>
                 </div>
               </div>
@@ -411,6 +433,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'login-audit' && <AdminLoginAudit />}
                 {activeTab === 'donations' && <AdminDonations />}
                 {activeTab === 'maintenance' && <AdminMaintenance />}
+                {activeTab === 'changelog' && <AdminChangelogEditor />}
               </div>
             </div>
           </div>

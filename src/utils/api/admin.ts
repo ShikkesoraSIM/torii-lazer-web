@@ -252,6 +252,134 @@ export const adminAPI = {
     return response.data;
   },
 
+  // ─── Changelog editor ──────────────────────────────────────────────
+  // All under /api/private/changelog (mounted in app/router/private/router.py
+  // by including the changelog router with prefix="/changelog"). Pure
+  // admin-only; the public read endpoints stay at /api/v2/changelog and
+  // automatically prefer DB rows over the hardcoded historical builds.
+
+  getChangelogStreams: async () => {
+    const response = await api.get('/api/private/changelog/streams');
+    return response.data as Array<{
+      id: number;
+      name: string;
+      display_name: string;
+      is_featured: boolean;
+      user_count: number;
+      created_at: string;
+      updated_at: string;
+    }>;
+  },
+
+  createChangelogStream: async (payload: {
+    name: string;
+    display_name: string;
+    is_featured?: boolean;
+    user_count?: number;
+  }) => {
+    const response = await api.post('/api/private/changelog/streams', payload);
+    return response.data;
+  },
+
+  getChangelogBuilds: async () => {
+    const response = await api.get('/api/private/changelog/admin/builds');
+    return response.data as Array<{
+      id: number;
+      version: string;
+      display_version: string;
+      stream_name: string;
+      stream_id: number;
+      users: number;
+      created_at: string | null;
+      github_url: string | null;
+      entry_count: number;
+    }>;
+  },
+
+  getChangelogEntries: async (buildId: number) => {
+    const response = await api.get(`/api/private/changelog/admin/entries/${buildId}`);
+    return response.data as Array<{
+      id: number;
+      type: string;
+      category: string;
+      title: string;
+      major: boolean;
+      url: string | null;
+      github_pull_request_id: number | null;
+      created_at: string | null;
+    }>;
+  },
+
+  createChangelogBuild: async (payload: {
+    stream_id: number;
+    version: string;
+    display_version: string;
+    users?: number;
+    created_at?: string;
+    github_url?: string | null;
+  }) => {
+    const response = await api.post('/api/private/changelog/builds', payload);
+    return response.data;
+  },
+
+  deleteChangelogBuild: async (buildId: number) => {
+    const response = await api.delete(`/api/private/changelog/builds/${buildId}`);
+    return response.data;
+  },
+
+  createChangelogEntry: async (payload: {
+    build_id: number;
+    repository?: string;
+    github_pull_request_id?: number | null;
+    github_url?: string | null;
+    url?: string | null;
+    type: string;
+    category: string;
+    title: string;
+    message_html?: string;
+    major?: boolean;
+  }) => {
+    const response = await api.post('/api/private/changelog/entries', payload);
+    return response.data;
+  },
+
+  deleteChangelogEntry: async (entryId: number) => {
+    const response = await api.delete(`/api/private/changelog/entries/${entryId}`);
+    return response.data;
+  },
+
+  getGitHubCommits: async (repo: string = 'shikkesora/torii-osu', perPage: number = 20) => {
+    const response = await api.get('/api/private/changelog/github/commits', {
+      params: { repo, per_page: perPage },
+    });
+    // Endpoint returns either an array of commits OR an {error,repo} dict.
+    return response.data as
+      | Array<{
+          sha: string;
+          full_sha: string;
+          message: string;
+          author: string;
+          date: string;
+          html_url: string | null;
+        }>
+      | { error: string; repo: string };
+  },
+
+  createEntryFromCommit: async (
+    buildId: number,
+    commitSha: string,
+    commitMessage: string,
+    repo: string = 'shikkesora/torii-osu',
+  ) => {
+    const response = await api.post('/api/private/changelog/entries/from-commit', {
+      build_id: buildId,
+      commit_sha: commitSha,
+      commit_message: commitMessage,
+      repo,
+    });
+    return response.data;
+  },
+
   // Teams
   getAllTeams: async () => {
     const response = await api.get('/api/private/admin/teams');
