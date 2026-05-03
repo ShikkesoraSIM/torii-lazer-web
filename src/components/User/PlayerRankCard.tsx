@@ -4,6 +4,14 @@ import { useTranslation } from 'react-i18next';
 interface Props {
   stats?: { pp?: number };
   playTime: string;
+  /**
+   * Raw play time in seconds. When provided, the play-time stat shows
+   * a hover tooltip with the unrounded hour count — useful for users
+   * whose displayed time is "5d 12h 30m" but who want to see "132h"
+   * at a glance, or for marathon players where the hour total is the
+   * meaningful number.
+   */
+  playTimeSeconds?: number;
   user_achievements?: {
     achievement_id: number;
     achieved_at: string;
@@ -17,7 +25,7 @@ interface Props {
   };
 }
 
-const PlayerRankCard: React.FC<Props> = ({ stats, playTime, user_achievements, gradeCounts }) => {
+const PlayerRankCard: React.FC<Props> = ({ stats, playTime, playTimeSeconds, user_achievements, gradeCounts }) => {
   const { t } = useTranslation();
   const achievementCount = user_achievements
     ? new Set(user_achievements.map((a) => a.achievement_id)).size
@@ -39,9 +47,25 @@ const PlayerRankCard: React.FC<Props> = ({ stats, playTime, user_achievements, g
             {Math.round(stats?.pp ?? 0)}
           </div>
         </div>
-        <div className="text-center min-w-0 flex-shrink-0">
+        {/*
+          Play-time stat. Wrapping in a `group` container lets the
+          tooltip below appear on hover purely via Tailwind utilities
+          — no React state, no event handlers, nothing to memoise.
+          Tooltip shows the raw hour total (e.g. "132 hours") because
+          the primary display compresses time into "Xd Yh Zm" which
+          can hide the magnitude for marathon players.
+        */}
+        <div className="relative group text-center min-w-0 flex-shrink-0">
           <div className="text-gray-500 dark:text-gray-400 text-xs mb-1 whitespace-nowrap">{t('profile.stats.playTime')}</div>
-          <div className="text-gray-800 dark:text-gray-100 font-bold text-base">{playTime}</div>
+          <div className="text-gray-800 dark:text-gray-100 font-bold text-base cursor-help">{playTime}</div>
+          {typeof playTimeSeconds === 'number' && playTimeSeconds > 0 && (
+            <div
+              className="absolute left-1/2 -translate-x-1/2 -top-9 px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10"
+              role="tooltip"
+            >
+              {Math.round(playTimeSeconds / 3600).toLocaleString()} hours
+            </div>
+          )}
         </div>
       </div>
 

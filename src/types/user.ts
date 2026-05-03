@@ -161,6 +161,19 @@ export interface User {
     weekly_streak_current: number;
     user_id: number;
   };
+
+  // Admin-only fields. The backend only attaches these when the
+  // requesting user has is_admin=true (see g0v0-server's
+  // app/router/v2/user.py + app/service/suspicious_summary.py).
+  // Non-admins receive a User payload without these properties, and
+  // the SuspiciousBanner component returns null when is_suspicious is
+  // undefined, so non-admin viewers never see the banner. trust_score
+  // is 0-100 (100 = clean); reasons are short alert titles capped to
+  // a small number server-side.
+  is_suspicious?: boolean;
+  trust_score?: number;
+  suspicious_reasons?: string[];
+  open_suspicious_alert_count?: number;
 }
 
 export interface FriendRelation {

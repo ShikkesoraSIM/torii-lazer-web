@@ -15,6 +15,8 @@ import UserBestScores from './UserBestScores';
 import UserRecentScores from './UserRecentScores';
 import UserPageDisplay from './UserPageDisplay';
 import RestrictedBanner from './RestrictedBanner';
+import SuspiciousBanner from './SuspiciousBanner';
+import DailyChallengeStatsCard from './DailyChallengeStatsCard';
 import Badges from './Badges';
 import { UserTitleBadges } from './TitleBadge';
 import Achievements from './Achievements';
@@ -247,6 +249,23 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
           </div>
         )}
 
+        {/*
+          Suspicious-activity admin banner. The backend only attaches
+          is_suspicious / trust_score / suspicious_reasons to the user
+          payload when the *viewer* is_admin=true (see
+          g0v0-server/app/router/v2/user.py), so non-admins receive a
+          payload without these props and the component returns null
+          unconditionally — no extra is_admin gate needed here.
+        */}
+        <div className="px-3 md:px-6 pt-4 empty:hidden">
+          <SuspiciousBanner
+            is_suspicious={user.is_suspicious}
+            trust_score={user.trust_score}
+            suspicious_reasons={user.suspicious_reasons}
+            open_alert_count={user.open_suspicious_alert_count}
+          />
+        </div>
+
         {/* 头部栏 + 模式选择 */}
         <div className="relative">
           <div className="relative z-10 bg-transparent md:bg-card px-4 md:px-6 py-3 md:py-4 flex items-center justify-between md:rounded-t-2xl border-b border-card" style={{ color: 'var(--text-primary)' }}>
@@ -404,6 +423,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
                 <PlayerRankCard
                   stats={stats}
                   playTime={playTime}
+                  playTimeSeconds={stats?.play_time}
                   user_achievements={user_achievements}
                   gradeCounts={gradeCounts}
                 />
@@ -493,6 +513,17 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
         */}
         <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
           <MatchmakingStatsCard userId={user.id} />
+        </div>
+
+        {/*
+          Daily Challenge stats. Self-hides via the component for users
+          who have never engaged with the daily challenge (zeroed-out
+          stats look like clutter, not information). For active players
+          it shows current/best streaks, total play count, and top-10/50%
+          placement counts.
+        */}
+        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card empty:hidden">
+          <DailyChallengeStatsCard stats={user.daily_challenge_user_stats} />
         </div>
 
         {/* 用户最近成绩 */}
