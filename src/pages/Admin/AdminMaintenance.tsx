@@ -18,6 +18,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { api } from '../../utils/api/client';
+import AdminUserRecalcSection from './AdminUserRecalcSection';
 
 interface MaintenanceState {
   enabled: boolean;
@@ -195,6 +196,16 @@ const AdminMaintenance: React.FC = () => {
           reads. You can always log in and disable it from this page.
         </p>
       </div>
+
+      {/*
+        Per-user PP recalculation lives in this same admin page because
+        both surfaces are operational tools an admin reaches for during
+        manual recovery / one-off cleanups. Splitting them across two
+        sidebar tabs would just inflate the navigation. The component
+        is fully self-contained so it can be lifted into its own tab
+        later if the page grows.
+      */}
+      <AdminUserRecalcSection />
     </div>
   );
 };

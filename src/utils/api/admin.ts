@@ -1,5 +1,19 @@
 import { api } from './client';
 
+export interface RecalcTask {
+  id: number;
+  kind: 'user_pp';
+  target_user_id: number;
+  target_username: string | null;
+  actor_username: string | null;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  enqueued_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+  error: string | null;
+  stdout_tail: string;
+}
+
 export const adminAPI = {
   // Statistics
   getStats: async () => {
@@ -8,9 +22,36 @@ export const adminAPI = {
   },
 
   // Users
-  getUsers: async () => {
-    const response = await api.get('/api/private/admin/users');
+  getUsers: async (params?: { search?: string; limit?: number }) => {
+    // Backwards compatible: no params returns the full table (the
+    // historical behaviour). With params the backend filters by
+    // username substring and caps the row count -- useful for
+    // autocomplete pickers (e.g. user-recalc dropdown) that don't
+    // want to ship hundreds of MB of users to the browser.
+    const response = await api.get('/api/private/admin/users', { params });
     return response.data;
+  },
+
+  // ─── Per-user recalculation queue ──────────────────────────────────
+  // Fire-and-forget — the POST returns immediately; poll the GET for
+  // pending/running/recent state. The actual subprocess that does the
+  // work lives behind app/service/recalculation_service.py on the
+  // server, with a single concurrent worker so multiple admins can
+  // queue without stepping on each other.
+
+  recalculateUser: async (userId: number) => {
+    const response = await api.post(`/api/private/admin/recalculate/user/${userId}`);
+    return response.data as RecalcTask;
+  },
+
+  getRecalculationStatus: async () => {
+    const response = await api.get('/api/private/admin/recalculate/status');
+    return response.data as {
+      running: RecalcTask | null;
+      pending: RecalcTask[];
+      pending_count: number;
+      recent: RecalcTask[];
+    };
   },
 
   getUser: async (userId: number) => {
