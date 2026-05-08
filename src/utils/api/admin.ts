@@ -1,4 +1,6 @@
 import { api } from './client';
+import type { ModCatalogByRuleset } from '../../types/mods';
+import { BUNDLED_MODS_CATALOG } from '../../data/modsCatalog';
 
 export interface RecalcTask {
   id: number;
@@ -291,6 +293,58 @@ export const adminAPI = {
   getDailyChallengeStats: async (userId: number) => {
     const response = await api.get(`/api/private/admin/daily-challenge/stats/${userId}`);
     return response.data;
+  },
+
+  /**
+   * Fetch the mod catalog (every available mod across rulesets, with
+   * settings + incompatibility metadata) used by the Daily Challenge
+   * mod picker.
+   *
+   * Tries the server endpoint first. If the endpoint isn't deployed
+   * yet (older server) or the request fails for any reason, silently
+   * falls back to the catalog bundled in the frontend (a copy of
+   * `g0v0-server/static/mods.json`). The bundled copy is generally
+   * accurate because Torii's mod set rarely changes.
+   *
+   * Shape normalisation: the server's `API_MODS` is a
+   * `dict[ruleset_id, dict[acronym, Mod]]` — an inner DICT keyed by
+   * mod acronym. The bundled JSON (read straight from `mods.json`) is
+   * a `dict[ruleset_id, Mod[]]` — an inner ARRAY. The picker expects
+   * the array shape, so we normalise the server response here.
+   */
+  getModsCatalog: async (): Promise<ModCatalogByRuleset> => {
+    /** Pull only entries that look like a real Mod definition — guards against
+     *  a future server adding metadata keys (e.g. `_checksum`) that would
+     *  otherwise pollute the array fed to ModPicker. M4 audit fix. */
+    const looksLikeMod = (v: unknown): boolean =>
+      !!v && typeof v === 'object' && !Array.isArray(v) && typeof (v as { Acronym?: unknown }).Acronym === 'string';
+
+    const normalize = (raw: unknown): ModCatalogByRuleset | null => {
+      if (!raw || typeof raw !== 'object') return null;
+      const out: ModCatalogByRuleset = {};
+      for (const [ruleset, value] of Object.entries(raw as Record<string, unknown>)) {
+        if (Array.isArray(value)) {
+          out[ruleset] = value.filter(looksLikeMod) as ModCatalogByRuleset[string];
+        } else if (value && typeof value === 'object') {
+          // dict-of-acronym → array, dropping anything that isn't a Mod definition.
+          out[ruleset] = (Object.values(value).filter(looksLikeMod) as ModCatalogByRuleset[string]);
+        } else {
+          // Unrecognised shape — bail to bundled fallback.
+          return null;
+        }
+      }
+      return out;
+    };
+
+    try {
+      const response = await api.get('/api/private/admin/mods-catalog');
+      const normalized = normalize(response.data?.rulesets);
+      return normalized ?? BUNDLED_MODS_CATALOG;
+    } catch {
+      // 404 (endpoint missing on old server) or any network error —
+      // fall back to the bundled copy.
+      return BUNDLED_MODS_CATALOG;
+    }
   },
 
   // ─── Changelog editor ──────────────────────────────────────────────
