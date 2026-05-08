@@ -9,6 +9,7 @@ import {
   type BulkBeatmapsetAddResponse,
 } from '../../utils/api';
 import { AdminPoolRowSkeleton } from '../../components/Matchmaking/MatchmakingSkeletons';
+import PoolAutoImportPanel from '../../components/Matchmaking/PoolAutoImportPanel';
 
 /**
  * Admin matchmaking management page.
@@ -372,8 +373,10 @@ const AdminMatchmaking: React.FC = () => {
             return (
               <li
                 key={pool.id}
-                className={`bg-card rounded-xl border transition-all ${
-                  expanded ? 'border-osu-pink shadow-lg' : 'border-card hover:border-osu-pink/30'
+                className={`mm-glass transition-all ${
+                  expanded
+                    ? 'shadow-[inset_0_1px_0_rgba(255,255,255,0.07),_0_0_28px_rgba(236,72,153,0.18),_0_8px_28px_rgba(0,0,0,0.4)]'
+                    : 'hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),_0_0_24px_rgba(236,72,153,0.08),_0_8px_24px_rgba(0,0,0,0.35)]'
                 }`}
               >
                 {/* Pool row header */}
@@ -426,9 +429,11 @@ const AdminMatchmaking: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Expanded edit panel */}
+                {/* Expanded edit panel — soft fade divider above instead
+                    of a hard line. The gradient bar communicates "this
+                    is a section break" without slicing the panel. */}
                 {expanded && editForm && (
-                  <div className="border-t border-card p-4 md:p-5 space-y-6">
+                  <div className="p-4 md:p-5 space-y-6 relative before:content-[''] before:absolute before:left-5 before:right-5 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/8 before:to-transparent">
                     {/* Pool config form */}
                     <div>
                       <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-3">
@@ -445,7 +450,7 @@ const AdminMatchmaking: React.FC = () => {
                           }
                           placeholder="e.g. Warm-up pool · 3-5★ classics · 2-min rounds"
                           rows={2}
-                          className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm leading-relaxed"
+                          className="mm-input w-full px-3 py-2 text-sm leading-relaxed"
                         />
                       </FormField>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
@@ -453,7 +458,7 @@ const AdminMatchmaking: React.FC = () => {
                           <input
                             value={editForm.name}
                             onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm"
+                            className="mm-input w-full px-3 py-2 text-sm"
                           />
                         </FormField>
                         <FormField label="Lobby size">
@@ -465,7 +470,7 @@ const AdminMatchmaking: React.FC = () => {
                             onChange={(e) =>
                               setEditForm({ ...editForm, lobby_size: Number(e.target.value) || 0 })
                             }
-                            className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm font-mono"
+                            className="mm-input w-full px-3 py-2 text-sm font-mono"
                           />
                         </FormField>
                         <FormField label="Initial radius">
@@ -478,7 +483,7 @@ const AdminMatchmaking: React.FC = () => {
                                 rating_search_radius: Number(e.target.value) || 0,
                               })
                             }
-                            className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm font-mono"
+                            className="mm-input w-full px-3 py-2 text-sm font-mono"
                           />
                         </FormField>
                         <FormField label="Max radius">
@@ -491,7 +496,7 @@ const AdminMatchmaking: React.FC = () => {
                                 rating_search_radius_max: Number(e.target.value) || 0,
                               })
                             }
-                            className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm font-mono"
+                            className="mm-input w-full px-3 py-2 text-sm font-mono"
                           />
                         </FormField>
                         <FormField label="Expand seconds">
@@ -504,7 +509,7 @@ const AdminMatchmaking: React.FC = () => {
                                 rating_search_radius_exp: Number(e.target.value) || 0,
                               })
                             }
-                            className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm font-mono"
+                            className="mm-input w-full px-3 py-2 text-sm font-mono"
                           />
                         </FormField>
                       </div>
@@ -524,6 +529,28 @@ const AdminMatchmaking: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Auto-import — primary curation flow. The admin
+                        describes pool taste (FA / status / SR / length)
+                        and the backend scans the local beatmap cache for
+                        everything matching. No mapset-id pasting. */}
+                    <PoolAutoImportPanel
+                      poolId={pool.id}
+                      rulesetId={pool.ruleset_id}
+                      onImported={() => loadPoolBeatmaps(pool.id)}
+                    />
+
+                    {/* Manual ID-paste flows survive as a collapsed
+                        "advanced" disclosure for operators who already
+                        know exactly which maps they want — e.g. seeding
+                        a tournament-replica pool from an existing
+                        mappool spreadsheet. The auto-import panel is
+                        the default path. */}
+                    <details className="mm-glass-inset rounded-2xl">
+                      <summary className="px-4 py-3 cursor-pointer text-xs uppercase tracking-wider text-gray-400 hover:text-gray-200 transition-colors select-none">
+                        Advanced — paste beatmap or mapset IDs by hand
+                      </summary>
+                      <div className="px-4 pb-4 space-y-4">
+
                     {/* Bulk add beatmaps */}
                     <div>
                       <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-3">
@@ -539,7 +566,7 @@ const AdminMatchmaking: React.FC = () => {
                         onChange={(e) => setBulkInput(e.target.value)}
                         placeholder={'75\n2317\n2845\n…'}
                         rows={4}
-                        className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm font-mono"
+                        className="mm-input w-full px-3 py-2 text-sm font-mono"
                       />
                       <div className="flex flex-wrap items-center gap-3 mt-2">
                         <label className="flex items-center gap-2 text-xs text-gray-400">
@@ -548,7 +575,7 @@ const AdminMatchmaking: React.FC = () => {
                             type="number"
                             value={bulkInitialRating}
                             onChange={(e) => setBulkInitialRating(Number(e.target.value) || 1500)}
-                            className="w-20 px-2 py-1 rounded bg-card-hover border border-card text-sm font-mono"
+                            className="mm-input w-20 px-2 py-1 text-sm font-mono"
                           />
                         </label>
                         <button
@@ -586,7 +613,7 @@ const AdminMatchmaking: React.FC = () => {
 
                     {/* Bulk import by beatmapset id — expand each into its
                         ranked diffs that fit the SR / length window. */}
-                    <div className="rounded-xl bg-card-hover/40 border border-card p-4">
+                    <div className="mm-glass-inset p-4">
                       <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-1">
                         Add whole mapsets
                       </h4>
@@ -601,7 +628,7 @@ const AdminMatchmaking: React.FC = () => {
                         onChange={(e) => setMapsetBulkInput(e.target.value)}
                         placeholder={'2347\n3289\n7028'}
                         rows={3}
-                        className="w-full px-3 py-2 rounded-lg bg-card border border-card focus:border-osu-pink/60 focus:outline-none text-sm font-mono"
+                        className="mm-input w-full px-3 py-2 text-sm font-mono"
                       />
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
                         <label className="text-xs text-gray-400">
@@ -611,7 +638,7 @@ const AdminMatchmaking: React.FC = () => {
                             step="0.1"
                             value={mapsetMinSr}
                             onChange={(e) => setMapsetMinSr(Number(e.target.value) || 0)}
-                            className="mt-1 w-full px-2 py-1 rounded bg-card border border-card text-sm font-mono"
+                            className="mm-input mt-1 w-full px-2 py-1 text-sm font-mono"
                           />
                         </label>
                         <label className="text-xs text-gray-400">
@@ -621,7 +648,7 @@ const AdminMatchmaking: React.FC = () => {
                             step="0.1"
                             value={mapsetMaxSr}
                             onChange={(e) => setMapsetMaxSr(Number(e.target.value) || 0)}
-                            className="mt-1 w-full px-2 py-1 rounded bg-card border border-card text-sm font-mono"
+                            className="mm-input mt-1 w-full px-2 py-1 text-sm font-mono"
                           />
                         </label>
                         <label className="text-xs text-gray-400">
@@ -630,7 +657,7 @@ const AdminMatchmaking: React.FC = () => {
                             type="number"
                             value={mapsetMinLen}
                             onChange={(e) => setMapsetMinLen(Number(e.target.value) || 0)}
-                            className="mt-1 w-full px-2 py-1 rounded bg-card border border-card text-sm font-mono"
+                            className="mm-input mt-1 w-full px-2 py-1 text-sm font-mono"
                           />
                         </label>
                         <label className="text-xs text-gray-400">
@@ -639,7 +666,7 @@ const AdminMatchmaking: React.FC = () => {
                             type="number"
                             value={mapsetMaxLen}
                             onChange={(e) => setMapsetMaxLen(Number(e.target.value) || 0)}
-                            className="mt-1 w-full px-2 py-1 rounded bg-card border border-card text-sm font-mono"
+                            className="mm-input mt-1 w-full px-2 py-1 text-sm font-mono"
                           />
                         </label>
                       </div>
@@ -679,6 +706,8 @@ const AdminMatchmaking: React.FC = () => {
                         </div>
                       )}
                     </div>
+                      </div>
+                    </details>
 
                     {/* Existing beatmaps table */}
                     <div>
@@ -692,13 +721,14 @@ const AdminMatchmaking: React.FC = () => {
                             value={beatmapFilter}
                             onChange={(e) => setBeatmapFilter(e.target.value)}
                             placeholder="filter by id / artist / title / version"
-                            className="px-3 py-1.5 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm text-foreground placeholder-gray-500 w-64 max-w-full"
+                            className="mm-input px-3 py-1.5 text-sm placeholder-gray-500 w-64 max-w-full"
                           />
                         </span>
                       </h4>
                       {poolBeatmaps.length === 0 ? (
                         <p className="text-sm text-gray-500 italic">
-                          Empty rotation. Paste some beatmap ids above to seed it.
+                          Empty rotation. Use the auto-import panel above to seed it from the local
+                          beatmap cache, or expand "Advanced" to paste IDs by hand.
                         </p>
                       ) : (
                         <div className="overflow-x-auto">
@@ -745,7 +775,7 @@ const AdminMatchmaking: React.FC = () => {
                                 return filtered.map((bm) => (
                                 <tr
                                   key={bm.id}
-                                  className="border-t border-card/50 hover:bg-card-hover/40"
+                                  className="mm-row"
                                 >
                                   <td className="py-2 pr-3 font-mono text-xs text-gray-400">
                                     {bm.beatmap_id}
@@ -801,14 +831,14 @@ const AdminMatchmaking: React.FC = () => {
       {/* Create modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-card backdrop-blur-md rounded-2xl border border-card shadow-2xl max-w-xl w-full p-6 space-y-4">
+          <div className="mm-glass-pop max-w-xl w-full p-6 space-y-4">
             <h3 className="text-xl font-bold text-foreground">Create matchmaking pool</h3>
             <FormField label="Name">
               <input
                 value={createForm.name}
                 onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                 placeholder="e.g. osu! standard 2K-3K"
-                className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm"
+                className="mm-input w-full px-3 py-2 text-sm"
               />
             </FormField>
             <FormField label="Description (optional, shown to players)">
@@ -819,7 +849,7 @@ const AdminMatchmaking: React.FC = () => {
                 }
                 placeholder="e.g. Warm-up pool · 3-5★ classics"
                 rows={2}
-                className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm leading-relaxed"
+                className="mm-input w-full px-3 py-2 text-sm leading-relaxed"
               />
             </FormField>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -829,7 +859,7 @@ const AdminMatchmaking: React.FC = () => {
                   onChange={(e) =>
                     setCreateForm({ ...createForm, ruleset_id: Number(e.target.value) })
                   }
-                  className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm"
+                  className="mm-input w-full px-3 py-2 text-sm"
                 >
                   {RULESET_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -847,7 +877,7 @@ const AdminMatchmaking: React.FC = () => {
                   onChange={(e) =>
                     setCreateForm({ ...createForm, lobby_size: Number(e.target.value) || 8 })
                   }
-                  className="w-full px-3 py-2 rounded-lg bg-card-hover border border-card focus:border-osu-pink/60 focus:outline-none text-sm font-mono"
+                  className="mm-input w-full px-3 py-2 text-sm font-mono"
                 />
               </FormField>
             </div>

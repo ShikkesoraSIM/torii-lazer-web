@@ -32,4 +32,13 @@ export {
   type BulkBeatmapAddResponse,
   type BulkBeatmapsetAddRequest,
   type BulkBeatmapsetAddResponse,
+  type MatchmakingPoolStats,
+  type MatchmakingPoolStatsTopMap,
+  type MatchmakingPoolStatsActivePlayer,
+  type MatchmakingPoolStatsActivityPoint,
+  type AutoImportFilters,
+  type AutoImportPreviewResponse,
+  type AutoImportPreviewSample,
+  type AutoImportResponse,
+  type BeatmapRankStatus,
 } from './matchmaking';

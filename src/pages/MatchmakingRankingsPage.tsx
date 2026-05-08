@@ -15,6 +15,8 @@ import {
   LeaderboardRowSkeleton,
   PoolTabsSkeleton,
 } from '../components/Matchmaking/MatchmakingSkeletons';
+import BeatmapThumb from '../components/Matchmaking/BeatmapThumb';
+import PoolStatsPanel from '../components/Matchmaking/PoolStatsPanel';
 
 /**
  * Public matchmaking rankings page (`/rankings/matchmaking`).
@@ -201,7 +203,7 @@ const MatchmakingRankingsPage: React.FC = () => {
   if (poolsError) {
     return (
       <div className="torii-page-stage min-h-screen px-4 py-12">
-        <div className="max-w-3xl mx-auto bg-card backdrop-blur-md rounded-2xl shadow-lg border border-card p-10 text-center">
+        <div className="mm-glass max-w-3xl mx-auto p-10 text-center">
           <FaTrophy className="mx-auto text-5xl text-osu-pink mb-4 opacity-60" />
           <h1 className="text-2xl font-bold text-foreground mb-2">Matchmaking</h1>
           <p className="text-gray-400">{poolsError}</p>
@@ -214,17 +216,17 @@ const MatchmakingRankingsPage: React.FC = () => {
     return (
       <div className="torii-page-stage min-h-screen">
         <main className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10 space-y-6">
-          <div className="bg-card backdrop-blur-md rounded-3xl shadow-2xl border border-card p-6 md:p-8 animate-pulse h-48" />
+          <div className="mm-glass-pop p-6 md:p-8 animate-pulse h-48" />
           <PoolTabsSkeleton />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <section className="lg:col-span-2 bg-card backdrop-blur-md rounded-2xl border border-card shadow-xl overflow-hidden">
+            <section className="lg:col-span-2 mm-glass overflow-hidden">
               <ul>
                 {Array.from({ length: 6 }).map((_, i) => (
                   <LeaderboardRowSkeleton key={i} />
                 ))}
               </ul>
             </section>
-            <section className="bg-card backdrop-blur-md rounded-2xl border border-card shadow-xl overflow-hidden">
+            <section className="mm-glass overflow-hidden">
               <ul>
                 {Array.from({ length: 5 }).map((_, i) => (
                   <BeatmapRowSkeleton key={i} />
@@ -240,7 +242,7 @@ const MatchmakingRankingsPage: React.FC = () => {
   if (pools.length === 0) {
     return (
       <div className="torii-page-stage min-h-screen px-4 py-12">
-        <div className="max-w-3xl mx-auto bg-card backdrop-blur-md rounded-2xl shadow-lg border border-card p-10 text-center">
+        <div className="mm-glass max-w-3xl mx-auto p-10 text-center">
           <FaTrophy className="mx-auto text-5xl text-osu-pink mb-4 opacity-60" />
           <h1 className="text-2xl font-bold text-foreground mb-2">Matchmaking</h1>
           <p className="text-gray-400">
@@ -262,7 +264,7 @@ const MatchmakingRankingsPage: React.FC = () => {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="relative overflow-hidden bg-card backdrop-blur-md rounded-3xl shadow-2xl border border-card"
+          className="relative overflow-hidden mm-glass-pop"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-osu-pink/20 via-fuchsia-500/5 to-cyan-500/15 pointer-events-none" />
           {/* Decorative grid */}
@@ -409,7 +411,7 @@ const MatchmakingRankingsPage: React.FC = () => {
             >
               {/* Pool description (admin-curated) */}
               {selectedPool.description && (
-                <div className="bg-card backdrop-blur-md rounded-2xl border border-card px-5 py-4">
+                <div className="mm-glass-inset px-5 py-4">
                   <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
                     {selectedPool.description}
                   </p>
@@ -457,8 +459,11 @@ const MatchmakingRankingsPage: React.FC = () => {
                   )}
 
                   {/* Rest of leaderboard */}
-                  <div className="bg-card backdrop-blur-md rounded-2xl border border-card shadow-xl overflow-hidden">
-                    <header className="px-5 py-3.5 border-b border-card flex items-center justify-between">
+                  <div className="mm-glass overflow-hidden">
+                    {/* Header — no divider line. The padding alone gives
+                        enough separation; rows below start with their own
+                        rhythm and the eye reads the heading naturally. */}
+                    <header className="px-5 pt-4 pb-3 flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
                         <FaTrophy className="text-osu-pink" />
                         <h2 className="font-bold text-foreground text-sm uppercase tracking-wider">
@@ -490,7 +495,10 @@ const MatchmakingRankingsPage: React.FC = () => {
                         </p>
                       </div>
                     ) : (
-                      <ul className="divide-y divide-card/40">
+                      // No divide-y. Definition between rows comes from
+                      // padding + soft hover background shift inside each
+                      // row (.mm-row), not a hard stroke.
+                      <ul>
                         {(top1 && top2 && top3 ? restOfBoard : leaderboard).map((entry) => (
                           <LeaderboardRow
                             key={entry.user_id}
@@ -504,8 +512,8 @@ const MatchmakingRankingsPage: React.FC = () => {
                 </section>
 
                 {/* Map rotation */}
-                <section className="bg-card backdrop-blur-md rounded-2xl border border-card shadow-xl overflow-hidden h-fit lg:sticky lg:top-4">
-                  <header className="px-5 py-3.5 border-b border-card flex items-center justify-between">
+                <section className="mm-glass overflow-hidden h-fit lg:sticky lg:top-4">
+                  <header className="px-5 pt-4 pb-3 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <FaFire className="text-amber-400" />
                       <h2 className="font-bold text-foreground text-sm uppercase tracking-wider">
@@ -528,21 +536,20 @@ const MatchmakingRankingsPage: React.FC = () => {
                       No beatmaps in this pool yet.
                     </p>
                   ) : (
-                    <ul className="divide-y divide-card/40 max-h-[680px] overflow-y-auto">
+                    <ul className="max-h-[680px] overflow-y-auto">
                       {poolBeatmaps.map((bm) => (
                         <li
                           key={bm.id}
-                          className="px-5 py-3 flex items-center gap-3 hover:bg-card-hover/40 transition-colors"
+                          className="mm-row px-5 py-3 flex items-center gap-3"
                         >
                           <Link
                             to={`/beatmaps/${bm.beatmap_id}`}
                             className="flex items-center gap-3 flex-1 min-w-0 group"
                           >
-                            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-card-hover to-card flex items-center justify-center font-mono text-xs text-osu-pink/80 shrink-0 ring-1 ring-card">
-                              {bm.difficulty_rating != null
-                                ? bm.difficulty_rating.toFixed(2) + '★'
-                                : '—'}
-                            </div>
+                            <BeatmapThumb
+                              setId={bm.beatmapset_id}
+                              starRating={bm.difficulty_rating}
+                            />
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-semibold text-foreground truncate group-hover:text-osu-pink transition-colors">
                                 {bm.artist} — {bm.title}
@@ -566,6 +573,9 @@ const MatchmakingRankingsPage: React.FC = () => {
                   )}
                 </section>
               </div>
+
+              {/* Pool-level stats panel — top picked, most active (7d), 30d activity. */}
+              <PoolStatsPanel poolId={selectedPool.id} />
             </motion.div>
           </AnimatePresence>
         )}
@@ -584,7 +594,7 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ icon, label, value, live = false }) => (
-  <div className="relative bg-card backdrop-blur-md rounded-2xl border border-card px-5 py-4 overflow-hidden group hover:border-osu-pink/30 transition-all">
+  <div className="mm-glass-inset relative px-5 py-4 overflow-hidden group transition-all">
     <div className="flex items-center gap-2 text-gray-400 text-xs uppercase tracking-wider font-semibold">
       <span className="text-base">{icon}</span>
       {label}
@@ -624,16 +634,16 @@ const Podium: React.FC<PodiumProps> = ({ top1, top2, top3, currentUserId }) => {
           <Link
             key={entry.user_id}
             to={`/users/${entry.user_id}`}
-            className={`group relative bg-card backdrop-blur-md rounded-2xl border transition-all overflow-hidden
+            className={`group relative mm-glass-inset transition-all overflow-hidden
               ${
                 place === 1
-                  ? 'border-yellow-400/40 hover:border-yellow-300/80 shadow-[0_0_20px_rgba(252,211,77,0.2)]'
+                  ? 'shadow-[0_0_28px_rgba(252,211,77,0.18),_0_8px_24px_rgba(0,0,0,0.35)] hover:shadow-[0_0_44px_rgba(252,211,77,0.32),_0_12px_32px_rgba(0,0,0,0.45)]'
                   : place === 2
-                    ? 'border-gray-400/30 hover:border-gray-300/60'
-                    : 'border-amber-700/40 hover:border-amber-600/70'
+                    ? 'hover:shadow-[0_0_24px_rgba(229,231,235,0.16),_0_8px_24px_rgba(0,0,0,0.35)]'
+                    : 'hover:shadow-[0_0_24px_rgba(180,83,9,0.22),_0_8px_24px_rgba(0,0,0,0.35)]'
               }
               ${place === 1 ? 'pt-7 pb-5' : 'pt-5 pb-4'}
-              ${isMe ? 'ring-1 ring-osu-pink/60 ring-inset' : ''}`}
+              ${isMe ? 'shadow-[0_0_28px_rgba(236,72,153,0.28)]' : ''}`}
           >
             <div
               className={`absolute inset-0 bg-gradient-to-b ${tier.bg} pointer-events-none opacity-50`}
@@ -715,13 +725,10 @@ const LeaderboardRow: React.FC<LeaderboardRowProps> = ({ entry, isMe }) => {
   const tier = ratingTier(entry.rating);
   return (
     <li
-      className={`relative px-5 py-3 flex items-center gap-4 transition-colors ${
-        isMe ? 'bg-osu-pink/10' : 'hover:bg-card-hover/40'
+      className={`relative px-5 py-3 flex items-center gap-4 ${
+        isMe ? 'mm-row-self' : 'mm-row'
       }`}
     >
-      {isMe && (
-        <span className="absolute left-0 top-0 bottom-0 w-1 bg-osu-pink" aria-hidden />
-      )}
       <div className="w-10 flex items-center justify-center text-base font-bold text-gray-400">
         #{entry.rank}
       </div>
@@ -733,10 +740,10 @@ const LeaderboardRow: React.FC<LeaderboardRowProps> = ({ entry, isMe }) => {
           <img
             src={entry.user.avatar_url}
             alt=""
-            className={`w-10 h-10 rounded-full object-cover ring-2 transition-all ${
+            className={`w-10 h-10 rounded-full object-cover transition-all ${
               isMe
-                ? 'ring-osu-pink/70 shadow-[0_0_12px_rgba(236,72,153,0.5)]'
-                : 'ring-card-hover group-hover:ring-osu-pink/60'
+                ? 'shadow-[0_0_18px_rgba(236,72,153,0.45)] ring-1 ring-osu-pink/60'
+                : 'group-hover:ring-1 group-hover:ring-osu-pink/40'
             }`}
           />
         ) : (

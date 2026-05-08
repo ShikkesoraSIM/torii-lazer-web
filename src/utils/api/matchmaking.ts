@@ -50,6 +50,10 @@ export interface MatchmakingLeaderboardEntry {
   first_placements: number;
   total_points: number;
   rank: number;
+  /** 0..1 win-rate from elo_history; null if the user has no recorded matches yet. */
+  win_rate: number | null;
+  wins: number | null;
+  losses: number | null;
   user: MatchmakingMinimalUser | null;
 }
 
@@ -113,6 +117,8 @@ export interface MatchmakingPoolBeatmap {
   id: number;
   pool_id: number;
   beatmap_id: number;
+  /** Parent beatmapset id — used to build cover URLs without a follow-up call. */
+  beatmapset_id: number | null;
   rating: number;
   rating_sig: number;
   selection_count: number;
@@ -122,6 +128,39 @@ export interface MatchmakingPoolBeatmap {
   title: string | null;
   difficulty_rating: number | null;
   total_length: number | null;
+}
+
+/** One row of the pool's "top picked maps" stats panel. */
+export interface MatchmakingPoolStatsTopMap {
+  beatmap_id: number;
+  beatmapset_id: number | null;
+  selection_count: number;
+  rating: number;
+  artist: string | null;
+  title: string | null;
+  version: string | null;
+  difficulty_rating: number | null;
+}
+
+/** One row of the pool's "most active players (last 7d)" stats panel. */
+export interface MatchmakingPoolStatsActivePlayer {
+  user_id: number;
+  matches: number;
+  wins: number;
+  losses: number;
+  user: MatchmakingMinimalUser | null;
+}
+
+export interface MatchmakingPoolStatsActivityPoint {
+  day: string;
+  matches: number;
+}
+
+/** Aggregated stats for one pool — one round trip for the whole panel. */
+export interface MatchmakingPoolStats {
+  top_maps: MatchmakingPoolStatsTopMap[];
+  most_active_players: MatchmakingPoolStatsActivePlayer[];
+  activity_timeseries: MatchmakingPoolStatsActivityPoint[];
 }
 
 export interface MatchmakingPoolCreate {
@@ -176,6 +215,68 @@ export interface BulkBeatmapsetAddResponse {
   mapsets_not_found: number[];
 }
 
+/**
+ * Operator-facing curation filter set. Same payload for the preview
+ * (count + sample) and the commit (actual insert) endpoints.
+ *
+ * The defaults mirror the backend: Featured Artist OFF, statuses
+ * RANKED+APPROVED+LOVED (mapper-frozen, safe for pools), 2.5–6.5★,
+ * 1–5 minutes, max 500 maps, SR-aware initial rating ON.
+ */
+export interface AutoImportFilters {
+  featured_artist: boolean;
+  statuses: BeatmapRankStatus[];
+  min_sr: number;
+  max_sr: number;
+  min_length_seconds: number;
+  max_length_seconds: number;
+  max_count: number;
+  use_sr_aware_rating: boolean;
+  /** Only consulted when use_sr_aware_rating=false. */
+  fixed_initial_rating: number;
+  initial_rating_sig: number;
+}
+
+export type BeatmapRankStatus =
+  | 'RANKED'
+  | 'APPROVED'
+  | 'LOVED'
+  | 'QUALIFIED'
+  | 'PENDING'
+  | 'GRAVEYARD'
+  | 'WIP';
+
+/** One sample row in the preview response. */
+export interface AutoImportPreviewSample {
+  beatmap_id: number;
+  beatmapset_id: number | null;
+  artist: string | null;
+  title: string | null;
+  version: string | null;
+  difficulty_rating: number | null;
+  total_length: number | null;
+  /** What rating this map would receive if imported with the current filters. */
+  seed_rating: number;
+}
+
+export interface AutoImportPreviewResponse {
+  /** Maps that would actually land (after dedupe + max_count cap). */
+  matched: number;
+  /** Maps matching the filters before the cap — surfaces overflow. */
+  matched_uncapped: number;
+  skipped_already_in_pool: number;
+  /** Up to 12 sample rows, ordered easy→hard by SR. */
+  sample: AutoImportPreviewSample[];
+}
+
+export interface AutoImportResponse {
+  added: number[];
+  skipped_already_in_pool: number[];
+  matched_uncapped: number;
+  /** True if matched_uncapped > max_count and we trimmed. */
+  capped: boolean;
+}
+
 export const matchmakingAPI = {
   /** List pools the user can queue into. By default only `active=true`. */
   listPools: async (params: ListPoolsParams = {}): Promise<MatchmakingPool[]> => {
@@ -192,6 +293,21 @@ export const matchmakingAPI = {
   ): Promise<MatchmakingPoolBeatmap[]> => {
     const response = await api.get<MatchmakingPoolBeatmap[]>(
       `/api/v2/matchmaking/pools/${poolId}/beatmaps${buildQuery({ ...params })}`,
+    );
+    return response.data;
+  },
+
+  /**
+   * Aggregated stats for one pool — top picked maps, most active players
+   * in the last 7 days, and a per-day activity timeseries (last 30 days).
+   * One round trip for the whole "what's hot" panel.
+   */
+  getPoolStats: async (
+    poolId: number,
+    params: { top_maps_limit?: number; active_players_limit?: number } = {},
+  ): Promise<MatchmakingPoolStats> => {
+    const response = await api.get<MatchmakingPoolStats>(
+      `/api/v2/matchmaking/pools/${poolId}/stats${buildQuery({ ...params })}`,
     );
     return response.data;
   },
@@ -239,6 +355,39 @@ export const matchmakingAPI = {
   ): Promise<BulkBeatmapsetAddResponse> => {
     const response = await api.post<BulkBeatmapsetAddResponse>(
       `/api/v2/matchmaking/pools/${poolId}/beatmapsets`,
+      payload,
+    );
+    return response.data;
+  },
+
+  /**
+   * Admin only — dry-run the auto-import. Returns the count of maps
+   * that would be inserted with the given filters + a small sample so
+   * the operator can iterate filters without committing.
+   */
+  autoImportPreview: async (
+    poolId: number,
+    payload: AutoImportFilters,
+  ): Promise<AutoImportPreviewResponse> => {
+    const response = await api.post<AutoImportPreviewResponse>(
+      `/api/v2/matchmaking/pools/${poolId}/beatmaps/auto-import/preview`,
+      payload,
+    );
+    return response.data;
+  },
+
+  /**
+   * Admin only — commit the auto-import. Scans the local beatmap cache
+   * for everything matching the filters and inserts up to `max_count`
+   * of them. Each inserted map is seeded with an SR-aware rating from
+   * the ruleset's anchor curve unless `use_sr_aware_rating=false`.
+   */
+  autoImport: async (
+    poolId: number,
+    payload: AutoImportFilters,
+  ): Promise<AutoImportResponse> => {
+    const response = await api.post<AutoImportResponse>(
+      `/api/v2/matchmaking/pools/${poolId}/beatmaps/auto-import`,
       payload,
     );
     return response.data;
