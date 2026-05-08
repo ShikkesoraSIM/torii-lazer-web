@@ -393,7 +393,19 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
         const totalScores = user?.scores_best_count || 0;
         const currentTotal = scores.length + newScores.length;
         hasMoreData = newScores.length === 6 && currentTotal < totalScores;
-        setScores(prev => [...prev, ...newScores]);
+        // CRUCIAL: persist the larger combined list to cache after
+        // load-more. Without this, the cache lags behind state at the
+        // initial 6 entries — and any re-render that re-runs the mount
+        // effect (e.g. parent passing a fresh `initialScores` reference,
+        // window-focus refetches) restores from cache and visibly
+        // collapses the list back to 6 the moment the user clicks "Show
+        // more". Use the functional setScores so we read the latest
+        // committed state instead of the closure-captured `scores`.
+        setScores(prev => {
+          const combined = [...prev, ...newScores];
+          saveToCache(combined);
+          return combined;
+        });
         setOffset(prev => prev + newScores.length);
       }
 
@@ -418,9 +430,17 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
     setOffset(0);
     setError(null);
 
+    // hasMore needs to be derived from `scores_best_count` rather than
+    // the simplistic `length === 6` heuristic. After a load-more chain
+    // the cache holds 12 / 18 / 24+ entries; `length === 6` would be
+    // false for those and would incorrectly hide the "Show more" button
+    // when restoring from cache, even though there are still more pages
+    // available on the server.
+    const totalAvailable = user?.scores_best_count ?? Number.POSITIVE_INFINITY;
+
     if (initialScoresKey === currentScoresKey && initialScores) {
       setScores(initialScores);
-      setHasMore(initialScores.length === 6);
+      setHasMore(initialScores.length < totalAvailable);
       setOffset(initialScores.length);
       saveToCache(initialScores);
       setLoading(false);
@@ -430,7 +450,7 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
     const cachedScores = loadFromCache();
     if (cachedScores) {
       setScores(cachedScores);
-      setHasMore(cachedScores.length === 6);
+      setHasMore(cachedScores.length < totalAvailable);
       setOffset(cachedScores.length);
       setLoading(false);
       void loadScores(true, true);
@@ -440,17 +460,26 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
     setScores([]);
     setHasMore(true);
     void loadScores(true);
-    // Intentionally omits loadScores / loadFromCache / saveToCache from
-    // the deps list. Those callbacks are recreated whenever `offset`
-    // changes (offset is in loadScores' useCallback deps), so including
-    // them here made this effect re-fire after every "Show more" load —
-    // it would re-read the cached initial-six items and clobber the
-    // freshly-fetched additional pages, leaving the list visually stuck
-    // at 6 entries no matter how many times the user clicked Show more.
-    // The effect should only kick when the *user* or *mode* actually
-    // changes (currentScoresKey or userId).
+    // Two intentional omissions from the deps list:
+    //
+    //   1. loadScores / loadFromCache / saveToCache — those callbacks
+    //      are recreated whenever `offset` / `scores.length` change
+    //      (they're in loadScores' useCallback deps). Including them
+    //      here would make the effect re-fire after every "Show more",
+    //      re-read the cache, and clobber the freshly-fetched pages.
+    //
+    //   2. `initialScores` — the prop is a fresh array reference on
+    //      every parent render even when the underlying user/mode
+    //      hasn't changed. Including it here was the second half of
+    //      the "Show more is broken" bug: a parent re-render → new
+    //      reference → effect fires → restore from cache (or
+    //      initialScores) → list collapses back to 6. We key the
+    //      effect on `initialScoresKey` instead, which is a stable
+    //      string identifier of the underlying user/mode pair, so the
+    //      effect only fires when the user actually navigated.
+    //
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentScoresKey, initialScores, initialScoresKey, userId]);
+  }, [currentScoresKey, initialScoresKey, userId]);
   const handleLoadMore = () => {
     if (!loadingMore && hasMore) {
       void loadScores(false);

@@ -428,11 +428,13 @@ export const adminAPI = {
   },
 
   updateTeam: async (teamId: number, teamData: FormData) => {
-    const response = await api.patch(`/api/private/admin/teams/${teamId}`, teamData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // No explicit Content-Type — axios + the runtime derive
+    // "multipart/form-data; boundary=…" automatically from the FormData
+    // body. Hard-setting Content-Type to a bare "multipart/form-data"
+    // suppresses that auto-derivation and leaves the boundary missing,
+    // breaking the FastAPI parser before it reaches the route handler.
+    // See teams.ts createTeam for the long-form rationale.
+    const response = await api.patch(`/api/private/admin/teams/${teamId}`, teamData);
     return response.data;
   },
 
