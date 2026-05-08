@@ -34,7 +34,9 @@ const PulseBlock: React.FC<{ className?: string }> = ({ className = '' }) => (
  * first render.
  */
 export const LeaderboardRowSkeleton: React.FC = () => (
-  <li className="px-5 py-3 flex items-center gap-4 border-b border-card/40 last:border-b-0">
+  // No row border — the live row also drops dividers in the new
+  // glass theme (definition comes from spacing + hover wash).
+  <li className="px-5 py-3 flex items-center gap-4">
     <PulseBlock className="w-10 h-6" />
     <PulseBlock className="w-10 h-10 rounded-full" />
     <div className="flex-1 min-w-0 space-y-2">
@@ -62,8 +64,8 @@ export const LeaderboardRowSkeleton: React.FC = () => (
  * data lands.
  */
 export const BeatmapRowSkeleton: React.FC = () => (
-  <li className="px-5 py-3 flex items-center gap-3 border-b border-card/40 last:border-b-0">
-    <PulseBlock className="w-12 h-12 rounded-lg" />
+  <li className="px-5 py-3 flex items-center gap-3">
+    <PulseBlock className="w-12 h-12 rounded-xl" />
     <div className="flex-1 min-w-0 space-y-2">
       <PulseBlock className="h-4 w-3/4" />
       <PulseBlock className="h-3 w-1/3" />
@@ -85,8 +87,8 @@ export const PoolBodySkeleton: React.FC<{ leaderboardRows?: number; beatmapRows?
   beatmapRows = 5,
 }) => (
   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <section className="lg:col-span-2 bg-card backdrop-blur-md rounded-2xl border border-card shadow-xl overflow-hidden">
-      <header className="px-5 py-4 border-b border-card flex items-center justify-between">
+    <section className="lg:col-span-2 mm-glass overflow-hidden">
+      <header className="px-5 pt-4 pb-3 flex items-center justify-between">
         <PulseBlock className="h-5 w-44" />
         <PulseBlock className="h-3 w-20" />
       </header>
@@ -97,8 +99,8 @@ export const PoolBodySkeleton: React.FC<{ leaderboardRows?: number; beatmapRows?
       </ul>
     </section>
 
-    <section className="bg-card backdrop-blur-md rounded-2xl border border-card shadow-xl overflow-hidden">
-      <header className="px-5 py-4 border-b border-card flex items-center justify-between">
+    <section className="mm-glass overflow-hidden">
+      <header className="px-5 pt-4 pb-3 flex items-center justify-between">
         <PulseBlock className="h-5 w-32" />
         <PulseBlock className="h-3 w-16" />
       </header>
@@ -122,7 +124,7 @@ export const PoolTabsSkeleton: React.FC = () => (
     {[0, 1, 2].map((i) => (
       <div
         key={i}
-        className="px-4 py-2.5 rounded-xl bg-card/60 border border-card flex items-center gap-2.5"
+        className="mm-glass-inset px-4 py-2.5 flex items-center gap-2.5"
       >
         <PulseBlock className="h-3 w-12" />
         <PulseBlock className="h-3 w-16" />
@@ -178,7 +180,7 @@ export const ProfileHistoryRowSkeleton: React.FC = () => (
  * `matchmakingAPI.listPools({ include_inactive: true })` is in flight.
  */
 export const AdminPoolRowSkeleton: React.FC = () => (
-  <li className="bg-card rounded-xl border border-card p-4">
+  <li className="mm-glass p-4">
     <div className="flex items-center gap-3">
       <PulseBlock className="h-4 w-10" />
       <PulseBlock className="h-5 w-44" />

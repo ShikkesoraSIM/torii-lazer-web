@@ -85,6 +85,119 @@
   .border-card-hover {
     border-color: var(--border-hover);
   }
+
+  /* ───────────── Matchmaking "apple-like" glass aesthetic ─────────────
+   *
+   * Used across the matchmaking pages (public ranking, profile section,
+   * admin) so the visual language stays consistent without sprinkling
+   * the same long Tailwind utility chain everywhere.
+   *
+   * Design intent: panels float on the page WITHOUT any visible edge.
+   * Definition comes purely from
+   *   - the drop shadow underneath (depth signal)
+   *   - the backdrop-blur softening the background behind
+   *   - opaque-enough card background so the panel's "body" reads as
+   *     a solid surface, not as a translucent overlay
+   *
+   * Earlier versions had a subtle `inset 0 1px 0 rgba(255,255,255,0.05)`
+   * top-edge gloss to mimic Apple's "lit glass" look. On dark backdrops
+   * with blur, that tiny highlight reads as a 1px border on most monitor
+   * + browser combos — exactly the harshness this redesign was trying
+   * to avoid. Removed entirely.
+   */
+  .mm-glass {
+    background: var(--card-bg);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border-radius: 1.5rem; /* 24px */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Elevated hero / champion-card variant — heavier blur + deeper drop. */
+  .mm-glass-pop {
+    background: var(--card-bg);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border-radius: 1.75rem; /* 28px */
+    box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Compact / inset variant — for nested cards (stat tiles, the "your
+   * placement" pill). Same family, smaller radius + lighter shadow so
+   * they don't fight the panel they're inside. */
+  .mm-glass-inset {
+    background: var(--card-bg);
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    border-radius: 1.25rem; /* 20px */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Row-style hover. Used for leaderboard / rotation rows so we can
+   * drop the harsh `divide-y` borders entirely — definition comes from
+   * spacing, and rows light up subtly on hover instead. */
+  .mm-row {
+    transition: background-color 150ms ease-out;
+  }
+  .mm-row:hover {
+    background-color: rgba(255, 255, 255, 0.025);
+  }
+  .mm-row-self {
+    /* "Your row" highlight — gradient pink wash that fades right.
+     * Replaces the old left-stripe + bg-osu-pink/10 combo. */
+    background: linear-gradient(
+      to right,
+      rgba(236, 72, 153, 0.14),
+      rgba(236, 72, 153, 0.04) 40%,
+      rgba(236, 72, 153, 0) 80%
+    );
+  }
+  .mm-row-self::before {
+    /* The pink stripe is now a soft glow rather than a hard line. */
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(236, 72, 153, 0),
+      rgba(236, 72, 153, 0.9) 30%,
+      rgba(236, 72, 153, 0.9) 70%,
+      rgba(236, 72, 153, 0)
+    );
+    box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
+    pointer-events: none;
+  }
+
+  /* Inset-style form inputs. Read as "indented surface" rather than
+   * "outlined box" — sits naturally inside a glass panel without the
+   * stacked-border tax. The inner shadow does the field-edge work; the
+   * very faint ring-1 hint is just so the right edge doesn't blur into
+   * the panel on a low-contrast monitor. */
+  .mm-input {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: none;
+    border-radius: 0.625rem; /* 10px = rounded-lg */
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.4),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    transition: box-shadow 150ms ease-out;
+    color: var(--foreground, #fff);
+  }
+  .mm-input::placeholder {
+    color: rgba(156, 163, 175, 0.6);
+  }
+  .mm-input:focus,
+  .mm-input:focus-visible {
+    outline: none;
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.4),
+      inset 0 0 0 1px rgba(236, 72, 153, 0.6),
+      0 0 0 3px rgba(236, 72, 153, 0.15);
+  }
 }
 
 /* 导入 Extra 字体 */
