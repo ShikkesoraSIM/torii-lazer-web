@@ -364,6 +364,29 @@ const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { t } = useTranslation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const location = useLocation();
+
+  // Parent-level guarantee that the search overlay closes whenever the
+  // route changes. The overlay component itself has an equivalent
+  // useEffect, but it lives inside a framer-motion AnimatePresence
+  // tree — we kept hitting a "click result -> overlay stays visible,
+  // Close button also unresponsive" failure mode where the overlay's
+  // internal state machinery was in a partially-exited state and
+  // setIsSearchOpen(false) inside it didn't propagate. Owning the
+  // close from the parent (which holds the canonical isSearchOpen
+  // state) sidesteps that entirely: a navigation happens -> location
+  // changes -> this effect fires -> setIsSearchOpen(false) goes
+  // straight to the source of truth, no closure / mount / animation
+  // dance involved. The lastPathRef ensures we only fire on actual
+  // path changes, not on every re-render.
+  const lastPathRef = useRef<string>(location.pathname + location.search);
+  useEffect(() => {
+    const currentPath = location.pathname + location.search;
+    if (currentPath !== lastPathRef.current) {
+      lastPathRef.current = currentPath;
+      setIsSearchOpen(false);
+    }
+  }, [location.pathname, location.search]);
 
   let unreadCount = { total: 0, team_requests: 0, private_messages: 0, friend_requests: 0 } as any;
   let isConnected = false;

@@ -217,6 +217,14 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          // Explicit key so AnimatePresence has an unambiguous identity
+          // for the conditional child. Without one, framer-motion v11
+          // sometimes left the exit animation in a stalled state on
+          // React 19 — the overlay state was already isOpen=false but
+          // the DOM node hung around (backdrop blur visible, content
+          // not interactable) until a hard reload. With a stable key
+          // the presence machine has a fixed handle to track.
+          key="navbar-search-overlay"
           className="fixed inset-0 z-[120] bg-black/65 backdrop-blur-[3px] px-4 pt-24 pb-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
