@@ -600,9 +600,14 @@ const AdminDailyChallenges: React.FC = () => {
   };
 
   /**
-   * Flag mods that need configuration but don't have it (PA without
-   * `pitch_shift`, etc.). Returns the offending acronyms so the toast
-   * can name them — A1 audit fix, hard-blocks submit.
+   * Flag mods the admin added without touching their settings, so we can
+   * show a soft "heads up — falling back to defaults" toast on submit.
+   * No longer hard-blocks: the osu! game client and server-side
+   * `_parse_mods_raw` fall back to per-setting defaults for anything
+   * unset, and forcing the admin to twiddle every boolean toggle just
+   * to clear validation was a UX trap (see e.g. PA — its
+   * `extended_limits` toggle has a sensible default of false; nobody
+   * needs to "configure" it explicitly).
    */
   const findUnconfiguredMods = (rulesetId: number, mods: ApiMod[]): string[] => {
     const ruleset = catalog[String(rulesetId)] ?? [];
@@ -617,16 +622,19 @@ const AdminDailyChallenges: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const blockers = [
+    // Soft heads-up only — submit goes through with defaults applied
+    // server-side. Used to be a hard block, but that produced false
+    // positives on configurations like "PA at 1.15× without explicit
+    // extended_limits" (which is the default and perfectly valid).
+    const using_defaults = [
       ...findUnconfiguredMods(formData.ruleset_id, formData.required_mods),
       ...findUnconfiguredMods(formData.ruleset_id, formData.allowed_mods),
     ];
-    if (blockers.length > 0) {
-      toast.error(
-        `These mods still need configuration: ${[...new Set(blockers)].join(', ')}. Open their settings panel and fill in the values before saving.`,
-        { duration: 6000 },
+    if (using_defaults.length > 0) {
+      toast(
+        `Heads up: ${[...new Set(using_defaults)].join(', ')} will use default settings.`,
+        { icon: 'ℹ️', duration: 4000 },
       );
-      return;
     }
 
     try {
@@ -668,16 +676,15 @@ const AdminDailyChallenges: React.FC = () => {
     e.preventDefault();
     if (!editingChallenge) return;
 
-    const blockers = [
+    const using_defaults = [
       ...findUnconfiguredMods(formData.ruleset_id, formData.required_mods),
       ...findUnconfiguredMods(formData.ruleset_id, formData.allowed_mods),
     ];
-    if (blockers.length > 0) {
-      toast.error(
-        `These mods still need configuration: ${[...new Set(blockers)].join(', ')}. Open their settings panel and fill in the values before saving.`,
-        { duration: 6000 },
+    if (using_defaults.length > 0) {
+      toast(
+        `Heads up: ${[...new Set(using_defaults)].join(', ')} will use default settings.`,
+        { icon: 'ℹ️', duration: 4000 },
       );
-      return;
     }
 
     try {
@@ -1460,17 +1467,16 @@ const AdminDailyChallenges: React.FC = () => {
                 type="button"
                 disabled={randomBusy}
                 onClick={async () => {
-                  // Same A1 guard as the manual create form.
-                  const blockers = [
+                  // Same soft heads-up as the manual create form.
+                  const using_defaults = [
                     ...findUnconfiguredMods(randomFilters.ruleset_id, randomRequiredMods),
                     ...findUnconfiguredMods(randomFilters.ruleset_id, randomAllowedMods),
                   ];
-                  if (blockers.length > 0) {
-                    toast.error(
-                      `These mods still need configuration: ${[...new Set(blockers)].join(', ')}. Open the mods panel and fill them in.`,
-                      { duration: 6000 },
+                  if (using_defaults.length > 0) {
+                    toast(
+                      `Heads up: ${[...new Set(using_defaults)].join(', ')} will use default settings.`,
+                      { icon: 'ℹ️', duration: 4000 },
                     );
-                    return;
                   }
                   setRandomBusy(true);
                   // Use the PREVIEWED beatmap_id instead of re-rolling. The

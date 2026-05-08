@@ -122,24 +122,29 @@ const findMod = (catalog: ModDefinition[], acronym: string): ModDefinition | und
   catalog.find((m) => m.Acronym === acronym);
 
 /**
- * A1 audit fix: a mod is "fully configured" when it doesn't require
- * configuration, OR when every one of its settings has an explicit value.
- * `RequiresConfiguration: true` mods (e.g. PA) only do something useful
- * when the admin actively sets at least the primary slider — `{acronym:
- * "PA"}` with no settings produces silent no-op behaviour at play time.
+ * A1 audit fix: a mod is "configured enough" when it doesn't require
+ * configuration, OR when the admin has touched at least one of its
+ * settings. Originally this required ALL settings to be present, but
+ * that turned into a false-positive trap: PA's secondary boolean toggle
+ * (`extended_limits`) almost never needs to be set explicitly — it
+ * defaults to false and the slider's primary value (`pitch_shift`) is
+ * what actually does the work. Requiring both blocked perfectly-valid
+ * configurations like "PA at 1.15× with safe limits" (the default).
  *
- * We require ALL settings to be present (not "at least one") because for
- * mods like PA the secondary toggle (`extended_limits`) could be the only
- * filled slot, leaving the meaningful slider blank.
+ * Now the rule is just: did the admin touch ANY setting? If yes, trust
+ * them. The osu! game client and the server fall back to per-setting
+ * defaults for anything left unset, so a mod with `{pitch_shift: 1.15}`
+ * works perfectly fine even though `extended_limits` is implicit.
  *
- * Exported so the AdminDailyChallenges form can block submit when the
- * picker says "you forgot to configure something".
+ * The visual ⚠ in the picker still surfaces "you added this mod but
+ * haven't tweaked anything" — useful when the auto-fill defaults
+ * (`initialSettingsFor`) haven't kicked in for some setting.
  */
 export const isModFullyConfigured = (def: ModDefinition, mod: ApiMod): boolean => {
   if (!def.RequiresConfiguration) return true;
   if (def.Settings.length === 0) return true;
   const settings = mod.settings ?? {};
-  return def.Settings.every((s) => Object.prototype.hasOwnProperty.call(settings, s.Name));
+  return Object.keys(settings).length > 0;
 };
 
 /**
