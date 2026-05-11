@@ -431,7 +431,9 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="hidden md:flex fixed top-4 left-0 right-0 z-50 justify-center px-4">
+      <header
+        className={`hidden md:flex fixed ${user?.is_restricted ? 'top-14' : 'top-4'} left-0 right-0 z-50 justify-center px-4`}
+      >
         <div className="w-full max-w-7xl">
           <div
             className={[
@@ -532,7 +534,9 @@ const Navbar: React.FC = () => {
         </div>
       </header>
 
-      <header className="md:hidden fixed top-0 left-0 right-0 z-50 px-3 pt-3">
+      <header
+        className={`md:hidden fixed ${user?.is_restricted ? 'top-10' : 'top-0'} left-0 right-0 z-50 px-3 pt-3`}
+      >
         <div className="rounded-3xl torii-nav-liquid">
           <div className="flex items-center justify-between px-4 py-3">
             <Link to="/" className="flex items-center gap-3">

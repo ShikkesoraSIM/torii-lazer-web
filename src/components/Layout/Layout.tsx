@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import MaintenanceBanner from './MaintenanceBanner';
+import RestrictionBanner from './RestrictionBanner';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
 import { NotificationProvider } from '../../contexts/NotificationContext';
@@ -9,14 +10,23 @@ import { NotificationProvider } from '../../contexts/NotificationContext';
 const Layout: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();
-  
+
   // 登录/注册/找回密码页面不需要顶部内边距
   const noTopPaddingRoutes = ['/', '/login', '/register', '/password-reset'];
   const shouldApplyTopPadding = !noTopPaddingRoutes.includes(location.pathname);
 
+  // RestrictionBanner is a thin red stripe pinned above the navbar
+  // (z-index 60 vs navbar's 50). When it's visible the page content
+  // would otherwise sit underneath it — push the main stage down by
+  // an extra ~40px to compensate. The banner only renders for
+  // authenticated AND restricted users so this padding is dead code
+  // for everyone else.
+  const isRestricted = !!(isAuthenticated && user?.is_restricted);
+
   return (
     <NotificationProvider isAuthenticated={isAuthenticated} user={user}>
       <div className="torii-app-shell min-h-screen bg-gray-50 dark:bg-gray-900">
+        <RestrictionBanner />
         <Navbar />
         {/*
           Maintenance banner sits between the fixed navbar and the page
@@ -25,7 +35,7 @@ const Layout: React.FC = () => {
           mount + a 30s interval that returns {maintenance: false}).
         */}
         <MaintenanceBanner />
-        <main className={`torii-page-stage ${shouldApplyTopPadding ? 'pt-[56px] md:pt-20' : ''}`}>
+        <main className={`torii-page-stage ${shouldApplyTopPadding ? 'pt-[56px] md:pt-20' : ''} ${isRestricted ? 'mt-10' : ''}`}>
           <Outlet />
         </main>
         <Toaster
