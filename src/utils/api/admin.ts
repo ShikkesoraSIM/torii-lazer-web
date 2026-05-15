@@ -625,4 +625,75 @@ export const adminAPI = {
     );
     return response.data;
   },
+
+  // Anti-cheat
+  getAnticheatAlerts: async (params?: {
+    kind?: string;
+    severity?: string;
+    user_id?: number;
+    score_id?: number;
+    beatmap_id?: number;
+    unresolved_only?: boolean;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const response = await api.get('/api/private/admin/anticheat/alerts', { params });
+    return response.data as {
+      total: number;
+      limit: number;
+      offset: number;
+      alerts: Array<{
+        id: number;
+        kind: string;
+        severity: string;
+        user_id: number | null;
+        score_id: number | null;
+        beatmap_id: number | null;
+        title: string;
+        body: string;
+        payload: Record<string, unknown>;
+        created_at: string | null;
+        dispatched_at: string | null;
+        resolved_at: string | null;
+      }>;
+    };
+  },
+
+  getAnticheatUserSummary: async (userId: number) => {
+    const response = await api.get(`/api/private/admin/anticheat/users/${userId}/summary`);
+    return response.data as {
+      user_id: number;
+      username: string;
+      alert_counts: { total: number; unresolved: number };
+      hwid: {
+        known_hwids: string[];
+        breakdown: Array<{ hwid: string; peer_count: number; peer_user_ids: number[] }>;
+        correlated_account_count: number;
+        correlated_user_ids: number[];
+      };
+    };
+  },
+
+  resetAnticheatAlerts: async (userId: number, kind?: string) => {
+    const response = await api.post(
+      `/api/private/admin/anticheat/users/${userId}/reset-alerts`,
+      null,
+      { params: kind ? { kind } : undefined },
+    );
+    return response.data as {
+      user_id: number;
+      kind: string | null;
+      resolved_count: number;
+      resolved_at: string;
+    };
+  },
+
+  clearAnticheatUserHwid: async (userId: number) => {
+    const response = await api.delete(`/api/private/admin/anticheat/users/${userId}/hwid`);
+    return response.data as {
+      user_id: number;
+      cleared_hwids: string[];
+      count: number;
+    };
+  },
 };

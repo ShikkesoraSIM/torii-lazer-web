@@ -15,6 +15,7 @@ import AdminDonations from './AdminDonations';
 import AdminMatchmaking from './AdminMatchmaking';
 import AdminMaintenance from './AdminMaintenance';
 import AdminChangelogEditor from './AdminChangelogEditor';
+import AdminAnticheat from './AdminAnticheat';
 
 
 type AdminTab =
@@ -27,6 +28,7 @@ type AdminTab =
   | 'matchmaking'
   | 'announcements'
   | 'login-audit'
+  | 'anticheat'
   | 'donations'
   | 'maintenance'
   | 'changelog';
@@ -341,6 +343,24 @@ const AdminPanel: React.FC = () => {
                 </button>
 
                 <button
+                  onClick={() => setActiveTab('anticheat')}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                    activeTab === 'anticheat'
+                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Shield-check glyph — security/review section. */}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M12 3l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z M9 12l2 2 4-4" />
+                    </svg>
+                    <span>Anti-cheat</span>
+                  </div>
+                </button>
+
+                <button
                   onClick={() => setActiveTab('donations')}
                   className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
                     activeTab === 'donations'
@@ -415,6 +435,7 @@ const AdminPanel: React.FC = () => {
                     {activeTab === 'matchmaking' && 'Matchmaking Pool Management'}
                     {activeTab === 'announcements' && 'Global Announcements'}
                     {activeTab === 'login-audit' && 'Login Audit & Client Hashes'}
+                    {activeTab === 'anticheat' && 'Anti-cheat Review'}
                     {activeTab === 'donations' && 'Donations'}
                     {activeTab === 'maintenance' && 'Maintenance Mode'}
                     {activeTab === 'changelog' && 'Changelog Editor'}
@@ -431,6 +452,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'matchmaking' && <AdminMatchmaking />}
                 {activeTab === 'announcements' && <AdminAnnouncements />}
                 {activeTab === 'login-audit' && <AdminLoginAudit />}
+                {activeTab === 'anticheat' && <AdminAnticheat />}
                 {activeTab === 'donations' && <AdminDonations />}
                 {activeTab === 'maintenance' && <AdminMaintenance />}
                 {activeTab === 'changelog' && <AdminChangelogEditor />}
