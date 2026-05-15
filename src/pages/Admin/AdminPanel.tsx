@@ -45,12 +45,18 @@ interface AdminStats {
   api_server_status: 'online' | 'offline';
 }
 
+// One of the sidebar sections is currently gated to a single owner id
+// while it's being tested. Once it's stable this restriction goes away.
+const SECTION_OWNER_ID = 3;
+
 const AdminPanel: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const canSeeOwnerSection = user?.id === SECTION_OWNER_ID;
 
   useEffect(() => {
     if (!user || !user.is_admin) {
@@ -342,6 +348,7 @@ const AdminPanel: React.FC = () => {
                   </div>
                 </button>
 
+                {canSeeOwnerSection && (
                 <button
                   onClick={() => setActiveTab('anticheat')}
                   className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
@@ -359,6 +366,7 @@ const AdminPanel: React.FC = () => {
                     <span>Anti-cheat</span>
                   </div>
                 </button>
+                )}
 
                 <button
                   onClick={() => setActiveTab('donations')}
@@ -435,7 +443,7 @@ const AdminPanel: React.FC = () => {
                     {activeTab === 'matchmaking' && 'Matchmaking Pool Management'}
                     {activeTab === 'announcements' && 'Global Announcements'}
                     {activeTab === 'login-audit' && 'Login Audit & Client Hashes'}
-                    {activeTab === 'anticheat' && 'Anti-cheat Review'}
+                    {activeTab === 'anticheat' && canSeeOwnerSection && 'Anti-cheat Review'}
                     {activeTab === 'donations' && 'Donations'}
                     {activeTab === 'maintenance' && 'Maintenance Mode'}
                     {activeTab === 'changelog' && 'Changelog Editor'}
@@ -452,7 +460,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'matchmaking' && <AdminMatchmaking />}
                 {activeTab === 'announcements' && <AdminAnnouncements />}
                 {activeTab === 'login-audit' && <AdminLoginAudit />}
-                {activeTab === 'anticheat' && <AdminAnticheat />}
+                {activeTab === 'anticheat' && canSeeOwnerSection && <AdminAnticheat />}
                 {activeTab === 'donations' && <AdminDonations />}
                 {activeTab === 'maintenance' && <AdminMaintenance />}
                 {activeTab === 'changelog' && <AdminChangelogEditor />}
