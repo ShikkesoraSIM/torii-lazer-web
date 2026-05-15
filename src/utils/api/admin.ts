@@ -696,4 +696,140 @@ export const adminAPI = {
       count: number;
     };
   },
+
+  listAnticheatReplays: async (params?: {
+    user_id?: number;
+    beatmap_id?: number;
+    gamemode?: number;
+    verdict?: string;
+    has_replay?: boolean;
+    min_pp?: number;
+    passed_only?: boolean;
+    sort?: 'latest' | 'top_pp' | 'low_trust';
+    limit?: number;
+    offset?: number;
+  }) => {
+    const response = await api.get('/api/private/admin/anticheat/replays', { params });
+    return response.data as {
+      total: number;
+      limit: number;
+      offset: number;
+      items: AnticheatReplayRow[];
+    };
+  },
+
+  getAnticheatReplayDetail: async (scoreId: number) => {
+    const response = await api.get(`/api/private/admin/anticheat/scores/${scoreId}/detail`);
+    return response.data as AnticheatReplayDetail;
+  },
+
+  reanalyzeAnticheatScore: async (scoreId: number) => {
+    const response = await api.post(`/api/private/admin/anticheat/scores/${scoreId}/reanalyze`);
+    return response.data as AnticheatReanalyzeResult;
+  },
+
+  reanalyzeAnticheatBulk: async (params?: {
+    user_id?: number;
+    beatmap_id?: number;
+    gamemode?: number;
+    only_unanalyzed?: boolean;
+    only_with_replay?: boolean;
+    min_pp?: number;
+    max_count?: number;
+  }) => {
+    const response = await api.post(
+      '/api/private/admin/anticheat/reanalyze-bulk',
+      null,
+      { params },
+    );
+    return response.data as AnticheatBulkJob;
+  },
+
+  getAnticheatBulkJob: async (jobId: string) => {
+    const response = await api.get(`/api/private/admin/anticheat/reanalyze-jobs/${jobId}`);
+    return response.data as AnticheatBulkJob;
+  },
 };
+
+export interface AnticheatAnalysisSummary {
+  verdict: string;
+  confidence: number;
+  trust_factor_applied: number;
+  detectors_fired: string[];
+  replay_was_available: boolean;
+  analyzer_version: string;
+  error: string | null;
+  analyzed_at: string | null;
+}
+
+export interface AnticheatReplayRow {
+  score_id: number;
+  user_id: number;
+  username: string | null;
+  beatmap_id: number | null;
+  beatmap_title: string | null;
+  gamemode: number;
+  mods: Array<Record<string, unknown> | string>;
+  pp: number;
+  accuracy: number;
+  max_combo: number;
+  rank: string | null;
+  passed: boolean;
+  has_replay: boolean;
+  ended_at: string | null;
+  analysis: AnticheatAnalysisSummary | null;
+}
+
+export interface AnticheatReplayDetail {
+  score: AnticheatReplayRow;
+  analysis_full: (AnticheatAnalysisSummary & {
+    reasons: Array<{
+      detector: string;
+      code: string;
+      severity: string;
+      evidence: Record<string, unknown>;
+    }>;
+    metrics: Record<string, unknown>;
+  }) | null;
+  siblings_same_map: Array<{
+    score_id: number;
+    pp: number;
+    accuracy: number;
+    max_combo: number;
+    rank: string | null;
+    passed: boolean;
+    ended_at: string | null;
+  }>;
+  hwid: { known_hwids: string[] };
+  alerts: Array<{
+    id: number;
+    kind: string;
+    severity: string;
+    title: string;
+    body: string;
+    created_at: string | null;
+  }>;
+}
+
+export interface AnticheatReanalyzeResult extends Partial<AnticheatAnalysisSummary> {
+  score_id: number;
+  reasons?: Array<{
+    detector: string;
+    code: string;
+    severity: string;
+    evidence: Record<string, unknown>;
+  }>;
+  metrics?: Record<string, unknown>;
+}
+
+export interface AnticheatBulkJob {
+  id: string;
+  status: 'queued' | 'running' | 'completed' | 'failed';
+  total: number;
+  processed: number;
+  errors: number;
+  started_at: string;
+  finished_at: string | null;
+  error?: string;
+  filters: Record<string, unknown>;
+}
