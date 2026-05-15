@@ -65,9 +65,9 @@ const PasswordResetSection: React.FC = () => {
     if (password.length < 8) {
       return t('settings.password.errors.passwordMin');
     }
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      return t('settings.password.errors.passwordStrength');
-    }
+    // Strength check (upper + lower + digit) intentionally dropped to
+    // match the server's validate_password (8+ chars only). See the
+    // matching comment in RegisterPage.tsx for the full rationale.
     return null;
   };
 

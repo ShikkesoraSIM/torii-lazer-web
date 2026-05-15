@@ -57,9 +57,17 @@ const RegisterPage: React.FC = () => {
       newErrors.password = t('auth.register.errors.passwordRequired');
     } else if (formData.password.length < 8) {
       newErrors.password = t('auth.register.errors.passwordMin');
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = t('auth.register.errors.passwordStrength');
     }
+    // Note: the "must include upper + lower + digit" strength check was
+    // dropped here to match the server's own validation (app/auth.py
+    // validate_password — only enforces length >= 8). Forcing case +
+    // digit on registration was bouncing users who'd genuinely picked a
+    // memorable lowercase passphrase, and the friction was making people
+    // change to something unmemorable just to clear the form — exactly
+    // the bad-UX outcome strong-password rules are supposed to prevent.
+    // The passwordStrength i18n key is kept in the locale files in case
+    // we want to bring this back as a "suggestion" hint later, but it
+    // is no longer wired as a hard error.
 
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = t('auth.register.errors.confirmPasswordRequired');

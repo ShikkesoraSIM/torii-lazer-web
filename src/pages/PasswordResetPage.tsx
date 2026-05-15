@@ -80,9 +80,11 @@ const PasswordResetPage: React.FC = () => {
     if (password.length < 8) {
       return t('auth.passwordReset.errors.passwordMin');
     }
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      return t('auth.passwordReset.errors.passwordStrength');
-    }
+    // Strength check (upper + lower + digit) intentionally dropped to
+    // match the server's validate_password (8+ chars only). See the
+    // matching comment in RegisterPage.tsx for the full rationale —
+    // forcing users to change their password to a less memorable form
+    // when going through a reset flow was the worst time to do it.
     return null;
   };
 
