@@ -73,6 +73,35 @@ export const adminAPI = {
     return response.data;
   },
 
+  // Manually grant N months of supporter time to a user. Routes through
+  // the SAME `apply_supporter_grant` code path the Ko-fi webhook and the
+  // admin donation-match endpoint use, so the resulting supporter state
+  // (is_supporter / has_supported / donor_end_at / total_supporter_months
+  // / support_level) is identical to what a real donation would produce.
+  //
+  // Use this instead of trying to grant supporter via the `badge` field —
+  // adding a badge alone doesn't flip the supporter booleans the client
+  // checks for gating (e.g. the UI accent hue picker). The user must log
+  // out and back in for client-cached LocalUser to refetch and unlock
+  // those gated features.
+  grantSupporter: async (
+    userId: number,
+    body: { months: number; reason?: string },
+  ) => {
+    const response = await api.post(
+      `/api/private/admin/users/${userId}/grant-supporter`,
+      body,
+    );
+    return response.data as {
+      user_id: number;
+      username: string;
+      months_granted: number;
+      total_supporter_months: number;
+      donor_end_at: string | null;
+      is_currently_supporting: boolean;
+    };
+  },
+
   banUser: async (userId: number) => {
     const response = await api.post(`/api/private/admin/users/${userId}/ban`);
     return response.data;

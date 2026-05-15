@@ -83,6 +83,17 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, onClose }
   const [availableBadges, setAvailableBadges] = useState<any[]>([]);
   const [loadingBadges, setLoadingBadges] = useState(false);
 
+  // ─── Manual supporter grant ──────────────────────────────────────────
+  // Local state for the "Grant Supporter" sub-form. Kept separate from
+  // the main `formData` because the grant is its own POST (calls the
+  // dedicated /admin/users/{id}/grant-supporter endpoint) rather than
+  // riding the PATCH that the main Save Changes button does — adding
+  // months of supporter is a one-shot event, not a property being
+  // edited, so it has its own button + loading state.
+  const [grantMonths, setGrantMonths] = useState(1);
+  const [grantReason, setGrantReason] = useState('');
+  const [grantingSupporter, setGrantingSupporter] = useState(false);
+
   useEffect(() => {
     loadBadges();
   }, []);
@@ -165,6 +176,51 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, onClose }
       toast.error('Failed to remove badge');
     } finally {
       setLoadingBadges(false);
+    }
+  };
+
+  const handleGrantSupporter = async () => {
+    // Defensive clamp — the input has min/max already but a paste or
+    // a programmatic mutation could still slip something through.
+    const months = Math.max(1, Math.min(120, Math.floor(grantMonths)));
+    if (!Number.isFinite(months) || months < 1) {
+      toast.error('Months must be a positive integer.');
+      return;
+    }
+
+    // Explicit confirm because this is irreversible — the server does
+    // NOT expose an "ungrant" endpoint (reversing donor_end_at
+    // extensions / total_supporter_months decrements gets fiddly when
+    // multiple grants stack), and an accidental "comp 12 months" is
+    // way harder to walk back than to confirm here.
+    const ok = window.confirm(
+      `Grant ${months} month(s) of supporter to ${user.username}?\n\n`
+      + `This sets is_supporter = true, extends donor_end_at by ${months * 30} days, `
+      + `and increments total_supporter_months. It cannot be undone via the admin UI.`,
+    );
+    if (!ok) return;
+
+    try {
+      setGrantingSupporter(true);
+      const result = await adminAPI.grantSupporter(user.id, {
+        months,
+        reason: grantReason.trim() || undefined,
+      });
+      toast.success(
+        `Granted ${result.months_granted} month(s) to ${result.username}. `
+        + `Total supporter months: ${result.total_supporter_months}. `
+        + `User must log out + log in to see client-side gates unlock.`,
+        { duration: 6000 },
+      );
+      setGrantMonths(1);
+      setGrantReason('');
+    } catch (error: any) {
+      console.error('Failed to grant supporter:', error);
+      const detail = error?.response?.data?.detail;
+      const message = typeof detail === 'string' ? detail : 'Failed to grant supporter.';
+      toast.error(message);
+    } finally {
+      setGrantingSupporter(false);
     }
   };
 
@@ -420,6 +476,72 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, onClose }
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Award
+                </button>
+              </div>
+            </div>
+
+            {/* ── Grant Supporter ─────────────────────────────────────────────
+                Manual supporter grant — calls the dedicated
+                /admin/users/{id}/grant-supporter endpoint which routes
+                through `apply_supporter_grant`, the same function the
+                Ko-fi webhook and the donation match flow use. Adding
+                the Supporter badge alone (above, via "Manage Badges")
+                does NOT flip the supporter booleans the client checks
+                for feature gating — this section is the proper path.
+                Kept visually separate from "Save Changes" because the
+                grant has its own POST and is irreversible. */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Grant Supporter
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
+                Manually grant N months of supporter time. Sets <code className="text-pink-400">is_supporter</code> +{' '}
+                <code className="text-pink-400">has_supported</code>, extends{' '}
+                <code className="text-pink-400">donor_end_at</code> by 30×N days, and bumps the loyalty tier — identical
+                effect to a real Ko-fi donation match. The user must <strong>log out and log back in</strong> for the
+                client to refetch their <code className="text-pink-400">/me</code> cache and unlock supporter-gated
+                features (UI accent hue picker, etc.).
+              </p>
+
+              <div className="flex flex-wrap items-end gap-2">
+                <div className="w-24">
+                  <label className="block text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
+                    Months
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={120}
+                    value={grantMonths}
+                    onChange={(e) => {
+                      const parsed = parseInt(e.target.value, 10);
+                      setGrantMonths(Number.isFinite(parsed) ? Math.max(1, Math.min(120, parsed)) : 1);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    disabled={grantingSupporter}
+                  />
+                </div>
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
+                    Reason (optional, audit log only)
+                  </label>
+                  <input
+                    type="text"
+                    value={grantReason}
+                    onChange={(e) => setGrantReason(e.target.value)}
+                    placeholder="e.g. comp for Ko-fi outage / fix-up for botched match #123"
+                    maxLength={500}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    disabled={grantingSupporter}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleGrantSupporter}
+                  disabled={grantingSupporter}
+                  className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                >
+                  {grantingSupporter ? 'Granting…' : 'Grant'}
                 </button>
               </div>
             </div>
