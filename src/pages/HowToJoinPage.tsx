@@ -13,6 +13,15 @@ const SERVER_HOST = "lazer-api.shikkesora.com";
 const API_URL = "https://lazer-api.shikkesora.com";
 const WEBSITE_URL = "https://lazer.shikkesora.com";
 
+// localStorage key used to remember that the user explicitly acknowledged
+// the AuthlibInjector deprecation warning and asked to see the instructions
+// anyway (e.g. offline / advanced use cases). When this is set to "1" the
+// deprecated card + setup section render at full opacity instead of greyed
+// out. The deprecation BADGES (ribbon, "halted" pill, banner) stay regardless
+// so the user can never claim they weren't warned. Versioned suffix lets us
+// invalidate consent later if the wording / nature of the warning changes.
+const INJECTOR_ACK_STORAGE_KEY = "torii.injector.acknowledged.v1";
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function cx(...classes: Array<string | false | undefined | null>) {
@@ -276,31 +285,78 @@ export default function HowToJoinPage() {
   const toriiSetupRef = useRef<HTMLDivElement>(null);
   const injectorRef = useRef<HTMLDivElement>(null);
 
+  // Injector deprecation acknowledgment state. Three-state flow:
+  //   acknowledged=false, confirmOpen=false → "Show anyway" button visible
+  //   acknowledged=false, confirmOpen=true  → checkbox + confirm/cancel
+  //   acknowledged=true                     → instructions un-greyed, "Hide
+  //                                            again" button visible
+  // Persisted via localStorage so power users don't have to re-accept every
+  // visit. Hydrated client-side in the effect below (avoids hydration
+  // mismatch with the closed-by-default initial render).
+  const [injectorAcknowledged, setInjectorAcknowledged] = useState(false);
+  const [injectorConfirmOpen, setInjectorConfirmOpen] = useState(false);
+  const [injectorConfirmChecked, setInjectorConfirmChecked] = useState(false);
+
   useEffect(() => {
     const prev = document.body.style.background;
     const prevHtml = document.documentElement.style.background;
     document.body.style.background = "#030014";
     document.documentElement.style.background = "#030014";
+
+    // Hydrate the injector acknowledgment from localStorage on mount.
+    // Wrapped in try because localStorage can throw in strict privacy
+    // modes (Safari, some incognito flows).
+    try {
+      if (localStorage.getItem(INJECTOR_ACK_STORAGE_KEY) === "1") {
+        setInjectorAcknowledged(true);
+      }
+    } catch { /* localStorage unavailable, treat as not-acknowledged */ }
+
     return () => {
       document.body.style.background = prev;
       document.documentElement.style.background = prevHtml;
     };
   }, []);
 
+  const acknowledgeInjector = () => {
+    setInjectorAcknowledged(true);
+    setInjectorConfirmOpen(false);
+    setInjectorConfirmChecked(false);
+    try { localStorage.setItem(INJECTOR_ACK_STORAGE_KEY, "1"); } catch { /* no-op */ }
+  };
+
+  const revokeInjectorAcknowledgment = () => {
+    setInjectorAcknowledged(false);
+    setInjectorConfirmOpen(false);
+    setInjectorConfirmChecked(false);
+    try { localStorage.removeItem(INJECTOR_ACK_STORAGE_KEY); } catch { /* no-op */ }
+  };
+
   const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) =>
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#030014]">
-      {/* Background blobs */}
+      {/* Background blobs. Pushed well below the navbar area so they
+          never compete with it. The first blob now sits AT the hero
+          level (top-64) rather than spilling above. */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-56 -left-56 h-[640px] w-[640px] rounded-full bg-fuchsia-500/20 blur-[150px]" />
+        <div className="absolute top-64 -left-72 h-[560px] w-[560px] rounded-full bg-fuchsia-500/15 blur-[150px]" />
         <div className="absolute top-1/3 -right-56 h-[640px] w-[640px] rounded-full bg-violet-500/20 blur-[150px]" />
         <div className="absolute bottom-[-260px] left-1/3 h-[640px] w-[640px] rounded-full bg-sky-400/10 blur-[160px]" />
-        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#030014] via-[#030014]/80 to-transparent" />
+        {/* Top-fade mask: extended to h-64 (256px) and uses a smooth
+            3-stop gradient (opaque -> 60% opaque -> transparent) so
+            the boundary where the mask ends is no longer visible as a
+            hard horizontal line. Anything in the top 256px is mostly
+            opaque-dark, which fully hides the navbar's blob bleed. */}
+        <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#030014] via-[#030014]/95 to-transparent" />
       </div>
 
-      <div className="relative mx-auto max-w-6xl px-6 pb-32 pt-20 md:pt-24">
+      {/* Top padding tuned to clear the floating navbar (~70px) with
+          ~30-50px of breathing room. Earlier values were either too
+          tight (text squashed behind navbar) or too generous (huge
+          empty band before the hero). */}
+      <div className="relative mx-auto max-w-6xl px-6 pb-32 pt-24 md:pt-28">
 
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <motion.div
@@ -314,13 +370,128 @@ export default function HowToJoinPage() {
             <span>Play on Torii</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
-            Join the Torii server
+            Join Torii Server
           </h1>
           <p className="mx-auto max-w-2xl text-white/60 text-lg">
-            Pick a method. The{" "}
+            The{" "}
             <span className="text-fuchsia-300 font-medium">Torii osu! client</span>{" "}
-            is recommended — it comes with exclusive features and migrates your existing data automatically. The injector lets you use your current osu!lazer install instead.
+            is the recommended way to play. It comes with exclusive features and migrates your existing data automatically. The injector method is currently <span className="text-rose-300 font-medium">not advised</span> — see the notice below.
           </p>
+        </motion.div>
+
+        {/* ── AuthlibInjector deprecation notice (peppy statement) ──────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.05 }}
+          className="mb-10 rounded-3xl border-2 border-rose-400/60 bg-gradient-to-br from-rose-950/60 via-red-950/40 to-black/40 p-6 md:p-7 shadow-[0_0_60px_rgba(244,63,94,0.15)_inset]"
+          role="alert"
+        >
+          <div className="flex items-start gap-4">
+            <span className="text-3xl select-none" aria-hidden>⚠️</span>
+            <div className="flex-1">
+              <h2 className="text-lg md:text-xl font-bold text-rose-100 mb-2">
+                AuthlibInjector method — please stop using it for now
+              </h2>
+              <p className="text-sm md:text-base text-white/75 leading-relaxed mb-3">
+                <span className="font-semibold text-rose-200">peppy</span> (osu! lead) has stated that the AuthlibInjector method is <span className="font-semibold text-rose-200">not permitted</span> and may result in account action against users in the future. Until this is resolved, please <span className="font-semibold text-white">do not install or use the injector</span>.
+              </p>
+              <p className="text-sm md:text-base text-white/65 leading-relaxed mb-4">
+                If you want to play on Torii, use the{" "}
+                <span className="font-semibold text-fuchsia-200">Torii osu! client</span> instead — it's a separate client (not a modification of official osu!lazer), which is explicitly fine.
+              </p>
+
+              {/* When the injector is actually OK to use + responsibility disclaimer.
+                  Two cases the user wanted to spell out explicitly:
+                    1. Pure offline / sandbox usage where you'll NEVER log into the
+                       official osu! servers with the injected .dll installed.
+                    2. People who don't have an osu! account to worry about. */}
+              <div className="rounded-2xl border border-white/10 bg-black/30 p-4 mb-4">
+                <p className="text-xs md:text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
+                  When is it OK to keep using it?
+                </p>
+                <p className="text-sm text-white/65 leading-relaxed mb-3">
+                  Only if you will <span className="font-semibold text-white">never</span> log into the official osu! servers with the injected <code className="text-rose-200 bg-rose-500/10 rounded px-1 py-0.5">.dll</code> installed, <span className="font-semibold text-white">or</span> if you don't have an osu! account that you'd care about losing.
+                </p>
+                <p className="text-xs text-white/45 leading-relaxed">
+                  <span className="font-semibold text-rose-200/85">We accept no responsibility</span> if you ignore this disclaimer and your osu! account is actioned. You've been warned, in plain text, on the page you used to set this up.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <a
+                  href="https://github.com/Cai1Hsu/osu-plugins/issues/93"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-100 transition hover:border-rose-300/70 hover:bg-rose-500/20"
+                >
+                  <span>Read more on GitHub</span>
+                  <span aria-hidden>↗</span>
+                </a>
+
+                {/* Escape-hatch flow — three states. We HIDE the injector
+                    instructions by default (greyed out further down) because
+                    the warning above is real. But power users / advanced
+                    cases (offline / dev) can opt in via this checkbox flow
+                    to read the steps at full visibility. The opt-in
+                    persists across visits via localStorage. */}
+                {injectorAcknowledged ? (
+                  <button
+                    type="button"
+                    onClick={revokeInjectorAcknowledgment}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white/65 transition hover:border-white/25 hover:bg-white/10"
+                  >
+                    <span aria-hidden>✓</span>
+                    <span>Acknowledged — re-hide injector section</span>
+                  </button>
+                ) : injectorConfirmOpen ? null : (
+                  <button
+                    type="button"
+                    onClick={() => setInjectorConfirmOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-transparent px-4 py-2 text-sm font-medium text-white/55 transition hover:border-white/30 hover:text-white/75"
+                  >
+                    <span>I know what I'm doing — show me anyway</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Confirmation panel — appears under the buttons. Hard
+                  checkbox + literal acknowledgment text. The "Show
+                  anyway" button stays disabled until the user ticks the
+                  box, so this can't be a one-click oopsie. */}
+              {!injectorAcknowledged && injectorConfirmOpen && (
+                <div className="mt-5 rounded-2xl border-2 border-rose-400/50 bg-black/40 p-5">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={injectorConfirmChecked}
+                      onChange={e => setInjectorConfirmChecked(e.target.checked)}
+                      className="mt-1 h-5 w-5 shrink-0 cursor-pointer accent-rose-500"
+                    />
+                    <span className="text-sm md:text-base font-semibold text-rose-100 leading-snug uppercase tracking-wide">
+                      I understand this injector should NEVER be used online and that I take full responsibility for any consequences to my osu! account.
+                    </span>
+                  </label>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={acknowledgeInjector}
+                      disabled={!injectorConfirmChecked}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/60 bg-rose-500/20 px-4 py-2 text-sm font-semibold text-rose-100 transition hover:border-rose-300/80 hover:bg-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-rose-400/60 disabled:hover:bg-rose-500/20"
+                    >
+                      Show injector method
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setInjectorConfirmOpen(false); setInjectorConfirmChecked(false); }}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-transparent px-4 py-2 text-sm font-medium text-white/65 transition hover:border-white/30 hover:text-white"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </motion.div>
 
         {/* ── Two option cards ──────────────────────────────────────────── */}
@@ -352,12 +523,38 @@ export default function HowToJoinPage() {
               <div className="text-4xl select-none">🎌</div>
             </div>
 
+            {/* Ban-free callout — the headline reason to pick the Torii
+                client over the injector. Sits above the generic
+                description so it's the second thing the user reads
+                after the "Recommended" badge + title. Green so it
+                reads as the visual opposite of the red deprecation
+                banner above. */}
+            <div className="mb-5 rounded-2xl border border-emerald-400/30 bg-emerald-500/[0.08] p-4">
+              <div className="flex items-start gap-3">
+                <span className="text-xl select-none mt-0.5" aria-hidden>🛡️</span>
+                <div>
+                  <p className="text-sm font-bold text-emerald-200 mb-1">
+                    Ban-free — your osu! account is safe
+                  </p>
+                  <p className="text-xs text-emerald-100/75 leading-relaxed">
+                    The Torii client is a fully separate build that <span className="font-semibold text-emerald-100">cannot</span> connect to bancho — it talks only to Torii's own servers. Your official osu! account isn't touched, can't be matched against, and isn't at risk.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <p className="text-white/65 mb-6 leading-relaxed text-sm">
               A custom build of osu!lazer made for Torii. Comes with exclusive features and a setup wizard that automatically migrates your maps, skins, and settings from your existing osu! install — no starting from scratch.
             </p>
 
             {/* Feature pills */}
             <div className="flex flex-wrap gap-1.5 mb-6">
+              {/* Ban-free pill — same color treatment as the callout above
+                  so the "safe to use" message is reinforced in the quick-
+                  glance pill row too. */}
+              <span className="rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-200">
+                🛡️ Ban-free
+              </span>
               {["pp-dev calculations", "Daily briefing", "Custom UI hue", "Multi-server", "Mania Sunny rework", "CTB & Taiko RX leaderboards", "Zero-loss migration", "Unlimited FPS"].map(f => (
                 <span key={f} className="rounded-full border border-fuchsia-400/20 bg-fuchsia-500/5 px-2.5 py-1 text-xs text-fuchsia-200/75">{f}</span>
               ))}
@@ -376,52 +573,67 @@ export default function HowToJoinPage() {
             </div>
           </motion.div>
 
-          {/* Injector */}
+          {/* Injector — DEPRECATED per peppy statement, see banner above.
+              Greyed out by default; un-greyed when the user opts in via the
+              acknowledgment flow in the banner. Badges (DEPRECATED ribbon,
+              "Not advised" pill, line-through title) STAY in both states so
+              even the acknowledged user keeps seeing the warning context. */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.2 }}
             onClick={() => scrollTo(injectorRef)}
-            className="cursor-pointer rounded-3xl border border-white/8 bg-white/3 p-8 backdrop-blur transition hover:border-violet-400/30 hover:bg-white/5 group flex flex-col"
+            className={cx(
+              "relative cursor-pointer rounded-3xl border border-white/8 bg-white/[0.02] p-8 backdrop-blur transition group flex flex-col",
+              injectorAcknowledged
+                ? "hover:border-violet-400/30 hover:bg-white/5"
+                : "opacity-55 grayscale-[0.4] hover:opacity-70"
+            )}
             role="button"
             tabIndex={0}
             onKeyDown={e => { if (e.key === "Enter" || e.key === " ") scrollTo(injectorRef); }}
+            aria-label={injectorAcknowledged ? "Injector method — deprecated but acknowledged" : "Injector method — deprecated, see warning above"}
           >
+            {/* Diagonal DEPRECATED ribbon — sits in the top-right corner */}
+            <div className="pointer-events-none absolute top-4 right-4 rounded-md border border-rose-400/60 bg-rose-500/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-rose-100">
+              🚫 Deprecated
+            </div>
+
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-200 mb-3">
-                  Official-compatible
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/30 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-200 mb-3">
+                  ⚠️ Not advised — see notice above
                 </span>
-                <h2 className="text-2xl font-bold text-white leading-tight">
+                <h2 className="text-2xl font-bold text-white/75 leading-tight line-through decoration-rose-400/60 decoration-2">
                   Injector method
                 </h2>
               </div>
-              <div className="text-4xl select-none">💉</div>
+              <div className="text-4xl select-none opacity-50">💉</div>
             </div>
 
-            <p className="text-white/65 mb-6 leading-relaxed text-sm">
-              Use an auth injector with your current osu!lazer install. Your maps, skins, settings, and local scores stay exactly where they are. Works with official builds.
+            <p className="text-white/50 mb-6 leading-relaxed text-sm">
+              Used to patch auth into your existing osu!lazer install. <span className="text-rose-200/85">Currently halted</span> following peppy's statement that this method is not permitted and may result in account action.
             </p>
 
             <div className="rounded-2xl border border-white/8 bg-black/20 p-5 mb-6">
-              <p className="mb-3 text-sm font-semibold text-white">What you get</p>
-              <ul className="space-y-2 text-sm text-white/55">
-                <li>• Keeps all your existing maps, skins, settings & scores</li>
-                <li>• Works with the latest official osu!lazer builds</li>
-                <li>• Switch back to official servers any time</li>
+              <p className="mb-3 text-sm font-semibold text-white/70">Why not use it</p>
+              <ul className="space-y-2 text-sm text-white/45">
+                <li>• Risk of action against your osu! account per peppy</li>
+                <li>• Modifies an official client — explicitly not permitted</li>
+                <li>• Use the Torii osu! client (separate client) instead — it's fine</li>
               </ul>
             </div>
 
             <div className="mt-auto">
-              <div className="flex items-center justify-center gap-2 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm font-semibold text-white/80 transition group-hover:border-violet-400/25">
-                View setup steps ↓
+              <div className="flex items-center justify-center gap-2 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm font-semibold text-white/55 transition">
+                View (deprecated) setup steps ↓
               </div>
             </div>
           </motion.div>
         </div>
 
         {/* ── Features showcase ─────────────────────────────────────────── */}
-        <div ref={featuresRef} className="scroll-mt-24 mt-28">
+        <div ref={featuresRef} className="scroll-mt-32 mt-28">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -479,7 +691,7 @@ export default function HowToJoinPage() {
         </div>
 
         {/* ── Torii client setup ────────────────────────────────────────── */}
-        <div ref={toriiSetupRef} className="scroll-mt-24 mt-24">
+        <div ref={toriiSetupRef} className="scroll-mt-32 mt-24">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -561,8 +773,8 @@ export default function HowToJoinPage() {
           </motion.div>
         </div>
 
-        {/* ── Injector setup ────────────────────────────────────────────── */}
-        <div ref={injectorRef} className="scroll-mt-24 mt-24">
+        {/* ── Injector setup ── DEPRECATED per peppy statement ──────────── */}
+        <div ref={injectorRef} className={cx("scroll-mt-32 mt-24", !injectorAcknowledged && "opacity-70")}>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -570,14 +782,27 @@ export default function HowToJoinPage() {
             transition={{ duration: 0.4 }}
           >
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl select-none">💉</span>
-              <h3 className="text-3xl font-bold text-white">Injector method</h3>
+              <span className="text-3xl select-none opacity-50">💉</span>
+              <h3 className="text-3xl font-bold text-white/70 line-through decoration-rose-400/60 decoration-2">Injector method</h3>
+              <span className="rounded-md border border-rose-400/60 bg-rose-500/20 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-rose-100">
+                Deprecated
+              </span>
             </div>
-            <p className="text-white/45 mb-8 ml-12">Keep your existing osu!lazer. Works with official builds.</p>
+            <p className="text-white/40 mb-6 ml-12">Halted following peppy's statement — see notice above.</p>
 
-            <div className="rounded-3xl border border-white/8 bg-white/3 p-8 backdrop-blur">
+            {/* In-section repeat of the warning so users who deep-link or scroll-jump straight here can't miss it. */}
+            <div className="mb-8 rounded-2xl border-2 border-rose-400/60 bg-rose-950/40 p-5">
+              <p className="text-sm font-semibold text-rose-100 mb-1">⚠️ Do not follow these steps right now</p>
+              <p className="text-sm text-white/70 leading-relaxed">
+                peppy has stated that the AuthlibInjector method is not permitted and may result in account action. Use the{" "}
+                <span className="font-semibold text-fuchsia-200">Torii osu! client</span> instead.{" "}
+                <a href="https://github.com/Cai1Hsu/osu-plugins/issues/93" target="_blank" rel="noreferrer" className="text-rose-200 underline hover:text-rose-100">Read more</a>.
+              </p>
+            </div>
+
+            <div className={cx("rounded-3xl border border-white/8 bg-white/3 p-8 backdrop-blur", !injectorAcknowledged && "grayscale-[0.35]")}>
               <p className="text-white/55 mb-8 text-sm">
-                This patches auth into your existing osu!lazer so it connects to Torii. Your maps, skins, and settings stay exactly as they are. You'll set API + Website URLs in settings, then restart twice.
+                <span className="text-rose-200/85 font-medium">For reference only — do not follow.</span> This was previously the patch-auth-into-existing-osu!lazer flow. Set API + Website URLs in settings, then restart twice.
               </p>
 
               <ol className="space-y-10 text-white/70">
@@ -652,21 +877,31 @@ export default function HowToJoinPage() {
                 </li>
               </ol>
 
-              {/* Safety notice */}
-              <div className="mt-10 rounded-2xl border border-violet-400/20 bg-violet-500/8 p-6">
-                <p className="mb-2 text-sm font-semibold text-white">Account safety</p>
-                <p className="text-sm text-white/55">
-                  osu! explicitly permits custom rulesets and custom servers. This is simply osu!lazer connecting to a different server — your osu! account is not at risk. You can switch back to the official servers any time by clearing the fields and pressing Apply.
+              {/* Account safety — UPDATED. Replaces the previous "this is fine" notice.
+                  We were wrong about this method being safe; peppy clarified that it is
+                  not permitted because it modifies the official client. */}
+              <div className="mt-10 rounded-2xl border-2 border-rose-400/50 bg-rose-950/40 p-6">
+                <p className="mb-2 text-sm font-semibold text-rose-100">⚠️ Account safety — updated</p>
+                <p className="text-sm text-white/70 leading-relaxed mb-3">
+                  We previously told you this method was safe. That was wrong, and we're sorry. peppy has since clarified that the AuthlibInjector approach is not permitted because it modifies the official client — and may result in action against your osu! account in the future.
+                </p>
+                <p className="text-sm text-white/70 leading-relaxed">
+                  If you've already set this up, remove the injector and switch to the{" "}
+                  <span className="font-semibold text-fuchsia-200">Torii osu! client</span>{" "}
+                  (a separate client, not a modification — explicitly fine).{" "}
+                  <a href="https://github.com/Cai1Hsu/osu-plugins/issues/93" target="_blank" rel="noreferrer" className="text-rose-200 underline hover:text-rose-100">Background reading</a>.
                 </p>
               </div>
 
-              {/* Switch back */}
+              {/* Removal instructions — what was previously "Switch back to official osu!".
+                  Reframed: you should now actively undo the injector setup, not just leave it. */}
               <div className="mt-4 rounded-2xl border border-white/8 bg-black/20 p-6">
-                <p className="mb-2 text-sm font-semibold text-white">Switching back to official osu!</p>
-                <ol className="space-y-2 text-sm text-white/55">
-                  <li>1) Clear the API and Website fields (leave them empty)</li>
+                <p className="mb-2 text-sm font-semibold text-white">How to undo the injector setup</p>
+                <ol className="space-y-2 text-sm text-white/65">
+                  <li>1) In osu!lazer Settings → Rulesets, clear the API and Website fields (leave them empty)</li>
                   <li>2) Press Apply</li>
-                  <li>3) Restart osu!lazer</li>
+                  <li>3) Open your osu! folder → <code className="text-violet-200 bg-violet-500/10 rounded px-1.5 py-0.5">rulesets/</code> → delete the injector <code className="text-violet-200 bg-violet-500/10 rounded px-1.5 py-0.5">.dll</code></li>
+                  <li>4) Restart osu!lazer</li>
                 </ol>
               </div>
             </div>
