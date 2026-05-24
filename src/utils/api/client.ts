@@ -23,10 +23,28 @@ const clearAuthCache = () => {
   }
 };
 
+// IMPORTANT: do NOT hardcode `Content-Type` in the global defaults. axios
+// v1's `transformRequest` uses `setContentTypeIfUnset` -- a no-op when the
+// header is already set -- so any default we put here LEAKS into FormData
+// requests and the multipart auto-detection never fires. FastAPI then sees
+// application/json on what is actually a multipart body, can't parse any
+// of the fields, and returns 422 with "Field required" on every required
+// form field. Symptom: team creation (and any other multipart endpoint)
+// quietly broken for everyone.
+//
+// Removing the default is safe because axios auto-derives the right header
+// per body type: plain objects -> application/json, FormData -> multipart/
+// form-data; boundary=..., URLSearchParams -> application/x-www-form-
+// urlencoded. The only case axios DOESN'T auto-set is raw-string bodies,
+// and we don't have any of those (verified via grep on the codebase).
+//
+// The May 8 fix dropped the per-call override in teamsAPI.createTeam et al.
+// That fixed image-bearing edits because the runtime's File handling
+// re-derives the boundary, but text-only edits and small multipart bodies
+// still rode the global default. This removes the root cause.
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
     'x-api-version': '20250913',
   },
   withCredentials: false, // 确保不发送cookies避免CORS问题
