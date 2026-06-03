@@ -16,6 +16,34 @@ export interface RecalcTask {
   stdout_tail: string;
 }
 
+export interface ManualSubmitPreview {
+  can_submit: boolean;
+  player_name: string;
+  mode: string;
+  total_score: number;
+  max_combo: number;
+  accuracy: number;
+  mods: string[];
+  played_at: string;
+  counts: { great: number; ok: number; meh: number; miss: number; geki: number; katu: number };
+  resolved_user: { id: number; username: string } | null;
+  resolved_beatmap: { id: number; version: string; status: string } | null;
+  warnings: string[];
+}
+
+export interface ManualSubmitResult {
+  score_id: number;
+  user_id: number;
+  username: string;
+  beatmap_id: number;
+  beatmap_version: string;
+  accuracy: number;
+  rank: string;
+  total_score: number;
+  mods: string[];
+  new_global_rank: number | null;
+}
+
 export const adminAPI = {
   // Statistics
   getStats: async () => {
@@ -54,6 +82,20 @@ export const adminAPI = {
       pending_count: number;
       recent: RecalcTask[];
     };
+  },
+
+  // Manual score submission — upload a player's .osr and land the play.
+  // Preview is a dry-run (parse + resolve, no writes); commit inserts it.
+  // FormData fields: `replay` (the .osr File) + optional `user_id`. Do NOT
+  // set Content-Type — axios derives multipart/form-data from the FormData.
+  manualSubmitPreview: async (formData: FormData) => {
+    const response = await api.post('/api/private/admin/manual-submit/preview', formData);
+    return response.data as ManualSubmitPreview;
+  },
+
+  manualSubmitCommit: async (formData: FormData) => {
+    const response = await api.post('/api/private/admin/manual-submit/commit', formData);
+    return response.data as ManualSubmitResult;
   },
 
   getUser: async (userId: number) => {

@@ -19,6 +19,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { api } from '../../utils/api/client';
 import AdminUserRecalcSection from './AdminUserRecalcSection';
+import AdminManualSubmitSection from './AdminManualSubmitSection';
 
 interface MaintenanceState {
   enabled: boolean;
@@ -206,6 +207,13 @@ const AdminMaintenance: React.FC = () => {
         later if the page grows.
       */}
       <AdminUserRecalcSection />
+
+      {/*
+        Manual score submission lives here too — same "operational recovery"
+        family as the recalc tool above. An admin uploads a player's .osr to
+        honour a play whose live submission was lost.
+      */}
+      <AdminManualSubmitSection />
     </div>
   );
 };
