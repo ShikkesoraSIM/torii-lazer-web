@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUser, FiLogOut, FiSettings, FiChevronDown, FiChevronRight, FiCheck } from 'react-icons/fi';
+import { FiUser, FiUsers, FiLogOut, FiSettings, FiChevronDown, FiChevronRight, FiCheck } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import Avatar from './Avatar';
 import type { User } from '../../types';
@@ -176,7 +176,14 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
                 label={t('nav.profile')}
                 onClick={handleMenuItemClick}
               />
-              
+
+              <DropdownItem
+                to="/friends"
+                icon={FiUsers}
+                label={t('nav.friends')}
+                onClick={handleMenuItemClick}
+              />
+
               <DropdownItem
                 to="/settings"
                 icon={FiSettings}

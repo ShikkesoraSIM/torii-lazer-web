@@ -30,15 +30,13 @@ const FriendsPage: React.FC = () => {
   const [followers, setFollowers] = useState<FriendRelation[]>([]);
   const [following, setFollowing] = useState<FriendRelation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      setLoading(false);
-      return;
-    }
     let cancelled = false;
     (async () => {
       setLoading(true);
+      setError(null);
       try {
         // Both lists are small; fetch once and derive every tab client-side
         // so switching tabs is instant.
@@ -50,8 +48,11 @@ const FriendsPage: React.FC = () => {
           setFollowers(Array.isArray(incoming) ? incoming : []);
           setFollowing(Array.isArray(outgoing) ? outgoing : []);
         }
-      } catch (err) {
-        if (!cancelled) handleApiError(err);
+      } catch (err: any) {
+        if (!cancelled) {
+          setError(err?.response?.data?.detail || err?.message || 'Failed to load friends');
+          handleApiError(err);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -59,6 +60,8 @@ const FriendsPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
+    // Refetch when auth resolves — on a hard refresh the token may not be
+    // ready on the first mount, so don't silently bail when unauthenticated.
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -114,6 +117,11 @@ const FriendsPage: React.FC = () => {
             <div className="flex flex-col items-center justify-center py-16">
               <LoadingSpinner size="lg" className="mb-4" />
               <p className="text-gray-500 dark:text-gray-400 font-medium">{t('common.loading')}</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Users className="w-12 h-12 text-red-400/60 mb-3" />
+              <p className="text-red-300 font-medium">{error}</p>
             </div>
           ) : list.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">

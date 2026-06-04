@@ -17,7 +17,6 @@ import {
   BarChart3,
   Disc3,
   Users2,
-  UserPlus,
   Shield,
   Wrench,
 } from 'lucide-react';
@@ -407,7 +406,6 @@ const Navbar: React.FC = () => {
       { path: '/rankings', title: t('nav.rankings'), icon: BarChart3, requireAuth: true },
       { path: '/beatmaps', title: t('nav.beatmaps'), icon: Disc3, requireAuth: true },
       { path: '/teams', title: t('nav.teams'), icon: Users2, requireAuth: true },
-      { path: '/friends', title: t('nav.friends'), icon: UserPlus, requireAuth: true },
       { path: '/admin', title: 'Admin', icon: Shield, requireAuth: true, requireAdmin: true },
       { path: '/how-to-join', title: t('nav.join'), icon: Wrench },
     ],
