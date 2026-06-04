@@ -11,17 +11,21 @@ export const settingsPage = {
       current: 'Current Username',
       change: 'Change Username',
       placeholder: 'Enter new username',
-      hint: 'After changing your username, your old username will be saved in history',
-      save: 'Save',
-      saving: 'Saving...',
+      hint: 'Username changes are reviewed by an admin before they take effect. Your old username is kept in your history.',
+      save: 'Submit request',
+      saving: 'Submitting...',
       cancel: 'Cancel',
       success: 'Username changed successfully!',
+      requestSubmitted: 'Username change requested — pending admin review.',
+      pendingReview: 'Pending review',
+      pendingDesc: 'Your request to change to "{{name}}" is awaiting admin review.',
       errors: {
         empty: 'Username cannot be empty',
         sameAsOld: 'New username is the same as current username',
         taken: 'Username is taken, please choose another one',
         userNotFound: 'User not found',
-        failed: 'Failed to change username, please try again later'
+        alreadyPending: 'You already have a pending username change request.',
+        failed: 'Failed to submit request, please try again later'
       }
     },
     avatar: {

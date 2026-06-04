@@ -44,6 +44,46 @@ export interface ManualSubmitResult {
   new_global_rank: number | null;
 }
 
+export interface UsernameChangeRequest {
+  id: number;
+  user_id: number;
+  username: string | null;
+  avatar_url: string | null;
+  current_username: string;
+  requested_username: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reject_reason: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+  reviewed_by_id: number | null;
+}
+
+export interface UsernameChangeRequestList {
+  total: number;
+  page: number;
+  per_page: number;
+  requests: UsernameChangeRequest[];
+}
+
+export interface ProfileMediaReview {
+  id: number;
+  user_id: number;
+  username: string | null;
+  media_type: 'avatar' | 'cover';
+  url: string;
+  status: 'pending' | 'revoked' | 'resolved';
+  is_current: boolean;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
+export interface ProfileMediaReviewList {
+  total: number;
+  page: number;
+  per_page: number;
+  items: ProfileMediaReview[];
+}
+
 export const adminAPI = {
   // Statistics
   getStats: async () => {
@@ -790,6 +830,51 @@ export const adminAPI = {
   getAnticheatBulkJob: async (jobId: string) => {
     const response = await api.get(`/api/private/admin/anticheat/reanalyze-jobs/${jobId}`);
     return response.data as AnticheatBulkJob;
+  },
+
+  // ─── Username change requests ──────────────────────────────────────
+  // Renames are no longer instant: users submit a request and an admin
+  // approves/rejects it here. Approval applies the rename server-side.
+  listUsernameChangeRequests: async (params?: {
+    status?: string;
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }) => {
+    const response = await api.get('/api/private/admin/username-change-requests', { params });
+    return response.data as UsernameChangeRequestList;
+  },
+
+  approveUsernameChangeRequest: async (requestId: number) => {
+    const response = await api.post(`/api/private/admin/username-change-requests/${requestId}/approve`);
+    return response.data as UsernameChangeRequest;
+  },
+
+  rejectUsernameChangeRequest: async (requestId: number, reason?: string) => {
+    const response = await api.post(
+      `/api/private/admin/username-change-requests/${requestId}/reject`,
+      { reason: reason ?? null },
+    );
+    return response.data as UsernameChangeRequest;
+  },
+
+  // ─── NSFW profile media review ─────────────────────────────────────
+  // Feed of avatar/banner uploads the user flagged NSFW. Admins monitor
+  // the queue and revoke anything over the top (revoke resets the media
+  // to the default and deletes the file).
+  listProfileMediaReviews: async (params?: {
+    status?: string;
+    media_type?: string;
+    page?: number;
+    per_page?: number;
+  }) => {
+    const response = await api.get('/api/private/admin/profile-media-reviews', { params });
+    return response.data as ProfileMediaReviewList;
+  },
+
+  revokeProfileMedia: async (reviewId: number) => {
+    const response = await api.post(`/api/private/admin/profile-media-reviews/${reviewId}/revoke`);
+    return response.data as ProfileMediaReview;
   },
 };
 

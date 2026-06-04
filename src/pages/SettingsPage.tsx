@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { userAPI, type TOTPStatus } from '../utils/api';
+import { userAPI, type TOTPStatus, type PendingUsernameChange } from '../utils/api';
 import EditableCover from '../components/UI/EditableCover';
 import Avatar from '../components/UI/Avatar';
 import AvatarUpload from '../components/UI/AvatarUpload';
@@ -25,6 +25,7 @@ const SettingsPage: React.FC = () => {
   const [newUsername, setNewUsername] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState<PendingUsernameChange | null>(null);
   
   // TOTP 相关状态
   const [totpStatus, setTotpStatus] = useState<TOTPStatus | null>(null);
@@ -58,10 +59,21 @@ const SettingsPage: React.FC = () => {
     toast.success(t('settings.totp.disableSuccess'));
   };
 
+  // 获取当前用户待审核的用户名修改申请（若有）
+  const fetchPendingUsernameRequest = async () => {
+    try {
+      const req = await userAPI.getUsernameChangeRequest();
+      setPendingRequest(req);
+    } catch (error) {
+      console.error('获取用户名修改申请失败:', error);
+    }
+  };
+
   // 初始化时获取TOTP状态
   useEffect(() => {
     if (isAuthenticated && user) {
       fetchTotpStatus();
+      fetchPendingUsernameRequest();
     }
   }, [isAuthenticated, user]);
 
@@ -131,23 +143,25 @@ const SettingsPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await userAPI.rename(newUsername.trim());
-      
-      toast.success(t('settings.username.success'));
+      const req = await userAPI.rename(newUsername.trim());
+
+      setPendingRequest(req);
+      toast.success(t('settings.username.requestSubmitted'));
       setIsEditing(false);
       setNewUsername('');
-      
-      // 延迟刷新用户信息，避免立即刷新导致头像缓存问题
-      setTimeout(async () => {
-        await refreshUser();
-      }, 1000);
     } catch (error) {
-      console.error('修改用户名失败:', error);
-      const err = error as { response?: { status?: number } };
-      if (err.response?.status === 409) {
-        toast.error(t('settings.username.errors.taken'));
-      } else if (err.response?.status === 404) {
+      console.error('申请修改用户名失败:', error);
+      const err = error as { status?: number; message?: string };
+      if (err.status === 409) {
+        if (err.message && /pending/i.test(err.message)) {
+          toast.error(t('settings.username.errors.alreadyPending'));
+        } else {
+          toast.error(t('settings.username.errors.taken'));
+        }
+      } else if (err.status === 404) {
         toast.error(t('settings.username.errors.userNotFound'));
+      } else if (err.status === 403) {
+        toast.error(err.message || t('settings.username.errors.failed'));
       } else {
         toast.error(t('settings.username.errors.failed'));
       }
@@ -203,16 +217,30 @@ const SettingsPage: React.FC = () => {
               {t('settings.username.current')}
             </label>
             {!isEditing ? (
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-medium text-gray-900 dark:text-white">
-                  {user.username}
-                </span>
-                <button
-                  onClick={handleStartEdit}
-                  className="btn-secondary !px-4 !py-2 text-sm"
-                >
-                  {t('settings.username.change')}
-                </button>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium text-gray-900 dark:text-white">
+                    {user.username}
+                  </span>
+                  {!pendingRequest && (
+                    <button
+                      onClick={handleStartEdit}
+                      className="btn-secondary !px-4 !py-2 text-sm"
+                    >
+                      {t('settings.username.change')}
+                    </button>
+                  )}
+                </div>
+                {pendingRequest && (
+                  <div className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm">
+                    <div className="font-semibold text-amber-600 dark:text-amber-300">
+                      {t('settings.username.pendingReview')}
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-300 mt-0.5">
+                      {t('settings.username.pendingDesc', { name: pendingRequest.requested_username })}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-4">

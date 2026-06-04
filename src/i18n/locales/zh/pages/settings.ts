@@ -11,17 +11,21 @@ export const settingsPage = {
       current: '当前用户名',
       change: '修改用户名',
       placeholder: '输入新的用户名',
-      hint: '用户名修改后，您的原用户名将保存在历史记录中',
-      save: '保存',
-      saving: '保存中...',
+      hint: '用户名修改需经管理员审核后生效，您的原用户名将保存在历史记录中',
+      save: '提交申请',
+      saving: '提交中...',
       cancel: '取消',
       success: '用户名修改成功！',
+      requestSubmitted: '已提交用户名修改申请，等待管理员审核。',
+      pendingReview: '等待审核',
+      pendingDesc: '您修改为“{{name}}”的申请正在等待管理员审核。',
       errors: {
         empty: '用户名不能为空',
         sameAsOld: '新用户名与当前用户名相同',
         taken: '用户名已被占用，请选择其他用户名',
         userNotFound: '找不到指定用户',
-        failed: '修改用户名失败，请稍后重试'
+        alreadyPending: '您已有一条待审核的用户名修改申请。',
+        failed: '提交申请失败，请稍后重试'
       }
     },
     avatar: {

@@ -16,6 +16,18 @@ export interface TOTPCreateStart {
 export type TOTPBackupCodes = string[];
 export type UserBeatmapsetType = 'ranked' | 'pending' | 'loved' | 'graveyard';
 
+// A username change is no longer applied instantly: submitting one creates a
+// pending request that an admin reviews. This is what /rename now returns and
+// what the settings page polls to show pending state.
+export interface PendingUsernameChange {
+  id: number;
+  current_username: string;
+  requested_username: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  reject_reason: string | null;
+}
+
 export const userAPI = {
   getMe: async (ruleset?: string) => {
     const url = ruleset ? `/api/v2/me/${ruleset}` : '/api/v2/me/';
@@ -85,8 +97,10 @@ export const userAPI = {
     return result;
   },
 
-  rename: async (newUsername: string) => {
-    console.log('重命名用户名:', newUsername);
+  // Submit a username change request for admin review. Does NOT rename
+  // immediately — the resolved request is applied by an admin from the panel.
+  rename: async (newUsername: string): Promise<PendingUsernameChange> => {
+    console.log('申请修改用户名:', newUsername);
 
     const token = localStorage.getItem('access_token');
     if (!token) {
@@ -109,13 +123,23 @@ export const userAPI = {
       } catch {
         errorData = await response.text();
       }
-      console.error('重命名失败响应:', errorData);
-      throw new Error(errorData?.detail || errorData?.message || `HTTP ${response.status}`);
+      console.error('用户名修改申请失败响应:', errorData);
+      const err = new Error(errorData?.detail || errorData?.message || `HTTP ${response.status}`) as Error & {
+        status?: number;
+      };
+      err.status = response.status;
+      throw err;
     }
 
     const result = await response.json();
-    console.log('重命名响应:', result);
-    return result;
+    console.log('用户名修改申请响应:', result);
+    return result as PendingUsernameChange;
+  },
+
+  // Returns the current user's pending username change request, or null.
+  getUsernameChangeRequest: async (): Promise<PendingUsernameChange | null> => {
+    const response = await api.get('/api/private/username-change-request');
+    return (response.data as PendingUsernameChange | null) ?? null;
   },
 
   uploadCover: async (imageFile: File | Blob, isNsfw: boolean = false) => {
