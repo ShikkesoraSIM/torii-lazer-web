@@ -31,6 +31,7 @@ const TeamsPage = lazy(() => import('./pages/TeamsPage'));
 const TeamDetailPage = lazy(() => import('./pages/TeamDetailPage'));
 const CreateTeamPage = lazy(() => import('./pages/CreateTeamPage'));
 const MessagesPage = lazy(() => import('./pages/MessagesPage'));
+const FriendsPage = lazy(() => import('./pages/FriendsPage'));
 const HowToJoinPage = lazy(() => import('./pages/HowToJoinPage'));
 const BeatmapPage = lazy(() => import('./pages/BeatmapPage'));
 const BeatmapsPage = lazy(() => import('./pages/BeatmapsPage'));
@@ -77,6 +78,7 @@ function App() {
                     <Route path="teams/:teamId" element={<TeamDetailPage />} />
                     <Route path="teams/:teamId/edit" element={<CreateTeamPage />} />
                     <Route path="messages" element={<MessagesPage />} />
+                    <Route path="friends" element={<FriendsPage />} />
                     <Route path="how-to-join" element={<HowToJoinPage />} />
                     <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
                     <Route path="beatmaps/:beatmapId" element={<BeatmapPage />} />

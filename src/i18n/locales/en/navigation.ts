@@ -3,6 +3,7 @@ export const navigation = {
   rankings: 'Rankings',
   beatmaps: 'Beatmaps',
   teams: 'Teams',
+  friends: 'Friends',
   messages: 'Messages',
   profile: 'Profile',
   join: 'Join Server',

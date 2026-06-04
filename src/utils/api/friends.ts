@@ -73,8 +73,8 @@ export const friendsAPI = {
     }
   },
 
-  getUserFollowers: async (userId: number) => {
-    const response = await api.get(`/api/v2/relationship/followers/${userId}`);
+  getFollowers: async () => {
+    const response = await api.get('/api/v2/followers');
     return response.data;
   },
 
