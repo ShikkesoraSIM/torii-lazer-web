@@ -14,7 +14,6 @@ import {
   FiLogOut,
 } from 'react-icons/fi';
 import {
-  House,
   BarChart3,
   Disc3,
   Users2,
@@ -405,7 +404,6 @@ const Navbar: React.FC = () => {
 
   const navItems: NavItemType[] = React.useMemo(
     () => [
-      { path: '/', title: t('nav.home'), icon: House },
       { path: '/rankings', title: t('nav.rankings'), icon: BarChart3, requireAuth: true },
       { path: '/beatmaps', title: t('nav.beatmaps'), icon: Disc3, requireAuth: true },
       { path: '/teams', title: t('nav.teams'), icon: Users2, requireAuth: true },
@@ -445,7 +443,7 @@ const Navbar: React.FC = () => {
           >
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
               <div className="flex items-center justify-start">
-                <Link to="/" className="flex items-center gap-3">
+                <Link to="/" title={t('nav.home')} className="flex items-center gap-3">
                   <BrandMark size={36} />
 
                   <div className="leading-tight">
