@@ -257,8 +257,8 @@
 :root {
   /* Cambiamos el tono base a uno más violeta (270-280) en lugar de rosa (340) */
   --hue: 275; 
-  --profile-color: #8a2be2; /* Tu BlueViolet */
-  --osu-pink: #8a2be2;
+  --profile-color: #ED8EA6;
+  --osu-pink: #ED8EA6;
   
   /* Fondos inspirados en tu #030014 */
   --page-bg: #030014;
@@ -340,7 +340,7 @@
   
   /* 深色模式专用颜色 */
   /* --osu-pink: var(--profile-color, #ED8EA6); */
-  --osu-pink: #ff007f;
+  --osu-pink: #ED8EA6;
   --profile-color: #ED8EA6;
 }
 
@@ -1357,4 +1357,47 @@ textarea {
   -webkit-user-select: text !important;
   -moz-user-select: text !important;
   user-select: text !important;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Torii design-system utilities (canonical glass materials + a11y)
+   Use these instead of ad-hoc backdrop-blur / shadow values so the glass
+   language stays consistent. Three materials only: thin / regular / thick.
+   ─────────────────────────────────────────────────────────────────────────── */
+.glass-thin {
+  background: rgba(18, 18, 32, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px) saturate(125%);
+  -webkit-backdrop-filter: blur(10px) saturate(125%);
+}
+.glass {
+  background: rgba(18, 18, 32, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.glass-thick {
+  background: rgba(16, 16, 28, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Canonical brand gradient (one source of truth; was duplicated as hex + rgba). */
+.text-gradient-brand {
+  background-image: linear-gradient(135deg, #c084fc 0%, #ff5bbd 50%, #ff7a18 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Global keyboard focus ring. Components strip outlines with `outline-none` for
+   the mouse; this guarantees keyboard users always get a visible ring (WCAG
+   2.4.7) without affecting mouse interaction. */
+:focus-visible {
+  outline: 2px solid var(--osu-pink, #ed8ea6);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { createPortal } from 'react-dom';
+import Dialog from './Dialog';
+import Button from './Button';
 
 interface ConfirmationDialogProps {
   isOpen: boolean;
@@ -14,6 +15,11 @@ interface ConfirmationDialogProps {
   isDanger?: boolean;
 }
 
+/**
+ * Destructive/confirm dialog. Now built on the shared <Dialog> primitive, so it
+ * has a focus trap, Escape-to-close and scroll-lock (the old hand-rolled portal
+ * had none), and uses the shared <Button> for consistent affordances.
+ */
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   isOpen,
   title,
@@ -25,57 +31,23 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   onCancel,
   onSecondary,
   isDanger = false,
-}) => {
-  if (!isOpen) {
-    return null;
-  }
-
-  return createPortal(
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-black/75 p-4"
-      style={{ zIndex: 1000001 }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onCancel();
-        }
-      }}
-    >
-      <div className="w-full max-w-md rounded-xl border border-white/10 bg-card p-5 shadow-2xl">
-        <h4 className="text-base font-semibold text-white">{title}</h4>
-        <p className="mt-2 text-sm text-gray-300">{message}</p>
-        <div className="mt-5 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-lg border border-white/15 bg-slate-700/30 px-3 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-white/30"
-          >
-            {cancelLabel}
-          </button>
-          {secondaryLabel && onSecondary && (
-            <button
-              type="button"
-              onClick={onSecondary}
-              className="rounded-lg border border-white/15 bg-slate-700/30 px-3 py-2 text-sm font-semibold text-slate-100 transition-colors hover:border-white/30"
-            >
-              {secondaryLabel}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onConfirm}
-            className={`rounded-lg px-3 py-2 text-sm font-semibold text-white transition-colors ${
-              isDanger
-                ? 'bg-red-600 hover:bg-red-500'
-                : 'bg-osu-pink hover:bg-osu-pink/90'
-            }`}
-          >
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-};
+}) => (
+  <Dialog open={isOpen} onClose={onCancel} title={title}>
+    <p className="text-sm text-white/70">{message}</p>
+    <div className="mt-5 flex justify-end gap-2">
+      <Button variant="secondary" size="sm" onClick={onCancel}>
+        {cancelLabel}
+      </Button>
+      {secondaryLabel && onSecondary && (
+        <Button variant="secondary" size="sm" onClick={onSecondary}>
+          {secondaryLabel}
+        </Button>
+      )}
+      <Button variant={isDanger ? 'danger' : 'primary'} size="sm" onClick={onConfirm}>
+        {confirmLabel}
+      </Button>
+    </div>
+  </Dialog>
+);
 
 export default ConfirmationDialog;

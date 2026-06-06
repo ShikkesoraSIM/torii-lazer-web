@@ -80,6 +80,31 @@ export default {
         body: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
         sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'], // default
       },
+      // --- Torii design tokens (semantic scales) -------------------------
+      // Use these instead of arbitrary values so the UI stays consistent:
+      //   text-3xs/2xs  for 10/11px labels (was text-[10px]/[11px])
+      //   shadow-elev-1..4 + shadow-glow-accent  for elevation (was shadow-[...])
+      //   duration-fast/base/slow + ease-torii   for motion
+      fontSize: {
+        '3xs': ['0.625rem', { lineHeight: '0.85rem' }], // 10px
+        '2xs': ['0.6875rem', { lineHeight: '0.95rem' }], // 11px
+      },
+      boxShadow: {
+        'elev-1': '0 1px 2px rgba(0,0,0,0.30), 0 4px 12px rgba(0,0,0,0.22)',
+        'elev-2': '0 6px 20px rgba(0,0,0,0.30)',
+        'elev-3': '0 14px 42px rgba(0,0,0,0.35)',
+        'elev-4': '0 24px 70px rgba(0,0,0,0.45)',
+        'glow-accent': '0 0 24px rgba(237,142,166,0.35)',
+      },
+      transitionTimingFunction: {
+        torii: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'torii-spring': 'cubic-bezier(0.32, 0.72, 0, 1)',
+      },
+      transitionDuration: {
+        fast: '120ms',
+        base: '200ms',
+        slow: '320ms',
+      },
     },
   },
   plugins: [],
