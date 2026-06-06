@@ -1401,3 +1401,56 @@ textarea {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   PERFORMANCE MODE  (html.perf-mode)
+   backdrop-filter: blur() is the single most expensive thing on the page, and
+   when the browser has hardware acceleration OFF it's done on the CPU -> the
+   whole site crawls. perf-mode drops ALL blur and makes the now-unfrosted
+   surfaces opaque enough to stay readable. It's auto-enabled (see the inline
+   script in index.html) when the GPU is doing software rendering (HW accel off)
+   or the user prefers reduced transparency. Can be forced via
+   localStorage 'torii-perf-mode' = '1' (on) / '0' (off).
+   ─────────────────────────────────────────────────────────────────────────── */
+html.perf-mode *,
+html.perf-mode *::before,
+html.perf-mode *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Make the glass surfaces opaque (the blur is gone, so translucency over busy
+   content would hurt readability). Keeps the bluish tint, just solid. */
+html.perf-mode {
+  --torii-surface: linear-gradient(165deg, #181d44, #0e1234);
+  --torii-surface-soft: linear-gradient(165deg, #141838, #0c1030);
+  --torii-nav-surface: linear-gradient(180deg, #141845, #0b0f30);
+  --torii-panel-bg: linear-gradient(165deg, #161b40, #0d1132);
+  --torii-panel-soft-bg: linear-gradient(165deg, #131737, #0b0e2c);
+  --card-bg: #15161f;
+  --card-bg-hover: #1b1c27;
+  --float-panel-bg: #0f1330;
+  --navbar-bg: #11153a;
+}
+
+html.perf-mode .glass,
+html.perf-mode .glass-thin {
+  background: #14163a !important;
+}
+html.perf-mode .glass-thick {
+  background: #0f1230 !important;
+}
+html.perf-mode .mm-glass,
+html.perf-mode .mm-glass-pop,
+html.perf-mode .mm-glass-inset,
+html.perf-mode .glass-morphism,
+html.perf-mode .profile-glass,
+html.perf-mode .glass-effect {
+  background: #141833 !important;
+}
+
+/* Also calm down the heavy fixed background blobs in perf-mode (large radial
+   gradients are cheap, but drop a layer to reduce overdraw). */
+html.perf-mode .torii-app-shell::before {
+  background: linear-gradient(180deg, #030014 0%, #050a24 45%, #04081d 100%);
+}

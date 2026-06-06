@@ -96,7 +96,7 @@ const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beat
 
     if (coverCandidates.length === 0) {
       return (
-        <div className="rounded-lg border border-slate-200/80 dark:border-white/10 px-3 py-2 bg-white/70 dark:bg-slate-900/45">
+        <div className="glass-thin rounded-lg px-3 py-2">
           {content}
         </div>
       );

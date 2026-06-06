@@ -136,7 +136,7 @@ const ScoreActionsMenu: React.FC<ScoreActionsMenuProps> = ({
               ref={refs.setFloating}
               style={floatingStyles}
               {...getFloatingProps()}
-              className="w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[9999]"
+              className="w-48 glass-thick rounded-lg overflow-hidden z-[9999]"
             >
               <button
                 onClick={handleTogglePin}

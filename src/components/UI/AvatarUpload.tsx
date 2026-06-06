@@ -155,7 +155,9 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -169,7 +171,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       }}
     >
       <div
-        className="bg-card rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden"
+        className="glass-thick rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden"
         style={{ minHeight: '400px' }}
       >
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">

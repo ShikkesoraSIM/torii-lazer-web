@@ -402,7 +402,7 @@ const FriendActions: React.FC<FriendActionsProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -5 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="mt-10 w-48 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 overflow-hidden focus:outline-none z-[9999]"
+            className="mt-10 w-48 glass-thick rounded-xl py-1 overflow-hidden focus:outline-none z-[9999]"
           >
             {menuItems.map((item) => (
               <button

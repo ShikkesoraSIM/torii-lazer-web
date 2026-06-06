@@ -11,6 +11,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Performance mode: when the GPU is doing software rendering (browser
+         hardware acceleration is OFF) or the user prefers reduced transparency,
+         drop the expensive backdrop-blur glass. Runs before paint so there's no
+         flash. Force with localStorage 'torii-perf-mode' = '1' (on) / '0' (off). -->
+    <script>
+      (function () {
+        try {
+          var d = document.documentElement;
+          var forced = localStorage.getItem('torii-perf-mode');
+          if (forced === '1') { d.classList.add('perf-mode'); return; }
+          if (forced === '0') { return; }
+          var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-transparency: reduce)').matches;
+          var soft = false;
+          try {
+            var c = document.createElement('canvas');
+            var gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+            if (!gl) {
+              soft = true;
+            } else {
+              var ext = gl.getExtension('WEBGL_debug_renderer_info');
+              var r = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : (gl.getParameter(gl.RENDERER) || '');
+              soft = /swiftshader|llvmpipe|software|basic render|microsoft basic/i.test(String(r));
+            }
+          } catch (e) { /* webgl probe failed; leave soft=false */ }
+          if (reduce || soft) { d.classList.add('perf-mode'); }
+        } catch (e) { /* never block render on this */ }
+      })();
+    </script>
+
     <title>Torii - osu!lazer Private Server by Shikkesora</title>
     <meta
       name="description"

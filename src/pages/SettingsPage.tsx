@@ -564,7 +564,7 @@ const SettingsPage: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('settings.account.userId')}
             </label>
-            <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="px-4 py-3 bg-white/5 rounded-lg">
               <span className="text-gray-900 dark:text-white font-mono">
                 {user.id}
               </span>
@@ -576,7 +576,7 @@ const SettingsPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('settings.account.joinDate')}
               </label>
-              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="px-4 py-3 bg-white/5 rounded-lg">
                 <span className="text-gray-900 dark:text-white">
                   {new Date(user.join_date).toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-US', {
                     year: 'numeric',
@@ -593,7 +593,7 @@ const SettingsPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('settings.account.country')}
               </label>
-              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="px-4 py-3 bg-white/5 rounded-lg">
                 <div className="flex items-center gap-2">
                   <img
                     src={`https://flagcdn.com/w20/${user.country.code.toLowerCase()}.png`}
@@ -613,7 +613,7 @@ const SettingsPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('settings.account.lastVisit')}
               </label>
-              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="px-4 py-3 bg-white/5 rounded-lg">
                 <span className="text-gray-900 dark:text-white">
                   {new Date(user.last_visit).toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-US', {
                     year: 'numeric',
