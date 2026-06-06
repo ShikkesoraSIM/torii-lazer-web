@@ -119,7 +119,7 @@ export function useFriendRelationship(targetUserId: number, selfUserId: number) 
       }
       handleApiError(err);
     }
-  }, [targetUserId]);
+  }, [targetUserId, selfUserId]);
 
   useEffect(() => {
     mountedRef.current = true;

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { authAPI, userAPI, handleApiError, CLIENT_CONFIG, type RestrictionStatus } from '../utils/api';
 import type { User, TokenResponse } from '../types';
 import toast from 'react-hot-toast';
+import { apiCache } from '../utils/apiCache';
 
 interface AuthContextType {
   user: User | null;
@@ -296,8 +297,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     setRestriction(null);
-    // 清除缓存
+    // Clear both the sessionStorage user cache AND the in-memory apiCache
+    // (user/channel/message maps) so the next account in the same tab can't see
+    // the previous user's cached data.
     CacheUtil.clearCache();
+    apiCache.clearCache();
     toast.success(t('auth.context.messages.logoutSuccess'));
   };
 

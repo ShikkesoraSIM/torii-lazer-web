@@ -65,6 +65,18 @@ const UserRankingsList: React.FC<Props> = ({ rankings, currentPage, selectedMode
     };
   }, [rankings]);
 
+  // Hooks must run unconditionally: compute before the empty-state early return
+  // below (it used to sit after it, which changed hook order between renders).
+  const visibleRankings = useMemo(
+    () =>
+      (rankings?.ranking ?? []).map((ranking) => {
+        const hydrated = hydratedUsers.get(ranking.user.id);
+        if (!hydrated) return ranking;
+        return { ...ranking, user: { ...ranking.user, ...hydrated } };
+      }),
+    [hydratedUsers, rankings],
+  );
+
   if (!rankings || !rankings.ranking.length) {
     return (
       <div className="text-center py-20 px-4 sm:px-0">
@@ -78,21 +90,6 @@ const UserRankingsList: React.FC<Props> = ({ rankings, currentPage, selectedMode
   }
 
   const startRank = (currentPage - 1) * 50 + 1;
-  const visibleRankings = useMemo(
-    () =>
-      rankings.ranking.map((ranking) => {
-        const hydrated = hydratedUsers.get(ranking.user.id);
-        if (!hydrated) return ranking;
-        return {
-          ...ranking,
-          user: {
-            ...ranking.user,
-            ...hydrated,
-          },
-        };
-      }),
-    [hydratedUsers, rankings.ranking]
-  );
 
   return (
     <div className="space-y-3">

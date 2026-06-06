@@ -8,7 +8,7 @@ import LazyAvatar from '../UI/LazyAvatar';
 import LazyFlag from '../UI/LazyFlag';
 import { GAME_MODE_COLORS } from '../../types';
 import type { UserRanking, GameMode, RankingType } from '../../types';
-import { pickUserCoverCandidates } from '../../utils/profileMedia';
+import { pickUserCoverCandidates, isCoverDebugEnabled } from '../../utils/profileMedia';
 
 interface Props {
   ranking: UserRanking;
@@ -34,6 +34,7 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
     ranking.user.cover?.custom_url,
   ].filter(Boolean);
   if (
+    isCoverDebugEnabled() &&
     coverCandidates.length === 0 &&
     rawCoverCandidates.length > 0 &&
     !loggedMissingCoverUsers.has(ranking.user.id)
