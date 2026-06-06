@@ -360,7 +360,7 @@ const BrandMark = memo<{ size?: number }>(({ size = 36 }) => {
 BrandMark.displayName = 'BrandMark';
 const Navbar: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, restriction, isAuthenticated, logout } = useAuth();
   const { t } = useTranslation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
@@ -430,7 +430,7 @@ const Navbar: React.FC = () => {
   return (
     <>
       <header
-        className={`hidden md:flex fixed ${user?.is_restricted ? 'top-14' : 'top-4'} left-0 right-0 z-50 justify-center px-4`}
+        className={`hidden md:flex fixed ${restriction?.is_restricted ? 'top-14' : 'top-4'} left-0 right-0 z-50 justify-center px-4`}
       >
         <div className="w-full max-w-7xl">
           <div
@@ -533,7 +533,7 @@ const Navbar: React.FC = () => {
       </header>
 
       <header
-        className={`md:hidden fixed ${user?.is_restricted ? 'top-10' : 'top-0'} left-0 right-0 z-50 px-3 pt-3`}
+        className={`md:hidden fixed ${restriction?.is_restricted ? 'top-10' : 'top-0'} left-0 right-0 z-50 px-3 pt-3`}
       >
         <div className="rounded-3xl torii-nav-liquid">
           <div className="flex items-center justify-between px-4 py-3">

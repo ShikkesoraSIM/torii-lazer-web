@@ -8,7 +8,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { NotificationProvider } from '../../contexts/NotificationContext';
 
 const Layout: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, restriction } = useAuth();
   const location = useLocation();
 
   // 登录/注册/找回密码页面不需要顶部内边距
@@ -21,7 +21,10 @@ const Layout: React.FC = () => {
   // an extra ~40px to compensate. The banner only renders for
   // authenticated AND restricted users so this padding is dead code
   // for everyone else.
-  const isRestricted = !!(isAuthenticated && user?.is_restricted);
+  // Driven by the dedicated restriction endpoint (see AuthContext), not the
+  // user payload: a restricted account 403s on /me and never produces a user
+  // object on the web, so user?.is_restricted would never be true here.
+  const isRestricted = !!restriction?.is_restricted;
 
   return (
     <NotificationProvider isAuthenticated={isAuthenticated} user={user}>
@@ -35,7 +38,7 @@ const Layout: React.FC = () => {
           mount + a 30s interval that returns {maintenance: false}).
         */}
         <MaintenanceBanner />
-        <main className={`torii-page-stage ${shouldApplyTopPadding ? 'pt-[56px] md:pt-20' : ''} ${isRestricted ? 'mt-10' : ''}`}>
+        <main className={`torii-page-stage ${shouldApplyTopPadding ? 'pt-[56px] md:pt-20' : ''} ${isRestricted ? 'mt-16 md:mt-12' : ''}`}>
           <Outlet />
         </main>
         <Toaster

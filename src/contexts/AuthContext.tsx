@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { authAPI, userAPI, handleApiError, CLIENT_CONFIG } from '../utils/api';
+import { authAPI, userAPI, handleApiError, CLIENT_CONFIG, type RestrictionStatus } from '../utils/api';
 import type { User, TokenResponse } from '../types';
 import toast from 'react-hot-toast';
 
 interface AuthContextType {
   user: User | null;
+  restriction: RestrictionStatus | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (username: string, password: string, turnstileToken?: string) => Promise<boolean>;
@@ -98,7 +99,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // auth-check takes.
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [restriction, setRestriction] = useState<RestrictionStatus | null>(null);
   const { t } = useTranslation();
+
+  // Pull restriction status from the one endpoint that does NOT 403 a
+  // restricted user. Safe to call whenever a token exists; returns
+  // { is_restricted: false } for everyone else. Drives RestrictionBanner.
+  const checkRestriction = useCallback(async (): Promise<RestrictionStatus | null> => {
+    try {
+      const status = await userAPI.getRestriction();
+      setRestriction(status);
+      return status;
+    } catch {
+      setRestriction(null);
+      return null;
+    }
+  }, []);
 
   // Check if user is authenticated on mount
   useEffect(() => {
@@ -111,6 +127,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         CacheUtil.clearCache();
         return;
       }
+
+      // We have a session: check restriction status in the background so the
+      // banner shows even when getMe() below 403s. A restricted account can't
+      // load its own profile, but it must still see why.
+      void checkRestriction();
 
       // 尝试从缓存读取
       const cachedData = CacheUtil.getUserCache();
@@ -188,15 +209,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('refresh_token', tokenResponse.refresh_token);
 
       // Get user data
-      const userData = await userAPI.getMe();
-      setUser(userData);
-      setIsAuthenticated(true);
+      try {
+        const userData = await userAPI.getMe();
+        setUser(userData);
+        setIsAuthenticated(true);
 
-      // 保存到缓存
-      CacheUtil.saveUserCache(userData);
+        // 保存到缓存
+        CacheUtil.saveUserCache(userData);
 
-      toast.success(t('auth.context.messages.welcomeBack', { username: userData.username }));
-      return true;
+        // Normal accounts aren't restricted, but check in the background so the
+        // banner stays correct if a restriction landed mid-session.
+        void checkRestriction();
+
+        toast.success(t('auth.context.messages.welcomeBack', { username: userData.username }));
+        return true;
+      } catch (meError) {
+        // A restricted account authenticates fine (the token is issued) but
+        // getMe() 403s. Don't show a generic "login failed" — surface the
+        // restriction instead, so the banner can explain it.
+        const meStatus = (meError as { response?: { status?: number } }).response?.status;
+        if (meStatus === 403) {
+          const status = await checkRestriction();
+          if (status?.is_restricted) {
+            // The global banner (also rendered on /login) carries the details.
+            // Returning false keeps them on the login page rather than bouncing
+            // to a profile they can't load.
+            return false;
+          }
+        }
+        throw meError;
+      }
     } catch (error) {
       handleApiError(error);
       return false;
@@ -253,6 +295,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('refresh_token');
     setUser(null);
     setIsAuthenticated(false);
+    setRestriction(null);
     // 清除缓存
     CacheUtil.clearCache();
     toast.success(t('auth.context.messages.logoutSuccess'));
@@ -292,6 +335,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
+    restriction,
     isLoading,
     isAuthenticated,
     login,

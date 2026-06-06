@@ -1,55 +1,73 @@
 // Site-wide restriction banner.
 //
-// Renders a red stripe at the top of every page while the logged-in
-// user carries an active restriction. The flag comes from the user
-// payload `user.is_restricted` which the API surfaces via
-// `UserModel.transform` (see g0v0-server/app/database/user.py). The
-// banner is read-only — it just makes the state visible; write-side
-// restrictions (score submission, chat send, etc.) are enforced
-// server-side at their respective endpoints.
+// Renders a red stripe at the top of every page while the logged-in user
+// carries an active restriction. The state comes from the dedicated
+// GET /api/v2/torii/restriction endpoint (see AuthContext.checkRestriction)
+// rather than the user payload, because a restricted account 403s on
+// /api/v2/me and never gets a user object on the web at all - so reading
+// user.is_restricted would never light up. The endpoint is the one
+// authenticated surface a restricted user can still reach.
 //
-// This is paired with a ToriiHalo PM that fires on every WebSocket
-// reconnect for restricted users (see g0v0-server/app/router/
-// notification/server.py) and an immediate-push PM at the moment of
-// restriction (see admin ban endpoint). The banner is the visual
-// equivalent for the web frontend — the user can't always check
-// chat, but the banner is unavoidable.
+// Read-only: it just makes the state visible. Write-side restrictions
+// (score submission, chat, etc.) are enforced server-side at their own
+// endpoints. Paired with the ToriiHalo PM in-client and the in-game
+// ToriiBriefingGlass restriction panel.
 
 import React from 'react';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
 
-const RESTRICTION_MESSAGE =
-  'You are restricted, please wait 1 month before your appeal through a ticket in the discord server.';
+const DISCORD_URL = 'https://discord.gg/fZXsZFT5Xv';
 
 const RestrictionBanner: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { restriction } = useAuth();
 
-  // Only render if the user is both authenticated AND restricted.
-  // Anonymous visitors and non-restricted users see nothing — this
-  // mirrors MaintenanceBanner's "happy path is invisible" pattern so
-  // the layout's reserved-space logic doesn't shift around for the
-  // 99% of users who aren't affected.
-  if (!isAuthenticated || !user?.is_restricted) {
+  // Happy path is invisible: anonymous visitors and non-restricted users see
+  // nothing, mirroring MaintenanceBanner so the layout's reserved-space logic
+  // doesn't shift for the 99% who aren't affected.
+  if (!restriction?.is_restricted) {
     return null;
   }
 
-  // Pinned to the top of the viewport with z-index above the Navbar.
-  // The Navbar itself reads `user.is_restricted` and shifts its own
-  // `top` value when the banner is present (top-0 → top-10 on mobile,
-  // top-4 → top-14 on desktop) so the two never overlap. Page content
-  // gets a matching mt-10 from Layout.tsx to clear the banner.
+  const reason = restriction.reason?.trim();
+
+  // ends_at is ISO-UTC (tagged with Z by the server). Show a friendly date.
+  let endsStr: string | null = null;
+  if (!restriction.permanent && restriction.ends_at) {
+    const d = new Date(restriction.ends_at);
+    if (!isNaN(d.getTime())) {
+      endsStr = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+  }
+
+  // Pinned to the top of the viewport above the Navbar (z-index 70 vs 50).
+  // The Navbar and Layout reserve space for it when a restriction is active.
   return (
     <div
       className="fixed top-0 left-0 right-0 z-[70] bg-red-600 text-white shadow-lg"
       role="alert"
       aria-live="polite"
     >
-      <div className="max-w-7xl mx-auto px-4 py-2 flex items-center gap-3">
-        <FaExclamationTriangle className="flex-shrink-0 text-yellow-300" aria-hidden />
-        <span className="text-sm md:text-base font-medium">
-          {RESTRICTION_MESSAGE}
-        </span>
+      <div className="max-w-7xl mx-auto px-4 py-2 flex items-start gap-3">
+        <FaExclamationTriangle className="flex-shrink-0 text-yellow-300 mt-0.5" aria-hidden />
+        <p className="text-sm md:text-base font-medium leading-snug">
+          Your account is restricted{reason ? <>, for: <span className="font-semibold">{reason}</span></> : ''}.
+          {restriction.permanent
+            ? ' This restriction is currently permanent.'
+            : endsStr
+              ? ` It is scheduled to lift on ${endsStr}.`
+              : ''}
+          {' '}This can be a safety measure or while staff look into something, and is not necessarily permanent.
+          You can reach out to the admins on our{' '}
+          <a
+            href={DISCORD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline font-semibold hover:text-yellow-200"
+          >
+            Discord
+          </a>{' '}to appeal.
+        </p>
       </div>
     </div>
   );

@@ -28,10 +28,28 @@ export interface PendingUsernameChange {
   reject_reason: string | null;
 }
 
+// Restriction status, from GET /api/v2/torii/restriction. This is the ONE
+// authenticated endpoint a restricted user can reach (every other one 403s),
+// so it's how the site learns *why* a restricted user can't really get in.
+export interface RestrictionStatus {
+  is_restricted: boolean;
+  permanent?: boolean;
+  reason?: string | null;
+  ends_at?: string | null;
+}
+
 export const userAPI = {
   getMe: async (ruleset?: string) => {
     const url = ruleset ? `/api/v2/me/${ruleset}` : '/api/v2/me/';
     const response = await api.get(url);
+    return response.data;
+  },
+
+  // Does not 403 for restricted users (unlike getMe), so it's safe to call
+  // even when the account is locked out. Returns { is_restricted: false } for
+  // everyone who isn't restricted.
+  getRestriction: async (): Promise<RestrictionStatus> => {
+    const response = await api.get('/api/v2/torii/restriction');
     return response.data;
   },
 
