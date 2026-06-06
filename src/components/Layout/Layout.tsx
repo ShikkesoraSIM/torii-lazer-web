@@ -38,7 +38,10 @@ const Layout: React.FC = () => {
           mount + a 30s interval that returns {maintenance: false}).
         */}
         <MaintenanceBanner />
-        <main className={`torii-page-stage ${shouldApplyTopPadding ? 'pt-[56px] md:pt-20' : ''} ${isRestricted ? 'mt-16 md:mt-12' : ''}`}>
+        <main
+          className={`torii-page-stage ${shouldApplyTopPadding ? 'pt-[56px] md:pt-20' : ''}`}
+          style={isRestricted ? { marginTop: 'calc(var(--restriction-banner-h, 0px) + 0.5rem)' } : undefined}
+        >
           <Outlet />
         </main>
         <Toaster
