@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import Avatar from '../UI/Avatar';
 import GameModeSelector from '../UI/GameModeSelector';
-import RankHistoryChart from '../UI/RankHistoryChart';
+// Lazy: pulls recharts (~300 KB) into its own on-demand chunk instead of the
+// profile bundle. The chart is below the fold and not every visit needs it.
+const RankHistoryChart = React.lazy(() => import('../UI/RankHistoryChart'));
 import PlayerRankCard from '../User/PlayerRankCard';
 import StatsCard from '../User/StatsCard';
 import LevelProgress from '../UI/LevelProgress';
@@ -447,14 +449,16 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
               {/* 折线图 */}
               <div className="relative w-full -mt-2">
                 <div className="relative z-10">
-                  <RankHistoryChart
-                    rankHistory={user.rank_history}
-                    isUpdatingMode={isUpdatingMode}
-                    selectedModeColor={profileColor}
-                    delay={0.4}
-                    height="8rem"
-                    fullBleed={false}
-                  />
+                  <Suspense fallback={<div style={{ height: '8rem' }} />}>
+                    <RankHistoryChart
+                      rankHistory={user.rank_history}
+                      isUpdatingMode={isUpdatingMode}
+                      selectedModeColor={profileColor}
+                      delay={0.4}
+                      height="8rem"
+                      fullBleed={false}
+                    />
+                  </Suspense>
                 </div>
               </div>
 

@@ -13,6 +13,19 @@ export default defineConfig({
     // temp-file cleanup error ("remove AppData/Temp/esbuild-xxx: Access is denied")
     target: 'esnext',
     minify: 'terser',
+    rollupOptions: {
+      output: {
+        // Split stable, always-loaded vendor code into cacheable chunks.
+        // recharts + fingerprintjs are intentionally NOT listed: they're now
+        // dynamically imported, so Rollup keeps them in their own on-demand
+        // chunks, out of the initial load.
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'framer-motion': ['framer-motion'],
+          i18n: ['i18next', 'react-i18next'],
+        },
+      },
+    },
   },
   server: {
     host: '127.0.0.1',

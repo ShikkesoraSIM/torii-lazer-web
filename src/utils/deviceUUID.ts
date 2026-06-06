@@ -3,7 +3,9 @@
  * 使用 FingerprintJS 生成设备唯一标识符，用于设备绑定
  */
 
-import FingerprintJS from '@fingerprintjs/fingerprintjs';
+// FingerprintJS is dynamically imported in initFingerprint() so the heavy lib
+// stays out of the main bundle and only loads the first time a device UUID is
+// minted. Returning users read the UUID from localStorage and never pull it in.
 
 const DEVICE_UUID_KEY = 'device_uuid';
 
@@ -15,7 +17,7 @@ let fpPromise: Promise<any> | null = null;
  */
 function initFingerprint() {
   if (!fpPromise) {
-    fpPromise = FingerprintJS.load();
+    fpPromise = import('@fingerprintjs/fingerprintjs').then((m) => m.default.load());
   }
   return fpPromise;
 }

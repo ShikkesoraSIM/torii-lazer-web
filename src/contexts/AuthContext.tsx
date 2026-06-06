@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { authAPI, userAPI, handleApiError, CLIENT_CONFIG, type RestrictionStatus } from '../utils/api';
@@ -194,7 +194,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (username: string, password: string, turnstileToken?: string): Promise<boolean> => {
+  const login = useCallback(async (username: string, password: string, turnstileToken?: string): Promise<boolean> => {
     try {
       setIsLoading(true);
       const tokenResponse: TokenResponse = await authAPI.login(
@@ -246,9 +246,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [t, checkRestriction]);
 
-  const register = async (username: string, email: string, password: string, turnstileToken?: string): Promise<boolean> => {
+  const register = useCallback(async (username: string, email: string, password: string, turnstileToken?: string): Promise<boolean> => {
     try {
       setIsLoading(true);
       await authAPI.register(username, email, password, turnstileToken);
@@ -289,9 +289,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [t, login]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     setUser(null);
@@ -303,7 +303,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     CacheUtil.clearCache();
     apiCache.clearCache();
     toast.success(t('auth.context.messages.logoutSuccess'));
-  };
+  }, [t]);
 
   const updateUserMode = useCallback(async (mode?: string) => {
     if (!isAuthenticated) return;
@@ -337,18 +337,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     CacheUtil.saveUserCache(updatedUser);
   }, []);
 
-  const value: AuthContextType = {
-    user,
-    restriction,
-    isLoading,
-    isAuthenticated,
-    login,
-    register,
-    logout,
-    updateUserMode,
-    refreshUser,
-    updateUser,
-  };
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      restriction,
+      isLoading,
+      isAuthenticated,
+      login,
+      register,
+      logout,
+      updateUserMode,
+      refreshUser,
+      updateUser,
+    }),
+    [user, restriction, isLoading, isAuthenticated, login, register, logout, updateUserMode, refreshUser, updateUser],
+  );
 
   return (
     <AuthContext.Provider value={value}>
