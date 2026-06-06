@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FiChevronRight, FiSearch, FiX } from 'react-icons/fi';
 import type { Beatmapset } from '../../types/beatmap';
 import { beatmapAPI, searchAPI, userAPI } from '../../utils/api';
@@ -213,8 +213,14 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
 
   const hasResults = beatmaps.length > 0 || users.length > 0 || teams.length > 0;
 
+  // No AnimatePresence: on React 19 + framer-motion v11 its exit animation
+  // could stall, leaving the dimmed backdrop stuck on screen (not interactive)
+  // even after isOpen flipped to false. A plain conditional render unmounts the
+  // overlay instantly and reliably; the enter animation still plays on open.
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
         <motion.div
           // Explicit key so AnimatePresence has an unambiguous identity
@@ -422,7 +428,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </>
   );
 };
 

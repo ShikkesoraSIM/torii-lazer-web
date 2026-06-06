@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+// No AnimatePresence: its exit animation can stall on React 19 + framer-motion
+// v11, leaving the menu stuck open (needing a second click / not closing on
+// outside-click). Plain conditional render closes instantly and reliably.
+import { motion } from 'framer-motion';
 import { FiUser, FiUsers, FiLogOut, FiSettings, FiChevronDown, FiChevronRight, FiCheck } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import Avatar from './Avatar';
@@ -141,7 +144,7 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
       </button>
 
       {/* Dropdown Menu */}
-      <AnimatePresence>
+      <>
         {isOpen && (
           <motion.div
             initial={{ 
@@ -214,7 +217,7 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
                 </button>
 
                 {/* Language Submenu - Floating below */}
-                <AnimatePresence>
+                <>
                   {languageOpen && (
                     <motion.div
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -263,7 +266,7 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
                       })}
                     </motion.div>
                   )}
-                </AnimatePresence>
+                </>
               </div>
             </div>
 
@@ -282,7 +285,7 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-osu-pink/5 via-transparent to-osu-blue/5 pointer-events-none" />
           </motion.div>
         )}
-      </AnimatePresence>
+      </>
     </div>
   );
 });
