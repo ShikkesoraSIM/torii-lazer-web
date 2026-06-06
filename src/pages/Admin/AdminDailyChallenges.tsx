@@ -1178,6 +1178,7 @@ const AdminDailyChallenges: React.FC = () => {
                 value={formData.allowed_mods}
                 onChange={(mods) => setFormData((f) => ({ ...f, allowed_mods: mods }))}
                 conflictWith={formData.required_mods}
+                poolMode
                 emptyLabel="No free-mod options"
               />
             </div>
@@ -1410,6 +1411,7 @@ const AdminDailyChallenges: React.FC = () => {
                     value={randomAllowedMods}
                     onChange={setRandomAllowedMods}
                     conflictWith={randomRequiredMods}
+                    poolMode
                     emptyLabel="No free-mod options"
                   />
                 </div>

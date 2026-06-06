@@ -221,6 +221,16 @@ export interface ModPickerProps {
   hideNonPlayable?: boolean;
   /** Hide mods that aren't `ValidForMultiplayer` (default true for daily challenges). */
   multiplayerOnly?: boolean;
+  /**
+   * Free-mod / pool mode. The picker then represents a POOL of mods that each
+   * player opts into independently at play time, so options that are mutually
+   * incompatible with EACH OTHER (DT and HT, HR and EZ) are all still valid
+   * pool members — the game client enforces per-player compatibility. This
+   * disables intra-slot conflict blocking and makes "select all" grab every
+   * available mod. Conflicts against the OTHER slot (required mods) are still
+   * respected, since a freemod that fights a forced mod could never be used.
+   */
+  poolMode?: boolean;
   /** Optional placeholder text when nothing is selected. */
   emptyLabel?: string;
 }
@@ -233,6 +243,7 @@ const ModPicker: React.FC<ModPickerProps> = ({
   conflictWith = [],
   hideNonPlayable = true,
   multiplayerOnly = true,
+  poolMode = false,
   emptyLabel = 'No mods selected',
 }) => {
   // Belt-and-suspenders: if the catalog hands us a non-array (e.g. an old
@@ -273,8 +284,14 @@ const ModPicker: React.FC<ModPickerProps> = ({
   const selectedSet = useMemo(() => new Set(value.map((m) => m.acronym)), [value]);
   const conflictWithSet = useMemo(() => new Set(conflictWith.map((m) => m.acronym)), [conflictWith]);
 
-  // Hard conflicts: incompatibilities arising from currently-selected mods (same picker).
-  const hardConflicts = useMemo(() => incompatibleAcronyms(allMods, value), [allMods, value]);
+  // Hard conflicts: incompatibilities arising from currently-selected mods (same
+  // picker). In pool / free-mod mode there are none — each player resolves
+  // compatibility for their own chosen subset at play time, so e.g. HR and EZ
+  // can legitimately both sit in the pool.
+  const hardConflicts = useMemo(
+    () => (poolMode ? new Set<string>() : incompatibleAcronyms(allMods, value)),
+    [allMods, value, poolMode],
+  );
   // Soft conflicts: incompatibilities arising from the *other* picker.
   const softConflicts = useMemo(() => incompatibleAcronyms(allMods, conflictWith), [allMods, conflictWith]);
 
@@ -331,9 +348,14 @@ const ModPicker: React.FC<ModPickerProps> = ({
         if (localBlocked.has(def.Acronym)) continue;
         next.push({ acronym: def.Acronym });
         inSelection.add(def.Acronym);
-        // Block anything this newly-selected mod is incompatible with so the
-        // resulting bundle stays internally valid.
-        def.IncompatibleMods.forEach((a) => localBlocked.add(a));
+        // In loadout mode (required mods) block anything this newly-selected mod
+        // is incompatible with so the bundle stays internally valid. In pool /
+        // free-mod mode we DON'T — the pool is meant to hold incompatible
+        // options side by side (DT and HT, HR and EZ); each player picks a valid
+        // subset at play time, so "select all" should grab every available mod.
+        if (!poolMode) {
+          def.IncompatibleMods.forEach((a) => localBlocked.add(a));
+        }
       }
     }
     onChange(next);
@@ -352,7 +374,10 @@ const ModPicker: React.FC<ModPickerProps> = ({
       if (localBlocked.has(def.Acronym)) continue;
       next.push({ acronym: def.Acronym });
       inSelection.add(def.Acronym);
-      def.IncompatibleMods.forEach((a) => localBlocked.add(a));
+      // See selectAllAvailable: pool mode keeps incompatible options together.
+      if (!poolMode) {
+        def.IncompatibleMods.forEach((a) => localBlocked.add(a));
+      }
     }
     onChange(next);
   };
