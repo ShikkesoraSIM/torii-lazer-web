@@ -55,6 +55,11 @@ const ACHIEVEMENTS: Record<number, { name: string; description: string; assets_i
   100: { name: 'Gear Shift', description: 'Tailor your experience to your perfect fit.', assets_id: 'all-intro-conversion', category: 'Mod Introduction' },
   101: { name: 'Game Night', description: "Mum said it's my turn with the beatmap!", assets_id: 'all-intro-fun', category: 'Mod Introduction' },
   
+  // Daily Challenge (streak medals)
+  102: { name: 'Daily Sprout', description: 'Ready for anything.', assets_id: 'all-skill-dc-1', category: 'Daily Challenge' },
+  103: { name: 'Weekly Sapling', description: 'Circadian rhythm calibrated.', assets_id: 'all-skill-dc-7', category: 'Daily Challenge' },
+  104: { name: 'Monthly Shrub', description: 'In for the grind.', assets_id: 'all-skill-dc-30', category: 'Daily Challenge' },
+
   // Secret achievements (Hush-Hush)
   105: { name: 'Jackpot', description: 'Lucky sevens is a mild understatement.', assets_id: 'all-secret-jackpot', category: 'Hush-Hush' },
   106: { name: 'Nonstop', description: 'Breaks? What are those?', assets_id: 'all-secret-nonstop', category: 'Hush-Hush' },
