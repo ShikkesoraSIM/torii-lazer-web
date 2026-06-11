@@ -23,6 +23,9 @@ const loggedMissingCoverUsers = new Set<number>();
 const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, rankingType }) => {
   const { t } = useTranslation();
   const isTopThree = rank <= 3;
+  // Torii: server flags 15-30d-inactive players (30d+ are dropped from the
+  // response). Grey the row so the board reads as active players.
+  const isInactive = ranking.is_inactive ?? false;
 
   const coverCandidates = pickUserCoverCandidates(ranking.user, {
     scope: 'rankings:user-card',
@@ -70,7 +73,8 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
       : null;
 
   const cardBaseClass =
-    'group relative overflow-hidden rounded-2xl border border-white/10 shadow-[0_12px_34px_rgba(0,0,0,0.28)] transition-all duration-300 hover:border-white/20 hover:shadow-[0_18px_44px_rgba(0,0,0,0.36)]';
+    'group relative overflow-hidden rounded-2xl border border-white/10 shadow-[0_12px_34px_rgba(0,0,0,0.28)] transition-all duration-300 hover:border-white/20 hover:shadow-[0_18px_44px_rgba(0,0,0,0.36)]'
+    + (isInactive ? ' opacity-50 saturate-50' : '');
 
   const renderRow = () => (
     <div className="relative flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5 sm:py-4">

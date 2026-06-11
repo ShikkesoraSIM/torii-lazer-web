@@ -13,6 +13,7 @@ export interface UserRanking {
   ranked_score?: number;
   pp?: number;
   hit_accuracy?: number; // Accuracy
+  is_inactive?: boolean; // Torii: 15-30d inactive -> grey the row (30d+ are dropped server-side)
 }
 
 export interface CountryResponse {
