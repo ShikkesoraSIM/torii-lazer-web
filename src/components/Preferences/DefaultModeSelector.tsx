@@ -6,7 +6,6 @@ import toast from 'react-hot-toast';
 import { preferencesAPI } from '../../utils/api';
 import type { GameMode } from '../../types';
 
-// 游戏模式配置
 const GAME_MODES: { value: GameMode; iconClass: string }[] = [
   { value: 'osu', iconClass: 'fa-extra-mode-osu' },
   { value: 'osurx', iconClass: 'fa-extra-mode-osu' },
@@ -27,21 +26,17 @@ const DefaultModeSelector: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  // 获取当前用户偏好设置
   const fetchUserPreferences = async () => {
     try {
       setIsLoading(true);
       const response = await preferencesAPI.getPreferences();
       const defaultMode = (response.playmode as GameMode) || 'osu';
-      // 假设所有模式都可用，或者可以从其他 API 获取
       const availableModesFromAPI: GameMode[] = ['osu', 'osurx', 'osuap', 'taiko', 'taikorx', 'fruits', 'fruitsrx', 'mania'];
       
       setCurrentMode(defaultMode);
       setSelectedMode(defaultMode);
       setAvailableModes(availableModesFromAPI);
-    } catch (error) {
-      console.error('获取用户偏好设置失败:', error);
-      // 如果获取失败，设置默认值
+    } catch {
       setCurrentMode('osu');
       setSelectedMode('osu');
       setAvailableModes(['osu']);
@@ -50,7 +45,6 @@ const DefaultModeSelector: React.FC = () => {
     }
   };
 
-  // 保存默认游戏模式
   const handleSaveMode = async () => {
     if (!selectedMode || selectedMode === currentMode) {
       setIsEditing(false);
@@ -64,32 +58,26 @@ const DefaultModeSelector: React.FC = () => {
       setIsEditing(false);
       toast.success(t('settings.preferences.defaultMode.success'));
     } catch (error) {
-      console.error('保存默认游戏模式失败:', error);
       toast.error(t('settings.preferences.defaultMode.error'));
-      // 恢复到当前模式
       setSelectedMode(currentMode);
     } finally {
       setIsSaving(false);
     }
   };
 
-  // 取消编辑
   const handleCancelEdit = () => {
     setSelectedMode(currentMode);
     setIsEditing(false);
   };
 
-  // 开始编辑
   const handleStartEdit = () => {
     setIsEditing(true);
   };
 
-  // 获取模式显示名称
   const getModeName = (mode: GameMode) => {
     return t(`settings.preferences.defaultMode.modes.${mode}`, mode);
   };
 
-  // 初始化时获取用户偏好设置
   useEffect(() => {
     fetchUserPreferences();
   }, []);
@@ -99,7 +87,7 @@ const DefaultModeSelector: React.FC = () => {
       <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-profile-color"></div>
         <span className="ml-3 text-gray-500 dark:text-gray-400">
-          {t('common.loading', '加载中...')}
+          {t('common.loading', 'Loading...')}
         </span>
       </div>
     );
@@ -107,7 +95,6 @@ const DefaultModeSelector: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 当前默认模式显示 */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           {t('settings.preferences.defaultMode.current')}
@@ -131,7 +118,6 @@ const DefaultModeSelector: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {/* 游戏模式选择网格 */}
             <div className={`grid gap-3 ${
               availableModes.length <= 4 
                 ? 'grid-cols-2 sm:grid-cols-4' 
@@ -170,7 +156,6 @@ const DefaultModeSelector: React.FC = () => {
               ))}
             </div>
 
-            {/* 操作按钮 */}
             <div className="flex gap-3">
               <button
                 onClick={handleSaveMode}
@@ -192,7 +177,6 @@ const DefaultModeSelector: React.FC = () => {
         )}
       </div>
 
-      {/* 描述信息 */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <p className="text-sm text-blue-700 dark:text-blue-300">
           {t('settings.preferences.defaultMode.description')}

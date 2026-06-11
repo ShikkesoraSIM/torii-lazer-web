@@ -12,7 +12,7 @@ export interface UserRanking {
   user: User;
   ranked_score?: number;
   pp?: number;
-  hit_accuracy?: number; // 准确率
+  hit_accuracy?: number; // Accuracy
 }
 
 export interface CountryResponse {
@@ -30,7 +30,7 @@ export interface CountryRanking {
   play_count: number;
   ranked_score: number;
   performance: number;
-  hit_accuracy?: number; // 准确率（如果 API 返回）
+  hit_accuracy?: number; // Accuracy (if the API returns it)
 }
 
 export type RankingType = 'performance' | 'score';

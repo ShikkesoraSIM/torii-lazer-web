@@ -5,7 +5,7 @@ interface LazyFlagProps {
   alt: string;
   className?: string;
   title?: string;
-  [key: string]: any; // 允许传递额外的属性
+  [key: string]: any; // allow passing through extra props
 }
 
 const LazyFlag: React.FC<LazyFlagProps> = ({
@@ -45,7 +45,7 @@ const LazyFlag: React.FC<LazyFlagProps> = ({
   useEffect(() => {
     if (!isInView) return;
 
-    // 延迟加载国旗
+    // Lazy-load the flag
     const timer = setTimeout(() => {
       const img = new Image();
       img.onload = () => {
@@ -58,7 +58,7 @@ const LazyFlag: React.FC<LazyFlagProps> = ({
         setIsLoaded(true);
       };
       img.src = src;
-    }, 150); // 延迟150ms加载国旗
+    }, 150); // delay flag load by 150ms
 
     return () => clearTimeout(timer);
   }, [isInView, src]);
@@ -69,12 +69,12 @@ const LazyFlag: React.FC<LazyFlagProps> = ({
       className={`relative overflow-hidden ${className}`}
       {...restProps}
     >
-      {/* 占位符背景 - 只在未加载且没有错误时显示 */}
+      {/* Placeholder background - only while not loaded and no error */}
       {!isLoaded && !hasError && (
         <div className="absolute inset-0 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded animate-pulse" />
       )}
       
-      {/* 国旗图片 */}
+      {/* Flag image */}
       {imageSrc && !hasError && (
         <img
           src={imageSrc}
@@ -87,7 +87,7 @@ const LazyFlag: React.FC<LazyFlagProps> = ({
         />
       )}
       
-      {/* 错误时的占位符 */}
+      {/* Error placeholder */}
       {hasError && (
         <div className={`bg-gray-200 dark:bg-gray-600 flex items-center justify-center border border-gray-200 dark:border-gray-600 rounded ${className}`}>
           <span className="text-xs text-gray-500 dark:text-gray-400">{alt}</span>

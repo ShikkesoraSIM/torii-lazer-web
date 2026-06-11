@@ -1,4 +1,4 @@
-// OAuth 应用类型定义
+// OAuth application type definitions
 
 export interface OAuthApp {
   client_id: number;

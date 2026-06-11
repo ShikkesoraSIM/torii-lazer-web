@@ -19,34 +19,34 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [deviceToRemove, setDeviceToRemove] = useState<TrustedDevice | null>(null);
 
-  // 获取受信任设备列表
+  // Fetch the list of trusted devices
   const fetchDevices = async () => {
     try {
       setIsLoading(true);
       const data = await deviceAPI.getTrustedDevices();
       setDevicesData(data);
     } catch (error) {
-      console.error('获取受信任设备失败:', error);
+      console.error('Failed to fetch trusted devices:', error);
       toast.error(t('settings.device.trustedDevices.loadError'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 打开移除设备弹窗
+  // Open the remove-device modal
   const handleShowRemoveModal = (device: TrustedDevice) => {
     setDeviceToRemove(device);
     setShowRemoveModal(true);
   };
 
-  // 关闭移除设备弹窗
+  // Close the remove-device modal
   const handleCloseRemoveModal = () => {
     if (removingDeviceId) return;
     setShowRemoveModal(false);
     setDeviceToRemove(null);
   };
 
-  // 确认移除设备
+  // Confirm removing the device
   const handleConfirmRemove = async () => {
     if (!deviceToRemove || removingDeviceId) return;
 
@@ -54,22 +54,22 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
       setRemovingDeviceId(deviceToRemove.id);
       await deviceAPI.removeTrustedDevice(deviceToRemove.id);
       toast.success(t('settings.device.trustedDevices.removeSuccess'));
-      
-      // 关闭弹窗
+
+      // Close the modal
       setShowRemoveModal(false);
       setDeviceToRemove(null);
-      
-      // 重新获取设备列表
+
+      // Re-fetch the list of devices
       await fetchDevices();
     } catch (error) {
-      console.error('移除设备失败:', error);
+      console.error('Failed to remove device:', error);
       toast.error(t('settings.device.trustedDevices.removeError'));
     } finally {
       setRemovingDeviceId(null);
     }
   };
 
-  // 获取设备类型图标
+  // Get the device-type icon
   const getDeviceIcon = (device: TrustedDevice) => {
     const { user_agent_info, client_type } = device;
     
@@ -82,7 +82,7 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
     }
   };
 
-  // 获取设备显示名称
+  // Get the device display name
   const getDeviceDisplayName = (device: TrustedDevice) => {
     const { user_agent_info, client_type } = device;
     
@@ -97,7 +97,7 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
     return t('settings.device.browsers.unknown');
   };
 
-  // 获取客户端类型名称
+  // Get the client-type name
   const getClientTypeName = (device: TrustedDevice) => {
     const { client_type } = device;
     
@@ -113,7 +113,7 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
     }
   };
 
-  // 格式化位置信息
+  // Format the location info
   const formatLocation = (device: TrustedDevice) => {
     const { location } = device;
     
@@ -128,7 +128,7 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
     return parts.join(', ') || t('settings.device.sessions.localhost');
   };
 
-  // 格式化日期
+  // Format the date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-US', {
       year: 'numeric',
@@ -139,7 +139,7 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
     });
   };
 
-  // 判断是否为当前设备
+  // Determine whether this is the current device
   const isCurrentDevice = (device: TrustedDevice) => {
     return devicesData?.current === device.id;
   };
@@ -179,10 +179,10 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
         <div className="space-y-3">
           {devicesData.devices
             .sort((a, b) => {
-              // 当前设备排在最前面
+              // Current device first
               if (isCurrentDevice(a) && !isCurrentDevice(b)) return -1;
               if (!isCurrentDevice(a) && isCurrentDevice(b)) return 1;
-              // 其他按最后使用时间排序（最新的在前）
+              // Otherwise sort by last-used time (newest first)
               return new Date(b.last_used_at).getTime() - new Date(a.last_used_at).getTime();
             })
             .map((device, index) => {
@@ -266,7 +266,7 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
         </div>
       )}
 
-      {/* 移除设备确认弹窗 */}
+      {/* Remove-device confirmation modal */}
       {deviceToRemove && (
         <RemoveDeviceModal
           isOpen={showRemoveModal}

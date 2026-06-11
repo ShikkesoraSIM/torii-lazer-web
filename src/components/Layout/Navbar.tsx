@@ -29,6 +29,7 @@ import Avatar from '../UI/Avatar';
 import LanguageSelector from '../UI/LanguageSelector';
 import NavbarSearchOverlay from './NavbarSearchOverlay';
 import SupportButton from './SupportButton';
+import CountryFlag from '../UI/CountryFlag';
 import type { NavItem as NavItemType } from '../../types';
 const NavItem = memo<{ item: NavItemType }>(({ item }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -158,10 +159,11 @@ const LanguageMenuSection = memo<{ i18n: any; t: any }>(({ i18n, t }) => {
               }`}
             >
               <div className="flex items-center">
-                <img
-                  src={`/image/flag/${lang.flag}.svg`}
-                  alt={`${lang.name} flag`}
-                  className="w-5 h-4 rounded-sm object-cover mr-3"
+                <CountryFlag
+                  code={lang.flag}
+                  name={lang.name}
+                  className="h-4 mr-3"
+                  rounded="rounded-sm"
                 />
                 <span>{lang.nativeName}</span>
               </div>
@@ -397,6 +399,7 @@ const Navbar: React.FC = () => {
     isConnected = ctx.isConnected;
     chatConnected = ctx.chatConnected;
   } catch {
+    // NotificationContext isn't mounted (e.g. the logged-out shell) — keep defaults.
   }
 
   const isFullyConnected = isConnected && chatConnected;
@@ -440,14 +443,13 @@ const Navbar: React.FC = () => {
               'px-5 py-3',
             ].join(' ')}
           >
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
               <div className="flex items-center justify-start">
-                <Link to="/" title={t('nav.home')} className="flex items-center gap-3">
+                <Link to="/" title={t('nav.home')} className="group flex items-center gap-3">
                   <BrandMark size={36} />
-
                   <div className="leading-tight">
-                    <div className="text-white font-semibold tracking-wide">Torii</div>
-                    <div className="text-white/60 text-xs -mt-0.5">forged in Shikke's Dojo</div>
+                    <span className="block text-white font-semibold tracking-wide group-hover:text-white/90 transition">Torii</span>
+                    <span className="block text-white/55 text-xs -mt-0.5">forged in Shikke's Dojo</span>
                   </div>
                 </Link>
               </div>
@@ -539,12 +541,11 @@ const Navbar: React.FC = () => {
       >
         <div className="rounded-3xl torii-nav-liquid">
           <div className="flex items-center justify-between px-4 py-3">
-            <Link to="/" className="flex items-center gap-3">
+            <Link to="/" title={t('nav.home')} className="group flex items-center gap-3">
               <BrandMark size={36} />
-
               <div className="leading-tight">
-                <div className="text-white font-semibold">Torii</div>
-                <div className="text-white/60 text-xs -mt-0.5">forged in Shikke's Dojo</div>
+                <span className="block text-white font-semibold group-hover:text-white/90 transition">Torii</span>
+                <span className="text-white/55 text-xs -mt-0.5 hidden min-[420px]:block">forged in Shikke's Dojo</span>
               </div>
             </Link>
 

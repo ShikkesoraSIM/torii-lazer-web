@@ -36,7 +36,7 @@ export const friendsAPI = {
       const response = await api.get(`/api/private/relationship/check/${targetUserId}`);
       return response.data;
     } catch (error) {
-      console.error('检查用户关系失败:', error);
+      console.error('Failed to check user relationship:', error);
       try {
         const [friends, blocks] = await Promise.all([
           friendsAPI.getFriends(),
@@ -62,7 +62,7 @@ export const friendsAPI = {
           is_followed: followsMe,
         };
       } catch (fallbackError) {
-        console.error('备用方法也失败:', fallbackError);
+        console.error('Fallback method also failed:', fallbackError);
         return {
           is_following: false,
           isBlocked: false,

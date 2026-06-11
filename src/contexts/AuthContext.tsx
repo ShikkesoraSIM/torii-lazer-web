@@ -25,19 +25,19 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// 缓存键名
+// Cache keys
 const CACHE_KEYS = {
   USER: 'cached_user',
   AUTH_STATUS: 'cached_auth_status',
   CACHE_TIMESTAMP: 'cache_timestamp',
 } as const;
 
-// 缓存有效期（毫秒）- 5分钟
+// Cache lifetime (ms) - 5 minutes
 const CACHE_DURATION = 5 * 60 * 1000;
 
-// 缓存工具函数
+// Cache helpers
 const CacheUtil = {
-  // 保存用户数据到缓存
+  // Save user data to the cache
   saveUserCache: (user: User) => {
     try {
       sessionStorage.setItem(CACHE_KEYS.USER, JSON.stringify(user));
@@ -48,26 +48,26 @@ const CacheUtil = {
     }
   },
 
-  // 从缓存获取用户数据
+  // Read user data from the cache
   getUserCache: (): { user: User | null; isAuthenticated: boolean; isValid: boolean } => {
     try {
       const timestamp = sessionStorage.getItem(CACHE_KEYS.CACHE_TIMESTAMP);
       const authStatus = sessionStorage.getItem(CACHE_KEYS.AUTH_STATUS);
       const userJson = sessionStorage.getItem(CACHE_KEYS.USER);
 
-      // 检查缓存是否存在
+      // Check that the cache exists
       if (!timestamp || !authStatus || !userJson) {
         return { user: null, isAuthenticated: false, isValid: false };
       }
 
-      // 检查缓存是否过期
+      // Check whether the cache has expired
       const cacheAge = Date.now() - parseInt(timestamp, 10);
       if (cacheAge > CACHE_DURATION) {
         CacheUtil.clearCache();
         return { user: null, isAuthenticated: false, isValid: false };
       }
 
-      // 返回缓存数据
+      // Return the cached data
       const user = JSON.parse(userJson) as User;
       return {
         user,
@@ -81,7 +81,7 @@ const CacheUtil = {
     }
   },
 
-  // 清除缓存
+  // Clear the cache
   clearCache: () => {
     try {
       sessionStorage.removeItem(CACHE_KEYS.USER);
@@ -123,7 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const token = localStorage.getItem('access_token');
       const refreshToken = localStorage.getItem('refresh_token');
 
-      // 如果没有 token，直接返回
+      // No token, nothing to do
       if (!token && !refreshToken) {
         CacheUtil.clearCache();
         return;
@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // load its own profile, but it must still see why.
       void checkRestriction();
 
-      // 尝试从缓存读取
+      // Try reading from the cache
       const cachedData = CacheUtil.getUserCache();
       if (cachedData.isValid && cachedData.user) {
         console.log(t('auth.context.cache.usingCachedState'));
@@ -163,29 +163,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      // 缓存无效或不存在，请求 API — run without blocking isLoading so the
+      // Cache invalid or missing, hit the API — run without blocking isLoading so the
       // login form stays interactive while we wait for the server.
       try {
         console.log(t('auth.context.cache.fetchingFromApi'));
         const userData = await userAPI.getMe();
         setUser(userData);
         setIsAuthenticated(true);
-        // 保存到缓存
+        // Save to the cache
         CacheUtil.saveUserCache(userData);
       } catch (error) {
-        // 如果获取用户信息失败，axios 拦截器会自动尝试刷新 token
-        // 这里只需要处理刷新失败的情况
+        // If fetching the user fails, the axios interceptor automatically tries to
+        // refresh the token; here we only handle the case where the refresh failed.
         const err = error as { response?: { status?: number } };
 
-        // 如果是 401 错误且已经重定向到登录页，说明刷新失败
-        // 否则可能是网络错误或其他问题，不应该清除 token
+        // A 401 after the redirect to the login page means the refresh failed.
+        // Other errors may be network issues, so we should not clear the token.
         if (err.response?.status === 401) {
-          // 拦截器会处理重定向，这里只清理状态
+          // The interceptor handles the redirect; here we only clear state
           setUser(null);
           setIsAuthenticated(false);
           CacheUtil.clearCache();
         } else {
-          // 其他错误，保持登录状态，可能是网络问题
+          // Other errors: keep the session, likely a network problem
           console.error('Failed to fetch user data:', error);
         }
       }
@@ -215,7 +215,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(userData);
         setIsAuthenticated(true);
 
-        // 保存到缓存
+        // Save to the cache
         CacheUtil.saveUserCache(userData);
 
         // Normal accounts aren't restricted, but check in the background so the
@@ -311,7 +311,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const userData = await userAPI.getMe(mode);
       setUser(userData);
-      // 更新缓存
+      // Update the cache
       CacheUtil.saveUserCache(userData);
     } catch (error) {
       handleApiError(error);
@@ -324,7 +324,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const userData = await userAPI.getMe();
       setUser(userData);
-      // 更新缓存
+      // Update the cache
       CacheUtil.saveUserCache(userData);
     } catch (error) {
       handleApiError(error);
@@ -333,7 +333,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateUser = useCallback((updatedUser: User) => {
     setUser(updatedUser);
-    // 更新缓存
+    // Update the cache
     CacheUtil.saveUserCache(updatedUser);
   }, []);
 

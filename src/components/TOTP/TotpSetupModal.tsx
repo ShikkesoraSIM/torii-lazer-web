@@ -12,7 +12,7 @@ interface TotpSetupModalProps {
   onSuccess: () => void;
 }
 
-// 使用从 API 导入的类型
+// Use the type imported from the API
 type TotpSecret = TOTPCreateStart;
 
 const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
@@ -29,7 +29,7 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
   const [showSecret, setShowSecret] = useState(false);
   const [verificationError, setVerificationError] = useState<string>('');
 
-  // 开始TOTP设置流程
+  // Start the TOTP setup flow
   const handleStartSetup = async () => {
     setIsLoading(true);
     try {
@@ -37,14 +37,14 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
       setTotpSecret(response);
       setStep('verify');
     } catch (error) {
-      console.error('创建TOTP密钥失败:', error);
+      console.error('Failed to create TOTP secret:', error);
       toast.error(t('settings.totp.errors.createFailed'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 验证TOTP代码
+  // Verify the TOTP code
   const handleVerifyCode = async () => {
     if (verificationCode.length !== 6) {
       setVerificationError(t('settings.totp.errors.invalidCodeLength', { length: 6 }));
@@ -60,14 +60,14 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
       setStep('backup');
       toast.success(t('settings.totp.setupSuccess'));
     } catch (error: any) {
-      console.error('TOTP验证失败:', error);
-      console.error('错误详情:', error.response?.data);
-      
-      // 处理不同类型的错误
+      console.error('TOTP verification failed:', error);
+      console.error('Error details:', error.response?.data);
+
+      // Handle different error types
       if (error.response?.status === 400) {
         const errorDetail = error.response?.data?.detail;
         if (Array.isArray(errorDetail) && errorDetail.length > 0) {
-          // 处理验证错误
+          // Handle validation errors
           setVerificationError(t('settings.totp.errors.invalidCode'));
         } else if (error.response?.data?.error === 'Invalid TOTP code') {
           setVerificationError(t('settings.totp.errors.invalidCode'));
@@ -82,7 +82,7 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
     }
   };
 
-  // 下载备份码
+  // Download the backup codes
   const handleDownloadBackupCodes = () => {
     const content = backupCodes.join('\n');
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
@@ -97,20 +97,20 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
     toast.success(t('settings.totp.backupCodesDownloaded'));
   };
 
-  // 完成设置
+  // Finish setup
   const handleFinishSetup = () => {
     onSuccess();
     onClose();
   };
 
-  // 处理验证码输入
+  // Handle verification-code input
   const handleCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
     setVerificationCode(value);
     setVerificationError('');
   };
 
-  // 重置状态
+  // Reset state
   const resetState = () => {
     setStep('setup');
     setTotpSecret(null);
@@ -120,31 +120,31 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
     setVerificationError('');
   };
 
-  // 监听关闭事件重置状态
+  // Reset state when the modal closes
   useEffect(() => {
     if (!isOpen) {
       resetState();
     }
   }, [isOpen]);
 
-  // 监听验证码长度自动验证
+  // Auto-verify once the code reaches full length
   useEffect(() => {
     if (verificationCode.length === 6 && step === 'verify' && !isLoading) {
       handleVerifyCode();
     }
   }, [verificationCode, step, isLoading]);
 
-  // 阻止背景滚动
+  // Prevent background scrolling
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '0px'; // 防止滚动条消失导致的跳动
+      document.body.style.paddingRight = '0px'; // avoid layout jump when the scrollbar disappears
     } else {
       document.body.style.overflow = 'unset';
       document.body.style.paddingRight = 'unset';
     }
-    
-    // 清理函数
+
+    // Cleanup
     return () => {
       document.body.style.overflow = 'unset';
       document.body.style.paddingRight = 'unset';
@@ -155,7 +155,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden">
-          {/* 背景遮罩 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -164,7 +163,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
             onClick={onClose}
           />
           
-          {/* 模态框内容 */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -173,7 +171,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
-        {/* 标题和关闭按钮 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <FiShield className="w-6 h-6 text-osu-pink" />
@@ -190,7 +187,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
         </div>
 
         <AnimatePresence mode="wait">
-          {/* 第一步：说明和开始设置 */}
           {step === 'setup' && (
             <motion.div
               key="setup"
@@ -217,7 +213,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
             </motion.div>
           )}
 
-          {/* 第二步：显示二维码和验证 */}
           {step === 'verify' && totpSecret && (
             <motion.div
               key="verify"
@@ -226,7 +221,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              {/* 二维码 */}
               <div className="flex justify-center">
                 <div className="bg-white p-4 rounded-lg">
                   <QRCode
@@ -237,7 +231,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
                 </div>
               </div>
 
-              {/* 手动输入密钥 */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   {t('settings.totp.manualEntry')}
@@ -258,7 +251,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
                 </div>
               </div>
 
-              {/* 验证码输入 */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   {t('settings.totp.enterCode')}
@@ -290,7 +282,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
             </motion.div>
           )}
 
-          {/* 第三步：显示备份码 */}
           {step === 'backup' && (
             <motion.div
               key="backup"
@@ -309,7 +300,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
                 </p>
               </div>
 
-              {/* 备份码 */}
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                 <div className="grid grid-cols-2 gap-2 font-mono text-sm">
                   {backupCodes.map((code, index) => (
@@ -320,7 +310,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
                 </div>
               </div>
 
-              {/* 下载按钮 */}
               <button
                 onClick={handleDownloadBackupCodes}
                 className="w-full btn-secondary flex items-center justify-center gap-2"
@@ -329,7 +318,6 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
                 {t('settings.totp.downloadBackupCodes')}
               </button>
 
-              {/* 完成按钮 */}
               <button
                 onClick={handleFinishSetup}
                 className="w-full btn-primary"

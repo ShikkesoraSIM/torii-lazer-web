@@ -3,7 +3,7 @@ import HeroSection from '../components/Home/HeroSection';
 import HomeFooter from '../components/Home/HomeFooter';
 
 const HomePage: React.FC = () => (
-  <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col">
+  <div className="flex min-h-screen flex-col bg-[#030014]">
     <HeroSection />
     <HomeFooter />
   </div>

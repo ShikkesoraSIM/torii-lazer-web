@@ -31,6 +31,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ISO_COUNTRIES, findCountryByCode } from '../../data/iso3166Countries';
+import CountryFlag from '../../components/UI/CountryFlag';
 
 interface AdminCountryPickerProps {
   /** Current saved value, e.g. "AR" or null if unset. */
@@ -117,10 +118,11 @@ const AdminCountryPicker: React.FC<AdminCountryPickerProps> = ({
               current value even while the admin is searching. */}
           {selected && (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
-              <img
-                src={`/image/flag/${selected.code.toLowerCase()}.svg`}
-                alt={selected.code}
-                className="w-5 h-3.5 rounded-sm shadow-sm"
+              <CountryFlag
+                code={selected.code}
+                name={selected.name}
+                className="h-3.5"
+                rounded="rounded-sm"
               />
               <span className="text-xs font-semibold text-white/80 tabular-nums">
                 {selected.code}
@@ -215,10 +217,11 @@ const AdminCountryPicker: React.FC<AdminCountryPickerProps> = ({
                         : 'hover:bg-white/8 focus:bg-white/8 focus:outline-none text-white/90'
                     }`}
                   >
-                    <img
-                      src={`/image/flag/${c.code.toLowerCase()}.svg`}
-                      alt={c.code}
-                      className="w-5 h-3.5 rounded-sm flex-shrink-0"
+                    <CountryFlag
+                      code={c.code}
+                      name={c.name}
+                      className="h-3.5"
+                      rounded="rounded-sm"
                     />
                     <span className="flex-1 text-sm">{c.name}</span>
                     <span className="text-white/55 text-xs tabular-nums">{c.code}</span>

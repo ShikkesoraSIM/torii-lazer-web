@@ -189,7 +189,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   );
 };
 
-// 播放按钮组件（类似 osu-web 的设计）
+// Play button component (similar to osu-web's design)
 interface AudioPlayButtonProps {
   audioUrl: string;
   className?: string;
@@ -247,7 +247,7 @@ export const AudioPlayButton: React.FC<AudioPlayButtonProps> = ({
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
     >
-      {/* 进度环 */}
+      {/* Progress ring */}
       {showProgress && isCurrentTrack && (
         <motion.svg
           className="absolute inset-0 w-full h-full transform -rotate-90"
@@ -277,7 +277,7 @@ export const AudioPlayButton: React.FC<AudioPlayButtonProps> = ({
         </motion.svg>
       )}
       
-      {/* 播放/暂停图标 */}
+      {/* Play/pause icon */}
       <div className="relative z-10">
         <AnimatePresence mode="wait">
           {isLoading && isCurrentTrack ? (
@@ -311,7 +311,7 @@ export const AudioPlayButton: React.FC<AudioPlayButtonProps> = ({
   );
 };
 
-// 完整的音频播放器控制栏（类似 osu-web 的主播放器）
+// Full audio player control bar (like osu-web's main player)
 interface AudioPlayerControlsProps {
   className?: string;
 }
@@ -336,7 +336,7 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const [isDraggingVolume, setIsDraggingVolume] = useState(false);
 
-  // 计算进度百分比
+  // Compute the progress percentage
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
   const volumeProgress = volume * 100;
 
@@ -346,7 +346,7 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // 进度条拖动处理
+  // Progress bar drag handling
   const updateProgressFromMouse = useCallback((e: MouseEvent | React.MouseEvent) => {
     if (!progressRef.current || !duration) return;
     
@@ -367,7 +367,7 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
     }
   }, [isDraggingProgress, updateProgressFromMouse]);
 
-  // 音量条拖动处理
+  // Volume bar drag handling
   const updateVolumeFromMouse = useCallback((e: MouseEvent | React.MouseEvent) => {
     if (!volumeRef.current) return;
     
@@ -388,7 +388,7 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
     }
   }, [isDraggingVolume, updateVolumeFromMouse]);
 
-  // 全局鼠标事件处理
+  // Global mouse event handling
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDraggingProgress) {
@@ -407,7 +407,7 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
     if (isDraggingProgress || isDraggingVolume) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.userSelect = 'none'; // 防止拖动时选中文本
+      document.body.style.userSelect = 'none'; // prevent text selection while dragging
     }
 
     return () => {
@@ -430,7 +430,7 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
       max-sm:bottom-2 max-sm:right-2 max-sm:left-2 max-sm:w-auto
       ${className}
     `}>
-      {/* 播放/暂停按钮 */}
+      {/* Play/pause button */}
       <motion.button
         onClick={isPlaying ? pause : () => currentUrl && play(currentUrl)}
         className="flex items-center justify-center w-8 h-8 rounded-full bg-osu-pink hover:bg-osu-pink/80 text-white transition-colors shadow-lg flex-shrink-0"
@@ -451,7 +451,7 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
         </AnimatePresence>
       </motion.button>
 
-      {/* 进度条 */}
+      {/* Progress bar */}
       <div className="flex-1 flex items-center gap-1 sm:gap-2">
         <span className="text-xs text-gray-600 dark:text-gray-400 min-w-[28px] sm:min-w-[32px] hidden xs:block">
           {formatTime(currentTime)}
@@ -473,7 +473,7 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
               width: `${progress}%`,
             }}
           >
-            {/* 进度条光泽效果 */}
+            {/* Progress bar shine effect */}
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
               animate={{ x: ['-100%', '100%'] }}
@@ -485,8 +485,8 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
               }}
             />
             
-            {/* 悬停时的拖拽点 */}
-            <div 
+            {/* Drag handle shown on hover */}
+            <div
               className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-osu-pink rounded-full shadow-lg border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
             />
           </div>
@@ -497,7 +497,7 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
         </span>
       </div>
 
-      {/* 音量控制 */}
+      {/* Volume control */}
       <div className="flex items-center gap-1 flex-shrink-0 hidden sm:flex">
         <motion.button
           onClick={toggleMute}

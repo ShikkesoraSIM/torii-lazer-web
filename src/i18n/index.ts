@@ -4,33 +4,33 @@ import { resources, type AppLanguages } from './resources';
 
 const defaultLanguage: AppLanguages = 'en';
 
-// 支持的语言列表
+// List of supported languages
 const supportedLanguages: AppLanguages[] = ['en', 'zh'];
 
-// 获取浏览器语言偏好
+// Get the browser's preferred language
 const getBrowserLanguage = (): AppLanguages => {
   if (typeof window === 'undefined') return defaultLanguage;
-  
+
   const browserLang = navigator.language || (navigator as any).userLanguage;
   const langCode = browserLang.split('-')[0].toLowerCase();
-  
-  // 检查是否是支持的语言
+
+  // Check whether it's a supported language
   if (supportedLanguages.includes(langCode as AppLanguages)) {
     return langCode as AppLanguages;
   }
-  
-  // 检查是否是中文变体
+
+  // Check whether it's a Chinese variant
   if (browserLang.startsWith('zh')) {
     return 'zh';
   }
-  
+
   return defaultLanguage;
 };
 
-// 获取存储的语言或浏览器语言
+// Get the stored language, or fall back to the browser language
 const getInitialLanguage = (): AppLanguages => {
   if (typeof window === 'undefined') return defaultLanguage;
-  
+
   const storedLanguage = localStorage.getItem('app-language') as AppLanguages | null;
   
   if (storedLanguage && supportedLanguages.includes(storedLanguage)) {
@@ -70,16 +70,16 @@ i18n
     },
   });
 
-// 语言变化监听器
+// Language-change listener
 i18n.on('languageChanged', (lng) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('app-language', lng);
-    // 更新HTML lang属性
+    // Update the HTML lang attribute
     document.documentElement.lang = lng;
   }
 });
 
-// 初始化时设置HTML lang属性
+// Set the HTML lang attribute on init
 if (typeof window !== 'undefined') {
   document.documentElement.lang = initialLanguage;
 }

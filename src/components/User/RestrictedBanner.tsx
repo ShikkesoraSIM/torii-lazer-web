@@ -11,13 +11,13 @@ const RestrictedBanner: React.FC<RestrictedBannerProps> = ({ className = '' }) =
   const { t } = useTranslation();
 
   const handleLearnMore = () => {
-    // 可以链接到帮助页面或说明文档
+    // Could link to a help page or documentation
     window.open('', '_blank');
   };
 
   return (
     <>
-      {/* 移动端：底部横幅 */}
+      {/* Mobile: bottom banner */}
       <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 ${className}`}>
         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-4 shadow-lg">
           <div className="flex items-start gap-3">
@@ -41,7 +41,7 @@ const RestrictedBanner: React.FC<RestrictedBannerProps> = ({ className = '' }) =
         </div>
       </div>
 
-      {/* 桌面端：右下角圆角提示框 */}
+      {/* Desktop: rounded toast in the bottom-right */}
       <div className={`hidden md:block fixed bottom-6 right-6 z-50 ${className}`}>
         <div className="bg-gradient-to-br from-red-600 to-red-700 text-white rounded-2xl shadow-2xl max-w-md overflow-hidden">
           <div className="px-6 py-5">

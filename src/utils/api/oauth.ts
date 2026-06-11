@@ -10,11 +10,11 @@ import type {
 } from '../../types/oauth';
 
 /**
- * OAuth 应用管理 API
+ * OAuth application management API
  */
 export const oauthAPI = {
   /**
-   * 创建 OAuth 应用
+   * Create an OAuth application
    */
   async create(data: CreateOAuthAppRequest): Promise<CreateOAuthAppResponse> {
     const response = await api.post('/api/private/oauth-app/create', data);
@@ -22,7 +22,7 @@ export const oauthAPI = {
   },
 
   /**
-   * 获取用户的所有 OAuth 应用
+   * Get all of the user's OAuth applications
    */
   async list(): Promise<OAuthApp[]> {
     const response = await api.get('/api/private/oauth-apps');
@@ -30,7 +30,7 @@ export const oauthAPI = {
   },
 
   /**
-   * 获取单个 OAuth 应用信息
+   * Get a single OAuth application
    */
   async get(clientId: number): Promise<OAuthApp> {
     const response = await api.get(`/api/private/oauth-apps/${clientId}`);
@@ -38,7 +38,7 @@ export const oauthAPI = {
   },
 
   /**
-   * 更新 OAuth 应用
+   * Update an OAuth application
    */
   async update(clientId: number, data: UpdateOAuthAppRequest): Promise<OAuthApp> {
     const response = await api.patch(`/api/private/oauth-app/${clientId}`, data);
@@ -46,14 +46,14 @@ export const oauthAPI = {
   },
 
   /**
-   * 删除 OAuth 应用
+   * Delete an OAuth application
    */
   async delete(clientId: number): Promise<void> {
     await api.delete(`/api/private/oauth-app/${clientId}`);
   },
 
   /**
-   * 刷新 OAuth 应用密钥
+   * Refresh an OAuth application's secret
    */
   async refreshSecret(clientId: number): Promise<RefreshSecretResponse> {
     const response = await api.post(`/api/private/oauth-app/${clientId}/refresh`);
@@ -61,7 +61,7 @@ export const oauthAPI = {
   },
 
   /**
-   * 生成授权码
+   * Generate an authorization code
    */
   async generateCode(clientId: number, data: GenerateCodeRequest): Promise<GenerateCodeResponse> {
     const response = await api.post(`/api/private/oauth-app/${clientId}/code`, data);

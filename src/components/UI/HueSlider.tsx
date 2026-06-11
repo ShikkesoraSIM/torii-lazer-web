@@ -7,9 +7,9 @@ interface HueSliderProps {
 }
 
 /**
- * HueSlider - 色相滑块组件
- * 参照 fuwari 的实现，使用 OKLCH 颜色空间
- * 使用 memo 优化，避免不必要的重渲染
+ * HueSlider - hue slider component
+ * Based on fuwari's implementation, using the OKLCH color space
+ * Wrapped in memo to avoid unnecessary re-renders
  */
 const HueSlider: React.FC<HueSliderProps> = memo(({ hue, onChange, className = '' }) => {
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

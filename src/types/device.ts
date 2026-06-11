@@ -1,6 +1,6 @@
-// 设备会话相关类型定义
+// Device session type definitions
 
-// 用户代理信息
+// User agent info
 export interface UserAgentInfo {
   raw_ua: string;
   browser: string;
@@ -13,14 +13,14 @@ export interface UserAgentInfo {
   is_client: boolean;
 }
 
-// 位置信息
+// Location info
 export interface LocationInfo {
   country: string;
   city: string;
   country_code: string;
 }
 
-// 登录会话
+// Login session
 export interface Session {
   id: number;
   user_id: number;
@@ -34,7 +34,7 @@ export interface Session {
   location: LocationInfo;
 }
 
-// 受信任设备
+// Trusted device
 export interface TrustedDevice {
   id: number;
   user_id: number;
@@ -47,21 +47,21 @@ export interface TrustedDevice {
   location: LocationInfo;
 }
 
-// 会话列表响应
+// Session list response
 export interface SessionsResponse {
   total: number;
   current: number;
   sessions: Session[];
 }
 
-// 受信任设备列表响应
+// Trusted device list response
 export interface TrustedDevicesResponse {
   total: number;
   current: number;
   devices: TrustedDevice[];
 }
 
-// 旧的设备会话类型（保留以兼容现有代码）
+// Legacy device session type (kept for compatibility with existing code)
 export interface DeviceSession {
   id: number;
   device_type: string;

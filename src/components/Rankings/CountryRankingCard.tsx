@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import RankBadge from '../UI/RankBadge';
-import LazyFlag from '../UI/LazyFlag';
+import CountryFlag from '../UI/CountryFlag';
 import { GAME_MODE_COLORS } from '../../types';
 import type { CountryRanking, GameMode } from '../../types';
 import { getCountryName } from '../../utils/countryName';
@@ -30,18 +30,18 @@ const CountryRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode }) =>
         </div>
 
         <div className="flex-shrink-0">
-          <LazyFlag
-            src={`/image/flag/${ranking.code.toLowerCase()}.svg`}
-            alt={ranking.code}
-            className="w-10 h-7 rounded-md border border-white/20"
-            title={countryName}
+          <CountryFlag
+            code={ranking.code}
+            name={countryName}
+            className="h-7 border border-white/20"
+            rounded="rounded-md"
           />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-sm sm:text-base text-white truncate">{countryName}</div>
           <div className="text-[11px] sm:text-xs text-white/65 mt-0.5">
-            <span>{ranking.active_users.toLocaleString()} {t('rankings.countryCard.activeUsers')} • {ranking.play_count.toLocaleString()} {t('rankings.countryCard.playCount')}</span>
+            <span>{ranking.active_users.toLocaleString()} {t('rankings.countryCard.activeUsers')} Â· {ranking.play_count.toLocaleString()} {t('rankings.countryCard.playCount')}</span>
           </div>
         </div>
 

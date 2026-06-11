@@ -22,20 +22,16 @@ const BeatmapUrlLoader: React.FC<BeatmapUrlLoaderProps> = ({ onLoad, className =
 
     setLoading(true);
     try {
-      // 首先尝试使用内部路由转换
       const internalUrl = beatmapAPI.convertToInternalBeatmapUrl(url);
       
       if (internalUrl) {
-        // 如果可以转换为内部路由，直接导航
         navigate(internalUrl);
       } else {
-        // 否则尝试直接从 URL 获取数据
         const data = await beatmapAPI.getBeatmapFromUrl(url);
         
         if (onLoad) {
           onLoad(data);
         } else {
-          // 导航到 beatmap 页面
           const targetUrl = data.beatmap 
             ? `/beatmapsets/${data.beatmapset.id}#${data.beatmap.mode || 'osu'}/${data.beatmap.id}`
             : `/beatmapsets/${data.beatmapset.id}`;

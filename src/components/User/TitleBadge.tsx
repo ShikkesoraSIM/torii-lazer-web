@@ -17,7 +17,7 @@ interface TitleBadgeProps {
 
 const PLAYMODE_ICONS: Record<string, string> = {
   osu: '●',
-  taiko: '太',
+  taiko: '◎',
   fruits: '◈',
   mania: '▦',
 }
@@ -46,8 +46,8 @@ export function TitleBadge({ group, size = 'md' }: TitleBadgeProps) {
       `}
       style={{
         color: colour,
-        borderColor: `${colour}55`,
-        background: `${colour}18`,
+        borderColor: `${colour}80`,
+        background: `${colour}33`,
         textShadow: isElite ? `0 0 8px ${colour}99` : undefined,
         boxShadow: isElite ? `0 0 10px ${colour}33` : undefined,
       }}

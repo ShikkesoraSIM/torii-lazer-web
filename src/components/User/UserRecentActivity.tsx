@@ -12,7 +12,6 @@ interface UserRecentActivityProps {
   className?: string;
 }
 
-// 时间格式化函数
 const formatTimeAgo = (dateString: string, t: any): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -38,14 +37,14 @@ const formatTimeAgo = (dateString: string, t: any): string => {
   }
 };
 
-// 成就图标组件
+// Achievement icon component
 const AchievementIcon: React.FC<{ slug: string; alt: string; className?: string }> = ({ slug, alt, className = "w-6 h-6" }) => {
   const [imgSrc, setImgSrc] = useState(`/image/achievement_images/${slug}@2x.png`);
   const [hasError, setHasError] = useState(false);
 
   const handleError = () => {
     if (!hasError) {
-      // 尝试普通版本
+      // Fall back to the regular-resolution version
       setImgSrc(`/image/achievement_images/${slug}.png`);
       setHasError(true);
     }
@@ -61,7 +60,7 @@ const AchievementIcon: React.FC<{ slug: string; alt: string; className?: string 
   );
 };
 
-// 评级图标映射
+// Rank-to-icon mapping
 const getRankIcon = (rank: string) => {
   const rankImageMap: Record<string, string> = {
     'SSH': '/image/grades/SS-Silver.svg',  // SS-Silver
@@ -77,7 +76,7 @@ const getRankIcon = (rank: string) => {
   return rankImageMap[rank] || rankImageMap['F'];
 };
 
-// 活动类型图标映射
+// Activity-type icon mapping
 const getActivityIcon = (type: string) => {
   const iconClass = "w-3 h-3";
   switch (type) {
@@ -105,7 +104,7 @@ const getActivityIcon = (type: string) => {
   }
 };
 
-// 获取活动描述
+// Build the activity description
 const getActivityDescription = (activity: UserActivity, t: any) => {
   switch (activity.type) {
     case 'rank':
@@ -239,10 +238,10 @@ const UserRecentActivity: React.FC<UserRecentActivityProps> = ({ userId, classNa
       }
 
       const response = await userAPI.getRecentActivity(userId, 6, currentOffset);
-      
-      // 假设 API 返回一个数组，没有 has_more 字段时，判断返回的数据是否小于请求的数量
+
+      // The API returns a plain array with no has_more flag, so infer it from the page size
       const newActivities = Array.isArray(response) ? response : [];
-      const hasMoreData = newActivities.length === 6; // 如果返回的数量等于请求的数量，可能还有更多
+      const hasMoreData = newActivities.length === 6; // a full page likely means there's more
 
       if (reset) {
         setActivities(newActivities);
@@ -255,7 +254,7 @@ const UserRecentActivity: React.FC<UserRecentActivityProps> = ({ userId, classNa
       setHasMore(hasMoreData);
     } catch (err) {
       console.error('Failed to load user activities:', err);
-      setError('加载用户活动失败');
+      setError('Failed to load activities');
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -339,7 +338,7 @@ const UserRecentActivity: React.FC<UserRecentActivityProps> = ({ userId, classNa
                 <div className="text-gray-900 dark:text-gray-100">
                   {getActivityDescription(activity, t)}
                 </div>
-                {/* 手机端时间显示在描述下方 */}
+                {/* On mobile, show the time below the description */}
                 <div className="flex items-center gap-2 mt-1 sm:hidden">
                   {activity.mode && (
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
@@ -352,7 +351,7 @@ const UserRecentActivity: React.FC<UserRecentActivityProps> = ({ userId, classNa
                 </div>
               </div>
 
-              {/* 桌面端时间显示在右侧 */}
+              {/* On desktop, show the time on the right */}
               <div className="flex-shrink-0 items-center gap-2 hidden sm:flex">
                 {activity.mode && (
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
@@ -371,15 +370,13 @@ const UserRecentActivity: React.FC<UserRecentActivityProps> = ({ userId, classNa
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="min-w-[80px] sm:min-w-[100px] h-[32px] px-3 py-1.5 disabled:bg-gray-400 text-white rounded text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5"
-                style={{ backgroundColor: loadingMore ? undefined : profileColor }}
-                onMouseEnter={(e) => !loadingMore && (e.currentTarget.style.opacity = '0.9')}
-                onMouseLeave={(e) => !loadingMore && (e.currentTarget.style.opacity = '1')}
+                className="inline-flex h-9 min-w-[120px] items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-white ring-1 ring-white/20 transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                style={{ background: `linear-gradient(180deg, ${profileColor}, ${profileColor}d4)`, boxShadow: `0 8px 24px -10px ${profileColor}` }}
               >
                 {loadingMore ? (
                   <>
                     <LoadingSpinner size="sm" />
-                    <span>加载中...</span>
+                    <span>Loading...</span>
                   </>
                 ) : (
                   <span>{t('profile.activities.loadMore')}</span>

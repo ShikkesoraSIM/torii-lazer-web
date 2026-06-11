@@ -95,15 +95,15 @@ const AdminPanel: React.FC = () => {
   return (
     <main className="max-w-7xl mx-auto px-0 md:px-4 lg:px-6 py-4 md:py-6">
       {/* Statistics Dashboard - Similar to UserProfileLayout header */}
-      <div className="relative bg-card md:main-card-shadow md:rounded-t-2xl md:rounded-b-2xl md:border md:border-card mb-6 overflow-visible">
-        <div className="relative z-10 bg-transparent md:bg-card px-4 md:px-6 py-3 md:py-4 flex items-center justify-between md:rounded-t-2xl border-b border-card">
+      <div className="glass relative rounded-2xl mb-6 overflow-visible">
+        <div className="relative z-10 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
             <div className="text-base md:text-lg font-bold">Admin Panel</div>
           </div>
         </div>
 
-        <div className="bg-transparent md:bg-card px-3 md:px-6 py-4 md:py-6 border-b border-card">
+        <div className="px-3 md:px-6 py-4 md:py-6">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-osu-pink"></div>
@@ -199,20 +199,20 @@ const AdminPanel: React.FC = () => {
       <div className="relative z-0 flex flex-col lg:flex-row items-start gap-5">
           {/* Side Panel Navigation - Similar to UserProfileLayout sidebar */}
           <div className="lg:w-60 w-full flex-shrink-0">
-            <div className="bg-card/95 md:main-card-shadow md:rounded-2xl md:border md:border-card backdrop-blur-sm overflow-visible">
-              <div className="bg-transparent md:bg-card px-3 md:px-6 py-3 md:py-4 border-b border-card">
+            <div className="glass rounded-2xl overflow-visible">
+              <div className="px-3 md:px-6 py-3 md:py-4 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
                   <div className="text-base md:text-lg font-bold">Navigation</div>
                 </div>
               </div>
-              <nav className="bg-transparent md:bg-card px-3 md:px-5 py-3 md:py-4 space-y-1.5">
+              <nav className="px-3 md:px-5 py-3 md:py-4 space-y-1.5">
                 <button
                   onClick={() => setActiveTab('users')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'users'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -225,10 +225,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('beatmaps')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'beatmaps'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -241,10 +241,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('beatmap-list')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'beatmap-list'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -257,10 +257,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('badges')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'badges'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -273,10 +273,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('teams')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'teams'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -289,10 +289,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('daily-challenges')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'daily-challenges'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -305,10 +305,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('matchmaking')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'matchmaking'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -322,10 +322,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('announcements')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'announcements'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -338,10 +338,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('login-audit')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'login-audit'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -354,10 +354,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('name-changes')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'name-changes'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -372,10 +372,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('media-review')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'media-review'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -393,10 +393,10 @@ const AdminPanel: React.FC = () => {
                 {canSeeOwnerSection && (
                 <button
                   onClick={() => setActiveTab('anticheat')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'anticheat'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -412,10 +412,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('donations')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'donations'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -431,10 +431,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('maintenance')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'maintenance'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -449,10 +449,10 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('changelog')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
                     activeTab === 'changelog'
                       ? 'bg-osu-pink/10 text-osu-pink font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -471,8 +471,8 @@ const AdminPanel: React.FC = () => {
 
           {/* Content Area - Following UserProfileLayout card pattern */}
           <div className="flex-1 min-w-0 w-full">
-            <div className="bg-card/95 md:main-card-shadow md:rounded-2xl md:border md:border-card backdrop-blur-sm overflow-visible">
-              <div className="bg-transparent md:bg-card px-3 md:px-6 py-3 md:py-4 border-b border-card">
+            <div className="glass rounded-2xl overflow-visible">
+              <div className="px-3 md:px-6 py-3 md:py-4 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
                   <div className="text-base md:text-lg font-bold">
@@ -494,7 +494,7 @@ const AdminPanel: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-transparent md:bg-card px-3 md:px-6 py-4 md:py-6">
+              <div className="px-3 md:px-6 py-4 md:py-6">
                 {activeTab === 'users' && <AdminUsers />}
                 {activeTab === 'beatmaps' && <AdminBeatmapBlacklist />}
                 {activeTab === 'beatmap-list' && <AdminBeatmap />}

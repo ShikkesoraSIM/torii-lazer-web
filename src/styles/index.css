@@ -4,7 +4,7 @@
 
 /* Fuwari-inspired card components */
 @layer components {
-  /* 基础卡片样式 */
+  /* Base card styles */
   .card-base {
     @apply rounded-2xl overflow-hidden transition-all duration-300;
     background: var(--card-bg);
@@ -27,13 +27,13 @@
     border-color: var(--border-hover);
   }
   
-  /* 浮动面板 */
+  /* Floating panel */
   .float-panel {
     @apply rounded-2xl overflow-hidden transition-shadow shadow-xl;
     background: var(--float-panel-bg);
   }
-  
-  /* 常用卡片组合 */
+
+  /* Common card combination */
   .card-standard {
     @apply rounded-2xl shadow-lg transition-all duration-300;
     background: var(--card-bg);
@@ -46,21 +46,21 @@
     border-color: var(--border-hover);
   }
   
-  /* Modal 样式 */
+  /* Modal styles */
   .modal-card {
     @apply rounded-2xl shadow-2xl;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
   }
   
-  /* 紧凑卡片 */
+  /* Compact card */
   .card-compact {
     @apply rounded-xl shadow transition-all duration-300;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
   }
   
-  /* 背景样式 - 用于替换 bg-white dark:bg-gray-xxx */
+  /* Background styles - used to replace bg-white dark:bg-gray-xxx */
   .bg-card {
     background: var(--card-bg);
   }
@@ -77,7 +77,7 @@
     background: var(--page-bg);
   }
   
-  /* 边框样式 */
+  /* Border styles */
   .border-card {
     border-color: var(--border-color);
   }
@@ -200,7 +200,7 @@
   }
 }
 
-/* 导入 Extra 字体 */
+/* Import the Extra font */
 @font-face {
   font-family: 'Extra';
   src: url('/fonts/extra.96448ca7.woff2') format('woff2');
@@ -209,7 +209,7 @@
   font-display: swap;
 }
 
-/* 游戏模式图标字体样式 */
+/* Game mode icon font styles */
 .fa-extra-mode-osu::before {
   font-family: 'Extra';
   content: "\e800";
@@ -240,7 +240,7 @@
   content: "\e806";
 }
 
-/* 通用图标字体基础样式 */
+/* Shared icon font base styles */
 .fa-extra-mode-osu,
 .fa-extra-mode-fruits,
 .fa-extra-mode-mania,
@@ -265,11 +265,11 @@
   --bg-primary: #030014;
   --bg-secondary: #0b0b1e;
   
-  /* 卡片背景 - 亮色模式用白色 */
-  /* --card-bg: white; */ 
+  /* Card background - white in light mode */
+  /* --card-bg: white; */
   --card-bg-hover: oklch(0.98 0.005 var(--hue));
   /* Cartas y Paneles con efecto Glass de tu web */
-  --card-bg: rgba(23, 23, 45, 0.6);
+  --card-bg: rgba(30, 34, 72, 0.66);
   --border-color: rgba(255, 255, 255, 0.08);
   --float-panel-bg: rgba(10, 10, 20, 0.75);
   
@@ -278,67 +278,67 @@
   --text-secondary: #b4b4c0;
   --text-muted: #a0aec0;
   
-  /* 边框颜色 */
+  /* Border color */
   --border-color: #e2e8f0;
   --border-hover: rgba(237, 142, 166, 0.2);
-  
-  /* 按钮背景 */
+
+  /* Button background */
   --btn-bg: oklch(0.95 0.025 var(--hue));
   --btn-bg-hover: oklch(0.9 0.05 var(--hue));
   --btn-bg-active: oklch(0.85 0.08 var(--hue));
-  
-  /* 重点色 */
+
+  /* Accent color */
   --bg-accent-light: rgba(237, 142, 166, 0.05);
   --bg-accent-medium: rgba(237, 142, 166, 0.1);
-  
-  /* 浮动面板 */
+
+  /* Floating panel */
   --float-panel-bg: rgba(255, 255, 255, 0.9);
-  
-  /* 导航栏 */
+
+  /* Navbar */
   --navbar-bg: rgba(255, 255, 255, 0.9);
 }
 
 .dark {
-  /* 深色模式 - 参考 Fuwari 实现 */
+  /* Dark mode - based on the Fuwari implementation */
   /* --page-bg: oklch(0.16 0.014 var(--hue)); */
   --page-bg: #030014;
   --bg-primary: var(--page-bg);
   --bg-secondary: oklch(0.20 0.015 var(--hue));
-  
-  /* 卡片背景 - 与 Fuwari 一致 */
+
+  /* Card background - matches Fuwari */
   /* --card-bg: oklch(0.23 0.015 var(--hue)); */
-  --card-bg: rgba(23, 23, 45, 0.8);
+  --card-bg: rgba(30, 34, 72, 0.82);
   --card-bg-hover: oklch(0.30 0.03 var(--hue));
-  
-  /* 文本颜色 */
+
+  /* Text color */
   --text-primary: rgba(255, 255, 255, 0.9);
   --text-secondary: rgba(255, 255, 255, 0.75);
   --text-muted: rgba(255, 255, 255, 0.5);
-  
-  /* 边框颜色 - 更柔和 */
+
+  /* Border color - softer */
   --border-color: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(237, 142, 166, 0.3);
-  
-  /* 按钮背景 - 与 Fuwari 一致 */
+
+  /* Button background - matches Fuwari */
   --btn-bg: oklch(0.33 0.035 var(--hue));
   --btn-bg-hover: oklch(0.38 0.04 var(--hue));
   --btn-bg-active: oklch(0.43 0.045 var(--hue));
-  
-  /* Hover 状态背景 */
+
+  /* Hover-state background */
   --btn-plain-bg-hover: oklch(0.30 0.035 var(--hue));
   --btn-plain-bg-active: oklch(0.27 0.025 var(--hue));
-  
-  /* 重点色 */
+
+  /* Accent color */
   --bg-accent-light: rgba(237, 142, 166, 0.08);
   --bg-accent-medium: rgba(237, 142, 166, 0.15);
-  
-  /* 浮动面板 - 与 Fuwari 一致，使用 oklch */
+
+  /* Floating panel - matches Fuwari, uses oklch */
   --float-panel-bg: oklch(0.19 0.015 var(--hue) / 0.95);
-  
-  /* 导航栏 - 使用 oklch 带透明度 */
+
+  /* Navbar - uses oklch with transparency */
   --navbar-bg: oklch(0.19 0.015 var(--hue) / 0.9);
-  
-  /* 深色模式专用颜色 */
+
+  /* Dark-mode-only colors */
   /* --osu-pink: var(--profile-color, #ED8EA6); */
   --osu-pink: #ED8EA6;
   --profile-color: #ED8EA6;
@@ -348,7 +348,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/* 防止图片拖拽 */
+/* Prevent image dragging */
 .react-crop img {
   -webkit-user-drag: none !important;
   -khtml-user-drag: none !important;
@@ -361,7 +361,7 @@
   pointer-events: auto !important;
 }
 
-/* 确保裁剪容器居中 */
+/* Keep the crop container centered */
 .react-crop {
   display: inline-block;
 }
@@ -725,7 +725,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #d1d5db;
 }
 
-/* Card styles - 使用 CSS 变量 */
+/* Card styles - uses CSS variables */
 .card {
   background: var(--card-bg);
   border-radius: 1rem;
@@ -915,19 +915,19 @@ h1, h2, h3, h4, h5, h6 {
   clip-path: polygon(0 90%, 5% 85%, 15% 70%, 25% 60%, 35% 45%, 50% 35%, 65% 25%, 80% 20%, 90% 15%, 100% 10%, 100% 100%, 0 100%);
 }
 
-/* 全局禁用选择（文本 & 元素） */
+/* Disable selection globally (text & elements) */
 html, body, * {
-  -webkit-user-select: none; /* Chrome / Safari / 新 Edge / Opera */
+  -webkit-user-select: none; /* Chrome / Safari / new Edge / Opera */
   -moz-user-select: none;    /* Firefox */
-  -ms-user-select: none;     /* 旧 IE/Edge */
+  -ms-user-select: none;     /* old IE/Edge */
   user-select: none;
 }
 
-/* 图片/媒体额外处理：禁拖拽、禁长按弹出（iOS Safari） */
+/* Extra handling for images/media: no dragging, no long-press popup (iOS Safari) */
 img, svg, picture, video {
-  -webkit-user-drag: none;   /* 禁止拖拽保存 */
-  user-drag: none;           /* 非标准，部分浏览器支持 */
-  -webkit-touch-callout: none; /* iOS 长按菜单 */
+  -webkit-user-drag: none;   /* Disable drag-to-save */
+  user-drag: none;           /* Non-standard, supported by some browsers */
+  -webkit-touch-callout: none; /* iOS long-press menu */
   -webkit-user-select: none;
   user-select: none;
 }
@@ -938,8 +938,8 @@ input, textarea {
   user-select: text;
 }
 
-/* BBCode 样式 */
-/* 图片映射样式 - 基于 osu-web 官方实现 */
+/* BBCode styles */
+/* Image map styles - based on the official osu-web implementation */
 .imagemap {
   position: relative;
   display: inline-block;
@@ -957,19 +957,19 @@ input, textarea {
   z-index: 1;
   cursor: pointer;
   text-decoration: none;
-  /* 官方实现中链接区域是不可见的，只有 hover 时显示 */
+  /* In the official implementation, link areas are invisible and only shown on hover */
   background-color: transparent;
   border: none;
   transition: all 0.2s ease;
 }
 
 .imagemap__link:hover {
-  /* 鼠标悬停时显示半透明覆盖层 */
+  /* Show a translucent overlay on hover */
   background-color: rgba(237, 110, 160, 0.3);
   border: 1px solid rgba(237, 110, 160, 0.7);
 }
 
-/* 对于 span 元素（无链接区域），鼠标样式为默认 */
+/* For span elements (non-link areas), use the default cursor */
 span.imagemap__link {
   cursor: default;
 }
@@ -979,7 +979,7 @@ span.imagemap__link:hover {
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* 剧透条样式 */
+/* Inline spoiler styles */
 .spoiler {
   background-color: #000;
   color: #000;
@@ -993,7 +993,7 @@ span.imagemap__link:hover {
   color: inherit;
 }
 
-/* BBCode 折叠框样式 */
+/* BBCode spoiler box styles */
 .bbcode-box,
 .bbcode-spoilerbox {
   border: 1px solid #ccc;
@@ -1020,7 +1020,7 @@ span.imagemap__link:hover {
   padding: 8px;
 }
 
-/* 深色主题下的BBCode样式调整 */
+/* BBCode style adjustments in dark theme */
 @media (prefers-color-scheme: dark) {
   .bbcode-box,
   .bbcode-spoilerbox {
@@ -1034,7 +1034,7 @@ span.imagemap__link:hover {
   }
 }
 
-/* 用户页面内容区域的 BBCode 样式 */
+/* BBCode styles for the user page content area */
 .user-page-content .imagemap {
   max-width: 100%;
   margin: 8px 0;
@@ -1053,7 +1053,7 @@ span.imagemap__link:hover {
   border-radius: 4px;
 }
 
-/* Hue 滑块样式 - 参照 fuwari 实现 */
+/* Hue slider styles - based on the fuwari implementation */
 .hue-slider-wrapper {
   position: relative;
   width: 100%;
@@ -1134,7 +1134,7 @@ span.imagemap__link:hover {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Firefox - 移除默认轨道样式 */
+/* Firefox - remove the default track styling */
 .hue-slider::-moz-range-track {
   background: transparent;
   border: none;
@@ -1161,22 +1161,22 @@ span.imagemap__link:hover {
   --torii-blob-a: rgba(176, 69, 255, 0.2);
   --torii-blob-b: rgba(66, 163, 255, 0.16);
   --torii-blob-c: rgba(255, 91, 189, 0.14);
-  --torii-surface: linear-gradient(165deg, rgba(22, 26, 62, 0.78), rgba(12, 16, 42, 0.64));
-  --torii-surface-soft: linear-gradient(165deg, rgba(18, 22, 53, 0.62), rgba(10, 13, 35, 0.52));
-  --torii-nav-surface: linear-gradient(180deg, rgba(17, 20, 52, 0.9), rgba(9, 12, 34, 0.78));
-  --torii-border: rgba(255, 255, 255, 0.16);
-  --torii-border-soft: rgba(255, 255, 255, 0.08);
-  --torii-glow-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --torii-panel-bg: linear-gradient(165deg, rgba(20, 24, 60, 0.76), rgba(12, 16, 40, 0.62));
-  --torii-panel-soft-bg: linear-gradient(165deg, rgba(18, 22, 52, 0.58), rgba(11, 14, 34, 0.48));
-  --torii-panel-border: rgba(255, 255, 255, 0.12);
-  --torii-panel-border-strong: rgba(255, 255, 255, 0.18);
-  --torii-panel-shadow: 0 16px 42px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --torii-surface: linear-gradient(165deg, rgba(36, 45, 108, 0.78), rgba(19, 26, 66, 0.64));
+  --torii-surface-soft: linear-gradient(165deg, rgba(30, 38, 92, 0.62), rgba(16, 22, 56, 0.52));
+  --torii-nav-surface: linear-gradient(180deg, rgba(28, 35, 92, 0.9), rgba(14, 19, 52, 0.78));
+  --torii-border: rgba(255, 255, 255, 0.18);
+  --torii-border-soft: rgba(255, 255, 255, 0.1);
+  --torii-glow-shadow: 0 20px 60px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --torii-panel-bg: linear-gradient(165deg, rgba(33, 41, 100, 0.76), rgba(18, 24, 62, 0.62));
+  --torii-panel-soft-bg: linear-gradient(165deg, rgba(29, 36, 88, 0.58), rgba(16, 21, 54, 0.48));
+  --torii-panel-border: rgba(255, 255, 255, 0.15);
+  --torii-panel-border-strong: rgba(255, 255, 255, 0.22);
+  --torii-panel-shadow: 0 16px 42px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .dark {
-  --torii-panel-bg: linear-gradient(165deg, rgba(17, 20, 52, 0.8), rgba(10, 13, 34, 0.66));
-  --torii-panel-soft-bg: linear-gradient(165deg, rgba(16, 19, 46, 0.64), rgba(9, 12, 30, 0.54));
+  --torii-panel-bg: linear-gradient(165deg, rgba(30, 38, 96, 0.8), rgba(16, 21, 58, 0.66));
+  --torii-panel-soft-bg: linear-gradient(165deg, rgba(27, 34, 84, 0.64), rgba(14, 19, 48, 0.54));
 }
 
 .torii-app-shell {
@@ -1371,11 +1371,13 @@ textarea {
   -webkit-backdrop-filter: blur(10px) saturate(125%);
 }
 .glass {
-  background: rgba(18, 18, 32, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px) saturate(130%);
-  -webkit-backdrop-filter: blur(18px) saturate(130%);
-  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(158deg, var(--bg-accent-medium, rgba(237, 142, 166, 0.1)) 0%, transparent 46%),
+    linear-gradient(158deg, rgba(46, 55, 116, 0.7), rgba(18, 24, 58, 0.56));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  box-shadow: 0 20px 54px -14px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .glass-thick {
   background: rgba(16, 16, 28, 0.7);
@@ -1422,23 +1424,23 @@ html.perf-mode *::after {
 /* Make the glass surfaces opaque (the blur is gone, so translucency over busy
    content would hurt readability). Keeps the bluish tint, just solid. */
 html.perf-mode {
-  --torii-surface: linear-gradient(165deg, #181d44, #0e1234);
-  --torii-surface-soft: linear-gradient(165deg, #141838, #0c1030);
-  --torii-nav-surface: linear-gradient(180deg, #141845, #0b0f30);
-  --torii-panel-bg: linear-gradient(165deg, #161b40, #0d1132);
-  --torii-panel-soft-bg: linear-gradient(165deg, #131737, #0b0e2c);
-  --card-bg: #15161f;
-  --card-bg-hover: #1b1c27;
-  --float-panel-bg: #0f1330;
-  --navbar-bg: #11153a;
+  --torii-surface: linear-gradient(165deg, #232c62, #131a46);
+  --torii-surface-soft: linear-gradient(165deg, #1d2452, #11173c);
+  --torii-nav-surface: linear-gradient(180deg, #1e2560, #0e1340);
+  --torii-panel-bg: linear-gradient(165deg, #212a5e, #121849);
+  --torii-panel-soft-bg: linear-gradient(165deg, #1b2250, #0f1438);
+  --card-bg: #1d2142;
+  --card-bg-hover: #262c52;
+  --float-panel-bg: #171d48;
+  --navbar-bg: #1a2256;
 }
 
 html.perf-mode .glass,
 html.perf-mode .glass-thin {
-  background: #14163a !important;
+  background: linear-gradient(158deg, #262e68, #151b46) !important;
 }
 html.perf-mode .glass-thick {
-  background: #0f1230 !important;
+  background: #171d48 !important;
 }
 html.perf-mode .mm-glass,
 html.perf-mode .mm-glass-pop,
@@ -1446,7 +1448,7 @@ html.perf-mode .mm-glass-inset,
 html.perf-mode .glass-morphism,
 html.perf-mode .profile-glass,
 html.perf-mode .glass-effect {
-  background: #141833 !important;
+  background: #1c2350 !important;
 }
 
 /* Also calm down the heavy fixed background blobs in perf-mode (large radial

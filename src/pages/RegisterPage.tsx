@@ -130,7 +130,7 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-gray-900 flex justify-center px-4 sm:px-6 lg:px-8 overflow-auto pt-8 sm:pt-12 lg:pt-0 lg:items-center">
+    <div className="min-h-screen bg-[#030014] flex justify-center px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-0 lg:items-center">
       <div className="max-w-md w-full space-y-3 pb-4 lg:pb-0">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto flex items-center justify-center mb-2">

@@ -7,6 +7,7 @@ import type { Beatmapset } from '../../types/beatmap';
 import { beatmapAPI, searchAPI, userAPI } from '../../utils/api';
 import type { NavbarSearchTeam, NavbarSearchUser } from '../../utils/api/search';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
+import CountryFlag from '../UI/CountryFlag';
 
 interface NavbarSearchOverlayProps {
   isOpen: boolean;
@@ -370,11 +371,11 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
                         <div className="min-w-0 flex-1">
                           <p className="text-white text-lg leading-tight truncate">{searchUser.username}</p>
                           <p className="text-white/70 text-sm truncate flex items-center gap-2">
-                            <img
-                              src={`/image/flag/${(searchUser.country_code || 'xx').toLowerCase()}.svg`}
-                              alt={searchUser.country_code}
-                              className="w-4 h-3 rounded-sm"
-                              loading="lazy"
+                            <CountryFlag
+                              code={searchUser.country_code || 'xx'}
+                              name={searchUser.country_code}
+                              className="h-3"
+                              rounded="rounded-sm"
                             />
                             <span>{searchUser.is_online ? 'Online' : 'Offline'}</span>
                           </p>

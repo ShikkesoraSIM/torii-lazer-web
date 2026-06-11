@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Tooltip } from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
 import LazyAvatar from '../UI/LazyAvatar';
-import LazyFlag from '../UI/LazyFlag';
+import CountryFlag from '../UI/CountryFlag';
 
 export interface FriendCardUser {
   id: number;
@@ -38,14 +37,12 @@ const FriendCard: React.FC<Props> = ({ user, mutual }) => {
         <div className="font-semibold text-sm sm:text-base text-white truncate">{user.username}</div>
         {user.country_code && (
           <div className="flex items-center gap-1 mt-0.5">
-            <LazyFlag
-              src={`/image/flag/${user.country_code.toLowerCase()}.svg`}
-              alt={user.country_code}
-              className="w-4 h-3 rounded-sm flex-shrink-0"
-              data-tooltip-id={`friend-country-${user.id}`}
-              data-tooltip-content={user.country?.name || user.country_code}
+            <CountryFlag
+              code={user.country_code}
+              name={user.country?.name || user.country_code}
+              className="h-3"
+              rounded="rounded-sm"
             />
-            <Tooltip id={`friend-country-${user.id}`} place="bottom" float style={{ zIndex: 9999 }} />
           </div>
         )}
       </div>

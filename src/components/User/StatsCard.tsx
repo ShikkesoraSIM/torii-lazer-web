@@ -18,7 +18,7 @@ interface StatsCardProps {
 
 const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
   const { t } = useTranslation();
-  // 每次游玩击打数 = 总命中次数 / 游戏次数
+  // Hits per play = total hits / play count
   const avgHitsPerPlay =
     stats?.play_count && stats?.play_count > 0
       ? Math.round((stats.total_hits ?? 0) / stats.play_count)
@@ -27,7 +27,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
   return (
     <div>
       <div className="flex flex-col gap-2 sm:gap-3 md:gap-4 text-xs">
-        {/* 计分成绩总分 */}
+        {/* Ranked score */}
         <div className="flex justify-between items-center">
           <span className="text-white/75">{t('profile.stats.rankedScore')}</span>
           <span className="text-white font-bold">
@@ -35,7 +35,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
           </span>
         </div>
 
-        {/* 准确率 */}
+        {/* Accuracy */}
         <div className="flex justify-between items-center">
           <span className="text-white/75">{t('profile.stats.accuracy')}</span>
           <span className="text-white font-bold">
@@ -43,7 +43,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
           </span>
         </div>
 
-        {/* 游戏次数 */}
+        {/* Play count */}
         <div className="flex justify-between items-center">
           <span className="text-white/75">{t('profile.stats.playCount')}</span>
           <span className="text-white font-bold">
@@ -51,7 +51,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
           </span>
         </div>
 
-        {/* 总分 */}
+        {/* Total score */}
         <div className="flex justify-between items-center">
           <span className="text-white/75">{t('profile.stats.totalScore')}</span>
           <span className="text-white font-bold">
@@ -59,7 +59,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
           </span>
         </div>
 
-        {/* 总命中次数 */}
+        {/* Total hits */}
         <div className="flex justify-between items-center">
           <span className="text-white/75">{t('profile.stats.totalHits')}</span>
           <span className="text-white font-bold">
@@ -67,7 +67,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
           </span>
         </div>
 
-        {/* 每次游玩击打数 */}
+        {/* Hits per play */}
         <div className="flex justify-between items-center">
           <span className="text-white/75">{t('profile.stats.hitsPerPlay')}</span>
           <span className="text-white font-bold">
@@ -75,7 +75,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
           </span>
         </div>
 
-        {/* 最大连击 */}
+        {/* Max combo */}
         <div className="flex justify-between items-center">
           <span className="text-white/75">{t('profile.stats.maxCombo')}</span>
           <span className="text-white font-bold">
@@ -83,7 +83,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
           </span>
         </div>
 
-        {/* 回放被观看次数 */}
+        {/* Replays watched by others */}
         <div className="flex justify-between items-center">
           <span className="text-white/75">{t('profile.stats.replaysWatched')}</span>
           <span className="text-white font-bold">

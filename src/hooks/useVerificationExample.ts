@@ -1,4 +1,4 @@
-// 这是一个使用示例，展示如何手动触发验证流程
+// Example showing how to manually trigger the verification flow
 import { useVerification } from '../contexts/VerificationContext';
 
 export const useVerificationExample = () => {
@@ -7,27 +7,25 @@ export const useVerificationExample = () => {
   const triggerVerification = async (method: 'totp' | 'mail') => {
     try {
       await showVerificationModal(method);
-      console.log('验证成功完成');
-      // 在这里处理验证成功后的逻辑
-    } catch (error) {
-      console.log('验证失败或被取消');
-      // 在这里处理验证失败的逻辑
+      // Handle the post-verification-success logic here
+    } catch {
+      // Handle the verification-failure logic here
     }
   };
 
   return { triggerVerification };
 };
 
-// 使用示例：
+// Usage example:
 // const { triggerVerification } = useVerificationExample();
-// 
+//
 // const handleSomeAction = async () => {
 //   try {
-//     // 执行需要验证的操作
+//     // Run the operation that requires verification
 //     await triggerVerification('totp');
-//     // 验证成功，继续执行
+//     // Verification succeeded, continue
 //   } catch (error) {
-//     // 验证失败，处理错误
+//     // Verification failed, handle the error
 //   }
 // };
 

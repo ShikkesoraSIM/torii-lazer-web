@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { hexToRgb } from '../../utils/color';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { userAPI } from '../../utils/api';
@@ -19,7 +20,6 @@ interface UserRecentScoresProps {
   className?: string;
 }
 
-// 时间格式化函数
 const formatTimeAgo = (dateString: string, t: any): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -45,18 +45,18 @@ const formatTimeAgo = (dateString: string, t: any): string => {
   }
 };
 
-// 评级图标映射
+// Rank-to-icon mapping
 const getRankIcon = (rank: string) => {
   const rankImageMap: Record<string, string> = {
-    // SS 系列
-    XH: '/image/grades/SS-Silver.svg', // 银 SS（SSH）
-    X:  '/image/grades/SS.svg',        // 金 SS（SS）
+    // SS tier
+    XH: '/image/grades/SS-Silver.svg', // silver SS (SSH)
+    X:  '/image/grades/SS.svg',        // gold SS
 
-    // S 系列
-    SH: '/image/grades/S-Silver.svg',  // 银 S
-    S:  '/image/grades/S.svg',         // 金 S
+    // S tier
+    SH: '/image/grades/S-Silver.svg',  // silver S
+    S:  '/image/grades/S.svg',         // gold S
 
-    // 其他等级
+    // Other tiers
     A:  '/image/grades/A.svg',
     B:  '/image/grades/B.svg',
     C:  '/image/grades/C.svg',
@@ -68,7 +68,7 @@ const getRankIcon = (rank: string) => {
 };
 
 
-// 单个成绩卡片组件 - 基于 osu! 官方设计
+// Single score-card component, based on the official osu! design
 const ScoreCard: React.FC<{
   score: BestScore;
   t: any;
@@ -77,28 +77,22 @@ const ScoreCard: React.FC<{
   clientDisplayMode?: ScoreClientDisplayMode;
   className?: string;
 }> = ({ score, t, profileColor, showPP = true, clientDisplayMode = 'icon', className = '' }) => {
-  // 必取字段处理
-  const rank = score.rank; // 等级徽章（S/A/B/C/D/F）
+  // Required fields
+  const rank = score.rank; // grade badge (S/A/B/C/D/F)
   const title = score.beatmapset?.title_unicode || score.beatmapset?.title || 'Unknown Title';
   const artist = score.beatmapset?.artist_unicode || score.beatmapset?.artist || 'Unknown Artist';
-  const version = score.beatmap?.version || 'Unknown'; // 难度名
-  const endedAt = formatTimeAgo(score.ended_at, t); // 相对时间
-  const accuracy = (score.accuracy * 100).toFixed(2); // 命中率（百分比）
-  const originalPp = Math.round(score.pp || 0); // 原始pp
-  const mods = score.mods || []; // MOD列表
-  const passed = score.passed; // 是否通过
+  const version = score.beatmap?.version || 'Unknown'; // difficulty name
+  const endedAt = formatTimeAgo(score.ended_at, t); // relative time
+  const accuracy = (score.accuracy * 100).toFixed(2); // accuracy (percentage)
+  const originalPp = Math.round(score.pp || 0); // raw pp
+  const mods = score.mods || []; // mod list
+  const passed = score.passed; // whether the score passed
 
   const beatmapUrl = score.beatmap?.url || '#';
   const coverImage = score.beatmapset?.covers?.['cover@2x'] || score.beatmapset?.covers?.cover;
 
-  // 将主题颜色转换为 RGB 以便使用透明度
-  const hexToRgb = (hex: string): string => {
-    const cleanHex = hex.replace('#', '');
-    const r = parseInt(cleanHex.substring(0, 2), 16);
-    const g = parseInt(cleanHex.substring(2, 4), 16);
-    const b = parseInt(cleanHex.substring(4, 6), 16);
-    return `${r}, ${g}, ${b}`;
-  };
+  // Convert the theme color to RGB so we can apply opacity
+
 
   const themeRgb = hexToRgb(profileColor);
 
@@ -107,26 +101,26 @@ const ScoreCard: React.FC<{
       src={coverImage}
       className={`relative overflow-hidden rounded-lg border border-gray-200/70 dark:border-gray-600/40 bg-card ${className}`}
     >
-      {/* 渐变遮罩层确保文字可读性 - 使用主题颜色 */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-r" 
+      {/* Gradient overlay tinted with the theme color to keep text readable */}
+      <div
+        className="absolute inset-0 bg-gradient-to-r"
         style={{
           background: `linear-gradient(to right, rgba(${themeRgb}, 0.15) 0%, rgba(${themeRgb}, 0.08) 50%, rgba(${themeRgb}, 0.03) 100%)`
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/75 to-white/60 dark:from-gray-800/90 dark:via-gray-800/75 dark:to-gray-800/60" />
-      
-      {/* 失败标记 */}
+
+      {/* Failed marker */}
       {!passed && (
         <div className="absolute inset-0 bg-red-500/10 dark:bg-red-500/20" />
       )}
-      
+
       <div className="relative bg-transparent hover:bg-white/20 dark:hover:bg-gray-800/20 transition-colors duration-150 group">
-        {/* 桌面端布局 */}
+        {/* Desktop layout */}
         <div className="hidden sm:block">
-          {/* 主要内容区域 */}
+          {/* Main content area */}
           <div className="flex items-center h-12 pl-5 pr-24">
-            {/* 等级徽章 */}
+            {/* Grade badge */}
             <div className="flex-shrink-0 mr-3">
               <img 
                 src={getRankIcon(rank)} 
@@ -135,10 +129,10 @@ const ScoreCard: React.FC<{
               />
             </div>
 
-            {/* 谱面信息 */}
+            {/* Beatmap info */}
             <div className="flex-1 min-w-0">
               <div className="flex flex-col -space-y-0.5">
-                {/* 标题和艺术家 */}
+                {/* Title and artist */}
                 <div className="flex items-baseline gap-1 text-sm leading-tight">
                   <BeatmapLink
                     beatmapUrl={beatmapUrl}
@@ -160,7 +154,7 @@ const ScoreCard: React.FC<{
                   )}
                 </div>
                 
-                {/* 难度名和时间 */}
+                {/* Difficulty name and time */}
                 <div className="flex items-center gap-3 text-xs">
                   <span className="text-yellow-600 dark:text-yellow-400 font-medium">
                     {version}
@@ -183,9 +177,9 @@ const ScoreCard: React.FC<{
               </div>
             </div>
 
-            {/* 中间成绩数据 */}
+            {/* Score data in the middle */}
             <div className="flex-shrink-0 flex items-center gap-2 mr-6">
-              {/* MOD图标 + 准确率 */}
+              {/* Mod icons + accuracy */}
               <ScoreModsDisplay mods={mods} />
               <div className={`text-sm font-bold ml-2 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${!passed ? 'text-gray-500 dark:text-gray-500' : 'text-cyan-600 dark:text-cyan-300'}`}>
                 {accuracy}%
@@ -193,10 +187,10 @@ const ScoreCard: React.FC<{
             </div>
           </div>
 
-          {/* 右侧性能区域 */}
+          {/* Performance area on the right */}
           {showPP && originalPp > 0 && (
             <div className="absolute right-0 top-0 h-full w-20 flex items-center justify-center">
-              {/* PP 值 */}
+              {/* PP value */}
               <div className={`text-sm font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${!passed ? 'text-gray-400 dark:text-gray-500' : 'torii-pp-gradient'}`}>
                 {originalPp} PP
               </div>
@@ -204,21 +198,21 @@ const ScoreCard: React.FC<{
           )}
         </div>
 
-        {/* 手机端布局 */}
+        {/* Mobile layout */}
         <div className="block sm:hidden p-4">
           <div className="flex items-start gap-3">
-            {/* 等级徽章 */}
+            {/* Grade badge */}
             <div className="flex-shrink-0">
-              <img 
-                src={getRankIcon(rank)} 
+              <img
+                src={getRankIcon(rank)}
                 alt={rank}
                 className={`w-12 h-8 object-contain ${!passed ? 'opacity-50' : ''}`}
               />
             </div>
 
-            {/* 主要内容 */}
+            {/* Main content */}
             <div className="flex-1 min-w-0">
-              {/* 第一行：标题和艺术家 */}
+              {/* Row 1: title and artist */}
               <div className="flex items-baseline gap-1 text-sm leading-tight mb-1">
                 <BeatmapLink
                   beatmapUrl={beatmapUrl}
@@ -240,7 +234,7 @@ const ScoreCard: React.FC<{
                 )}
               </div>
               
-              {/* 第二行：难度名和时间 */}
+              {/* Row 2: difficulty name and time */}
               <div className="flex items-center gap-3 text-xs mb-2">
                 <span className="text-yellow-600 dark:text-yellow-400 font-medium">
                   {version}
@@ -261,7 +255,7 @@ const ScoreCard: React.FC<{
                 </Link>
               </div>
 
-              {/* 第三行：MOD、准确率和PP */}
+              {/* Row 3: mods, accuracy and PP */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ScoreModsDisplay mods={mods} />
@@ -311,20 +305,20 @@ const UserRecentScores: React.FC<UserRecentScoresProps> = ({
       }
 
       const response = await userAPI.getRecentScores(userId, selectedMode, 6, currentOffset, false);
-      
-      // 处理 API 响应
+
+      // Handle the API response
       const newScores = Array.isArray(response) ? response : [];
-      
-      // 判断是否还有更多数据
+
+      // Determine whether there's more data
       let hasMoreData: boolean;
-      
+
       if (reset) {
         hasMoreData = newScores.length === 6;
         setScores(newScores);
         setOffset(newScores.length);
       } else {
         const currentTotal = scores.length + newScores.length;
-        hasMoreData = newScores.length === 6 && currentTotal < 100; // 最近成绩最多显示100条
+        hasMoreData = newScores.length === 6 && currentTotal < 100; // cap recent scores at 100 entries
         setScores(prev => [...prev, ...newScores]);
         setOffset(prev => prev + newScores.length);
       }
@@ -428,10 +422,8 @@ const UserRecentScores: React.FC<UserRecentScoresProps> = ({
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="min-w-[80px] sm:min-w-[100px] h-[32px] px-3 py-1.5 disabled:bg-gray-400 text-white rounded text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5"
-                style={{ backgroundColor: loadingMore ? undefined : profileColor }}
-                onMouseEnter={(e) => !loadingMore && (e.currentTarget.style.opacity = '0.9')}
-                onMouseLeave={(e) => !loadingMore && (e.currentTarget.style.opacity = '1')}
+                className="inline-flex h-9 min-w-[120px] items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-white ring-1 ring-white/20 transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                style={{ background: `linear-gradient(180deg, ${profileColor}, ${profileColor}d4)`, boxShadow: `0 8px 24px -10px ${profileColor}` }}
               >
                 {loadingMore ? (
                   <>

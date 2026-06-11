@@ -18,12 +18,12 @@ export interface ResendResponse {
 }
 
 export const verificationAPI = {
-  // 验证会话
+  // Verify the session
   verify: async (verificationKey: string): Promise<void> => {
     const formData = new URLSearchParams();
     formData.append('verification_key', verificationKey);
 
-    // 获取设备UUID（异步）
+    // Get the device UUID (async)
     const deviceUUID = await getDeviceUUID();
 
     const response = await api.post('/api/v2/session/verify', formData, {
@@ -36,20 +36,20 @@ export const verificationAPI = {
     return response.data;
   },
 
-  // 重新发送验证码（邮箱）
+  // Resend the verification code (email)
   reissueCode: async (): Promise<ResendResponse> => {
     const response = await api.post('/api/v2/session/verify/reissue');
     return response.data;
   },
 
-  // 切换到邮箱验证模式
+  // Switch to email verification mode
   switchToMailFallback: async (): Promise<VerificationResponse> => {
     const response = await api.post('/api/v2/session/verify/mail-fallback');
     return response.data;
   },
 };
 
-// 检查错误是否为用户验证错误
+// Check whether an error is a user-verification error
 export const isVerificationError = (error: any): error is { response: { data: VerificationError } } => {
   return (
     error?.response?.data?.error?.error === 'User not verified' &&
@@ -57,7 +57,7 @@ export const isVerificationError = (error: any): error is { response: { data: Ve
   );
 };
 
-// 从错误中获取验证方法
+// Extract the verification method from an error
 export const getVerificationMethod = (error: any): 'totp' | 'mail' | null => {
   if (isVerificationError(error)) {
     return error.response.data.error.method;

@@ -10,11 +10,9 @@ const ProfilePage: React.FC = () => {
   const { user, isAuthenticated, isLoading, updateUserMode, updateUser } = useAuth();
   const [selectedMode, setSelectedMode] = useState<GameMode>('osu');
   
-  // 使用 ref 跟踪是否正在更新模式，防止重复请求
   const isUpdatingModeRef = useRef(false);
   const latestModeRef = useRef<GameMode>(selectedMode);
 
-  // 当用户数据加载后，根据用户的 g0v0_playmode 设置初始模式
   useEffect(() => {
     if (user?.g0v0_playmode && user.g0v0_playmode !== selectedMode) {
       setSelectedMode(user.g0v0_playmode);
@@ -23,10 +21,8 @@ const ProfilePage: React.FC = () => {
   }, [user?.g0v0_playmode]);
 
   useEffect(() => {
-    // 如果正在更新或未认证，跳过
     if (!isAuthenticated || isUpdatingModeRef.current) return;
     
-    // 如果模式没有变化，跳过
     if (latestModeRef.current === selectedMode && user?.g0v0_playmode === selectedMode) {
       return;
     }

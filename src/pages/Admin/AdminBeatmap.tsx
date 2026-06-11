@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { hexToRgb } from '../../utils/color';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
 import LazyBackgroundImage from '../../components/UI/LazyBackgroundImage';
@@ -118,13 +119,7 @@ const AdminBeatmap: React.FC = () => {
     const tooltipId = `beatmap-${beatmapset.id}-${index}`;
 
     // Convert theme color to RGB for gradient overlay
-    const hexToRgb = (hex: string): string => {
-      const cleanHex = hex.replace('#', '');
-      const r = parseInt(cleanHex.substring(0, 2), 16);
-      const g = parseInt(cleanHex.substring(2, 4), 16);
-      const b = parseInt(cleanHex.substring(4, 6), 16);
-      return `${r}, ${g}, ${b}`;
-    };
+
 
     const themeRgb = hexToRgb(profileColor);
 

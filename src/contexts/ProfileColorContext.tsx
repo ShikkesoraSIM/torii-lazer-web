@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { hexToRgb } from '../utils/color';
 import type { ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { preferencesAPI } from '../utils/api';
@@ -6,9 +7,9 @@ import { preferencesAPI } from '../utils/api';
 interface ProfileColorContextType {
 	profileColor: string;
 	setProfileColor: (color: string) => Promise<void>;
-	// 设置临时颜色（仅应用于前端，不持久化到服务器）
+	// Set a temporary color (front-end only, not persisted to the server)
 	setProfileColorLocal: (color: string) => void;
-	// 重置为已保存的颜色（从服务器加载或最近一次成功保存的值）
+	// Reset to the saved color (loaded from the server or the last successful save)
 	resetProfileColor: () => void;
 	isLoading: boolean;
 }
@@ -19,22 +20,22 @@ interface ProfileColorProviderProps {
   children: ReactNode;
 }
 
-export const DEFAULT_PROFILE_COLOR = '#ED8EA6'; // 默认的 osu-pink 颜色
-const LOCAL_STORAGE_KEY = 'user_profile_color'; // 本地存储的键名
+export const DEFAULT_PROFILE_COLOR = '#ED8EA6'; // default osu-pink color
+const LOCAL_STORAGE_KEY = 'user_profile_color'; // localStorage key
 
 /**
- * ProfileColorProvider - 全局管理个人颜色设置
- * 通过CSS变量动态应用个人颜色到整个应用
- * 
- * 颜色优先级：
- * 1. 服务端返回的颜色（最高优先级）
- * 2. 本地存储的用户设置颜色
- * 3. 默认颜色
+ * ProfileColorProvider - globally manages the personal color setting
+ * and applies it across the whole app via CSS variables.
+ *
+ * Color priority:
+ * 1. Color returned by the server (highest priority)
+ * 2. User color stored in localStorage
+ * 3. Default color
  */
 export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
   const [profileColor, setProfileColorState] = useState<string>(() => {
-    // 初始化时从本地存储读取
+    // Read from localStorage on init
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       return stored || DEFAULT_PROFILE_COLOR;
@@ -42,9 +43,9 @@ export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ chil
       return DEFAULT_PROFILE_COLOR;
     }
   });
-	// 保留从服务器加载或成功保存的颜色，用于重置
+	// Keep the server-loaded or successfully-saved color, used for resets
 	const [savedProfileColor, setSavedProfileColor] = useState<string>(() => {
-    // 初始化时从本地存储读取
+    // Read from localStorage on init
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       return stored || DEFAULT_PROFILE_COLOR;
@@ -54,11 +55,11 @@ export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ chil
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // 加载用户的个人颜色设置
+  // Load the user's personal color setting
   useEffect(() => {
     const loadProfileColor = async () => {
       if (!isAuthenticated) {
-        // 未登录时使用本地存储的颜色或默认颜色
+        // When logged out, use the stored color or the default
         const storedColor = localStorage.getItem(LOCAL_STORAGE_KEY) || DEFAULT_PROFILE_COLOR;
         setProfileColorState(storedColor);
         setSavedProfileColor(storedColor);
@@ -67,7 +68,7 @@ export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ chil
         return;
       }
 
-      // 先立即应用本地存储的颜色，避免延迟
+      // Apply the stored color immediately to avoid a delay
       const storedColor = localStorage.getItem(LOCAL_STORAGE_KEY) || DEFAULT_PROFILE_COLOR;
       setProfileColorState(storedColor);
       setSavedProfileColor(storedColor);
@@ -75,16 +76,16 @@ export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ chil
       setIsLoading(false);
 
       try {
-        // 后台从服务器获取用户设置的颜色
+        // Fetch the user's saved color from the server in the background
         const preferences = await preferencesAPI.getPreferences();
         let serverColor = preferences.profile_colour || DEFAULT_PROFILE_COLOR;
-        
-        // 确保颜色值以 # 开头
+
+        // Ensure the color value starts with #
         if (serverColor && !serverColor.startsWith('#')) {
           serverColor = `#${serverColor}`;
         }
-        
-        // 只有当服务端颜色和本地存储不一样时才更新
+
+        // Only update when the server color differs from what's stored
         if (serverColor !== storedColor) {
           setProfileColorState(serverColor);
           setSavedProfileColor(serverColor);
@@ -93,28 +94,22 @@ export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ chil
         }
       } catch (error) {
         console.error('Failed to load profile color:', error);
-        // 失败时已经应用了本地存储的颜色，无需额外处理
+        // On failure the stored color is already applied; nothing else to do
       }
     };
 
     loadProfileColor();
   }, [isAuthenticated, user]);
 
-  // 应用颜色到DOM的CSS变量
+  // Apply the color to the DOM CSS variables
   const applyColorToDOM = (color: string) => {
     document.documentElement.style.setProperty('--profile-color', color);
     document.documentElement.style.setProperty('--osu-pink', color);
+
+    // Convert the HEX color to RGB for background opacity
+
     
-    // 将 HEX 颜色转换为 RGB 用于背景色透明度
-    const hexToRgb = (hex: string): string => {
-      const cleanHex = hex.replace('#', '');
-      const r = parseInt(cleanHex.substring(0, 2), 16);
-      const g = parseInt(cleanHex.substring(2, 4), 16);
-      const b = parseInt(cleanHex.substring(4, 6), 16);
-      return `${r}, ${g}, ${b}`;
-    };
-    
-    // 将 HEX 颜色转换为 Hue 值
+    // Convert the HEX color to a Hue value
     const hexToHue = (hex: string): number => {
       const cleanHex = hex.replace('#', '');
       const r = parseInt(cleanHex.substring(0, 2), 16) / 255;
@@ -140,36 +135,36 @@ export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ chil
     
     const rgb = hexToRgb(color);
     const hue = hexToHue(color);
-    
-    // 设置 hue 值，用于 OKLCH 颜色空间的背景色
+
+    // Set the hue value used for OKLCH-space background colors
     document.documentElement.style.setProperty('--hue', String(hue));
-    
-    // 更新背景颜色相关的 CSS 变量（浅色和深色模式都会用到）
+
+    // Update background-related CSS variables (used by both light and dark modes)
     document.documentElement.style.setProperty('--bg-accent-light', `rgba(${rgb}, 0.05)`);
     document.documentElement.style.setProperty('--bg-accent-medium', `rgba(${rgb}, 0.1)`);
   };
 
-  // 设置个人颜色并保存到服务器和本地存储
+  // Set the personal color and persist it to the server and localStorage
   const setProfileColor = async (color: string) => {
     try {
-      // 确保颜色值以 # 开头
+      // Ensure the color value starts with #
       let normalizedColor = color;
       if (normalizedColor && !normalizedColor.startsWith('#')) {
         normalizedColor = `#${normalizedColor}`;
       }
-      
+
       setProfileColorState(normalizedColor);
       applyColorToDOM(normalizedColor);
-      
-      // 如果已登录，保存到服务器
+
+      // Save to the server if logged in
       if (isAuthenticated) {
         await preferencesAPI.updatePreferences({ profile_colour: normalizedColor });
       }
-      
-      // 保存到本地存储
+
+      // Save to localStorage
       localStorage.setItem(LOCAL_STORAGE_KEY, normalizedColor);
-      
-      // 成功后更新已保存颜色
+
+      // Update the saved color on success
       setSavedProfileColor(normalizedColor);
     } catch (error) {
       console.error('Failed to save profile color:', error);
@@ -177,9 +172,9 @@ export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ chil
     }
   };
 
-	// 设置临时颜色（不持久化）
+	// Set a temporary color (not persisted)
 	const setProfileColorLocal = (color: string) => {
-		// 确保颜色值以 # 开头
+		// Ensure the color value starts with #
 		let normalizedColor = color;
 		if (normalizedColor && !normalizedColor.startsWith('#')) {
 			normalizedColor = `#${normalizedColor}`;
@@ -188,7 +183,7 @@ export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ chil
 		applyColorToDOM(normalizedColor);
 	};
 
-	// 重置为已保存的颜色
+	// Reset to the saved color
 	const resetProfileColor = () => {
 		setProfileColorState(savedProfileColor);
 		applyColorToDOM(savedProfileColor);

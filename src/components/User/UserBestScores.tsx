@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { hexToRgb } from '../../utils/color';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { userAPI } from '../../utils/api';
@@ -32,7 +33,6 @@ interface UserBestScoresProps {
   initialScoresKey?: string | null;
 }
 
-// 时间格式化函数
 const formatTimeAgo = (dateString: string, t: any): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -58,18 +58,18 @@ const formatTimeAgo = (dateString: string, t: any): string => {
   }
 };
 
-// 评级图标映射
+// Rank-to-icon mapping
 const getRankIcon = (rank: string) => {
   const rankImageMap: Record<string, string> = {
-    // SS 系列
-    XH: '/image/grades/SS-Silver.svg', // 银 SS（SSH）
-    X:  '/image/grades/SS.svg',        // 金 SS（SS）
+    // SS tier
+    XH: '/image/grades/SS-Silver.svg', // silver SS (SSH)
+    X:  '/image/grades/SS.svg',        // gold SS
 
-    // S 系列
-    SH: '/image/grades/S-Silver.svg',  // 银 S
-    S:  '/image/grades/S.svg',         // 金 S
+    // S tier
+    SH: '/image/grades/S-Silver.svg',  // silver S
+    S:  '/image/grades/S.svg',         // gold S
 
-    // 其他等级
+    // Other tiers
     A:  '/image/grades/A.svg',
     B:  '/image/grades/B.svg',
     C:  '/image/grades/C.svg',
@@ -81,9 +81,9 @@ const getRankIcon = (rank: string) => {
 };
 
 
-// 单个成绩卡片组件 - 基于 osu! 官方设计
-const ScoreCard: React.FC<{ 
-  score: BestScore; 
+// Single score-card component, based on the official osu! design
+const ScoreCard: React.FC<{
+  score: BestScore;
   t: any; 
   profileColor: string;
   clientDisplayMode?: ScoreClientDisplayMode;
@@ -92,17 +92,17 @@ const ScoreCard: React.FC<{
   onPinnedListChange?: () => void;
   className?: string;
 }> = ({ score, t, profileColor, clientDisplayMode = 'icon', canEdit = false, onPinChange, onPinnedListChange, className = '' }) => {
-  // 必取字段处理
-  const rank = score.rank; // 等级徽章（S/A/B/C/D/F）
+  // Required fields
+  const rank = score.rank; // grade badge (S/A/B/C/D/F)
   const title = score.beatmapset?.title_unicode || score.beatmapset?.title || 'Unknown Title';
   const artist = score.beatmapset?.artist_unicode || score.beatmapset?.artist || 'Unknown Artist';
-  const version = score.beatmap?.version || 'Unknown'; // 难度名
-  const endedAt = formatTimeAgo(score.ended_at, t); // 相对时间
-  const accuracy = (score.accuracy * 100).toFixed(2); // 命中率（百分比）
-  const originalPp = Math.round(score.pp || 0); // 原始pp
-  const mods = score.mods || []; // MOD列表
-  const isPinned = score.current_user_attributes?.pin?.is_pinned || false; // 是否已置顶
-  const hasReplay = score.has_replay || false; // 是否有回放
+  const version = score.beatmap?.version || 'Unknown'; // difficulty name
+  const endedAt = formatTimeAgo(score.ended_at, t); // relative time
+  const accuracy = (score.accuracy * 100).toFixed(2); // accuracy (percentage)
+  const originalPp = Math.round(score.pp || 0); // raw pp
+  const mods = score.mods || []; // mod list
+  const isPinned = score.current_user_attributes?.pin?.is_pinned || false; // whether pinned
+  const hasReplay = score.has_replay || false; // whether a replay exists
 
   const beatmapUrl =
     score.beatmap?.url ||
@@ -111,14 +111,8 @@ const ScoreCard: React.FC<{
       : '#');
   const coverImage = score.beatmapset?.covers?.['cover@2x'] || score.beatmapset?.covers?.cover;
 
-  // 将主题颜色转换为 RGB 以便使用透明度
-  const hexToRgb = (hex: string): string => {
-    const cleanHex = hex.replace('#', '');
-    const r = parseInt(cleanHex.substring(0, 2), 16);
-    const g = parseInt(cleanHex.substring(2, 4), 16);
-    const b = parseInt(cleanHex.substring(4, 6), 16);
-    return `${r}, ${g}, ${b}`;
-  };
+  // Convert the theme color to RGB so we can apply opacity
+
 
   const themeRgb = hexToRgb(profileColor);
 
@@ -127,33 +121,37 @@ const ScoreCard: React.FC<{
       src={coverImage}
       className={`relative overflow-hidden rounded-lg border border-gray-200/70 dark:border-gray-600/40 bg-card ${className}`}
     >
-      {/* 渐变遮罩层确保文字可读性 - 使用主题颜色 */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-r" 
-        style={{
-          background: `linear-gradient(to right, rgba(${themeRgb}, 0.15) 0%, rgba(${themeRgb}, 0.08) 50%, rgba(${themeRgb}, 0.03) 100%)`
-        }}
+      {/* Cover scrim: dark on the left for text legibility, fading right so the
+          cover art still reads as a subtle texture instead of a muddy wash.
+          Lightly tinted with the user's profile colour. Plain gradients, so it
+          stays clean in perf-mode (no backdrop blur involved). */}
+      <div
+        className="absolute inset-0"
+        style={{ background: `linear-gradient(90deg, rgba(9,11,24,0.94) 0%, rgba(9,11,24,0.82) 46%, rgba(9,11,24,0.42) 100%)` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/75 to-white/60 dark:from-gray-800/90 dark:via-gray-800/75 dark:to-gray-800/60" />
+      <div
+        className="absolute inset-0"
+        style={{ background: `linear-gradient(90deg, rgba(${themeRgb}, 0.22) 0%, rgba(${themeRgb}, 0.06) 45%, transparent 80%)` }}
+      />
       
       <div className="relative bg-transparent hover:bg-white/20 dark:hover:bg-gray-800/20 transition-colors duration-150 group">
-        {/* 桌面端布局 */}
+        {/* Desktop layout */}
         <div className="hidden sm:block">
-          {/* 主要内容区域 */}
+          {/* Main content area */}
           <div className="flex items-center h-12 pl-5 pr-24">
-            {/* 等级徽章 */}
+            {/* Grade badge */}
             <div className="flex-shrink-0 mr-3">
-              <img 
-                src={getRankIcon(rank)} 
+              <img
+                src={getRankIcon(rank)}
                 alt={rank}
                 className="w-14 h-10 object-contain"
               />
             </div>
 
-            {/* 谱面信息 */}
+            {/* Beatmap info */}
             <div className="flex-1 min-w-0">
               <div className="flex flex-col -space-y-0.5">
-                {/* 标题和艺术家 */}
+                {/* Title and artist */}
                 <div className="flex items-baseline gap-1 text-sm leading-tight">
                   <BeatmapLink
                     beatmapUrl={beatmapUrl}
@@ -170,7 +168,7 @@ const ScoreCard: React.FC<{
                   </span>
                 </div>
                 
-                {/* 难度名和时间 */}
+                {/* Difficulty name and time */}
                 <div className="flex items-center gap-3 text-xs">
                   <span className="text-yellow-600 dark:text-yellow-400 font-medium">
                     {version}
@@ -193,9 +191,9 @@ const ScoreCard: React.FC<{
               </div>
             </div>
 
-            {/* 中间成绩数据 */}
+            {/* Score data in the middle */}
             <div className="flex-shrink-0 flex items-center gap-2 mr-6">
-              {/* MOD图标 + 准确率 */}
+              {/* Mod icons + accuracy */}
               <ScoreModsDisplay mods={mods} />
               <div className="text-sm font-bold text-cyan-600 dark:text-cyan-300 ml-2 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                 {accuracy}%
@@ -203,13 +201,13 @@ const ScoreCard: React.FC<{
             </div>
           </div>
 
-          {/* 右侧性能区域 */}
+          {/* Performance area on the right */}
           <div className="absolute right-0 top-0 h-full flex items-center justify-center gap-2 pr-2">
-            {/* PP 值 */}
+            {/* PP value */}
             <div className="text-sm font-bold torii-pp-gradient drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
               {originalPp} PP
             </div>
-            {/* 操作菜单 */}
+            {/* Actions menu */}
             {canEdit && (
               <ScoreActionsMenu
                 scoreId={score.id}
@@ -222,21 +220,21 @@ const ScoreCard: React.FC<{
           </div>
         </div>
 
-        {/* 手机端布局 */}
+        {/* Mobile layout */}
         <div className="block sm:hidden p-4">
           <div className="flex items-start gap-3">
-            {/* 等级徽章 */}
+            {/* Grade badge */}
             <div className="flex-shrink-0">
-              <img 
-                src={getRankIcon(rank)} 
+              <img
+                src={getRankIcon(rank)}
                 alt={rank}
                 className="w-12 h-8 object-contain"
               />
             </div>
 
-            {/* 主要内容 */}
+            {/* Main content */}
             <div className="flex-1 min-w-0">
-              {/* 第一行：标题和艺术家 */}
+              {/* Row 1: title and artist */}
               <div className="flex items-baseline gap-1 text-sm leading-tight mb-1">
                 <BeatmapLink
                   beatmapUrl={beatmapUrl}
@@ -253,7 +251,7 @@ const ScoreCard: React.FC<{
                 </span>
               </div>
               
-              {/* 第二行：难度名和时间 */}
+              {/* Row 2: difficulty name and time */}
               <div className="flex items-center gap-3 text-xs mb-2">
                 <span className="text-yellow-600 dark:text-yellow-400 font-medium">
                   {version}
@@ -274,7 +272,7 @@ const ScoreCard: React.FC<{
                 </Link>
               </div>
 
-              {/* 第三行：MOD、准确率和PP */}
+              {/* Row 3: mods, accuracy and PP */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ScoreModsDisplay mods={mods} />
@@ -286,7 +284,7 @@ const ScoreCard: React.FC<{
                   <div className="text-sm font-bold torii-pp-gradient drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                     {originalPp} PP
                   </div>
-                  {/* 操作菜单 */}
+                  {/* Actions menu */}
                   {canEdit && (
                     <ScoreActionsMenu
                       scoreId={score.id}
@@ -490,14 +488,14 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
     void loadScores(true);
   };
 
-  // 将刷新函数暴露给父组件
+  // Expose the refresh function to the parent
   useEffect(() => {
     if (refreshRef) {
       refreshRef.current = handleRefresh;
     }
   }, [refreshRef]);
 
-  // 更新成绩的置顶状态（供置顶列表调用）
+  // Update a score's pin status (called by the pinned list)
   const updatePinStatus = (scoreId: number, isPinned: boolean) => {
     setScores(prevScores => {
       const nextScores = prevScores.map(s =>
@@ -519,7 +517,7 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
     });
   };
 
-  // 暴露 updatePinStatus 给置顶列表
+  // Expose updatePinStatus to the pinned list
   useEffect(() => {
     if (bestScoresActionRef) {
       bestScoresActionRef.current = {
@@ -528,17 +526,17 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
     }
   }, [bestScoresActionRef, updatePinStatus]);
 
-  // Pin/Unpin 后的本地更新
+  // Local update after pin/unpin
   const handlePinChange = useCallback((scoreId: number, isPinned: boolean) => {
-    // 1. 先找到成绩对象
+    // 1. Find the score object
     const score = scores.find(s => s.id === scoreId);
-    
+
     if (!score) {
       console.error('Score not found:', scoreId);
       return;
     }
 
-    // 2. 创建更新后的成绩对象
+    // 2. Build the updated score object
     const updatedScore = {
       ...score,
       current_user_attributes: {
@@ -550,20 +548,20 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
       }
     };
 
-    // 3. 更新本地状态
+    // 3. Update local state
     setScores(prevScores => {
       const nextScores = prevScores.map(s => s.id === scoreId ? updatedScore : s);
       saveToCache(nextScores);
       return nextScores;
     });
 
-    // 4. 同步更新置顶列表（在状态更新之外）
+    // 4. Sync the pinned list (outside the state update)
     if (pinActionRef?.current) {
       if (isPinned) {
-        // 取消置顶
+        // Unpin
         pinActionRef.current.handleUnpin(scoreId);
       } else {
-        // 置顶成绩 - 使用已更新的成绩对象
+        // Pin the score, using the updated score object
         pinActionRef.current.handlePin(updatedScore);
       }
     }
@@ -645,10 +643,8 @@ const UserBestScores: React.FC<UserBestScoresProps> = ({
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="min-w-[80px] sm:min-w-[100px] h-[32px] px-3 py-1.5 disabled:bg-gray-400 text-white rounded text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5"
-                style={{ backgroundColor: loadingMore ? undefined : profileColor }}
-                onMouseEnter={(e) => !loadingMore && (e.currentTarget.style.opacity = '0.9')}
-                onMouseLeave={(e) => !loadingMore && (e.currentTarget.style.opacity = '1')}
+                className="inline-flex h-9 min-w-[120px] items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-white ring-1 ring-white/20 transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                style={{ background: `linear-gradient(180deg, ${profileColor}, ${profileColor}d4)`, boxShadow: `0 8px 24px -10px ${profileColor}` }}
               >
                 {loadingMore ? (
                   <>

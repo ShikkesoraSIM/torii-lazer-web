@@ -18,18 +18,15 @@ const OAuthAppsSection: React.FC = () => {
   const [newAppResponse, setNewAppResponse] = useState<CreateOAuthAppResponse | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   
-  // 确认对话框状态
   const [deleteConfirm, setDeleteConfirm] = useState<{ clientId: number; name: string } | null>(null);
   const [refreshConfirm, setRefreshConfirm] = useState<{ clientId: number; name: string } | null>(null);
 
-  // 加载应用列表
   const loadApps = async () => {
     try {
       setIsLoading(true);
       const data = await oauthAPI.list();
       setApps(data);
     } catch (error) {
-      console.error('加载 OAuth 应用失败:', error);
       toast.error(t('settings.oauth.errors.loadFailed'));
     } finally {
       setIsLoading(false);
@@ -40,7 +37,6 @@ const OAuthAppsSection: React.FC = () => {
     loadApps();
   }, []);
 
-  // 复制到剪贴板
   const copyToClipboard = async (text: string, field: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -52,12 +48,10 @@ const OAuthAppsSection: React.FC = () => {
     }
   };
 
-  // 删除应用
   const handleDelete = async (clientId: number, appName: string) => {
     setDeleteConfirm({ clientId, name: appName });
   };
 
-  // 确认删除
   const confirmDelete = async () => {
     if (!deleteConfirm) return;
 
@@ -66,19 +60,16 @@ const OAuthAppsSection: React.FC = () => {
       toast.success(t('settings.oauth.deleteSuccess'));
       loadApps();
     } catch (error) {
-      console.error('删除应用失败:', error);
       toast.error(t('settings.oauth.errors.deleteFailed'));
     } finally {
       setDeleteConfirm(null);
     }
   };
 
-  // 刷新密钥
   const handleRefreshSecret = async (clientId: number, appName: string) => {
     setRefreshConfirm({ clientId, name: appName });
   };
 
-  // 确认刷新密钥
   const confirmRefreshSecret = async () => {
     if (!refreshConfirm) return;
 
@@ -95,7 +86,6 @@ const OAuthAppsSection: React.FC = () => {
       toast.success(t('settings.oauth.refreshSuccess'));
       loadApps();
     } catch (error) {
-      console.error('刷新密钥失败:', error);
       toast.error(t('settings.oauth.errors.refreshFailed'));
     } finally {
       setRefreshConfirm(null);
@@ -112,7 +102,6 @@ const OAuthAppsSection: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* 创建按钮 */}
       <div className="flex justify-between items-center">
         <p className="text-sm text-gray-600 dark:text-gray-400">
           {t('settings.oauth.description')}
@@ -126,7 +115,6 @@ const OAuthAppsSection: React.FC = () => {
         </button>
       </div>
 
-      {/* 应用列表 */}
       {apps.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
           <FiExternalLink className="w-12 h-12 mx-auto mb-4 text-gray-400" />
@@ -156,7 +144,6 @@ const OAuthAppsSection: React.FC = () => {
         </div>
       )}
 
-      {/* 创建/编辑模态框 */}
       <CreateEditModal
         isOpen={showCreateModal || editingApp !== null}
         onClose={() => {
@@ -174,7 +161,6 @@ const OAuthAppsSection: React.FC = () => {
         }}
       />
 
-      {/* 新应用密钥显示模态框 */}
       <SecretModal
         isOpen={newAppResponse !== null}
         onClose={() => setNewAppResponse(null)}
@@ -183,7 +169,6 @@ const OAuthAppsSection: React.FC = () => {
         onCopy={copyToClipboard}
       />
 
-      {/* 删除确认模态框 */}
       <ConfirmModal
         isOpen={deleteConfirm !== null}
         onClose={() => setDeleteConfirm(null)}
@@ -194,7 +179,6 @@ const OAuthAppsSection: React.FC = () => {
         type="danger"
       />
 
-      {/* 刷新密钥确认模态框 */}
       <ConfirmModal
         isOpen={refreshConfirm !== null}
         onClose={() => setRefreshConfirm(null)}
@@ -208,7 +192,6 @@ const OAuthAppsSection: React.FC = () => {
   );
 };
 
-// OAuth 应用卡片组件
 interface OAuthAppCardProps {
   app: OAuthApp;
   onEdit: (app: OAuthApp) => void;
@@ -330,7 +313,6 @@ const OAuthAppCard: React.FC<OAuthAppCardProps> = ({
   );
 };
 
-// 创建/编辑模态框组件
 interface CreateEditModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -374,7 +356,6 @@ const CreateEditModal: React.FC<CreateEditModalProps> = ({
     setIsSubmitting(true);
     try {
       if (app) {
-        // 更新
         await oauthAPI.update(app.client_id, {
           name: name.trim(),
           description: description.trim(),
@@ -383,7 +364,6 @@ const CreateEditModal: React.FC<CreateEditModalProps> = ({
         toast.success(t('settings.oauth.updateSuccess'));
         onSuccess();
       } else {
-        // 创建
         const response = await oauthAPI.create({
           name: name.trim(),
           description: description.trim(),
@@ -393,7 +373,6 @@ const CreateEditModal: React.FC<CreateEditModalProps> = ({
         onSuccess(response);
       }
     } catch (error) {
-      console.error('操作失败:', error);
       toast.error(
         app
           ? t('settings.oauth.errors.updateFailed')
@@ -517,7 +496,6 @@ const CreateEditModal: React.FC<CreateEditModalProps> = ({
   );
 };
 
-// 密钥显示模态框
 interface SecretModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -612,7 +590,6 @@ const SecretModal: React.FC<SecretModalProps> = ({
   );
 };
 
-// 确认对话框组件
 interface ConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;

@@ -1,13 +1,10 @@
-import React, { Suspense, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import Avatar from '../UI/Avatar';
+import CountryFlag from '../UI/CountryFlag';
 import GameModeSelector from '../UI/GameModeSelector';
-// Lazy: pulls recharts (~300 KB) into its own on-demand chunk instead of the
-// profile bundle. The chart is below the fold and not every visit needs it.
-const RankHistoryChart = React.lazy(() => import('../UI/RankHistoryChart'));
-import PlayerRankCard from '../User/PlayerRankCard';
-import StatsCard from '../User/StatsCard';
+import RankHistoryChart from '../UI/RankHistoryChart';
 import LevelProgress from '../UI/LevelProgress';
 import { type User, type GameMode, type BestScore } from '../../types';
 import FriendStats from './FriendStats';
@@ -25,7 +22,7 @@ import Achievements from './Achievements';
 import UserMostPlayedBeatmaps from './UserMostPlayedBeatmaps';
 import UserMappedBeatmaps from './UserMappedBeatmaps';
 import MatchmakingStatsCard from './MatchmakingStatsCard';
-import { FaTools, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { Tooltip } from 'react-tooltip';
 import { useAuth } from '../../hooks/useAuth';
 import { useUserPreferences } from '../../hooks/useUserPreferences';
@@ -55,17 +52,14 @@ const formatPlayTime = (seconds: number | undefined): string => {
   return parts.join(' ') || '0m';
 };
 
-/** 头图懒加载 + blur 过渡 */
+/** Cover image: lazy-loaded with a blur-up transition. */
 const CoverImage: React.FC<{ src?: string; alt?: string; isExpanded: boolean }> = ({ src, alt = 'cover', isExpanded }) => {
   const ref = useRef<HTMLDivElement | null>(null);
   const [inView, setInView] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-  //const [isUpdatingMode, setIsUpdatingMode] = useState(false);
 
-  // 默认背景图
   const defaultCover = '/image/backgrounds/layered-waves-haikei.svg';
-  // 如果没有提供 src 或加载失败，使用默认背景
   const displaySrc = (!src || error) ? defaultCover : src;
 
   useEffect(() => {
@@ -89,14 +83,14 @@ const CoverImage: React.FC<{ src?: string; alt?: string; isExpanded: boolean }> 
     return () => io.disconnect();
   }, []);
 
-  // 动态高度：展开时显示，收起时不显示
-  const heightClass = isExpanded 
-    ? 'h-[180px] md:h-[288px]' 
-    : 'h-0';
+  // Dynamic cover height. Collapsed keeps a slim band (not h-0) so the hero
+  // always reads as intentional and the avatar always has cover to overlap.
+  const heightClass = isExpanded
+    ? 'h-[200px] md:h-[320px]'
+    : 'h-[120px] md:h-[150px]';
 
   return (
     <div ref={ref} className={`relative w-full overflow-hidden transition-all duration-300 ${heightClass}`}>
-      {/* 骨架 or 渐变背景兜底 */}
       <div className="absolute inset-0 cover-bg">
         <div className="h-full w-full" style={{ background: 'transparent' }} />
       </div>
@@ -110,7 +104,6 @@ const CoverImage: React.FC<{ src?: string; alt?: string; isExpanded: boolean }> 
           className={`absolute inset-0 w-full h-full object-cover transition duration-500 ${loaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
           onLoad={() => setLoaded(true)}
           onError={() => {
-            // 如果不是默认图片才设置错误状态
             if (displaySrc !== defaultCover) {
               setError(true);
             }
@@ -118,9 +111,50 @@ const CoverImage: React.FC<{ src?: string; alt?: string; isExpanded: boolean }> 
         />
       )}
 
-      {/* 黑色顶层渐变，保证文字可读 */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
+      {/* Scrim so the floating controls + the avatar overlap stay readable on any cover. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-black/10" />
     </div>
+  );
+};
+
+/**
+ * Section — the single glass card used for every block on the profile,
+ * replacing the old edge-to-edge `bg-card` stripes. The `.glass` material is
+ * perf-mode aware (global `html.perf-mode` rules flatten it to an opaque
+ * surface), so the hardware-accelerated "rich glass" and the no-accel "clean
+ * solid" versions come from one class — no duplicated markup.
+ */
+const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <section className={`glass rounded-3xl p-4 md:p-6 ${className}`}>{children}</section>
+);
+
+/** Team flag with a graceful fallback: shows the flag image, but if the team
+ *  has no flag (or it fails to load) it shows a small short-name chip instead
+ *  of a broken image or nothing at all. */
+const TeamFlag: React.FC<{ team: { id: number; name: string; short_name?: string; flag_url?: string } }> = ({ team }) => {
+  const [broken, setBroken] = useState(!team.flag_url);
+  return (
+    <Link
+      to={`/teams/${team.id}`}
+      className="block transition-transform hover:scale-105"
+      data-tooltip-id="team-tooltip"
+      data-tooltip-content={team.name}
+    >
+      {broken ? (
+        <span className="inline-flex h-[26px] items-center rounded-md bg-white/10 px-2 text-xs font-bold uppercase tracking-wide text-white/85 ring-1 ring-white/15">
+          {team.short_name || team.name}
+        </span>
+      ) : (
+        <img
+          src={team.flag_url}
+          alt=""
+          className="h-[26px] w-auto rounded-md object-cover shadow-sm ring-1 ring-white/10"
+          loading="lazy"
+          decoding="async"
+          onError={() => setBroken(true)}
+        />
+      )}
+    </Link>
   );
 };
 
@@ -137,8 +171,8 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
   const { preferences, updatePreference } = useUserPreferences();
   const { profileColor, setProfileColorLocal, resetProfileColor } = useProfileColor();
   const scoreClientDisplayMode = getScoreClientDisplayMode(preferences.extra);
-  
-  // 用于跨组件刷新的 ref
+
+  // Cross-component refresh refs.
   const pinnedScoresRefreshRef = useRef<(() => void) | null>(null);
   const bestScoresRefreshRef = useRef<(() => void) | null>(null);
   const pinActionRef = useRef<{
@@ -148,7 +182,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
   const bestScoresActionRef = useRef<{
     updatePinStatus: (scoreId: number, isPinned: boolean) => void;
   } | null>(null);
-  
+
   const stats =
     user.statistics_rulesets?.[selectedMode] ??
     user.statistics;
@@ -166,17 +200,20 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
       )
     : undefined;
 
+  const medalCount = user_achievements ? new Set(user_achievements.map((a) => a.achievement_id)).size : 0;
+  const avgHitsPerPlay =
+    stats?.play_count && stats.play_count > 0 ? Math.round((stats.total_hits ?? 0) / stats.play_count) : 0;
+
   const coverUrl = pickBestUserCoverUrl(user) || (isDefaultUserCoverUrl(user.cover_url) ? "/image/backgrounds/bgcover.jpg" : user.cover_url);
   const [isUpdatingMode] = useState(false);
 
-  // 检查是否可以编辑（仅自己的页面）
+  // Only the owner may edit their own page.
   const canEdit = currentUser?.id === user.id;
 
-  // 进入用户资料页时，按查看的用户配色应用，离开时还原
+  // Apply the viewed user's accent colour on enter, restore on leave.
   useEffect(() => {
-    // 优先从本地存储获取颜色，避免 API 延迟导致的闪烁
     const getViewedUserColor = () => {
-      // 如果是查看自己的页面，使用当前已保存的颜色（本地存储优先）
+      // Own page: prefer the locally-saved colour to avoid an API-latency flash.
       if (currentUser?.id === user.id) {
         try {
           const storedColor = localStorage.getItem('user_profile_color');
@@ -185,355 +222,288 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
           console.error('Failed to read from localStorage:', e);
         }
       }
-      // 查看他人页面或本地无存储时，使用用户的 profile_colour
-      // 确保颜色值以 # 开头
       const rawColor = user.profile_colour || 'ED8EA6';
       return rawColor.startsWith('#') ? rawColor : `#${rawColor}`;
     };
 
     const viewedColor = getViewedUserColor();
     setProfileColorLocal(viewedColor);
-    
+
     return () => {
       resetProfileColor();
     };
   }, [user.profile_colour, user.id, currentUser?.id, setProfileColorLocal, resetProfileColor]);
 
-  // 头图展开状态 - 确保有明确的初始值
   const [isCoverExpanded, setIsCoverExpanded] = useState(() => {
     return preferences.profile_cover_expanded ?? false;
   });
 
-  // 当偏好设置加载完成时，更新本地状态
   useEffect(() => {
-    // 只在偏好设置实际存在时更新
     if (preferences.profile_cover_expanded !== undefined) {
       setIsCoverExpanded(preferences.profile_cover_expanded);
     }
   }, [preferences.profile_cover_expanded]);
 
-  // 处理头像更新
-  const handleAvatarUpdate = async (newAvatarUrl: string) => {
-    console.log('头像更新成功，延迟刷新用户信息:', newAvatarUrl);
-    // 延迟刷新用户信息，确保服务器端已经处理完成
+  const handleAvatarUpdate = async () => {
+    // Delay the refresh so the server has finished processing the upload.
     setTimeout(async () => {
-      console.log('执行延迟刷新用户信息');
       await refreshUser();
-    }, 3000); // 延迟3秒，给服务器更多时间处理
+    }, 3000);
   };
 
-  // 处理头图展开/收起
   const handleToggleCover = async () => {
     const newExpandedState = !isCoverExpanded;
     setIsCoverExpanded(newExpandedState);
-    
-    // 仅在当前用户查看自己的页面时保存偏好设置
     if (canEdit) {
       await updatePreference('profile_cover_expanded', newExpandedState);
     }
   };
 
   return (
-    <main className="torii-page-stage relative max-w-7xl mx-auto px-0 md:px-4 lg:px-6 py-4 md:py-8 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-28 -left-28 h-[340px] w-[340px] rounded-full bg-fuchsia-400/14 blur-[120px]" />
-        <div className="absolute -top-20 right-[-120px] h-[360px] w-[360px] rounded-full bg-cyan-300/12 blur-[126px]" />
-        <div className="absolute bottom-[-140px] left-[10%] h-[300px] w-[300px] rounded-full bg-orange-300/10 blur-[120px]" />
-        <div className="absolute bottom-[-90px] right-[8%] h-[280px] w-[280px] rounded-full bg-pink-400/10 blur-[120px]" />
-        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.24)_1px,transparent_0)] [background-size:24px_24px]" />
-      </div>
+    <main className="torii-profile relative mx-auto w-full max-w-6xl px-3 md:px-6 py-5 md:py-9">
+      {/* One restrained profile-color glow up top, replacing the old four-blob soup. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -top-24 -z-10 h-[460px]"
+        style={{ background: `radial-gradient(60% 100% at 50% 0%, ${profileColor}24 0%, ${profileColor}0b 36%, transparent 72%)` }}
+      />
 
-      <div className="rounded-[26px] bg-[rgba(10,10,24,0.72)] backdrop-blur-xl shadow-[0_18px_52px_rgba(0,0,0,0.34)] ring-1 ring-white/[0.04] overflow-hidden">
-        
-        {/* 受限用户提示 - 仅管理员可见 */}
-        {user.is_restricted && currentUser?.is_admin && (
-          <div className="px-3 md:px-6 pt-4">
-            <RestrictedBanner />
-          </div>
-        )}
+      <div className="space-y-4">
+        {/* Admin-only alert banners (each self-hides when not applicable). */}
+        {user.is_restricted && currentUser?.is_admin && <RestrictedBanner />}
+        <SuspiciousBanner
+          is_suspicious={user.is_suspicious}
+          trust_score={user.trust_score}
+          suspicious_reasons={user.suspicious_reasons}
+          open_alert_count={user.open_suspicious_alert_count}
+        />
 
-        {/*
-          Suspicious-activity admin banner. The backend only attaches
-          is_suspicious / trust_score / suspicious_reasons to the user
-          payload when the *viewer* is_admin=true (see
-          g0v0-server/app/router/v2/user.py), so non-admins receive a
-          payload without these props and the component returns null
-          unconditionally — no extra is_admin gate needed here.
-        */}
-        <div className="px-3 md:px-6 pt-4 empty:hidden">
-          <SuspiciousBanner
-            is_suspicious={user.is_suspicious}
-            trust_score={user.trust_score}
-            suspicious_reasons={user.suspicious_reasons}
-            open_alert_count={user.open_suspicious_alert_count}
-          />
-        </div>
-
-        {/* 头部栏 + 模式选择 */}
-        <div className="relative">
-          <div className="relative z-10 bg-transparent md:bg-card px-4 md:px-6 py-3 md:py-4 flex items-center justify-between md:rounded-t-2xl border-b border-card" style={{ color: 'var(--text-primary)' }}>
-            <div className="flex items-center gap-3">
-              <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
-              <div className="text-base md:text-lg font-heading font-bold tracking-wide">{t('profile.info.title')}</div>
-            </div>
-            <div className="flex items-center gap-2 md:gap-3">
-              {/* 右侧模式按钮们（来自你的 GameModeSelector） */}
-              <GameModeSelector
-                selectedMode={selectedMode}
-                onModeChange={onModeChange}
-                variant="compact"
-                className=""
-              />
-            </div>
-          </div>
-
-          {/* 头图懒加载 */}
-          <div className="overflow-hidden">
+        {/* ───────────────────────────── Hero ───────────────────────────── */}
+        <section className="glass overflow-hidden rounded-[28px]">
+          <div className="relative">
             <CoverImage src={coverUrl} alt={`${user.username} cover`} isExpanded={isCoverExpanded} />
-          </div>
-        </div>
 
-        {/* 头像与基本信息条 */}
-        <div className="bg-transparent md:bg-card px-3 md:px-8 py-4 md:py-6 flex items-center gap-4 md:gap-6 border-b border-card relative">
-          {/* 头像：渐变边 + 阴影，左下沉覆盖 - 展开时有负边距下沉效果，收起时无负边距 */}
-          <div className={isCoverExpanded ? "-mt-12" : "mt-0"}>
-            <Avatar
-              userId={user.id}
-              username={user.username}
-              avatarUrl={user.avatar_url}
-              size="xl"
-              shape="rounded"
-              editable={false}
-              className={
-                isCoverExpanded 
-                  ? "mt-[10px] md:mt-[1px] md:!w-32 md:!h-32 md:!min-w-32 md:!min-h-32 transition-all duration-300" 
-                  : "mt-[10px] md:mt-[1px] md:!w-24 md:!h-24 md:!min-w-24 md:!min-h-24 transition-all duration-300"
-              }
-              onAvatarUpdate={handleAvatarUpdate}
-            />
-          </div>
-          {/* 用户名 + 国家 + 团队旗帜 */}
-          <div className="flex-1">
-            <h1 className="mt-[-12px] md:mt-[-15px] ml-0 md:ml-[-10px] text-xl md:text-3xl font-heading font-bold mb-1 md:mb-1 text-gray-900 dark:text-gray-100 tracking-wide">
-              {user.username}
-            </h1>
-            {/* Torii title badges (groups) */}
-            {(user as any).groups?.length > 0 && (
-              <div className="mb-1.5 ml-0 md:ml-[-8px]">
-                <UserTitleBadges groups={(user as any).groups} size="md" />
-              </div>
-            )}
-            <div className="mb-2 md:mb-3 ml-0 md:ml-[-8px]">
-              <Badges badges={user.badges} />
+            {/* Cover expand / collapse toggle. */}
+            <div className="absolute right-3 top-3 z-20">
+              <button
+                onClick={handleToggleCover}
+                className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-black/35 text-sm text-white ring-1 ring-white/15 backdrop-blur-md transition hover:bg-black/55"
+                aria-label={isCoverExpanded ? t('profile.userPage.collapseCover') : t('profile.userPage.expandCover')}
+                data-tooltip-id="cover-toggle-tooltip"
+                data-tooltip-content={isCoverExpanded ? t('profile.userPage.collapseCover') : t('profile.userPage.expandCover')}
+              >
+                {isCoverExpanded ? <FaChevronUp /> : <FaChevronDown />}
+              </button>
             </div>
-            <div className="flex mt-[-10px] items-center gap-2 md:gap-4 md:mt-[10px] md:ml-[-8px] flex-wrap">
-              {/* 国旗和国家名 */}
-              {user.country?.code && (
-                <Link
-                  to={`/rankings?tab=users&mode=${selectedMode}&country=${encodeURIComponent(user.country.code)}`}
-                  className="group flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                  <img
-                    src={`/image/flag/${user.country.code.toLowerCase()}.svg`}
-                    alt={user.country.name}
-                    className="h-[20px] md:h-[25px] w-auto rounded-sm object-contain"
-                    loading="lazy"
-                    decoding="async"
-                    data-tooltip-id="country-tooltip"
-                    data-tooltip-content={user.country?.name || 'Country'}
-                  />
-                  <span className="text-gray-600 dark:text-gray-300 text-sm md:text-base group-hover:text-primary transition-colors">
-                    {user.country?.code || 'Country'}
-                  </span>
-                </Link>
-              )}
-
-              {/* 团队旗帜和名称 */}
-              {user.team && (
-                <Link
-                  to={`/teams/${user.team.id}`}
-                  className="group flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                  <img
-                    src={user.team.flag_url}
-                    alt="Team flag"
-                    className="h-[20px] md:h-[25px] w-auto rounded-sm object-contain"
-                    loading="lazy"
-                    decoding="async"
-                    data-tooltip-id="team-tooltip"
-                    data-tooltip-content={user.team.name}
-                  />
-                  <span className="text-gray-600 dark:text-gray-300 text-sm md:text-base group-hover:text-primary transition-colors">
-                    {user.team.short_name || user.team.name}
-                  </span>
-                </Link>
-              )}
-            </div>
-
-            {/*
-              Join date + last seen — small caption row below the
-              country/team flags. Both fields ship on every User
-              payload (see g0v0-server's user.py — join_date,
-              last_visit). Tooltip on each value shows the absolute
-              timestamp; the visible text is the relative form
-              ("3 months ago", "2 hours ago") for at-a-glance scan.
-              Self-hides if the backend somehow returns no values
-              for either, so we don't render an empty row.
-            */}
-            {(user.join_date || user.last_visit) && (
-              <div className="flex items-center gap-3 mt-2 ml-0 md:ml-[-8px] text-xs text-gray-500 dark:text-gray-400 flex-wrap">
-                {user.join_date && (
-                  <span
-                    className="inline-flex items-center gap-1.5"
-                    title={new Date(user.join_date).toLocaleString()}
-                  >
-                    <svg className="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span>Joined {formatRelativeTime(user.join_date)}</span>
-                  </span>
-                )}
-                {user.last_visit && (
-                  <span
-                    className="inline-flex items-center gap-1.5"
-                    title={new Date(user.last_visit).toLocaleString()}
-                  >
-                    <svg className="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Last seen {formatRelativeTime(user.last_visit)}</span>
-                  </span>
-                )}
-              </div>
-            )}
           </div>
 
-          {/* 展开/收起按钮 - 移到右侧 */}
-          <button 
-            onClick={handleToggleCover}
-            className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 grid place-items-center text-sm md:text-base hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0" 
-            aria-label={isCoverExpanded ? t('profile.userPage.collapseCover') : t('profile.userPage.expandCover')}
-            data-tooltip-id="cover-toggle-tooltip"
-            data-tooltip-content={isCoverExpanded ? t('profile.userPage.collapseCover') : t('profile.userPage.expandCover')}
-          >
-            {isCoverExpanded ? <FaChevronUp /> : <FaChevronDown />}
-          </button>
-          </div>
-
-        {/* Tooltips */}
-        <Tooltip id="country-tooltip" />
-        <Tooltip id="team-tooltip" />
-        <Tooltip id="cover-toggle-tooltip" />
-
-
-
-        {/* 中部：左 3/4（排名+折线+信息），右 1/4（统计） */}
-        <div className="bg-transparent md:bg-card px-3 md:px-6 py-4 border-b border-card">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* 左侧 3/4 */}
-            <div className="flex-[3] flex flex-col gap-3">
-              {/* 排名 */}
-              <div className="flex gap-8 p-3 md:rounded-lg md:rank-card-shadow mb-[20px] ml-0 md:ml-[-10px]">
-                <div className="text-center">
-                  <div className="text-gray-500 dark:text-gray-400 mb-[-5px] mb-1 text-[12px]">{t('profile.info.globalRank')}</div>
-                  <div className="font-bold text-primary text-[20px]">#{stats?.global_rank ?? '—'}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-gray-500 dark:text-gray-400 mb-[-5px] text-[12px]">{t('profile.info.countryRank')}</div>
-                  <div className="font-bold text-primary text-[20px]">#{stats?.country_rank ?? '—'}</div>
-                </div>
-              </div>
-
-              {/* 折线图 */}
-              <div className="relative w-full -mt-2">
-                <div className="relative z-10">
-                  <Suspense fallback={<div style={{ height: '8rem' }} />}>
-                    <RankHistoryChart
-                      rankHistory={user.rank_history}
-                      isUpdatingMode={isUpdatingMode}
-                      selectedModeColor={profileColor}
-                      delay={0.4}
-                      height="8rem"
-                      fullBleed={false}
-                    />
-                  </Suspense>
-                </div>
-              </div>
-
-              {/* 附加信息（PP / 游戏时间 / 成绩徽章） */}
-              <div className="relative z-20 w-full -mt-1">
-                <PlayerRankCard
-                  stats={stats}
-                  playTime={playTime}
-                  playTimeSeconds={stats?.play_time}
-                  user_achievements={user_achievements}
-                  gradeCounts={gradeCounts}
+          {/* Identity — only the AVATAR overlaps the cover; the name + badges sit
+              on the solid card below it so they stay readable over any cover art. */}
+          <div className="relative px-4 pb-6 pt-4 md:px-8">
+            <div className="flex flex-col gap-3 md:flex-row md:gap-6">
+              {/* Positioning only — the ring/rounding/clip all live on the Avatar's
+                  own element so the border hugs the image with no sub-pixel gap. */}
+              <div className="-mt-14 w-fit shrink-0 self-start md:-mt-16">
+                <Avatar
+                  userId={user.id}
+                  username={user.username}
+                  avatarUrl={user.avatar_url}
+                  size="xl"
+                  shape="rounded"
+                  editable={false}
+                  className="!h-24 !w-24 !min-h-24 !min-w-24 ring-2 ring-white/15 shadow-[0_12px_34px_rgba(0,0,0,0.5)] md:!h-32 md:!w-32 md:!min-h-32 md:!min-w-32"
+                  onAvatarUpdate={handleAvatarUpdate}
                 />
               </div>
+
+              <div className="min-w-0 flex-1 md:pb-1">
+                <h1 className="font-heading text-2xl font-bold tracking-wide text-white md:text-3xl">{user.username}</h1>
+
+                {(user as any).groups?.length > 0 && (
+                  <div className="mt-1.5">
+                    <UserTitleBadges groups={(user as any).groups} size="md" />
+                  </div>
+                )}
+
+                <div className="mt-2">
+                  <Badges badges={user.badges} />
+                </div>
+
+                {/* Flags only (no PG/EASY text). Names live in the tooltips. */}
+                <div className="mt-2 flex flex-wrap items-center gap-2.5">
+                  {user.country?.code && (
+                    <Link
+                      to={`/rankings?tab=users&mode=${selectedMode}&country=${encodeURIComponent(user.country.code)}`}
+                      className="block transition-transform hover:scale-105"
+                    >
+                      <CountryFlag
+                        code={user.country.code}
+                        name={user.country.name}
+                        className="h-[26px] ring-1 ring-white/10"
+                        rounded="rounded-md"
+                      />
+                    </Link>
+                  )}
+
+                  {user.team && <TeamFlag team={user.team} />}
+                </div>
+
+                {(user.join_date || user.last_visit) && (
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-white/50">
+                    {user.join_date && (
+                      <span className="inline-flex items-center gap-1.5" title={new Date(user.join_date).toLocaleString()}>
+                        <svg className="h-3.5 w-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Joined {formatRelativeTime(user.join_date)}</span>
+                      </span>
+                    )}
+                    {user.last_visit && (
+                      <span className="inline-flex items-center gap-1.5" title={new Date(user.last_visit).toLocaleString()}>
+                        <svg className="h-3.5 w-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Last seen {formatRelativeTime(user.last_visit)}</span>
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Mode selector — on the solid card now (was a busy pill over the cover). */}
+              <div className="self-start md:ml-auto">
+                <GameModeSelector selectedMode={selectedMode} onModeChange={onModeChange} variant="compact" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Performance — rank graph + grades + every stat in one dense card
+            (was three airy cards). The graph is embedded bare so there's no
+            card-in-card. Rich glass + a soft profile-colour wash; perf-mode
+            flattens .glass to opaque and keeps the wash, so it reads cleanly
+            without hardware acceleration too. */}
+        <div className="glass relative overflow-hidden rounded-3xl p-4 md:p-5">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{ background: `radial-gradient(120% 80% at 90% -10%, ${profileColor}1c 0%, transparent 55%)` }}
+          />
+          <div className="relative space-y-4">
+            {/* Rank headline — osu-style, inline (replaces the big marquee tiles). */}
+            <div className="flex flex-wrap items-end gap-x-7 gap-y-2">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-wider text-white/50">{t('profile.info.globalRank')}</div>
+                <div className="font-heading text-2xl font-bold tabular-nums text-primary md:text-[28px]">
+                  {stats?.global_rank ? `#${stats.global_rank.toLocaleString()}` : '—'}
+                </div>
+              </div>
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-wider text-white/50">{t('profile.info.countryRank')}</div>
+                <div className="font-heading text-2xl font-bold tabular-nums text-white md:text-[28px]">
+                  {stats?.country_rank ? `#${stats.country_rank.toLocaleString()}` : '—'}
+                </div>
+              </div>
+              <div className="ml-auto flex items-end gap-6">
+                <div className="text-right">
+                  <div className="text-[11px] font-medium uppercase tracking-wider text-white/50">pp</div>
+                  <div className="font-heading text-xl font-bold tabular-nums text-white">{Math.round(stats?.pp ?? 0).toLocaleString()}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[11px] font-medium uppercase tracking-wider text-white/50">{t('profile.stats.accuracy')}</div>
+                  <div className="font-heading text-xl font-bold tabular-nums text-white">{(stats?.hit_accuracy ?? 0).toFixed(2)}%</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[11px] font-medium uppercase tracking-wider text-white/50">{t('profile.stats.playTime')}</div>
+                  <div className="font-heading text-xl font-bold tabular-nums text-white">{playTime}</div>
+                </div>
+              </div>
             </div>
 
-            {/* 右侧 1/4：统计信息 */}
-            <div className="flex-1">
-              <div className="relative p-3 rounded-2xl h-full flex flex-col justify-center torii-liquid-soft border border-white/12 shadow-[0_12px_34px_rgba(0,0,0,0.3)]">
-                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(150deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02)_35%,rgba(8,12,34,0.25))]" />
-                <div className="pointer-events-none absolute inset-0 rounded-2xl" style={{ background: `radial-gradient(100% 70% at 88% 0%, ${profileColor}1f 0%, transparent 52%)` }} />
-                <div className="relative z-10">
-                  <StatsCard stats={stats} />
+            <RankHistoryChart
+              rankHistory={user.rank_history}
+              isUpdatingMode={isUpdatingMode}
+              selectedModeColor={profileColor}
+              delay={0.2}
+              height="6rem"
+              fullBleed
+              bare
+            />
+
+            <div className="h-px bg-white/10" />
+
+            {/* Stats — dense grid, up to 4 columns */}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm md:grid-cols-4">
+              {[
+                { label: t('profile.stats.medals'), value: medalCount.toLocaleString() },
+                { label: t('profile.stats.rankedScore'), value: (stats?.ranked_score ?? 0).toLocaleString() },
+                { label: t('profile.stats.playCount'), value: (stats?.play_count ?? 0).toLocaleString() },
+                { label: t('profile.stats.totalScore'), value: (stats?.total_score ?? 0).toLocaleString() },
+                { label: t('profile.stats.totalHits'), value: (stats?.total_hits ?? 0).toLocaleString() },
+                { label: t('profile.stats.hitsPerPlay'), value: avgHitsPerPlay.toLocaleString() },
+                { label: t('profile.stats.maxCombo'), value: (stats?.maximum_combo ?? 0).toLocaleString() },
+                { label: t('profile.stats.replaysWatched'), value: (stats?.replays_watched_by_others ?? 0).toLocaleString() },
+              ].map((s) => (
+                <div
+                  key={String(s.label)}
+                  className="flex items-baseline justify-between gap-3 border-b border-white/[0.06] pb-2"
+                >
+                  <span className="truncate text-white/55">{s.label}</span>
+                  <span className="shrink-0 font-semibold tabular-nums text-white">{s.value}</span>
                 </div>
+              ))}
+            </div>
+
+            {/* Friends + level, folded into the bottom of the card (osu-style) so it
+                isn't a near-empty standalone strip. */}
+            <div className="h-px bg-white/10" />
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <FriendStats user={user} />
+              <LevelProgress levelCurrent={levelCurrent} levelProgress={levelProgress} className="flex-1 min-w-[140px]" tint={profileColor} />
+              {/* Grades — clean pills, tucked to the right of the level bar (was a full row). */}
+              <div className="flex items-center gap-2.5">
+                {[
+                  { src: '/image/grades/SS-Silver.svg', alt: 'SSH', count: gradeCounts.ssh },
+                  { src: '/image/grades/SS.svg', alt: 'SS', count: gradeCounts.ss },
+                  { src: '/image/grades/S-Silver.svg', alt: 'SH', count: gradeCounts.sh },
+                  { src: '/image/grades/S.svg', alt: 'S', count: gradeCounts.s },
+                  { src: '/image/grades/A.svg', alt: 'A', count: gradeCounts.a },
+                ].map((g) => (
+                  <div key={g.alt} className="flex items-center gap-1" title={g.alt}>
+                    <img src={g.src} alt={g.alt} className="h-[18px] w-auto" loading="lazy" decoding="async" />
+                    <span className="text-xs font-bold tabular-nums text-white/90">{g.count.toLocaleString()}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* 好友/消息 + 等级进度 */}
-        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-4 md:py-6 relative border-b border-card">
-          <div className="flex items-center justify-between relative">
-              <FriendStats user={user} />
-            <div className="flex items-center gap-4">
-              {/* 进度条 */}
-              <LevelProgress
-                levelCurrent={levelCurrent}
-                levelProgress={levelProgress}
-                className="flex-1"
-                tint={profileColor}
-              />
-            </div>
-          </div>
-        </div>
+        {/* ───────────────────────────── Body ───────────────────────────── */}
+        <Section>
+          <UserPageDisplay user={user} onUserUpdate={onUserUpdate} />
+        </Section>
 
-        {/* 个人页面 */}
-        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
-          <UserPageDisplay
-            user={user}
-            onUserUpdate={onUserUpdate}
-          />
-        </div>
-
-        {/* 用户最近活动 */}
-        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
+        <Section>
           <UserRecentActivity userId={user.id} />
-        </div>
+        </Section>
 
-        {/* 用户置顶成绩 */}
-        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
-          <UserPinnedScores 
-            userId={user.id} 
-            selectedMode={selectedMode} 
+        <Section>
+          <UserPinnedScores
+            userId={user.id}
+            selectedMode={selectedMode}
             user={user}
             clientDisplayMode={scoreClientDisplayMode}
             refreshRef={pinnedScoresRefreshRef}
             onPinActionRef={pinActionRef}
             bestScoresActionRef={bestScoresActionRef}
           />
-        </div>
+        </Section>
 
-        {/* 用户最佳成绩 */}
-        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
-          <UserBestScores 
-            userId={user.id} 
-            selectedMode={selectedMode} 
+        <Section>
+          <UserBestScores
+            userId={user.id}
+            selectedMode={selectedMode}
             user={user}
             initialScores={initialBestScores}
             initialScoresKey={initialBestScoresKey}
@@ -543,68 +513,40 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
             pinActionRef={pinActionRef}
             bestScoresActionRef={bestScoresActionRef}
           />
-        </div>
+        </Section>
 
-        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
+        <Section>
           <UserMostPlayedBeatmaps userId={user.id} user={user} />
-        </div>
+        </Section>
 
-        {/*
-          Matchmaking — only renders if the user has any matchmaking
-          stats / history rows. Component self-hides for users who
-          haven't queued, so this slot is invisible for the majority
-          of profiles.
-        */}
-        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
+        {/* Matchmaking — self-hides for users who never queued. */}
+        <Section className="empty:hidden">
           <MatchmakingStatsCard userId={user.id} />
-        </div>
+        </Section>
 
-        {/*
-          Daily Challenge stats. Self-hides via the component for users
-          who have never engaged with the daily challenge (zeroed-out
-          stats look like clutter, not information). For active players
-          it shows current/best streaks, total play count, and top-10/50%
-          placement counts.
-        */}
-        <div className="bg-transparent md:bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card empty:hidden">
+        {/* Daily Challenge — self-hides for users who never engaged. */}
+        <Section className="empty:hidden">
           <DailyChallengeStatsCard stats={user.daily_challenge_user_stats} />
-        </div>
+        </Section>
 
-        {/* 用户最近成绩 */}
-        <div className="bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
-          <UserRecentScores
-            userId={user.id}
-            selectedMode={selectedMode}
-            user={user}
-            clientDisplayMode={scoreClientDisplayMode}
-          />
-        </div>
+        <Section>
+          <UserRecentScores userId={user.id} selectedMode={selectedMode} user={user} clientDisplayMode={scoreClientDisplayMode} />
+        </Section>
 
-        <div className="bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
+        <Section>
           <UserMappedBeatmaps userId={user.id} user={user} />
-        </div>
+        </Section>
 
-        <div className="bg-card px-3 md:px-6 lg:px-8 py-3 md:py-4 border-b border-card">
+        <Section>
           <Achievements userAchievements={user.user_achievements} />
-        </div>
-
-        {/* 施工中 */}
-        <div className="glass-thin p-3 md:rounded-b-lg h-[500px] flex flex-col justify-center">
-          <div className="flex justify-center items-center h-full">
-            <p className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-              <FaTools className="text-lg" />
-              {t('profile.info.underConstruction')}
-            </p>
-          </div>
-        </div>
-
+        </Section>
       </div>
+
+      {/* Profile-only tooltip anchors (country-tooltip is mounted globally in Layout). */}
+      <Tooltip id="team-tooltip" />
+      <Tooltip id="cover-toggle-tooltip" />
     </main>
   );
 };
 
 export default UserProfileLayout;
-
-
-
-

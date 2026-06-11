@@ -7,11 +7,11 @@ type User = { id: number; follower_count?: number; unread_pm_count?: number };
 export default function FriendStats({ user, selfId }: { user: User; selfId?: number }) {
   const { user: self } = useAuth();
   const resolvedSelfId = selfId ?? self?.id;
-  
-  // 直接检查是否为自己
+
+  // Direct check for whether this is the current user
   const isCurrentUserSelf = resolvedSelfId === user.id;
-  
-  // 始终调用 hook（遵循 React Hooks 规则），即使参数可能无效
+
+  // Always call the hook (per the Rules of Hooks), even if the args may be invalid
   const {
     status,
     isSelf,
@@ -20,14 +20,14 @@ export default function FriendStats({ user, selfId }: { user: User; selfId?: num
     block,
     unblock,
   } = useFriendRelationship(user.id ?? 0, resolvedSelfId ?? 0);
-  
-  // 如果没有有效的用户ID，显示加载状态
+
+  // Show a loading state when there's no valid user ID
   if (!resolvedSelfId || !user?.id) {
     console.log('Missing user IDs:', { resolvedSelfId, userId: user?.id });
     return (
       <div className="flex gap-3">
         <div className="bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-          <span>加载中...</span>
+          <span>Loading...</span>
         </div>
         <div className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 rounded-full flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 friend-button-shadow">
           <FaBell className="w-4 h-4" />
@@ -37,7 +37,7 @@ export default function FriendStats({ user, selfId }: { user: User; selfId?: num
     );
   }
 
-  // 优先使用直接比较的结果，只有当无法确定时才使用 hook 的结果
+  // Prefer the direct comparison; fall back to the hook only when it's unclear
   const finalIsSelf = isCurrentUserSelf;
 
   console.log('FriendStats debug:', { 

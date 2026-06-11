@@ -7,12 +7,12 @@ export function useDebounce<T extends (...args: any[]) => any>(
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const callbackRef = useRef(callback);
 
-  // 更新回调引用
+  // Keep the callback ref up to date
   useEffect(() => {
     callbackRef.current = callback;
   }, [callback]);
 
-  // 清理定时器
+  // Clear the timer on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {

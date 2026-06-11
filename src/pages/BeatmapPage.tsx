@@ -40,7 +40,6 @@ const BeatmapPage: React.FC = () => {
         }
       };
 
-      // 从 URL hash 获取 beatmap ID （用于 beatmapsets 路由）
       const hashMatch = window.location.hash.match(/#[^/]+\/(\d+)/);
       const hashBeatmapId = hashMatch ? parseInt(hashMatch[1], 10) : null;
       
@@ -61,10 +60,8 @@ const BeatmapPage: React.FC = () => {
         let resolvedBeatmap: Beatmap | undefined;
 
         if (targetBeatmapsetId) {
-          // 使用 beatmapset ID 查询
           beatmapsetData = await beatmapAPI.getBeatmapset(targetBeatmapsetId);
         } else if (targetBeatmapId) {
-          // 使用 beatmap ID 查询
           if (isNaN(targetBeatmapId)) {
             throw new Error(t('beatmap.notFound'));
           }
@@ -77,7 +74,6 @@ const BeatmapPage: React.FC = () => {
 
         setBeatmapset(beatmapsetData);
         
-        // 找到对应的beatmap
         let targetBeatmap: Beatmap | undefined;
         
         if (targetBeatmapId) {
@@ -88,14 +84,12 @@ const BeatmapPage: React.FC = () => {
         
         if (targetBeatmap) {
           setSelectedBeatmap(targetBeatmap);
-          // 更新 URL 为标准格式
           const mode = targetBeatmap.mode || 'osu';
           const newUrl = `/beatmapsets/${beatmapsetData.id}#${mode}/${targetBeatmap.id}`;
           if (window.location.pathname + window.location.hash !== newUrl) {
             navigate(newUrl, { replace: true });
           }
         } else {
-          // 如果没找到，选择第一个
           const firstBeatmap = beatmapsetData.beatmaps[0];
           if (firstBeatmap) {
             setSelectedBeatmap(firstBeatmap);
@@ -122,7 +116,6 @@ const BeatmapPage: React.FC = () => {
 
   const handleDifficultySelect = (beatmap: Beatmap) => {
     setSelectedBeatmap(beatmap);
-    // 更新URL为标准格式
     if (beatmapset) {
       const mode = beatmap.mode || 'osu';
       navigate(`/beatmapsets/${beatmapset.id}#${mode}/${beatmap.id}`, { replace: true });
@@ -142,30 +135,20 @@ const BeatmapPage: React.FC = () => {
     return 'text-red-500';
   };
 
-  // 根据难度星级返回从浅到深的 osu-pink 色调
   const getDifficultyPinkShade = (stars: number) => {
-    // 0-2星: 很浅的粉色
     if (stars < 2) return '#FFF0F4';
-    // 2-3星: 浅粉色
     if (stars < 3) return '#FFD9E5';
-    // 3-4星: 中等浅粉
     if (stars < 4) return '#FFC2D6';
-    // 4-5星: 中等粉色
     if (stars < 5) return '#FFABC7';
-    // 5-6星: 标准 osu-pink
     if (stars < 6) return '#ED8EA6';
-    // 6-7星: 深粉色
     if (stars < 7) return '#E06B8A';
-    // 7-8星: 更深的粉色
     if (stars < 8) return '#D34871';
-    // 8星以上: 最深的粉色
     return '#C62558';
   };
 
   const getDifficultyTextColor = (stars: number) => {
-    // 浅色背景使用深色文字，深色背景使用浅色文字
-    if (stars < 4) return '#9D2449'; // 深色文字
-    return '#FFFFFF'; // 白色文字
+    if (stars < 4) return '#9D2449';
+    return '#FFFFFF';
   };
 
   if (loading) {
@@ -322,7 +305,6 @@ const BeatmapPage: React.FC = () => {
                           }}
                         >
                           <div className="flex items-center gap-2">
-                            {/* 星数显示 */}
                             <div className="flex items-center gap-1">
                               <span className="font-bold text-base">
                                 {beatmap.difficulty_rating.toFixed(2)}
@@ -332,7 +314,6 @@ const BeatmapPage: React.FC = () => {
                             
                           </div>
                           
-                          {/* 选中指示器 */}
                           {isSelected && (
                             <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 rotate-45 border-r-2 border-b-2 border-osu-pink"
                                  style={{ backgroundColor: bgColor }}
@@ -343,7 +324,6 @@ const BeatmapPage: React.FC = () => {
                     })}
                 </div>
                 
-                {/* Tooltip 组件 */}
                 <Tooltip 
                   id="difficulty-tooltip"
                   place="top"

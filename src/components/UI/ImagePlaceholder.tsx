@@ -8,7 +8,7 @@ interface ImagePlaceholderProps {
 
 const ImagePlaceholder: React.FC<ImagePlaceholderProps> = ({
   className = '',
-  text = '加载中...',
+  text = 'Loading...',
   showIcon = true,
 }) => {
   return (

@@ -15,14 +15,14 @@ const DeviceManagement: React.FC = () => {
   const [showRevokeModal, setShowRevokeModal] = useState(false);
   const [sessionToRevoke, setSessionToRevoke] = useState<DeviceSession | null>(null);
 
-  // 获取设备会话列表
+  // Fetch the list of device sessions
   const fetchSessions = async () => {
     try {
       setIsLoadingSessions(true);
       const sessionsData = await deviceAPI.getSessions();
       setSessions(sessionsData);
     } catch (error) {
-      console.error('获取设备会话失败:', error);
+      console.error('Failed to fetch device sessions:', error);
       toast.error(t('settings.device.sessions.loadError', 'Failed to load sessions'));
     } finally {
       setIsLoadingSessions(false);
@@ -30,20 +30,20 @@ const DeviceManagement: React.FC = () => {
   };
 
 
-  // 打开撤销会话模态框
+  // Open the revoke-session modal
   const handleShowRevokeModal = (session: DeviceSession) => {
     setSessionToRevoke(session);
     setShowRevokeModal(true);
   };
 
-  // 关闭撤销会话模态框
+  // Close the revoke-session modal
   const handleCloseRevokeModal = () => {
-    if (revokingSessionId) return; // 如果正在撤销中，不允许关闭
+    if (revokingSessionId) return; // don't allow closing while a revoke is in progress
     setShowRevokeModal(false);
     setSessionToRevoke(null);
   };
 
-  // 确认撤销会话
+  // Confirm revoking the session
   const handleConfirmRevoke = async () => {
     if (!sessionToRevoke) return;
 
@@ -51,22 +51,22 @@ const DeviceManagement: React.FC = () => {
       setRevokingSessionId(sessionToRevoke.id);
       await deviceAPI.revokeSession(sessionToRevoke.id);
       toast.success(t('settings.device.sessions.revokeSuccess'));
-      
-      // 关闭模态框
+
+      // Close the modal
       setShowRevokeModal(false);
       setSessionToRevoke(null);
-      
-      // 重新获取会话列表
+
+      // Re-fetch the list of sessions
       await fetchSessions();
     } catch (error) {
-      console.error('撤销会话失败:', error);
+      console.error('Failed to revoke session:', error);
       toast.error(t('settings.device.sessions.revokeError'));
     } finally {
       setRevokingSessionId(null);
     }
   };
 
-  // 获取设备类型图标
+  // Get the device-type icon
   const getDeviceIcon = (deviceType: string) => {
     const type = deviceType.toLowerCase();
     if (type.includes('mobile') || type.includes('phone')) {
@@ -78,16 +78,16 @@ const DeviceManagement: React.FC = () => {
     }
   };
 
-  // 获取设备类型显示名称
+  // Get the device-type display name
   const getDeviceTypeName = (session: DeviceSession) => {
-    // 如果是 osu!lazer 客户端，显示为桌面应用
+    // If it's the osu!lazer client, show it as a desktop app
     if (session.user_agent === 'osu!' || session.user_agent.toLowerCase().includes('osu!')) {
       return t('settings.device.deviceTypes.app');
     }
-    
+
     const type = session.device_type.toLowerCase();
     if (type === 'osu_web') {
-      return 'Web 浏览器';
+      return 'Web browser';
     } else if (type.includes('mobile') || type.includes('phone')) {
       return t('settings.device.deviceTypes.mobile');
     } else if (type.includes('tablet') || type.includes('ipad')) {
@@ -99,24 +99,24 @@ const DeviceManagement: React.FC = () => {
     }
   };
 
-  // 获取客户端显示名称
+  // Get the client display name
   const getClientDisplayName = (session: DeviceSession) => {
-    // 检查是否是 osu!lazer 客户端
+    // Check whether it's the osu!lazer client
     if (session.user_agent === 'osu!' || session.user_agent.toLowerCase().includes('osu!')) {
       return 'osu!lazer';
     }
-    
-    // 如果有自定义显示名称，优先使用
+
+    // Prefer a custom display name if present
     if (session.client_display_name && session.client_display_name !== 'osu! web') {
       return session.client_display_name;
     }
-    
-    // 根据设备类型返回合适的名称
+
+    // Otherwise return a name based on the device type
     if (session.device_type === 'osu_web') {
       return 'osu! web';
     }
-    
-    // 否则根据User Agent解析浏览器名称
+
+    // Otherwise derive the browser name from the user agent
     const ua = session.user_agent.toLowerCase();
     if (ua.includes('edge')) {
       return 'Microsoft Edge';
@@ -133,7 +133,7 @@ const DeviceManagement: React.FC = () => {
     }
   };
 
-  // 格式化日期
+  // Format the date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-US', {
       year: 'numeric',
@@ -144,14 +144,14 @@ const DeviceManagement: React.FC = () => {
     });
   };
 
-  // 初始化时获取数据
+  // Fetch data on mount
   useEffect(() => {
     fetchSessions();
   }, []);
 
   return (
     <div>
-      {/* 活跃会话列表 */}
+      {/* Active sessions list */}
       <div>
 
         {isLoadingSessions ? (
@@ -172,10 +172,10 @@ const DeviceManagement: React.FC = () => {
           <div className="space-y-3">
             {sessions
               .sort((a, b) => {
-                // 当前设备排在最前面
+                // Current device first
                 if (a.is_current && !b.is_current) return -1;
                 if (!a.is_current && b.is_current) return 1;
-                // 其他按最后使用时间排序（最新的在前）
+                // Otherwise sort by last-used time (newest first)
                 return new Date(b.last_used_at).getTime() - new Date(a.last_used_at).getTime();
               })
               .map((session, index) => (
@@ -248,7 +248,7 @@ const DeviceManagement: React.FC = () => {
         )}
       </div>
 
-      {/* 撤销会话确认模态框 */}
+      {/* Revoke-session confirmation modal */}
       <RevokeSessionModal
         isOpen={showRevokeModal}
         session={sessionToRevoke}

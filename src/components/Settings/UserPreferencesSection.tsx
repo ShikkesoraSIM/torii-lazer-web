@@ -22,12 +22,9 @@ import type {
   BeatmapDownload
 } from '../../types';
 
-// 辅助函数：将 HEX 颜色转换为 HSL
 const hexToHue = (hex: string): number => {
-  // 移除 # 符号
   const color = hex.replace('#', '');
   
-  // 转换为 RGB
   const r = parseInt(color.substring(0, 2), 16) / 255;
   const g = parseInt(color.substring(2, 4), 16) / 255;
   const b = parseInt(color.substring(4, 6), 16) / 255;
@@ -51,14 +48,11 @@ const hexToHue = (hex: string): number => {
   return Math.round(h * 360);
 };
 
-// 辅助函数：OKLCH 转 RGB（参照 fuwari 颜色系统）
 const oklchToRgb = (l: number, c: number, h: number): [number, number, number] => {
-  // 将 OKLCH 转换为 OKLab
   const hRad = (h * Math.PI) / 180;
   const labA = c * Math.cos(hRad);
   const labB = c * Math.sin(hRad);
   
-  // OKLab 到 线性 RGB
   const l_ = l + 0.3963377774 * labA + 0.2158037573 * labB;
   const m_ = l - 0.1055613458 * labA - 0.0638541728 * labB;
   const s_ = l - 0.0894841775 * labA - 1.2914855480 * labB;
@@ -71,7 +65,6 @@ const oklchToRgb = (l: number, c: number, h: number): [number, number, number] =
   const g_linear = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3;
   const b_linear = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3;
   
-  // 线性 RGB 到 sRGB
   const toSrgb = (val: number) => {
     const abs = Math.abs(val);
     if (abs <= 0.0031308) return val * 12.92;
@@ -89,12 +82,9 @@ const oklchToRgb = (l: number, c: number, h: number): [number, number, number] =
   ];
 };
 
-// 辅助函数：将 Hue 值转换为 HEX 颜色（使用 OKLCH，参照 fuwari 标准）
 const hueToHex = (hue: number): string => {
-  // fuwari 使用 oklch(0.70-0.75, 0.14, var(--hue)) 作为主色
-  // 亮度 0.70，色度 0.14，让颜色更柔和自然
-  const l = 0.70;  // 亮度 70%
-  const c = 0.14;  // 色度 14% (远低于之前的 80%，更柔和)
+  const l = 0.70;
+  const c = 0.14;
   
   const [r, g, b] = oklchToRgb(l, c, hue);
   
@@ -117,7 +107,6 @@ const UserPreferencesSection: React.FC = () => {
   const [savingFields, setSavingFields] = useState<Set<string>>(new Set());
   const [showProfileMediaNsfwConfirm, setShowProfileMediaNsfwConfirm] = useState(false);
   
-  // 使用独立的 hue 状态来确保滑块跟手
   const [currentHue, setCurrentHue] = useState<number>(0);
 
   // Load preferences on mount
@@ -131,7 +120,6 @@ const UserPreferencesSection: React.FC = () => {
       const data = await preferencesAPI.getPreferences();
       setPreferences(data);
       setOriginalPreferences(data);
-      // 初始化 hue 值
       const initialHue = hexToHue(data.profile_colour ?? '#FF66AB');
       setCurrentHue(initialHue);
     } catch (error) {
@@ -142,7 +130,6 @@ const UserPreferencesSection: React.FC = () => {
     }
   };
 
-  // 单独保存某个设置项
   const savePreference = async <K extends keyof UserPreferences>(
     key: K,
     value: UserPreferences[K]
@@ -165,12 +152,10 @@ const UserPreferencesSection: React.FC = () => {
     }
   };
 
-  // 检查字段是否有修改
   const hasFieldChanged = (key: keyof UserPreferences): boolean => {
     return preferences[key] !== originalPreferences[key];
   };
 
-  // 立即更新并保存（用于开关和滑块）
   const updateAndSave = async <K extends keyof UserPreferences>(
     key: K,
     value: UserPreferences[K]
@@ -205,15 +190,11 @@ const UserPreferencesSection: React.FC = () => {
     await updateAndSave('extra', nextExtra);
   };
 
-  // 使用 ref 来存储最新的颜色值，避免频繁更新状态
   const pendingColorRef = useRef<string | null>(null);
   
-  // 防抖保存颜色（600ms 延迟）
   const debouncedSaveColor = useDebounce(
     async (color: string) => {
       try {
-        // 使用 ProfileColorContext 的 setProfileColor 方法
-        // 这会同时保存到服务器和本地存储
         await setProfileColor(color);
         setPreferences(prev => ({ ...prev, profile_colour: color }));
         setOriginalPreferences(prev => ({ ...prev, profile_colour: color }));
@@ -227,17 +208,11 @@ const UserPreferencesSection: React.FC = () => {
     600
   );
 
-  // 优化：使用 useMemo 缓存颜色变化的回调函数
   const handleHueChange = useMemo(() => (newHue: number) => {
-    // 立即更新滑块位置
     setCurrentHue(newHue);
-    // 转换为颜色（只计算一次）
     const newColor = hueToHex(newHue);
-    // 存储到 ref，避免频繁更新状态
     pendingColorRef.current = newColor;
-    // 立即应用颜色到 CSS 变量（实时预览），但不触发状态更新
     setProfileColorLocal(newColor);
-    // 防抖保存，避免频繁调用 API
     debouncedSaveColor(newColor);
   }, [setProfileColorLocal, debouncedSaveColor]);
 
@@ -483,13 +458,11 @@ const UserPreferencesSection: React.FC = () => {
                       </div>
                     </div>
                     
-                    {/* 彩虹渐变滑块 */}
                     <HueSlider
                       hue={currentHue}
                       onChange={handleHueChange}
                     />
                     
-                    {/* 颜色预览 */}
                     <div className="flex items-center gap-3 pt-1">
                       <div 
                         className="w-12 h-12 rounded-lg border-2 shadow-sm"

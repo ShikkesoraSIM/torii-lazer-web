@@ -31,16 +31,16 @@ const UserPageEditor: React.FC<UserPageEditorProps> = ({
   const [hasChanges, setHasChanges] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // 检查是否有权限编辑
+  // Check edit permission
   const canEdit = currentUser?.id === user.id;
 
-  // 加载用户页面内容
+  // Load the user page content
   useEffect(() => {
     if (canEdit) {
       setLoading(true);
       setError(null);
-      
-      // 直接从用户对象获取页面内容
+
+      // Read the page content straight from the user object
       const initialContent = user.page?.raw || '';
       setContent(initialContent);
       setOriginalContent(initialContent);
@@ -52,12 +52,12 @@ const UserPageEditor: React.FC<UserPageEditorProps> = ({
     }
   }, [user, canEdit]);
 
-  // 监听内容变化
+  // Track content changes
   useEffect(() => {
     setHasChanges(content !== originalContent);
   }, [content, originalContent]);
 
-  // 保存用户页面
+  // Save the user page
   const handleSave = async () => {
     if (!canEdit || saving) return;
 
@@ -79,7 +79,7 @@ const UserPageEditor: React.FC<UserPageEditorProps> = ({
         });
       }
 
-      // 延迟关闭以显示成功消息
+      // Delay closing so the success message is visible
       setTimeout(() => {
         if (onClose) {
           onClose();
@@ -95,7 +95,7 @@ const UserPageEditor: React.FC<UserPageEditorProps> = ({
     }
   };
 
-  // 取消编辑
+  // Cancel editing
   const handleCancel = () => {
     if (hasChanges) {
       if (window.confirm(t('profile.userPage.confirmDiscard'))) {
@@ -112,7 +112,7 @@ const UserPageEditor: React.FC<UserPageEditorProps> = ({
     }
   };
 
-  // 快捷键处理
+  // Keyboard shortcut handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -160,7 +160,7 @@ const UserPageEditor: React.FC<UserPageEditorProps> = ({
               onClick={onClose}
               className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
             >
-              关闭
+              Close
             </button>
           )}
         </div>
@@ -170,7 +170,7 @@ const UserPageEditor: React.FC<UserPageEditorProps> = ({
 
   return (
     <div className={`bg-card rounded-lg shadow-lg overflow-hidden ${className}`}>
-      {/* 头部 */}
+      {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
         <div className="flex items-center gap-3">
           <FaEdit className="w-5 h-5 text-profile-color" />
@@ -202,7 +202,7 @@ const UserPageEditor: React.FC<UserPageEditorProps> = ({
         </div>
       </div>
 
-      {/* 编辑器 */}
+      {/* Editor */}
       <div className="p-4">
         <BBCodeEditor
           title={t('profile.userPage.title')}
@@ -230,10 +230,10 @@ const UserPageEditor: React.FC<UserPageEditorProps> = ({
         )}
       </div>
 
-      {/* 底部操作栏 */}
+      {/* Bottom action bar */}
       <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
         <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-          <span>字数: {content.length}/60000</span>
+          <span>Characters: {content.length}/60000</span>
           <span>•</span>
           <span>{t('profile.userPage.supportsBBCode')}</span>
           <span>•</span>

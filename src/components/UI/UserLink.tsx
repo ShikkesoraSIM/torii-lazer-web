@@ -18,7 +18,7 @@ const UserLink: React.FC<UserLinkProps> = ({
     <Link
       to={`/users/${userId}`}
       className={`hover:text-osu-pink transition-colors duration-200 ${className}`}
-      title={`查看 ${username} 的个人资料`}
+      title={`View ${username}'s profile`}
     >
       {children || username}
     </Link>

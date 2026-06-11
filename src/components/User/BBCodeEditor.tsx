@@ -19,7 +19,7 @@ interface BBCodeEditorProps {
   className?: string;
   maxLength?: number;
   disabled?: boolean;
-  title?: string; // 新增标题属性
+  title?: string; // optional title
 }
 
 interface BBCodeTool {
@@ -36,7 +36,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
   className = '',
   maxLength = 60000,
   disabled = false,
-  title, // 新增标题参数
+  title,
 }) => {
   const { t } = useTranslation();
   const defaultPlaceholder = placeholder || t('profile.bbcodeEditor.placeholder');
@@ -48,7 +48,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // 防抖验证函数
+  // Debounced validation
   const debouncedValidation = useCallback(async (content: string) => {
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
@@ -59,11 +59,11 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
         try {
           setValidationLoading(true);
           setValidationError(null);
-          
-          // 先使用本地解析器进行基础验证
+
+          // Run basic validation with the local parser first
           const localResult = parseBBCode(content);
-          
-          // 设置本地验证结果，避免重复调用服务器
+
+          // Use the local result to avoid extra server calls
           setValidationResult({
             valid: localResult.valid,
             errors: localResult.errors,
@@ -83,10 +83,10 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
         setValidationResult(null);
         setValidationLoading(false);
       }
-    }, 300); // 减少防抖时间
+    }, 300); // shorter debounce
   }, []);
 
-  // 当内容变化时触发验证
+  // Trigger validation whenever the content changes
   useEffect(() => {
     debouncedValidation(value);
     return () => {
@@ -96,12 +96,12 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
     };
   }, [value, debouncedValidation]);
 
-  // 插入BBCode标签的辅助函数
+  // Helper to insert a BBCode tag
   const insertBBCode = useCallback((openTag: string, closeTag: string, defaultContent: string = '') => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
-    // 保存当前焦点状态
+    // Remember the current focus state
     const wasActive = document.activeElement === textarea;
     
     const start = textarea.selectionStart;
@@ -115,7 +115,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
     
     onChange(newText);
 
-    // 使用requestAnimationFrame确保DOM更新后再设置光标位置
+    // Use requestAnimationFrame so the cursor is set after the DOM updates
     requestAnimationFrame(() => {
       if (textarea && wasActive) {
         try {
@@ -126,16 +126,16 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
             textarea.setSelectionRange(start + openTag.length, start + openTag.length + defaultContent.length);
           }
         } catch (error) {
-          // 忽略可能的焦点设置错误
+          // Ignore possible focus-setting errors
           console.debug('Focus restoration failed:', error);
         }
       }
     });
   }, [value, onChange]);
 
-  // BBCode工具栏配置
+  // BBCode toolbar config
   const tools: BBCodeTool[] = [
-    // 基础格式化
+    // Basic formatting
     {
       icon: FaBold,
       tooltip: `${t('profile.bbcodeEditor.toolbar.bold')} (Ctrl+B)`,
@@ -170,7 +170,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
       action: () => insertBBCode('[size=100]', '[/size]', t('profile.bbcodeEditor.insertText.text')),
     },
     
-    // 内容插入
+    // Content insertion
     {
       icon: FaImage,
       tooltip: t('profile.bbcodeEditor.toolbar.image'),
@@ -207,7 +207,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
       action: () => insertBBCode('[imagemap]\n', `\n10.0 10.0 30.0 20.0 https://example.com ${t('profile.bbcodeEditor.insertText.clickToVisit')}\n50.0 30.0 40.0 25.0 # ${t('profile.bbcodeEditor.insertText.infoArea')}\n[/imagemap]`, 'https://example.com/image.jpg'),
     },
     
-    // 结构化内容
+    // Structured content
     {
       icon: FaQuoteLeft,
       tooltip: t('profile.bbcodeEditor.toolbar.quote'),
@@ -250,14 +250,14 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
     },
   ];
 
-  // 工具栏按钮点击处理
+  // Toolbar button click handler
   const handleToolClick = useCallback((e: React.MouseEvent, action: () => void) => {
     e.preventDefault();
     e.stopPropagation();
     action();
   }, []);
 
-  // 键盘快捷键处理
+  // Keyboard shortcut handler
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.ctrlKey || e.metaKey) {
       const tool = tools.find(t => t.shortcut === `ctrl+${e.key.toLowerCase()}`);
@@ -268,12 +268,12 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
     }
   }, [tools]);
 
-  // 颜色选择器
+  // Color picker
   const insertColor = useCallback((color: string) => {
     insertBBCode(`[color=${color}]`, '[/color]', t('profile.bbcodeEditor.insertText.colorText'));
   }, [insertBBCode, t]);
 
-  // 字体大小选择器
+  // Font-size picker
   const insertSize = useCallback((size: number) => {
     insertBBCode(`[size=${size}]`, '[/size]', `${size}px ${t('profile.bbcodeEditor.insertText.text')}`);
   }, [insertBBCode, t]);
@@ -281,7 +281,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
 
   return (
     <div className={`${className}`}>
-      {/* 标题栏 */}
+      {/* Title bar */}
       {title && (
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -290,12 +290,12 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
         </div>
       )}
       
-      {/* 编辑器容器 */}
+      {/* Editor container */}
       <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-card">
-        {/* 工具栏 */}
+        {/* Toolbar */}
       <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
         <div className="flex items-center gap-1 flex-wrap">
-          {/* 基础格式化工具 */}
+          {/* Basic formatting tools */}
           <div className="flex items-center gap-1">
             {tools.slice(0, 6).map((tool, index) => (
               <button
@@ -311,10 +311,10 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
             ))}
           </div>
           
-          {/* 分隔线 */}
+          {/* Separator */}
           <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-          
-          {/* 内容插入工具 */}
+
+          {/* Content-insertion tools */}
           <div className="flex items-center gap-1">
             {tools.slice(6, 13).map((tool, index) => (
               <button
@@ -330,10 +330,10 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
             ))}
           </div>
           
-          {/* 分隔线 */}
+          {/* Separator */}
           <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-          
-          {/* 结构化内容工具 */}
+
+          {/* Structured-content tools */}
           <div className="flex items-center gap-1">
             {tools.slice(13).map((tool, index) => (
               <button
@@ -349,10 +349,10 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
             ))}
           </div>
           
-          {/* 分隔线 */}
+          {/* Separator */}
           <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-          
-          {/* 快速颜色选择 */}
+
+          {/* Quick color picker */}
           <div className="flex items-center gap-1">
             {['red', 'blue', 'green', 'purple', 'orange'].map(color => (
               <button
@@ -367,10 +367,10 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
             ))}
           </div>
           
-          {/* 分隔线 */}
+          {/* Separator */}
           <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-          
-          {/* 字体大小 */}
+
+          {/* Font size */}
           <select
             onChange={(e) => e.target.value && insertSize(parseInt(e.target.value))}
             disabled={disabled}
@@ -385,7 +385,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
           </select>
         </div>
 
-        {/* 预览切换和字数统计 */}
+        {/* Preview toggle and character count */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500 dark:text-gray-400">
             {value.length}/{maxLength}
@@ -423,10 +423,10 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
         </div>
       </div>
 
-      {/* 编辑器内容区域 */}
+      {/* Editor content area */}
       <div className="relative">
         {isPreviewMode ? (
-          /* 预览模式 */
+          /* Preview mode */
           <div className={`p-4 min-h-[220px] ${editorPaneHeightClass} overflow-y-auto`}>
             {validationLoading ? (
               <div className="flex items-center justify-center py-8">
@@ -449,7 +449,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
             )}
           </div>
         ) : (
-          /* 编辑模式 */
+          /* Edit mode */
           <textarea
             ref={textareaRef}
             value={value}
@@ -463,7 +463,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
           />
         )}
 
-        {/* 验证结果指示器 */}
+        {/* Validation result indicator */}
         {!isPreviewMode && (
           <div className="absolute top-2 right-2 flex items-center gap-2">
             {validationLoading && (
@@ -486,7 +486,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
         )}
       </div>
 
-      {/* 验证错误列表 */}
+      {/* Validation error list */}
       {validationResult && !validationResult.valid && validationResult.errors.length > 0 && (
         <div className="border-t border-gray-200 dark:border-gray-700 p-3 bg-red-50 dark:bg-red-900/10">
           <div className="text-sm font-medium text-red-700 dark:text-red-300 mb-2">
@@ -502,7 +502,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
         </div>
       )}
 
-      {/* 帮助文本 - 更紧凑的设计 */}
+      {/* Help text - more compact layout */}
       <div className="border-t border-gray-200 dark:border-gray-700 px-2 py-1 bg-gray-50 dark:bg-gray-700/30">
         <details className="text-xs text-gray-600 dark:text-gray-400">
           <summary className="cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 py-1">
@@ -524,7 +524,7 @@ const BBCodeEditor: React.FC<BBCodeEditorProps> = ({
         </details>
       </div>
 
-      {/* BBCode帮助模态框 */}
+      {/* BBCode help modal */}
       <BBCodeHelpModal
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}

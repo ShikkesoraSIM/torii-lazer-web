@@ -3,6 +3,7 @@ import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
 import type { User } from '../../types';
 import AdminUserEditModal from './AdminUserEditModal';
+import CountryFlag from '../../components/UI/CountryFlag';
 
 // Country list used to come from `useAvailableCountries('osu')` (rankings
 // scrape). The admin modal now bundles its own canonical ISO list, so this
@@ -191,10 +192,11 @@ const AdminUsers: React.FC = () => {
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         {user.country_code && (
-                          <img
-                            src={`/image/flag/${user.country_code.toLowerCase()}.svg`}
-                            alt={user.country_code}
-                            className="w-5 h-4 rounded-sm"
+                          <CountryFlag
+                            code={user.country_code}
+                            name={user.country_code}
+                            className="h-4"
+                            rounded="rounded-sm"
                           />
                         )}
                         <span className="text-gray-300 text-sm">{user.country_code || '—'}</span>

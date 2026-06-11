@@ -62,7 +62,7 @@ const TeamsPage: React.FC = () => {
   };
 
   const actionClass =
-    'inline-flex items-center px-4 py-2 rounded-2xl border border-white/20 bg-gradient-to-r from-[#ff8b6b] to-[#ff6f91] text-white hover:brightness-110 transition-all self-start sm:self-auto shadow-[0_12px_28px_rgba(255,111,145,0.35)]';
+    'inline-flex items-center px-4 py-2 rounded-2xl border border-white/20 bg-osu-pink text-white hover:brightness-110 transition-all self-start sm:self-auto shadow-[0_12px_28px_-10px_rgba(0,0,0,0.6)]';
 
   return (
     <div className="min-h-screen torii-page-stage">

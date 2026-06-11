@@ -33,7 +33,7 @@ const PlayerRankCard: React.FC<Props> = ({ stats, playTime, playTimeSeconds, use
 
   return (
     <div className="px-2 md:px-4 py-3 flex flex-col md:flex-row gap-4 md:justify-between md:items-center">
-      {/* 左侧：奖章 / PP / 游玩时间 */}
+      {/* Left: medals / PP / play time */}
       <div className="flex gap-3 md:gap-4 items-center ml-0 md:ml-[-10px] justify-center md:justify-start">
         <div className="text-center min-w-0 flex-shrink-0">
           <div className="text-gray-500 dark:text-gray-400 text-xs mb-1 whitespace-nowrap">{t('profile.stats.medals')}</div>
@@ -69,7 +69,7 @@ const PlayerRankCard: React.FC<Props> = ({ stats, playTime, playTimeSeconds, use
         </div>
       </div>
 
-      {/* 右侧：评级徽章 */}
+      {/* Right: grade badges */}
       <div className="flex gap-1 md:gap-2 items-center mr-0 md:mr-[-15px] justify-center md:justify-end">
         <div className="flex flex-col items-center text-xs font-bold text-gray-700 dark:text-gray-200">
           <img src="/image/grades/SS-Silver.svg" alt="SSH" className="w-8 h-8 md:w-10 md:h-10" />

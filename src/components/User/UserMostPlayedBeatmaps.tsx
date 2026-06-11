@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
+import { hexToRgb, shiftHue  } from '../../utils/color';
 import LazyBackgroundImage from '../UI/LazyBackgroundImage';
 import { userAPI } from '../../utils/api';
 import { FaPlay } from 'react-icons/fa';
@@ -77,13 +78,7 @@ const BeatmapCard: React.FC<BeatmapCardProps> = ({ item, idx, profileColor }) =>
   const tooltipId = `beatmap-${bmId}-${idx}`;
 
   // Convert theme color to RGB for gradient overlay
-  const hexToRgb = (hex: string): string => {
-    const cleanHex = hex.replace('#', '');
-    const r = parseInt(cleanHex.substring(0, 2), 16);
-    const g = parseInt(cleanHex.substring(2, 4), 16);
-    const b = parseInt(cleanHex.substring(4, 6), 16);
-    return `${r}, ${g}, ${b}`;
-  };
+
 
   const themeRgb = hexToRgb(profileColor);
 
@@ -92,14 +87,17 @@ const BeatmapCard: React.FC<BeatmapCardProps> = ({ item, idx, profileColor }) =>
       src={coverUrl}
       className="relative overflow-hidden border-b border-gray-100 dark:border-gray-700/50 last:border-b-0"
     >
-      {/* Gradient overlay for readability with theme color */}
+      {/* Cover scrim: dark base for legibility on the left, fading right so the
+          cover art still reads. Tinted with this section's accent. Plain
+          gradients so it stays clean in perf-mode. */}
       <div
-        className="absolute inset-0 bg-gradient-to-r"
-        style={{
-          background: `linear-gradient(to right, rgba(${themeRgb}, 0.15) 0%, rgba(${themeRgb}, 0.08) 50%, rgba(${themeRgb}, 0.03) 100%)`
-        }}
+        className="absolute inset-0"
+        style={{ background: `linear-gradient(90deg, rgba(9,11,24,0.94) 0%, rgba(9,11,24,0.82) 46%, rgba(9,11,24,0.42) 100%)` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/75 to-white/60 dark:from-gray-800/90 dark:via-gray-800/75 dark:to-gray-800/60" />
+      <div
+        className="absolute inset-0"
+        style={{ background: `linear-gradient(90deg, rgba(${themeRgb}, 0.22) 0%, rgba(${themeRgb}, 0.06) 45%, transparent 80%)` }}
+      />
 
       <div className="relative bg-transparent hover:bg-white/20 dark:hover:bg-gray-800/20 transition-colors duration-150 group">
         {/* Desktop layout */}
@@ -200,7 +198,9 @@ const BeatmapCard: React.FC<BeatmapCardProps> = ({ item, idx, profileColor }) =>
 
 const UserMostPlayedBeatmaps: React.FC<UserMostPlayedBeatmapsProps> = ({ userId, user, max = 6, className = '' }) => {
   const { t } = useTranslation();
-  const { profileColor } = useProfileColor();
+  const { profileColor: baseProfileColor } = useProfileColor();
+  // Adjacent hue (opposite side from Pinned) so Most Played reads as distinct.
+  const profileColor = shiftHue(baseProfileColor, 38);
   const [beatmaps, setBeatmaps] = useState<MostPlayedBeatmap[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);

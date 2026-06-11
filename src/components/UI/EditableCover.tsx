@@ -24,7 +24,7 @@ const EditableCover: React.FC<EditableCoverProps> = ({
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 当 coverUrl prop 变化时，更新本地状态
+  // Sync local state when the coverUrl prop changes
   useEffect(() => {
     setCurrentCoverUrl(coverUrl);
     setImageError(false);
@@ -52,7 +52,7 @@ const EditableCover: React.FC<EditableCoverProps> = ({
     setImageError(true);
   };
 
-  // 默认背景图
+  // Default background image
   const defaultCover = '/image/backgrounds/layered-waves-haikei.svg';
   const displayCoverUrl = currentCoverUrl && !imageError ? currentCoverUrl : defaultCover;
 
@@ -66,7 +66,7 @@ const EditableCover: React.FC<EditableCoverProps> = ({
             )}
             <img
               src={displayCoverUrl}
-              alt={`${username}的头图`}
+              alt={`${username}'s cover image`}
               className={`w-full h-full object-cover transition-opacity duration-200 ${
                 isLoading ? 'opacity-0' : 'opacity-100'
               }`}
@@ -83,7 +83,7 @@ const EditableCover: React.FC<EditableCoverProps> = ({
           >
             <div className="text-white text-center">
               <FiEdit2 className="w-6 h-6 mx-auto mb-2" />
-              <span className="text-sm font-medium">更换头图</span>
+              <span className="text-sm font-medium">Change cover</span>
             </div>
           </button>
         )}

@@ -19,34 +19,34 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
   const [showRevokeModal, setShowRevokeModal] = useState(false);
   const [sessionToRevoke, setSessionToRevoke] = useState<Session | null>(null);
 
-  // 获取会话列表
+  // Fetch the list of sessions
   const fetchSessions = async () => {
     try {
       setIsLoading(true);
       const data = await deviceAPI.getUserSessions();
       setSessionsData(data);
     } catch (error) {
-      console.error('获取登录会话失败:', error);
+      console.error('Failed to fetch login sessions:', error);
       toast.error(t('settings.device.sessions.loadError'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 打开注销会话弹窗
+  // Open the revoke-session modal
   const handleShowRevokeModal = (session: Session) => {
     setSessionToRevoke(session);
     setShowRevokeModal(true);
   };
 
-  // 关闭注销会话弹窗
+  // Close the revoke-session modal
   const handleCloseRevokeModal = () => {
     if (revokingSessionId) return;
     setShowRevokeModal(false);
     setSessionToRevoke(null);
   };
 
-  // 确认注销会话
+  // Confirm revoking the session
   const handleConfirmRevoke = async () => {
     if (!sessionToRevoke || revokingSessionId) return;
 
@@ -54,22 +54,22 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
       setRevokingSessionId(sessionToRevoke.id);
       await deviceAPI.deleteSession(sessionToRevoke.id);
       toast.success(t('settings.device.sessions.revokeSuccess'));
-      
-      // 关闭弹窗
+
+      // Close the modal
       setShowRevokeModal(false);
       setSessionToRevoke(null);
-      
-      // 重新获取会话列表
+
+      // Re-fetch the list of sessions
       await fetchSessions();
     } catch (error) {
-      console.error('注销会话失败:', error);
+      console.error('Failed to revoke session:', error);
       toast.error(t('settings.device.sessions.revokeError'));
     } finally {
       setRevokingSessionId(null);
     }
   };
 
-  // 获取设备类型图标
+  // Get the device-type icon
   const getDeviceIcon = (session: Session) => {
     const { user_agent_info } = session;
     
@@ -82,7 +82,7 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
     }
   };
 
-  // 获取设备显示名称
+  // Get the device display name
   const getDeviceDisplayName = (session: Session) => {
     const { user_agent_info } = session;
     
@@ -97,7 +97,7 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
     return t('settings.device.browsers.unknown');
   };
 
-  // 获取设备类型名称
+  // Get the device-type name
   const getDeviceTypeName = (session: Session) => {
     const { user_agent_info } = session;
     
@@ -114,7 +114,7 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
     }
   };
 
-  // 格式化位置信息
+  // Format the location info
   const formatLocation = (session: Session) => {
     const { location } = session;
     
@@ -129,7 +129,7 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
     return parts.join(', ') || t('settings.device.sessions.localhost');
   };
 
-  // 格式化日期
+  // Format the date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-US', {
       year: 'numeric',
@@ -140,7 +140,7 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
     });
   };
 
-  // 判断是否为当前会话
+  // Determine whether this is the current session
   const isCurrentSession = (session: Session) => {
     return sessionsData?.current === session.id;
   };
@@ -261,7 +261,7 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
         </div>
       )}
 
-      {/* 注销会话确认弹窗 */}
+      {/* Revoke-session confirmation modal */}
       {sessionToRevoke && (
         <RemoveDeviceModal
           isOpen={showRevokeModal}

@@ -2,7 +2,7 @@ import type { AxiosRequestConfig } from 'axios';
 
 import { API_BASE_URL, api } from './client';
 
-// TOTP 相关类型定义
+// TOTP-related type definitions
 export interface TOTPStatus {
   enabled: boolean;
   created_at?: string;
@@ -71,28 +71,16 @@ export const userAPI = {
   },
 
   uploadAvatar: async (imageFile: File | Blob, isNsfw: boolean = false) => {
-    console.log('开始上传头像，文件类型:', imageFile.type, '文件大小:', imageFile.size);
-
     const formData = new FormData();
     const isJpeg = imageFile.type === 'image/jpeg';
     const fileName = isJpeg ? 'avatar.jpg' : 'avatar.png';
     formData.append('content', imageFile, fileName);
     formData.append('is_nsfw', String(isNsfw));
 
-    console.log('FormData内容:');
-    for (const [key, value] of formData.entries()) {
-      console.log(key, value);
-      if (value instanceof Blob) {
-        console.log(`  类型: ${value.type}, 大小: ${value.size}`);
-      }
-    }
-
     const token = localStorage.getItem('access_token');
     if (!token) {
-      throw new Error('未找到访问令牌，请重新登录');
+      throw new Error('Access token not found, please log in again');
     }
-
-    console.log('准备发送请求到:', `${API_BASE_URL}/api/private/avatar/upload`);
 
     const response = await fetch(`${API_BASE_URL}/api/private/avatar/upload`, {
       method: 'POST',
@@ -102,27 +90,22 @@ export const userAPI = {
       body: formData,
     });
 
-    console.log('响应状态:', response.status, response.statusText);
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      console.error('上传失败响应:', errorData);
+      console.error('Avatar upload failed:', errorData);
       throw new Error(errorData?.detail || errorData?.message || `HTTP ${response.status}`);
     }
 
     const result = await response.json();
-    console.log('上传响应:', result);
     return result;
   },
 
   // Submit a username change request for admin review. Does NOT rename
   // immediately — the resolved request is applied by an admin from the panel.
   rename: async (newUsername: string): Promise<PendingUsernameChange> => {
-    console.log('申请修改用户名:', newUsername);
-
     const token = localStorage.getItem('access_token');
     if (!token) {
-      throw new Error('未找到访问令牌');
+      throw new Error('Access token not found');
     }
 
     const response = await fetch(`${API_BASE_URL}/api/private/rename`, {
@@ -141,7 +124,7 @@ export const userAPI = {
       } catch {
         errorData = await response.text();
       }
-      console.error('用户名修改申请失败响应:', errorData);
+      console.error('Username change request failed:', errorData);
       const err = new Error(errorData?.detail || errorData?.message || `HTTP ${response.status}`) as Error & {
         status?: number;
       };
@@ -150,7 +133,6 @@ export const userAPI = {
     }
 
     const result = await response.json();
-    console.log('用户名修改申请响应:', result);
     return result as PendingUsernameChange;
   },
 
@@ -161,28 +143,16 @@ export const userAPI = {
   },
 
   uploadCover: async (imageFile: File | Blob, isNsfw: boolean = false) => {
-    console.log('开始上传头图，文件类型:', imageFile.type, '文件大小:', imageFile.size);
-
     const formData = new FormData();
     const isJpeg = imageFile.type === 'image/jpeg';
     const fileName = isJpeg ? 'cover.jpg' : 'cover.png';
     formData.append('content', imageFile, fileName);
     formData.append('is_nsfw', String(isNsfw));
 
-    console.log('FormData内容:');
-    for (const [key, value] of formData.entries()) {
-      console.log(key, value);
-      if (value instanceof Blob) {
-        console.log(`  类型: ${value.type}, 大小: ${value.size}`);
-      }
-    }
-
     const token = localStorage.getItem('access_token');
     if (!token) {
-      throw new Error('未找到访问令牌');
+      throw new Error('Access token not found');
     }
-
-    console.log('准备发送请求到:', `${API_BASE_URL}/api/private/cover/upload`);
 
     const response = await fetch(`${API_BASE_URL}/api/private/cover/upload`, {
       method: 'POST',
@@ -192,8 +162,6 @@ export const userAPI = {
       body: formData,
     });
 
-    console.log('响应状态:', response.status, response.statusText);
-
     if (!response.ok) {
       let errorData;
       try {
@@ -201,12 +169,11 @@ export const userAPI = {
       } catch {
         errorData = await response.text();
       }
-      console.error('上传失败响应:', errorData);
+      console.error('Cover upload failed:', errorData);
       throw new Error(errorData?.detail || errorData?.message || `HTTP ${response.status}`);
     }
 
     const result = await response.json();
-    console.log('上传响应:', result);
     return result;
   },
 
@@ -215,8 +182,6 @@ export const userAPI = {
     limit: number = 6,
     offset: number = 0
   ) => {
-    console.log('获取用户最近活动:', { userId, limit, offset });
-
     const params = new URLSearchParams();
     params.append('limit', limit.toString());
     params.append('offset', offset.toString());
@@ -255,14 +220,12 @@ export const userAPI = {
     return response.data;
   },
 
-  getUserPage: async (userId: number) => {
-    console.log('获取用户页面内容（编辑用）:', { userId });
+  getUserPage: async (_userId: number) => {
     const response = await api.get(`/api/private/user/page`);
     return response.data;
   },
 
-  updateUserPage: async (userId: number, content: string) => {
-    console.log('更新用户页面内容:', { userId, contentLength: content.length });
+  updateUserPage: async (_userId: number, content: string) => {
     const response = await api.put(`/api/private/user/page`, {
       body: content,
     });
@@ -270,7 +233,6 @@ export const userAPI = {
   },
 
   validateBBCode: async (content: string) => {
-    console.log('验证BBCode内容:', { contentLength: content.length });
     const response = await api.post('/api/private/user/validate-bbcode', {
       content: content,
     });
@@ -283,8 +245,6 @@ export const userAPI = {
     limit: number = 6,
     offset: number = 0
   ) => {
-    console.log('获取用户最佳成绩:', { userId, mode, limit, offset });
-
     const params = new URLSearchParams();
     params.append('limit', limit.toString());
     params.append('offset', offset.toString());
@@ -306,8 +266,6 @@ export const userAPI = {
     offset: number = 0,
     include_fails: boolean = true
   ) => {
-    console.log('获取用户最近成绩:', { userId, mode, limit, offset, include_fails });
-
     const params = new URLSearchParams();
     params.append('limit', limit.toString());
     params.append('offset', offset.toString());
@@ -327,8 +285,6 @@ export const userAPI = {
     userId: number,
     mode: string = 'osu'
   ) => {
-    console.log('获取用户置顶成绩:', { userId, mode });
-
     const params = new URLSearchParams();
     params.append('mode', mode);
 
@@ -343,11 +299,9 @@ export const userAPI = {
 
   // Change password with current password or TOTP code
   changePassword: async (newPassword: string, currentPassword?: string, totpCode?: string) => {
-    console.log('修改密码');
-
     const token = localStorage.getItem('access_token');
     if (!token) {
-      throw new Error('未找到访问令牌');
+      throw new Error('Access token not found');
     }
 
     const formData = new URLSearchParams();
@@ -377,47 +331,41 @@ export const userAPI = {
       } catch {
         errorData = await response.text();
       }
-      console.error('修改密码失败响应:', errorData);
+      console.error('Password change failed:', errorData);
       throw new Error(errorData?.detail || errorData?.message || `HTTP ${response.status}`);
     }
 
-    // 204 No Content 响应没有 body
+    // A 204 No Content response has no body
     if (response.status === 204) {
-      console.log('密码修改成功（无内容响应）');
       return;
     }
 
     const result = await response.json();
-    console.log('修改密码响应:', result);
     return result;
   },
 
-  // TOTP 相关接口
+  // TOTP-related endpoints
   totp: {
-    // 检查 TOTP 状态
+    // Check TOTP status
     getStatus: async (): Promise<TOTPStatus> => {
-      console.log('检查 TOTP 状态');
       const response = await api.get('/api/private/totp/status');
       return response.data;
     },
 
-    // 开始 TOTP 创建流程
+    // Start the TOTP creation flow
     createStart: async (): Promise<TOTPCreateStart> => {
-      console.log('开始 TOTP 创建流程');
       const response = await api.post('/api/private/totp/create');
       return response.data;
     },
 
-    // 完成 TOTP 创建流程
+    // Complete the TOTP creation flow
     createComplete: async (code: string): Promise<TOTPBackupCodes> => {
-      console.log('完成 TOTP 创建流程:', { code });
       const response = await api.put('/api/private/totp/create', { code });
       return response.data;
     },
 
-    // 禁用 TOTP 双因素验证
+    // Disable TOTP two-factor authentication
     disable: async (code: string): Promise<void> => {
-      console.log('禁用 TOTP 双因素验证:', { code });
       await api.delete('/api/private/totp', { data: { code } });
     },
   },

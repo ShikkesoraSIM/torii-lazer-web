@@ -1,10 +1,10 @@
 /**
  * BBCode Parser for osu! style BBCode
- * 基于官方osu-web BBCodeFromDB.php实现，确保输出与官方网站一致
+ * Based on the official osu-web BBCodeFromDB.php so output matches the official site.
  */
 import i18next from 'i18next';
 
-// useTranslation() 钩子不可用，直接引用
+// The useTranslation() hook isn't available here, so reference i18next directly
 type TranslationOptions = { [key: string]: unknown } | undefined;
 function t(key: string, options?: TranslationOptions): string {
   if (i18next.isInitialized) {
@@ -17,7 +17,7 @@ function t(key: string, options?: TranslationOptions): string {
   return key;
 }
 
-// 用于翻译错误消息的便捷方法
+// Convenience helper for translating error messages
 function et(key: string, options?: TranslationOptions): string {
   return t(`${errorMessageNamespace}.${key}`, options);
 }
@@ -47,7 +47,7 @@ export interface BBCodeTag {
   hasParam?: boolean;
   paramRequired?: boolean;
   allowNested?: boolean;
-  isBlock?: boolean;  // 标记是否为块级元素
+  isBlock?: boolean;  // Whether this is a block-level element
   validator?: (param?: string, content?: string) => TagValidationResult;
   renderer: (content: string, param?: string) => string;
 }
@@ -61,9 +61,9 @@ export class BBCodeParser {
   }
 
   private initializeTags(): void {
-    // === 基础格式化标签 ===
+    // === Basic formatting tags ===
 
-    // 粗体
+    // Bold
     this.addTag({
       name: 'b',
       openTag: '[b]',
@@ -72,7 +72,7 @@ export class BBCodeParser {
       renderer: (content: string) => `<strong>${content}</strong>`
     });
 
-    // 斜体
+    // Italic
     this.addTag({
       name: 'i',
       openTag: '[i]',
@@ -81,7 +81,7 @@ export class BBCodeParser {
       renderer: (content: string) => `<em>${content}</em>`
     });
 
-    // 下划线
+    // Underline
     this.addTag({
       name: 'u',
       openTag: '[u]',
@@ -90,7 +90,7 @@ export class BBCodeParser {
       renderer: (content: string) => `<u>${content}</u>`
     });
 
-    // 删除线 - 支持 [s] 和 [strike]
+    // Strikethrough - supports both [s] and [strike]
     this.addTag({
       name: 's',
       openTag: '[s]',
@@ -107,7 +107,7 @@ export class BBCodeParser {
       renderer: (content: string) => `<del>${content}</del>`
     });
 
-    // 颜色 - 按官方实现
+    // Color - follows the official implementation
     this.addTag({
       name: 'color',
       openTag: '[color=',
@@ -117,7 +117,7 @@ export class BBCodeParser {
       allowNested: true,
       validator: (param?: string) => {
         if (!param) return new TagValidationResult(false, et("missingColor"));
-        // 支持十六进制颜色和HTML颜色名
+        // Supports hex colors and HTML color names
         const hexPattern = /^#[0-9A-Fa-f]{3,6}$/;
         const htmlColors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'brown', 'black', 'white', 'gray', 'grey'];
         return new TagValidationResult(hexPattern.test(param) || htmlColors.includes(param.toLowerCase()), et("invalidColor"));
@@ -125,7 +125,7 @@ export class BBCodeParser {
       renderer: (content: string, param?: string) => `<span style="color: ${param};">${content}</span>`
     });
 
-    // 字体大小 - 按官方限制在30-200%
+    // Font size - clamped to 30-200% per the official limits
     this.addTag({
       name: 'size',
       openTag: '[size=',
@@ -144,9 +144,9 @@ export class BBCodeParser {
       }
     });
 
-    // === 块级元素 ===
+    // === Block-level elements ===
 
-    // 居中
+    // Center
     this.addTag({
       name: 'centre',
       openTag: '[centre]',
@@ -156,7 +156,7 @@ export class BBCodeParser {
       renderer: (content: string) => `<div style="text-align: center;">${content}</div>`
     });
 
-    // 标题
+    // Heading
     this.addTag({
       name: 'heading',
       openTag: '[heading]',
@@ -166,7 +166,7 @@ export class BBCodeParser {
       renderer: (content: string) => `<h2>${content}</h2>`
     });
 
-    // 通知框
+    // Notice box
     this.addTag({
       name: 'notice',
       openTag: '[notice]',
@@ -176,7 +176,7 @@ export class BBCodeParser {
       renderer: (content: string) => `<div class="well">${content}</div>`
     });
 
-    // 引用 - 按官方实现
+    // Quote - follows the official implementation
     this.addTag({
       name: 'quote',
       openTag: '[quote',
@@ -188,14 +188,14 @@ export class BBCodeParser {
       validator: (param?: string) => {
         if (!param) return new TagValidationResult(true);
 
-        // 必须包围双引号
+        // Must be wrapped in double quotes
         const trimmed = param.trim();
         return new TagValidationResult(trimmed.startsWith('"') && trimmed.endsWith('"'),
             et("missingQuotes"));
       },
       renderer: (content: string, param?: string) => {
         if (param) {
-          // 去掉引号
+          // Strip the quotes
           const author = param.replace(/^"?|"?$/g, '');
           return `<blockquote><h4>${this.escapeHtml(author)} wrote:</h4>${content}</blockquote>`;
         }
@@ -203,7 +203,7 @@ export class BBCodeParser {
       }
     });
 
-    // 代码块
+    // Code block
     this.addTag({
       name: 'code',
       openTag: '[code]',
@@ -213,7 +213,7 @@ export class BBCodeParser {
       renderer: (content: string) => `<pre>${this.escapeHtml(content)}</pre>`
     });
 
-    // 行内代码
+    // Inline code
     this.addTag({
       name: 'c',
       openTag: '[c]',
@@ -222,7 +222,7 @@ export class BBCodeParser {
       renderer: (content: string) => `<code>${this.escapeHtml(content)}</code>`
     });
 
-    // 折叠框/剧透框 - 按官方实现
+    // Collapsible / spoiler box - follows the official implementation
     this.addTag({
       name: 'box',
       openTag: '[box',
@@ -246,7 +246,7 @@ export class BBCodeParser {
       renderer: (content: string) => `<div class="js-spoilerbox bbcode-spoilerbox"><button type="button" class="js-spoilerbox__link bbcode-spoilerbox__link" style="background: none; border: none; cursor: pointer; padding: 0; text-align: left; width: 100%;"><span class="bbcode-spoilerbox__link-icon"></span>SPOILER</button><div class="js-spoilerbox__body bbcode-spoilerbox__body">${content}</div></div>`
     });
 
-    // 剧透条（涂黑）
+    // Inline spoiler (blacked-out text)
     this.addTag({
       name: 'spoiler',
       openTag: '[spoiler]',
@@ -255,14 +255,15 @@ export class BBCodeParser {
       renderer: (content: string) => `<span class="spoiler">${content}</span>`
     });
 
-    // 列表 - 按官方实现
+    // List - follows the official implementation
     this.addTag({
       name: 'list',
       openTag: '[list',
       closeTag: '[/list]',
       hasParam: true,
       paramRequired: false,
-      // 避免整体递归破坏分隔符，由 renderer 逐项递归
+      // Avoid recursing over the whole block (it would break the separators);
+      // the renderer recurses per item instead.
       allowNested: false,
       isBlock: true,
       renderer: (content: string, param?: string): string => {
@@ -272,9 +273,9 @@ export class BBCodeParser {
       }
     });
 
-    // === 链接和媒体 ===
+    // === Links and media ===
 
-    // URL链接
+    // URL link
     this.addTag({
       name: 'url',
       openTag: '[url',
@@ -294,7 +295,7 @@ export class BBCodeParser {
       }
     });
 
-    // 邮箱
+    // Email
     this.addTag({
       name: 'email',
       openTag: '[email',
@@ -314,7 +315,7 @@ export class BBCodeParser {
       }
     });
 
-    // 用户资料链接
+    // User profile link
     this.addTag({
       name: 'profile',
       openTag: '[profile',
@@ -332,13 +333,13 @@ export class BBCodeParser {
           const userId = param.replace(/^=/, '');
           return `<a href="/users/${userId}" class="profile-link">${this.escapeHtml(content)}</a>`;
         } else {
-          // 如果没有参数，假设content是用户名，需要解析为用户ID
+          // No param: assume content is the username (would need resolving to a user ID)
           return `<a href="/users/${this.escapeHtml(content)}" class="profile-link">${this.escapeHtml(content)}</a>`;
         }
       }
     });
 
-    // 图片
+    // Image
     this.addTag({
       name: 'img',
       openTag: '[img]',
@@ -354,7 +355,7 @@ export class BBCodeParser {
       }
     });
 
-    // YouTube视频
+    // YouTube video
     this.addTag({
       name: 'youtube',
       openTag: '[youtube]',
@@ -371,7 +372,7 @@ export class BBCodeParser {
       }
     });
 
-    // 音频
+    // Audio
     this.addTag({
       name: 'audio',
       openTag: '[audio]',
@@ -387,7 +388,7 @@ export class BBCodeParser {
       }
     });
 
-    // 图片映射
+    // Image map
     this.addTag({
       name: 'imagemap',
       openTag: '[imagemap]',
@@ -404,11 +405,11 @@ export class BBCodeParser {
     this.tags.set(tag.name, tag);
   }
 
-  // 仅在当前 list 顶层分割 [*]，支持嵌套 [list]
+  // Split [*] only at the top level of the current list, allowing nested [list]
   private splitTopLevelListItems(source: string): string[] {
     const text = typeof source === 'string' ? source : String(source ?? '');
     const items: string[] = [];
-    let depth = 1; // 顶层 [list] 的内容起始深度
+    let depth = 1; // Starting depth for the content of the top-level [list]
     let i = 0;
     let current = '';
     const len = text.length;
@@ -444,13 +445,13 @@ export class BBCodeParser {
           continue;
         }
         if (depth === 1 && tagLower === '*') {
-          // 顶层项分隔符
+          // Top-level item separator
           pushCurrent();
           i = close + 1;
           continue;
         }
 
-        // 其他标签原样写入
+        // Write any other tag through unchanged
         current += text.slice(i, close + 1);
         i = close + 1;
         continue;
@@ -465,7 +466,7 @@ export class BBCodeParser {
   }
 
   private escapeHtml(text: string): string {
-    // 类型检查
+    // Type guard
     if (typeof text !== 'string') {
       text = String(text || '');
     }
@@ -476,8 +477,8 @@ export class BBCodeParser {
   }
 
   /**
-   * 解析 [imagemap] 标签
-   * 基于 osu-web BBCodeFromDB.php 的实现
+   * Parse the [imagemap] tag.
+   * Based on the osu-web BBCodeFromDB.php implementation.
    */
   private parseImagemap(content: string): string {
     const lines = content.trim().split('\n');
@@ -486,7 +487,7 @@ export class BBCodeParser {
     const imageUrl = lines[0]?.trim();
     if (!imageUrl) return '';
 
-    // 如果只有图片URL，没有链接数据，返回原始BBCode（按官方逻辑）
+    // Only an image URL and no link data: return the original BBCode (official behavior)
     if (lines.length < 2) {
       return `[imagemap]${this.escapeHtml(imageUrl)}[/imagemap]`;
     }
@@ -494,12 +495,12 @@ export class BBCodeParser {
     const linksData = lines.slice(1);
     const links: string[] = [];
 
-    // 解析链接数据
+    // Parse the link data
     for (const line of linksData) {
       const trimmedLine = line.trim();
       if (!trimmedLine) continue;
 
-      // 使用官方的空格分割逻辑，最多分割6个部分
+      // Official whitespace split, into at most 6 parts
       const parts = trimmedLine.split(' ');
       if (parts.length >= 5) {
         try {
@@ -508,27 +509,27 @@ export class BBCodeParser {
           const width = parseFloat(parts[2]);
           const height = parseFloat(parts[3]);
           const href = parts[4];
-          // 第6个及之后的部分作为title（去掉#前缀如果存在）
+          // Part 6 onward is the title (drop a leading # if present)
           let title = parts.length > 5 ? parts.slice(5).join(' ') : '';
           if (title.startsWith('#')) {
             title = title.substring(1).trim();
           }
 
-          // 验证数值
+          // Validate the numbers
           if (isNaN(left) || isNaN(top) || isNaN(width) || isNaN(height)) {
             continue;
           }
 
-          // 构建样式（按官方CSS）
+          // Build the style (matching the official CSS)
           const style = `left:${left}%;top:${top}%;width:${width}%;height:${height}%;`;
 
           if (href === '#') {
-            // 无链接区域，使用span（官方做法）
+            // Non-link area: use a span (official approach)
             links.push(
               `<span class="imagemap__link" style="${style}" title="${this.escapeHtml(title)}"></span>`
             );
           } else {
-            // 有链接区域，使用a标签（官方做法）
+            // Linked area: use an anchor tag (official approach)
             const safeHref = this.escapeHtml(href);
             const safeTitle = this.escapeHtml(title);
             links.push(
@@ -536,18 +537,18 @@ export class BBCodeParser {
             );
           }
         } catch {
-          // 忽略解析错误的行
+          // Skip lines that fail to parse
           continue;
         }
       }
     }
 
-    // 获取图片文件名作为alt
+    // Use the image filename as the alt text
     const imageUrlParts = imageUrl.split('/');
     const imageName = imageUrlParts[imageUrlParts.length - 1] || '';
-    const altText = imageName.split('?')[0]; // 去掉查询参数
+    const altText = imageName.split('?')[0]; // Drop the query string
 
-    // 构建HTML（按官方格式）
+    // Build the HTML (matching the official format)
     const imageHtml = `<img class="imagemap__image" loading="lazy" src="${this.escapeHtml(imageUrl)}" width="1280" height="720" alt="${this.escapeHtml(altText)}" />`;
     const linksHtml = links.join('');
 
@@ -555,12 +556,12 @@ export class BBCodeParser {
   }
 
   /**
-   * 解析BBCode文本为HTML
+   * Parse BBCode text into HTML
    */
   public parse(input: string): BBCodeParseResult {
     this.errors.length = 0;
 
-    // 空输入检查
+    // Empty-input check
     if (!input || input.trim() === '') {
       return {
         html: `<div class="bbcode"></div>`,
@@ -588,19 +589,19 @@ export class BBCodeParser {
   }
 
   private parseRecursive(input: string): string {
-    // 类型检查
+    // Type guard
     if (typeof input !== 'string') {
       return this.escapeHtml(String(input || ''));
     }
 
     let result = input;
 
-    // 按官方顺序处理：先处理块级元素，再处理内联元素
+    // Process in the official order: block-level elements first, then inline ones
 
-    // 先单独处理可嵌套的同名块标签：list 需要平衡匹配
+    // Handle the nestable same-name block tag separately: list needs balanced matching
     result = this.processListsBalanced(result);
 
-    // === 块级元素 ===
+    // === Block-level elements ===
     const blockTags = ['imagemap', 'box', 'spoilerbox', 'code', 'notice', 'quote', 'heading'];
     for (const tagName of blockTags) {
       const tag = this.tags.get(tagName);
@@ -609,7 +610,7 @@ export class BBCodeParser {
       }
     }
 
-    // === 内联元素 ===
+    // === Inline elements ===
     const inlineTags = ['audio', 'b', 'centre', 'c', 'color', 'email', 'img', 'i', 'size', 'spoiler', 's', 'strike', 'u', 'url', 'youtube', 'profile'];
     for (const tagName of inlineTags) {
       const tag = this.tags.get(tagName);
@@ -618,16 +619,16 @@ export class BBCodeParser {
       }
     }
 
-    // 处理自动链接（纯URL转换为链接）- 在所有BBCode处理之后
+    // Auto-link bare URLs - after all other BBCode processing
     result = this.processAutoLinks(result);
 
-    // 最后处理换行
+    // Handle newlines last
     result = result.replace(/\n/g, '<br />');
 
     return result;
   }
 
-  // 基于深度平衡的 [list]...[/list] 处理，支持嵌套
+  // Depth-balanced [list]...[/list] handling, with nesting support
   private processListsBalanced(text: string): string {
     let i = 0;
     const len = text.length;
@@ -639,27 +640,27 @@ export class BBCodeParser {
         out += text.slice(i);
         break;
       }
-      // 复制前置文本
+      // Copy the preceding text
       out += text.slice(i, startList);
 
-      // 解析参数到右括号
+      // Read the params up to the closing bracket
       const openBracketEnd = text.indexOf(']', startList + 1);
       if (openBracketEnd === -1) {
-        // 不完整，作为普通文本处理
+        // Incomplete: treat as plain text
         out += text.slice(startList);
         break;
       }
 
-      // 提取 param（若有）
-      const openContent = text.slice(startList + 1, openBracketEnd); // e.g. "list" 或 "list=1"
+      // Extract the param (if any)
+      const openContent = text.slice(startList + 1, openBracketEnd); // e.g. "list" or "list=1"
       let param: string | undefined;
       const eqIdx = openContent.indexOf('=');
       if (eqIdx !== -1) {
         param = openContent.slice(eqIdx + 1);
-        // 保留原样（不去引号）——与现有 renderer 兼容
+        // Keep it as-is (don't strip quotes) for compatibility with the existing renderer
       }
 
-      // 扫描寻找匹配的闭合 [/list]
+      // Scan for the matching closing [/list]
       let depth = 1;
       let j = openBracketEnd + 1;
       let closingStart = -1;
@@ -683,26 +684,26 @@ export class BBCodeParser {
       }
 
       if (depth !== 0 || closingStart === -1) {
-        // 没有找到匹配闭合，当作普通文本
+        // No matching close found: treat as plain text
         out += text.slice(startList);
         break;
       }
 
-      // 完整块：内容位于 openBracketEnd+1 ... (closing tag 的起始 '[')
+      // Complete block: content runs from openBracketEnd+1 to the closing tag's '['
       const inner = text.slice(openBracketEnd + 1, closingStart);
 
-      // 使用现有 list 渲染器
+      // Use the existing list renderer
       const listTag = this.tags.get('list');
       if (listTag) {
-        // list 的 renderer 负责逐项递归解析
+        // The list renderer recurses through each item
         const rendered = listTag.renderer(inner, param ? `=${param}` : undefined);
         out += rendered;
       } else {
-        // 不应发生：保底原样输出
+        // Shouldn't happen: fall back to the original text
         out += text.slice(startList, j);
       }
 
-      // 继续向后
+      // Move on
       i = j;
     }
 
@@ -710,33 +711,33 @@ export class BBCodeParser {
   }
 
   private processAutoLinks(text: string): string {
-    // 避免在已生成的 HTML 标签或属性中二次转换
+    // Avoid re-processing inside already-generated HTML tags or attributes
     const urlRegex = /(https?:\/\/[^\s<>"]+)/g;
 
     return text.replace(urlRegex, (match: string, _p: string, offset: number) => {
-      // 检查是否在标签内部（属性）
+      // Check whether we're inside a tag (an attribute)
       const lastLt = text.lastIndexOf('<', offset);
       const lastGt = text.lastIndexOf('>', offset);
 
-      // 位于未闭合标签内，跳过
+      // Inside an unclosed tag: skip
       if (lastLt > lastGt) return match;
 
-      // 链接元素检测
+      // Anchor element detection
       const anchorStart = text.lastIndexOf('<a', offset);
       if (anchorStart !== -1) {
         const anchorEndTag = text.indexOf('</a>', anchorStart);
         const anchorOpenEnd = text.indexOf('>', anchorStart);
 
-        // <a> 内
+        // Inside an <a>
         if (anchorOpenEnd !== -1 && anchorOpenEnd < offset && anchorEndTag !== -1 && anchorEndTag > offset) {
           return match;
         }
 
-        // href="..." 属性值中
+        // Inside an href="..." attribute value
         if (anchorOpenEnd === -1 || anchorOpenEnd > offset) return match;
       }
 
-      // 跳过 code/pre 标签内容自动链接
+      // Skip auto-linking inside code/pre tag content
       const isInside = (tagName: string) => {
         const start = text.lastIndexOf(`<${tagName}`, offset);
         if (start !== -1) {
@@ -785,7 +786,7 @@ export class BBCodeParser {
   }
 
   private processTagWithParam(text: string, tag: BBCodeTag): string {
-    // 处理带参数的标签，如 [color=red]text[/color] 或 [quote="author"]text[/quote]
+    // Handle tags with params, e.g. [color=red]text[/color] or [quote="author"]text[/quote]
     const patterns = [
       // [tag=param]content[/tag]
       new RegExp(`\\[${tag.name}=([^\\]]+)\\](.*?)\\[\\/${tag.name}\\]`, 'gis'),
@@ -793,7 +794,7 @@ export class BBCodeParser {
       new RegExp(`\\[${tag.name}="([^"]+)"\\](.*?)\\[\\/${tag.name}\\]`, 'gis'),
     ];
 
-    // 如果参数不是必需的，也支持无参数形式
+    // If the param isn't required, also support the no-param form
     if (!tag.paramRequired) {
       patterns.push(new RegExp(`\\[${tag.name}\\](.*?)\\[\\/${tag.name}\\]`, 'gis'));
     }
@@ -809,11 +810,11 @@ export class BBCodeParser {
           let content: string;
 
           if (isNoParam) {
-            // 无参：[tag]content[/tag] —— g1 即内容
+            // No param: [tag]content[/tag] -- g1 is the content
             param = undefined;
             content = g1;
           } else {
-            // 有参：g1=参数 g2=内容
+            // With param: g1 is the param, g2 is the content
             param = g1;
             content = typeof g2 === 'string' ? g2 : '';
           }
@@ -831,7 +832,7 @@ export class BBCodeParser {
             }
           }
 
-          // 不要处理 list
+          // Don't process list here
           const processedContent = tag.name === 'list'
             ? content
             : (tag.allowNested ? this.parseRecursive(content) : this.escapeHtml(content));
@@ -848,15 +849,15 @@ export class BBCodeParser {
   }
 }
 
-// 创建全局解析器实例
+// Create the global parser instance
 export const bbcodeParser = new BBCodeParser();
 
-// 便捷函数
+// Convenience function
 export function parseBBCode(input: unknown): BBCodeParseResult {
-  // 确保输入是字符串
+  // Make sure the input is a string
   if (typeof input !== 'string') {
-    console.warn('parseBBCode: 输入不是字符串类型，尝试转换', { input, type: typeof input });
-    // 尝试转换为字符串
+    console.warn('parseBBCode: input is not a string, attempting to convert', { input, type: typeof input });
+    // Try to convert to a string
     if (input === null || input === undefined) {
       input = '';
     } else {

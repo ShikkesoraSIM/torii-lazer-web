@@ -20,7 +20,7 @@ export const GAME_MODE_NAMES: Record<GameMode, string> = {
   mania: 'Mania',
 };
 
-// 获取主题色的函数 - 直接从 CSS 变量读取
+// Helper to read the theme color - reads straight from the CSS variable
 export const getProfileColor = () => {
   if (typeof window !== 'undefined') {
     const color = getComputedStyle(document.documentElement).getPropertyValue('--profile-color').trim();

@@ -7,8 +7,6 @@ interface BBCodeRendererProps {
 }
 
 /**
- * BBCode HTML 渲染组件
- * 安全地渲染BBCode解析器生成的HTML，并添加交互功能
  */
 const BBCodeRenderer: React.FC<BBCodeRendererProps> = ({ html, className = '' }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -18,13 +16,11 @@ const BBCodeRenderer: React.FC<BBCodeRendererProps> = ({ html, className = '' })
 
     const container = containerRef.current;
 
-    // 初始化折叠框功能
     const initializeSpoilerBoxes = () => {
       const spoilerLinks = container.querySelectorAll('.js-spoilerbox__link');
       const cleanupFunctions: (() => void)[] = [];
       
       spoilerLinks.forEach((button) => {
-        // 先移除可能存在的旧事件监听器
         const existingHandler = (button as any).__spoilerClickHandler;
         if (existingHandler) {
           button.removeEventListener('click', existingHandler);
@@ -42,34 +38,28 @@ const BBCodeRenderer: React.FC<BBCodeRendererProps> = ({ html, className = '' })
             body.classList.toggle('is-visible', !isVisible);
             button.setAttribute('aria-expanded', String(!isVisible));
             
-            // 触发自定义事件
             spoilerBox?.dispatchEvent(new CustomEvent('spoilerToggle', {
               detail: { expanded: !isVisible }
             }));
           }
         };
 
-        // 存储事件处理器引用以便清理
         (button as any).__spoilerClickHandler = handleClick;
         button.addEventListener('click', handleClick);
         
-        // 设置初始状态 - button元素默认就有正确的属性
         button.setAttribute('aria-expanded', 'false');
         
-        // 添加清理函数
         cleanupFunctions.push(() => {
           button.removeEventListener('click', handleClick);
           delete (button as any).__spoilerClickHandler;
         });
       });
       
-      // 返回总的清理函数
       return () => {
         cleanupFunctions.forEach(cleanup => cleanup());
       };
     };
 
-    // 初始化剧透条功能
     const initializeSpoilers = () => {
       const spoilers = container.querySelectorAll('.spoiler');
       const cleanupFunctions: (() => void)[] = [];
@@ -87,20 +77,16 @@ const BBCodeRenderer: React.FC<BBCodeRendererProps> = ({ html, className = '' })
           }
         };
 
-        // 点击显示
         spoiler.addEventListener('click', handleReveal);
         
-        // 鼠标悬停显示
         spoiler.addEventListener('mouseenter', handleReveal);
         
-        // 支持键盘操作
         spoiler.setAttribute('tabindex', '0');
         spoiler.setAttribute('role', 'button');
-        spoiler.setAttribute('aria-label', '点击显示隐藏内容');
+        spoiler.setAttribute('aria-label', 'Show hidden content');
         
         spoiler.addEventListener('keydown', handleKeydown);
         
-        // 添加清理函数
         cleanupFunctions.push(() => {
           spoiler.removeEventListener('click', handleReveal);
           spoiler.removeEventListener('mouseenter', handleReveal);
@@ -108,13 +94,11 @@ const BBCodeRenderer: React.FC<BBCodeRendererProps> = ({ html, className = '' })
         });
       });
       
-      // 返回总的清理函数
       return () => {
         cleanupFunctions.forEach(cleanup => cleanup());
       };
     };
 
-    // 初始化图片映射功能
     const initializeImageMaps = () => {
       const imageMaps = container.querySelectorAll('.imagemap');
       const cleanupFunctions: (() => void)[] = [];
@@ -135,16 +119,13 @@ const BBCodeRenderer: React.FC<BBCodeRendererProps> = ({ html, className = '' })
             e.preventDefault();
           };
           
-          // 添加悬停效果
           link.addEventListener('mouseenter', handleMouseEnter);
           link.addEventListener('mouseleave', handleMouseLeave);
           
-          // 如果是信息区域（没有href），添加提示
           if (!link.getAttribute('href') || link.getAttribute('href') === '#') {
             link.addEventListener('click', handleClick);
           }
           
-          // 添加清理函数
           cleanupFunctions.push(() => {
             link.removeEventListener('mouseenter', handleMouseEnter);
             link.removeEventListener('mouseleave', handleMouseLeave);
@@ -155,32 +136,27 @@ const BBCodeRenderer: React.FC<BBCodeRendererProps> = ({ html, className = '' })
         });
       });
       
-      // 返回总的清理函数
       return () => {
         cleanupFunctions.forEach(cleanup => cleanup());
       };
     };
 
-    // 初始化所有交互功能并收集清理函数
     const cleanupSpoilerBoxes = initializeSpoilerBoxes();
     const cleanupSpoilers = initializeSpoilers();
     const cleanupImageMaps = initializeImageMaps();
     
-    // 返回总的清理函数
     return () => {
       cleanupSpoilerBoxes?.();
       cleanupSpoilers?.();
       cleanupImageMaps?.();
     };
 
-    // 处理外部链接
     const externalLinks = container.querySelectorAll('a[href^="http"]');
     externalLinks.forEach((link) => {
       link.setAttribute('target', '_blank');
       link.setAttribute('rel', 'noopener noreferrer');
     });
 
-    // 图片懒加载
     const images = container.querySelectorAll('img[loading="lazy"]');
     if ('IntersectionObserver' in window) {
       const imageObserver = new IntersectionObserver((entries) => {

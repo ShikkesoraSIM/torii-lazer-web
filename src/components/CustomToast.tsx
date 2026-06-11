@@ -27,7 +27,6 @@ export const CustomToast: React.FC<CustomToastProps> = ({
   const [userInfo, setUserInfo] = useState<{ username: string; avatar_url: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 获取用户信息
   useEffect(() => {
     if (sourceUserId === 2 && !username && !avatar) {
       setUserInfo({
@@ -99,7 +98,6 @@ export const CustomToast: React.FC<CustomToastProps> = ({
 
   return (
     <div className="flex items-start space-x-3 p-4 bg-card rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-w-sm min-w-[300px] relative">
-      {/* 关闭按钮 */}
       {onDismiss && (
         <button
           onClick={onDismiss}
@@ -109,7 +107,6 @@ export const CustomToast: React.FC<CustomToastProps> = ({
         </button>
       )}
 
-      {/* 头像或图标 */}
       <div className="flex-shrink-0">
         {avatarUrl && !isLoading ? (
           <img
@@ -146,7 +143,6 @@ export const CustomToast: React.FC<CustomToastProps> = ({
         </div>
       </div>
       
-      {/* 内容 */}
       <div className="flex-1 min-w-0 pt-1">
         <div className="flex items-center space-x-2 mb-2">
           <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
@@ -154,7 +150,6 @@ export const CustomToast: React.FC<CustomToastProps> = ({
           </h4>
         </div>
         
-        {/* 用户名 */}
         {(username || userInfo?.username) && (
           <div className="flex items-center space-x-1 mb-2">
             <span className="text-xs text-gray-500 dark:text-gray-400">{t('common.from')}</span>
@@ -164,7 +159,6 @@ export const CustomToast: React.FC<CustomToastProps> = ({
           </div>
         )}
         
-        {/* 消息内容 */}
         <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
           {message}
         </p>
@@ -173,7 +167,6 @@ export const CustomToast: React.FC<CustomToastProps> = ({
   );
 };
 
-// 自定义 toast 显示函数
 export const showCustomToast = (props: CustomToastProps) => {
   return toast.custom(
     (t: any) => (

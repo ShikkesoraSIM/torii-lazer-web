@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { FiChevronDown, FiGlobe, FiCheck } from 'react-icons/fi';
 import type { AppLanguages } from '../../i18n/resources';
+import CountryFlag from './CountryFlag';
 
-// 语言配置接口
 interface LanguageConfig {
   code: AppLanguages;
   name: string;
@@ -12,7 +12,6 @@ interface LanguageConfig {
   flag: string;
 }
 
-// 支持的语言列表
 const SUPPORTED_LANGUAGES: LanguageConfig[] = [
   {
     code: 'en',
@@ -26,17 +25,17 @@ const SUPPORTED_LANGUAGES: LanguageConfig[] = [
     nativeName: '中文',
     flag: 'cn'
   },
-  // // 其他支持的语言
+  // Other languages available to enable later
   // {
   //   code: 'ja',
   //   name: 'Japanese',
-  //   nativeName: '日本語',
+  //   nativeName: 'Japanese',
   //   flag: 'jp'
   // },
   // {
   //   code: 'ko',
   //   name: 'Korean',
-  //   nativeName: '한국어',
+  //   nativeName: 'Korean',
   //   flag: 'kr'
   // },
   // {
@@ -60,7 +59,7 @@ const SUPPORTED_LANGUAGES: LanguageConfig[] = [
   // {
   //   code: 'ru',
   //   name: 'Russian',
-  //   nativeName: 'Русский',
+  //   nativeName: 'Russian',
   //   flag: 'ru'
   // },
 ];
@@ -78,24 +77,21 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 获取当前语言配置
   const currentLanguage = SUPPORTED_LANGUAGES.find(
     lang => lang.code === (i18n.resolvedLanguage ?? i18n.language)
   ) || SUPPORTED_LANGUAGES[0];
 
-  // 切换下拉菜单
   const handleToggle = useCallback(() => {
     setIsOpen(prev => !prev);
   }, []);
 
-  // 选择语言
   const handleLanguageSelect = useCallback((languageCode: AppLanguages) => {
     void i18n.changeLanguage(languageCode);
     setIsOpen(false);
   }, [i18n]);
 
 
-  // 点击外部关闭
+  // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -109,7 +105,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
     };
   }, []);
 
-  // 键盘导航支持
+  // Keyboard navigation support
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
       setIsOpen(false);
@@ -124,7 +120,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
       ref={dropdownRef}
       onKeyDown={handleKeyDown}
     >
-      {/* 语言选择按钮 */}
+      {/* Language selector button */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -144,25 +140,26 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        {/* 地球图标或国旗 */}
+        {/* Globe icon or flag */}
         <div className="flex items-center space-x-1.5">
           {isMobile ? (
             <FiGlobe size={14} />
           ) : (
-            <img
-              src={`/image/flag/${currentLanguage.flag}.svg`}
-              alt={`${currentLanguage.name} flag`}
-              className="w-5 h-4 rounded-sm object-cover"
+            <CountryFlag
+              code={currentLanguage.flag}
+              name={currentLanguage.name}
+              className="h-4"
+              rounded="rounded-sm"
             />
           )}
           
-          {/* 语言名称 */}
+          {/* Language name */}
           <span className="whitespace-nowrap">
             {isMobile ? currentLanguage.code.toUpperCase() : currentLanguage.nativeName}
           </span>
         </div>
 
-        {/* 下拉箭头 */}
+        {/* Dropdown arrow */}
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
@@ -171,7 +168,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
         </motion.div>
       </motion.button>
 
-      {/* 下拉菜单 */}
+      {/* Dropdown menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -206,7 +203,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
             role="listbox"
             aria-label={t('common.language.label')}
           >
-            {/* 语言选项 */}
+            {/* Language options */}
             <div className="py-1">
               {SUPPORTED_LANGUAGES.map((language) => {
                 const isSelected = language.code === currentLanguage.code;
@@ -227,10 +224,11 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
                     aria-selected={isSelected}
                   >
                     <div className="flex items-center space-x-3">
-                      <img
-                        src={`/image/flag/${language.flag}.svg`}
-                        alt={`${language.name} flag`}
-                        className="w-5 h-4 rounded-sm object-cover flex-shrink-0"
+                      <CountryFlag
+                        code={language.flag}
+                        name={language.name}
+                        className="h-4"
+                        rounded="rounded-sm"
                       />
                       <div className="flex flex-col items-start">
                         <span className="font-medium">{language.nativeName}</span>
@@ -240,7 +238,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
                       </div>
                     </div>
                     
-                    {/* 选中指示器 */}
+                    {/* Selected indicator */}
                     {isSelected && (
                       <div className="text-osu-pink">
                         <FiCheck size={16} />
@@ -251,7 +249,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
               })}
             </div>
 
-            {/* 装饰性渐变 */}
+            {/* Decorative gradient */}
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-osu-pink/5 via-transparent to-osu-blue/5 pointer-events-none" />
           </motion.div>
         )}

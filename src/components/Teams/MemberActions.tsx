@@ -22,7 +22,7 @@ const MemberActions: React.FC<Props> = ({ member, team, onMemberRemoved }) => {
   const isTargetLeader = member.id === team.leader_id;
   const canKick = isLeader && !isTargetLeader && user?.id !== member.id;
 
-  // 踢出成员
+  // Kick a member
   const handleKickMember = async () => {
     if (!confirm(t('teams.detail.confirmKick', { username: member.username }))) return;
 
@@ -65,7 +65,7 @@ const MemberActions: React.FC<Props> = ({ member, team, onMemberRemoved }) => {
             </div>
           </div>
 
-          {/* 点击外部关闭菜单 */}
+          {/* Click outside to close the menu */}
           <div
             className="fixed inset-0 z-40"
             onClick={() => setShowActions(false)}

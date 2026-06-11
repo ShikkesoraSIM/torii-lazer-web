@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import MaintenanceBanner from './MaintenanceBanner';
 import RestrictionBanner from './RestrictionBanner';
 import { Toaster } from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 import { useAuth } from '../../hooks/useAuth';
 import { NotificationProvider } from '../../contexts/NotificationContext';
 
@@ -11,7 +12,7 @@ const Layout: React.FC = () => {
   const { isAuthenticated, user, restriction } = useAuth();
   const location = useLocation();
 
-  // 登录/注册/找回密码页面不需要顶部内边距
+  // Login / register / password-reset pages don't need the top padding.
   const noTopPaddingRoutes = ['/', '/login', '/register', '/password-reset'];
   const shouldApplyTopPadding = !noTopPaddingRoutes.includes(location.pathname);
 
@@ -47,8 +48,8 @@ const Layout: React.FC = () => {
         <Toaster
         position="top-right"
         containerStyle={{
-          top: '80px', // 在顶栏下面显示，顶栏高度约为64px，留一些间距
-          right: '16px', // 右侧留一些边距
+          top: '80px', // sit below the fixed navbar
+          right: '16px',
         }}
         toastOptions={{
           duration: 4000,
@@ -73,6 +74,8 @@ const Layout: React.FC = () => {
           },
         }}
       />
+      {/* One shared country-flag tooltip for the whole app (CountryFlag points here). */}
+      <Tooltip id="country-tooltip" place="bottom" float style={{ zIndex: 9999 }} />
       </div>
     </NotificationProvider>
   );

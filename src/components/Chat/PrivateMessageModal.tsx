@@ -18,7 +18,7 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
   isOpen,
   onClose,
   onMessageSent,
-  currentUser: _currentUser, // 目前未使用，但保留以便后续扩展
+  currentUser: _currentUser, // currently unused, kept for future use
 }) => {
   const { t } = useTranslation();
   const [targetUserId, setTargetUserId] = useState<number | null>(null);
@@ -27,7 +27,7 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<User[]>([]);
 
-  // 防止背景滚动
+  // Prevent background scrolling
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -43,13 +43,13 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
     };
   }, [isOpen]);
 
-  // 检查是否有预选用户
+  // Check for a pre-selected user
   useEffect(() => {
     const selectedUser = (window as any).selectedUserForPM as User;
     if (selectedUser) {
       setTargetUserId(selectedUser.id);
       setTargetUsername(selectedUser.username);
-      // 清除全局变量
+      // Clear the global variable
       delete (window as any).selectedUserForPM;
     }
   }, [isOpen]);
@@ -64,19 +64,18 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
       toast.success(t('messages.privateMessage.toasts.sent'));
       onMessageSent(result?.channel);
       onClose();
-      
-      // 重置表单
+
+      // Reset the form
       setTargetUserId(null);
       setTargetUsername('');
       setMessage('');
-      
-      // 如果创建成功，可以尝试自动选择新创建的频道
+
+      // On success, try to auto-select the newly created channel
       if (result?.channel) {
-        console.log('私聊频道创建成功:', result.channel);
-        // 通过回调通知父组件选择新频道
+        // Notify the parent via callback to select the new channel
       }
     } catch (error) {
-      console.error('发送私聊失败:', error);
+      console.error('Failed to send private message:', error);
       toast.error(t('messages.privateMessage.toasts.sendFailed'));
     } finally {
       setIsLoading(false);
@@ -90,11 +89,11 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
     }
 
     try {
-      // 由于没有搜索接口，这里暂时显示空结果
+      // No search endpoint yet, so show empty results for now
       toast.error(t('messages.privateMessage.toasts.searchUnsupported'));
       setSearchResults([]);
     } catch (error) {
-      console.error('搜索用户失败:', error);
+      console.error('Failed to search users:', error);
       toast.error(t('messages.privateMessage.toasts.searchFailed'));
       setSearchResults([]);
     }
@@ -111,7 +110,7 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center">
-        {/* 背景遮罩 */}
+        {/* Background overlay */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -120,14 +119,14 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
           onClick={onClose}
         />
         
-        {/* 模态框 */}
+        {/* Modal */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           className="relative bg-card rounded-xl shadow-xl w-full max-w-md mx-4"
         >
-          {/* 头部 */}
+          {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
               {t('messages.privateMessage.newMessage')}
@@ -141,9 +140,9 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
             </button>
           </div>
 
-          {/* 内容 */}
+          {/* Content */}
           <div className="p-6 space-y-4">
-            {/* 选择用户 */}
+            {/* Select user */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('messages.privateMessage.sendTo')}
@@ -158,7 +157,7 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
                     setTargetUsername(value);
                     
                     if (value) {
-                      // 防抖搜索
+                      // Debounced search
                       const timeoutId = setTimeout(() => {
                         searchUsers(value);
                       }, 300);
@@ -174,7 +173,7 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
                 <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
 
-              {/* 搜索结果 */}
+              {/* Search results */}
               {searchResults.length > 0 && (
                 <div className="mt-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                   {searchResults.map(user => (
@@ -203,7 +202,7 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
               )}
             </div>
 
-            {/* 消息内容 */}
+            {/* Message body */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('messages.privateMessage.messageLabel')}
@@ -224,7 +223,7 @@ const PrivateMessageModal: React.FC<PrivateMessageModalProps> = ({
             </div>
           </div>
 
-          {/* 底部 */}
+          {/* Footer */}
           <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={onClose}

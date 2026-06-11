@@ -24,7 +24,7 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
   const { profileColor } = useProfileColor();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // 移除图片边框的样式优化
+  // Style tweak to remove image borders
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -41,13 +41,13 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
     };
   }, []);
 
-  // 检查是否可以编辑（仅自己的页面）
+  // Editing is only allowed on your own page
   const canEdit = currentUser?.id === user.id;
 
-  // 从用户对象中获取页面内容
+  // Read the page content from the user object
   const userPage = user.page;
-  // 更健壮的内容检查：检查HTML或原始内容
-  const hasContent = (userPage?.html && userPage.html.trim()) || 
+  // Robust content check: look at the HTML or the raw content
+  const hasContent = (userPage?.html && userPage.html.trim()) ||
                     (userPage?.raw && userPage.raw.trim());
 
   const handleEditClick = () => {
@@ -58,14 +58,14 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
     onUserUpdate?.(updatedUser);
   };
 
-  // 没有内容的空状态
+  // Empty state when there's no content
   if (!hasContent) {
     return (
       <div className={className}>
         {canEdit ? (
-          // 自己的页面：显示编辑按钮
+          // Your own page: show the edit button
           <div className="pt-0 pb-16 min-h-[200px] md:min-h-[250px] flex flex-col">
-            {/* 标题在左上角 */}
+            {/* Title in the top-left */}
             <div className="flex items-center gap-3 mb-8">
               <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -73,17 +73,15 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
               </h3>
             </div>
             
-            {/* 中心内容 */}
+            {/* Centered content */}
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <p className="text-gray-600 dark:text-gray-400 mb-8">
                 {t('profile.userPage.noContent')}
               </p>
               <button
                 onClick={handleEditClick}
-                className="flex items-center gap-2 px-6 py-3 text-white rounded-lg transition-colors"
-                style={{ backgroundColor: profileColor }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
+                style={{ background: `linear-gradient(180deg, ${profileColor}, ${profileColor}d4)`, boxShadow: `0 12px 32px -10px ${profileColor}` }}
               >
                 <FaEdit className="w-4 h-4" />
                 <span>{t('profile.userPage.writeButton')}</span>
@@ -91,9 +89,9 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
             </div>
           </div>
         ) : (
-          // 其他人的页面：显示空状态
+          // Someone else's page: show the empty state
           <div className="pt-0 pb-16 min-h-[250px] md:min-h-[300px] flex flex-col">
-            {/* 标题在左上角 */}
+            {/* Title in the top-left */}
             <div className="flex items-center gap-3 mb-12">
               <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -101,7 +99,7 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
               </h3>
             </div>
             
-            {/* 中心内容 */}
+            {/* Centered content */}
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <FaUser className="w-16 h-16 text-gray-400 mx-auto mb-6" />
               <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
@@ -114,7 +112,7 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
           </div>
         )}
 
-        {/* 编辑模态框 */}
+        {/* Edit modal */}
         <UserPageEditModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
@@ -125,10 +123,10 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
     );
   }
 
-  // 有内容的正常显示
+  // Normal display when there is content
   return (
     <div className={`${className} min-h-[250px] md:min-h-[300px]`}>
-      {/* 头部标题和编辑按钮 */}
+      {/* Header title and edit button */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
@@ -139,10 +137,8 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
         {canEdit && (
           <button
             onClick={handleEditClick}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-white rounded-lg transition-colors"
-            style={{ backgroundColor: profileColor }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
+            style={{ background: `linear-gradient(180deg, ${profileColor}, ${profileColor}d4)`, boxShadow: `0 10px 28px -10px ${profileColor}` }}
           >
             <FaEdit className="w-3 h-3" />
             <span>{t('profile.userPage.editButton')}</span>
@@ -150,13 +146,13 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
         )}
       </div>
 
-      {/* 内容 */}
+      {/* Content */}
       <ContentContainer maxHeight={300} className="user-page-content">
         <div className="prose prose-sm dark:prose-invert max-w-none">
           {userPage.html ? (
             <div dangerouslySetInnerHTML={{ __html: userPage.html }} />
           ) : userPage.raw ? (
-            // 如果没有HTML但有原始内容，使用本地BBCode解析器
+            // No HTML but raw content exists: use the local BBCode parser
             <div dangerouslySetInnerHTML={{ __html: parseBBCode(String(userPage.raw || '')).html }} />
           ) : (
             <div className="text-gray-500 dark:text-gray-400 italic">
@@ -166,7 +162,6 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
         </div>
       </ContentContainer>
 
-      {/* 编辑模态框 */}
       <UserPageEditModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}

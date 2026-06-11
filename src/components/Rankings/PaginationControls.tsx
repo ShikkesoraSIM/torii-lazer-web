@@ -11,6 +11,11 @@ export default function PaginationControls({ total, currentPage, onPageChange }:
   const totalPages = Math.ceil(total / 50);
   if (totalPages <= 1) return null;
 
+  const base =
+    'px-4 py-2 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25';
+  const inactive = `${base} border border-white/10 bg-white/[0.05] text-white/70 hover:bg-white/10 hover:text-white`;
+  const active = `${base} border border-osu-pink bg-osu-pink text-white shadow-[0_6px_18px_-8px_rgba(0,0,0,0.6)]`;
+
   const pages: ReactNode[] = [];
   const maxVisiblePages = 5;
   const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
@@ -21,7 +26,8 @@ export default function PaginationControls({ total, currentPage, onPageChange }:
       <button
         key="prev"
         onClick={() => onPageChange(currentPage - 1)}
-        className="px-4 py-2 rounded-lg bg-card border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
+        className={inactive}
+        aria-label="Previous page"
       >
         <FiChevronLeft size={18} />
       </button>
@@ -33,11 +39,8 @@ export default function PaginationControls({ total, currentPage, onPageChange }:
       <button
         key={i}
         onClick={() => onPageChange(i)}
-        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-          i === currentPage
-            ? 'bg-osu-pink text-white border border-osu-pink'
-            : 'bg-card border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-        }`}
+        className={i === currentPage ? active : inactive}
+        aria-current={i === currentPage ? 'page' : undefined}
       >
         {i}
       </button>
@@ -49,7 +52,8 @@ export default function PaginationControls({ total, currentPage, onPageChange }:
       <button
         key="next"
         onClick={() => onPageChange(currentPage + 1)}
-        className="px-4 py-2 rounded-lg bg-card border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
+        className={inactive}
+        aria-label="Next page"
       >
         <FiChevronRight size={18} />
       </button>

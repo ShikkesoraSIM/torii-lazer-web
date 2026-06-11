@@ -28,7 +28,6 @@ const PasswordResetSection: React.FC = () => {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
 
-  // 获取 TOTP 状态
   useEffect(() => {
     const fetchTotpStatus = async () => {
       if (!isExpanded) return;
@@ -37,8 +36,7 @@ const PasswordResetSection: React.FC = () => {
       try {
         const status = await userAPI.totp.getStatus();
         setTotpStatus(status);
-      } catch (error) {
-        console.error('获取TOTP状态失败:', error);
+      } catch {
         setTotpStatus({ enabled: false });
       } finally {
         setIsLoadingTotpStatus(false);
@@ -74,7 +72,6 @@ const PasswordResetSection: React.FC = () => {
   const handleChangePassword = async () => {
     const newErrors: Partial<FormData> = {};
 
-    // 验证方式：如果启用了 TOTP，使用 TOTP 验证；否则使用密码验证
     if (totpStatus?.enabled) {
       if (!formData.totpCode) {
         newErrors.totpCode = t('settings.password.errors.totpCodeRequired');
@@ -121,7 +118,6 @@ const PasswordResetSection: React.FC = () => {
       });
       setIsExpanded(false);
       
-      // 延迟后重定向到登录页（因为所有会话都被清除了）
       setTimeout(() => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
@@ -181,7 +177,6 @@ const PasswordResetSection: React.FC = () => {
             </div>
           ) : (
             <>
-              {/* 提示信息 */}
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                 <p className="text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
                   <FiShield className="w-4 h-4" />
@@ -191,7 +186,6 @@ const PasswordResetSection: React.FC = () => {
                 </p>
               </div>
 
-              {/* 当前密码或 TOTP 验证码 */}
               {totpStatus?.enabled ? (
                 <div>
                   <label htmlFor="totpCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -333,7 +327,6 @@ const PasswordResetSection: React.FC = () => {
             )}
           </div>
 
-          {/* 警告信息 */}
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
             <p className="text-sm text-yellow-700 dark:text-yellow-300">
               ⚠️ {t('settings.password.warningMessage')}

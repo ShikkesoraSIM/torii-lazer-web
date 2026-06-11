@@ -6,6 +6,7 @@ import RankBadge from '../UI/RankBadge';
 import LazyBackgroundImage from '../UI/LazyBackgroundImage';
 import LazyAvatar from '../UI/LazyAvatar';
 import LazyFlag from '../UI/LazyFlag';
+import CountryFlag from '../UI/CountryFlag';
 import { GAME_MODE_COLORS } from '../../types';
 import type { UserRanking, GameMode, RankingType } from '../../types';
 import { pickUserCoverCandidates, isCoverDebugEnabled } from '../../utils/profileMedia';
@@ -95,21 +96,12 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
         </Link>
         <div className="flex items-center gap-1 mt-0.5">
           {ranking.user.country_code && (
-            <>
-              <LazyFlag
-                src={`/image/flag/${ranking.user.country_code.toLowerCase()}.svg`}
-                alt={ranking.user.country_code}
-                className="w-3 h-2 sm:w-4 sm:h-3 rounded-sm flex-shrink-0"
-                data-tooltip-id={`country-tooltip-ranking-${ranking.user.id}`}
-                data-tooltip-content={ranking.user.country?.name || ranking.user.country_code}
-              />
-              <Tooltip
-                id={`country-tooltip-ranking-${ranking.user.id}`}
-                place="bottom"
-                float={true}
-                style={{ zIndex: 9999 }}
-              />
-            </>
+            <CountryFlag
+              code={ranking.user.country_code}
+              name={ranking.user.country?.name || ranking.user.country_code}
+              className="h-2 sm:h-3"
+              rounded="rounded-sm"
+            />
           )}
           {ranking.user.team && (
             <>

@@ -1,6 +1,6 @@
 import type { GameMode } from './common';
 
-// 用户偏好设置相关类型定义
+// User preference type definitions
 
 export interface SetDefaultModeRequest {
   mode: GameMode;
@@ -79,7 +79,7 @@ export interface LegacyUserPreferences {
   available_modes: GameMode[];
 }
 
-// 获取用户偏好设置响应 - 直接返回UserPreferences对象
+// Get-user-preferences response - returns the UserPreferences object directly
 export interface GetUserPreferencesResponse extends UserPreferences {}
 
 // PATCH request body for updating preferences

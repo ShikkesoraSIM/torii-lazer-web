@@ -3,6 +3,7 @@ import { FiChevronDown, FiUser } from 'react-icons/fi';
 import { GiCrown } from 'react-icons/gi';
 import { useTranslation } from 'react-i18next';
 import type { User } from '../../types';
+import CountryFlag from './CountryFlag';
 
 interface MemberSelectorProps {
   value: number | null;
@@ -25,7 +26,7 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 点击外部关闭下拉菜单
+  // Close the dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -37,7 +38,7 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 键盘导航
+  // Keyboard navigation
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
       setIsOpen(false);
@@ -53,10 +54,10 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
     setIsOpen(false);
   }, [onChange]);
 
-  // 过滤掉当前队长
+  // Filter out the current leader
   const availableMembers = members.filter(member => member.id !== currentLeaderId);
-  
-  // 获取当前选中的成员
+
+  // Get the currently selected member
   const selectedMember = value ? members.find(member => member.id === value) : null;
 
   return (
@@ -65,7 +66,7 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
       ref={dropdownRef}
       onKeyDown={handleKeyDown}
     >
-      {/* 触发按钮 */}
+      {/* Trigger button */}
       <button
         type="button"
         onClick={handleToggle}
@@ -98,10 +99,10 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
                   <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                     <span>{selectedMember.country.name}</span>
                     {selectedMember.country.code && (
-                      <img
-                        src={`/image/flag/${selectedMember.country.code.toLowerCase()}.svg`}
-                        alt={selectedMember.country.name}
-                        className="w-3 h-2"
+                      <CountryFlag
+                        code={selectedMember.country.code}
+                        name={selectedMember.country.name}
+                        className="h-2"
                       />
                     )}
                   </div>
@@ -125,11 +126,11 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
         />
       </button>
 
-      {/* 下拉选项 */}
+      {/* Dropdown options */}
       {isOpen && (
         <div className="absolute z-50 w-full mt-1 bg-card border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden">
           <div className="max-h-60 overflow-y-auto">
-            {/* 保持当前队长选项 */}
+            {/* Keep current leader option */}
             <button
               type="button"
               onClick={() => handleSelect(null)}
@@ -146,12 +147,12 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
               </span>
             </button>
 
-            {/* 分隔线 */}
+            {/* Divider */}
             {availableMembers.length > 0 && (
               <div className="border-t border-gray-200 dark:border-gray-700" />
             )}
 
-            {/* 可选择的成员 */}
+            {/* Selectable members */}
             {availableMembers.map((member) => (
               <button
                 key={member.id}
@@ -182,10 +183,10 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
                     <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                       <span>{member.country.name}</span>
                       {member.country.code && (
-                        <img
-                          src={`/image/flag/${member.country.code.toLowerCase()}.svg`}
-                          alt={member.country.name}
-                          className="w-3 h-2"
+                        <CountryFlag
+                          code={member.country.code}
+                          name={member.country.name}
+                          className="h-2"
                         />
                       )}
                     </div>
@@ -194,7 +195,7 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
               </button>
             ))}
 
-            {/* 空状态 */}
+            {/* Empty state */}
             {availableMembers.length === 0 && (
               <div className="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
                 <FiUser className="w-8 h-8 mx-auto mb-2 opacity-50" />

@@ -9,8 +9,8 @@ import { useTranslation } from 'react-i18next';
 import Avatar from './Avatar';
 import type { User } from '../../types';
 import type { AppLanguages } from '../../i18n/resources';
+import CountryFlag from './CountryFlag';
 
-// 语言配置接口
 interface LanguageConfig {
   code: AppLanguages;
   name: string;
@@ -18,7 +18,6 @@ interface LanguageConfig {
   flag: string;
 }
 
-// 支持的语言列表
 const SUPPORTED_LANGUAGES: LanguageConfig[] = [
   {
     code: 'zh',
@@ -45,7 +44,6 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
   const [languageOpen, setLanguageOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 获取当前语言配置
   const currentLanguage = SUPPORTED_LANGUAGES.find(
     lang => lang.code === (i18n.resolvedLanguage ?? i18n.language)
   ) || SUPPORTED_LANGUAGES[0];
@@ -201,10 +199,10 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
                   className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-osu-pink dark:hover:text-osu-pink transition-all duration-200"
                 >
                   <div className="flex items-center space-x-3">
-                    <img
-                      src={`/image/flag/${currentLanguage.flag}.svg`}
-                      alt={`${currentLanguage.name} flag`}
-                      className="w-5 h-4 rounded object-cover flex-shrink-0"
+                    <CountryFlag
+                      code={currentLanguage.flag}
+                      name={currentLanguage.name}
+                      className="h-4"
                     />
                     <span className="font-medium">{currentLanguage.nativeName}</span>
                   </div>
@@ -247,15 +245,15 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
                             `}
                           >
                             <div className="flex items-center space-x-3">
-                              <img
-                                src={`/image/flag/${language.flag}.svg`}
-                                alt={`${language.name} flag`}
-                                className="w-5 h-4 rounded object-cover flex-shrink-0"
+                              <CountryFlag
+                                code={language.flag}
+                                name={language.name}
+                                className="h-4"
                               />
                               <span className="font-medium">{language.nativeName}</span>
                             </div>
                             
-                            {/* 选中指示器 */}
+                            {/* Selected indicator */}
                             {isSelected && (
                               <div className="text-osu-pink">
                                 <FiCheck size={16} />

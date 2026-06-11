@@ -18,7 +18,7 @@ export const authAPI = {
       formData.append('cf_turnstile_response', turnstileToken);
     }
 
-    // 获取设备UUID（异步）
+    // Get the device UUID (async)
     const deviceUUID = await getDeviceUUID();
 
     try {
@@ -70,7 +70,7 @@ export const authAPI = {
     formData.append('client_secret', clientSecret);
     formData.append('refresh_token', refreshToken);
 
-    // 获取设备UUID（异步）
+    // Get the device UUID (async)
     const deviceUUID = await getDeviceUUID();
 
     const response = await axios.post(`${API_BASE_URL}/oauth/token`, formData, {

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { userAPI, scoreAPI } from '../../utils/api';
 import type { BestScore, GameMode, User } from '../../types';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
+import { hexToRgb, shiftHue  } from '../../utils/color';
 import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../UI/LoadingSpinner';
 import LazyBackgroundImage from '../UI/LazyBackgroundImage';
@@ -44,10 +45,9 @@ interface UserPinnedScoresProps {
   } | null>;
   bestScoresActionRef?: React.MutableRefObject<{
     updatePinStatus: (scoreId: number, isPinned: boolean) => void;
-  } | null>; // 通知最佳成绩列表更新置顶状态
+  } | null>; // notify the best-scores list to update pin status
 }
 
-// 时间格式化函数
 const formatTimeAgo = (dateString: string, t: any): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -73,7 +73,7 @@ const formatTimeAgo = (dateString: string, t: any): string => {
   }
 };
 
-// 评级图标映射
+// Rank-to-icon mapping
 const getRankIcon = (rank: string) => {
   const rankImageMap: Record<string, string> = {
     XH: '/image/grades/SS-Silver.svg',
@@ -90,7 +90,7 @@ const getRankIcon = (rank: string) => {
   return rankImageMap[rank] || rankImageMap['F'];
 };
 
-// 可拖拽的成绩卡片组件
+// Draggable score-card component
 const SortableScoreCard: React.FC<{
   score: BestScore;
   t: any;
@@ -129,9 +129,9 @@ const SortableScoreCard: React.FC<{
   );
 };
 
-// 单个成绩卡片组件
-const ScoreCard: React.FC<{ 
-  score: BestScore; 
+// Single score-card component
+const ScoreCard: React.FC<{
+  score: BestScore;
   t: any; 
   profileColor: string;
   clientDisplayMode?: ScoreClientDisplayMode;
@@ -158,13 +158,7 @@ const ScoreCard: React.FC<{
       : '#');
   const coverImage = score.beatmapset?.covers?.['cover@2x'] || score.beatmapset?.covers?.cover;
 
-  const hexToRgb = (hex: string): string => {
-    const cleanHex = hex.replace('#', '');
-    const r = parseInt(cleanHex.substring(0, 2), 16);
-    const g = parseInt(cleanHex.substring(2, 4), 16);
-    const b = parseInt(cleanHex.substring(4, 6), 16);
-    return `${r}, ${g}, ${b}`;
-  };
+
 
   const themeRgb = hexToRgb(profileColor);
 
@@ -173,21 +167,24 @@ const ScoreCard: React.FC<{
       src={coverImage}
       className={`relative overflow-hidden rounded-lg border border-gray-200/70 dark:border-gray-600/40 bg-card ${className}`}
     >
-      {/* 渐变遮罩层 - 使用主题颜色 */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-r" 
-        style={{
-          background: `linear-gradient(to right, rgba(${themeRgb}, 0.15) 0%, rgba(${themeRgb}, 0.08) 50%, rgba(${themeRgb}, 0.03) 100%)`
-        }}
+      {/* Cover scrim: dark base for legibility on the left, fading right so the
+          cover art still reads. Tinted with this section's accent. Plain
+          gradients so it stays clean in perf-mode. */}
+      <div
+        className="absolute inset-0"
+        style={{ background: `linear-gradient(90deg, rgba(9,11,24,0.94) 0%, rgba(9,11,24,0.82) 46%, rgba(9,11,24,0.42) 100%)` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/75 to-white/60 dark:from-gray-800/90 dark:via-gray-800/75 dark:to-gray-800/60" />
-      
+      <div
+        className="absolute inset-0"
+        style={{ background: `linear-gradient(90deg, rgba(${themeRgb}, 0.22) 0%, rgba(${themeRgb}, 0.06) 45%, transparent 80%)` }}
+      />
+
       <div className="relative bg-transparent hover:bg-white/20 dark:hover:bg-gray-800/20 transition-colors duration-150 group">
-        {/* 桌面端布局 */}
+        {/* Desktop layout */}
         <div className="hidden sm:block">
           <div className="flex items-center h-12 pl-5 pr-24">
             <div className="flex-shrink-0 mr-3 flex items-center gap-2">
-              {/* 拖拽手柄 */}
+              {/* Drag handle */}
               {canEdit && dragHandleProps && (
                 <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing p-1">
                   <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -265,11 +262,11 @@ const ScoreCard: React.FC<{
           </div>
         </div>
 
-        {/* 手机端布局 */}
+        {/* Mobile layout */}
         <div className="block sm:hidden p-4">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 flex items-center gap-2">
-              {/* 拖拽手柄 */}
+              {/* Drag handle */}
               {canEdit && dragHandleProps && (
                 <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing p-1">
                   <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -360,7 +357,9 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
   bestScoresActionRef,
 }) => {
   const { t } = useTranslation();
-  const { profileColor } = useProfileColor();
+  const { profileColor: baseProfileColor } = useProfileColor();
+  // Adjacent hue so Pinned reads as distinct from Best / Most Played.
+  const profileColor = shiftHue(baseProfileColor, -38);
   const { user: currentUser } = useAuth();
   const [scores, setScores] = useState<BestScore[]>([]);
   const [loading, setLoading] = useState(true);
@@ -375,16 +374,16 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
     })
   );
 
-  // 本地缓存 key
+  // Local cache key
   const getCacheKey = useCallback(() => `pinned_scores_${userId}_${selectedMode}`, [userId, selectedMode]);
 
-  // 从本地缓存加载
+  // Load from local cache
   const loadFromCache = useCallback((): BestScore[] | null => {
     try {
       const cached = localStorage.getItem(getCacheKey());
       if (cached) {
         const parsed = JSON.parse(cached);
-        // 检查缓存时间（30分钟内有效，因为服务器也有缓存）
+        // Valid for 30 minutes (the server caches too)
         if (parsed.timestamp && Date.now() - parsed.timestamp < 30 * 60 * 1000) {
           return parsed.scores;
         }
@@ -395,7 +394,7 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
     return null;
   }, [getCacheKey]);
 
-  // 保存到本地缓存
+  // Save to local cache
   const saveToCache = useCallback((scores: BestScore[]) => {
     try {
       localStorage.setItem(getCacheKey(), JSON.stringify({
@@ -412,13 +411,13 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
       setLoading(true);
       setError(null);
 
-      // 先尝试从缓存加载
+      // Try the cache first
       if (useCache) {
         const cachedScores = loadFromCache();
         if (cachedScores) {
           setScores(cachedScores);
           setLoading(false);
-          // 后台更新
+          // Refresh in the background
           const response = await userAPI.getPinnedScores(userId, selectedMode);
           const newScores = Array.isArray(response) ? response : [];
           if (JSON.stringify(newScores) !== JSON.stringify(cachedScores)) {
@@ -429,7 +428,7 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
         }
       }
 
-      // 从服务器加载
+      // Load from the server
       const response = await userAPI.getPinnedScores(userId, selectedMode);
       const newScores = Array.isArray(response) ? response : [];
       setScores(newScores);
@@ -449,27 +448,27 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
   }, [userId, selectedMode]);
 
   const handleRefresh = () => {
-    // 优先使用本地缓存，然后后台更新
+    // Prefer the local cache, then refresh in the background
     loadScores(true);
   };
 
-  // Pin 成绩时添加到列表
+  // Add a score to the list when pinned
   const handlePinScore = useCallback((score: BestScore) => {
-    // 乐观更新：立即添加到置顶列表末尾
+    // Optimistic update: append to the end of the pinned list
     setScores(prevScores => {
-      // 检查是否已存在，避免重复
+      // Skip duplicates
       if (prevScores.some(s => s.id === score.id)) {
         return prevScores;
       }
-      const newScores = [...prevScores, score];  // 添加到末尾
+      const newScores = [...prevScores, score];  // append to the end
       saveToCache(newScores);
       return newScores;
     });
   }, [saveToCache]);
 
-  // Unpin 成绩时从列表移除
+  // Remove a score from the list when unpinned
   const handleUnpinScore = useCallback((scoreId: number) => {
-    // 乐观更新：立即从置顶列表移除
+    // Optimistic update: remove from the pinned list immediately
     setScores(prevScores => {
       const newScores = prevScores.filter(s => s.id !== scoreId);
       saveToCache(newScores);
@@ -477,25 +476,25 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
     });
   }, [saveToCache]);
 
-  // 处理 ScoreActionsMenu 的 pin 状态变化
+  // Handle pin-state changes coming from ScoreActionsMenu
   const handlePinChangeFromMenu = useCallback((scoreId: number, isPinned: boolean) => {
     if (isPinned) {
-      // 当前是置顶状态，点击后要取消置顶
+      // Currently pinned, so clicking unpins it
       handleUnpinScore(scoreId);
-      // 通知最佳成绩列表更新该成绩的置顶状态为 false
+      // Tell the best-scores list to mark this score as not pinned
       bestScoresActionRef?.current?.updatePinStatus(scoreId, false);
     }
-    // 注意：置顶列表不会显示非置顶的成绩，所以不需要处理 pin 的情况
+    // Note: the pinned list never shows unpinned scores, so there's nothing to do for the pin case
   }, [handleUnpinScore, bestScoresActionRef]);
 
-  // 将刷新函数暴露给父组件
+  // Expose the refresh function to the parent
   useEffect(() => {
     if (refreshRef) {
       refreshRef.current = handleRefresh;
     }
   }, [refreshRef]);
 
-  // 将 pin/unpin 操作暴露给父组件和兄弟组件
+  // Expose pin/unpin actions to the parent and sibling components
   useEffect(() => {
     if (onPinActionRef) {
       onPinActionRef.current = {
@@ -519,39 +518,39 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
       return;
     }
 
-    // 1. 立即更新 UI（乐观更新）
+    // 1. Update the UI immediately (optimistic)
     const newScores = arrayMove(scores, oldIndex, newIndex);
     setScores(newScores);
-    
-    // 2. 立即保存到本地缓存
+
+    // 2. Persist to the local cache immediately
     saveToCache(newScores);
 
-    // 3. 立即显示成功提示
+    // 3. Show a success toast immediately
     toast.success(t('profile.pinnedScores.reorderSuccess'));
 
-    // 4. 后台发送到服务器（不等待响应，不回滚）
+    // 4. Send to the server in the background (don't await, don't roll back)
     try {
       const movedScoreId = active.id as number;
-      
+
       if (newIndex === 0) {
-        // 移动到第一位，使用 before_score_id
+        // Moved to the first position, use before_score_id
         scoreAPI.reorderPinnedScore(movedScoreId, {
           before_score_id: newScores[1]?.id,
         }).catch(err => {
           console.error('Reorder API failed:', err);
-          // 服务器失败不回滚，因为可能是缓存问题
+          // Don't roll back on server failure, it may just be a cache issue
         });
       } else {
-        // 移动到其他位置，使用 after_score_id
+        // Moved elsewhere, use after_score_id
         scoreAPI.reorderPinnedScore(movedScoreId, {
           after_score_id: newScores[newIndex - 1]?.id,
         }).catch(err => {
           console.error('Reorder API failed:', err);
-          // 服务器失败不回滚，因为可能是缓存问题
+          // Don't roll back on server failure, it may just be a cache issue
         });
       }
     } catch (error) {
-      // 捕获同步错误
+      // Catch synchronous errors
       console.error('Reorder failed:', error);
     }
   };

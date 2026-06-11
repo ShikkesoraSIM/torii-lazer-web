@@ -39,10 +39,10 @@ export const VerificationProvider: React.FC<VerificationProviderProps> = ({ chil
         setResolveVerification(null);
         setRejectVerification(null);
       }
-      // 验证成功后刷新页面以重新请求API
+      // Reload the page after success so API requests are re-issued
       window.location.reload();
     } catch (error) {
-      // 如果验证失败，抛出错误让模态框显示错误信息
+      // On failure, rethrow so the modal can display the error message
       throw error;
     }
   };
@@ -50,11 +50,11 @@ export const VerificationProvider: React.FC<VerificationProviderProps> = ({ chil
   const handleSwitchMethod = async (): Promise<void> => {
     try {
       if (currentMethod === 'totp') {
-        // 从 TOTP 切换到邮箱验证
+        // Switch from TOTP to email verification
         await verificationAPI.switchToMailFallback();
         setCurrentMethod('mail');
       } else {
-        // 从邮箱切换到 TOTP（这里可能需要根据API设计调整）
+        // Switch from email back to TOTP (may need adjusting depending on the API design)
         setCurrentMethod('totp');
       }
     } catch (error) {
@@ -73,7 +73,7 @@ export const VerificationProvider: React.FC<VerificationProviderProps> = ({ chil
       const method = getVerificationMethod(error);
       if (method) {
         showVerificationModal(method).catch(() => {
-          // 如果用户取消验证，这里可以处理
+          // Handle the case where the user cancels verification
         });
         return true;
       }
@@ -81,11 +81,11 @@ export const VerificationProvider: React.FC<VerificationProviderProps> = ({ chil
     return false;
   };
 
-  // 在组件挂载时设置全局验证处理器
+  // Register the global verification handler on mount
   useEffect(() => {
     setGlobalVerificationHandler(handleVerificationError);
-    
-    // 清理函数
+
+    // Cleanup
     return () => {
       setGlobalVerificationHandler(() => false);
     };

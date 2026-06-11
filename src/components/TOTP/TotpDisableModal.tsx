@@ -21,7 +21,6 @@ const TotpDisableModal: React.FC<TotpDisableModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
-  // 禁用TOTP
   const handleDisableTotp = async () => {
     if (verificationCode.length !== 6) {
       setError(t('settings.totp.errors.invalidCodeLength', { length: 6 }));
@@ -37,7 +36,6 @@ const TotpDisableModal: React.FC<TotpDisableModalProps> = ({
       onSuccess();
       onClose();
     } catch (error: any) {
-      console.error('TOTP禁用失败:', error);
       if (error.response?.data?.error === 'Invalid TOTP code') {
         setError(t('settings.totp.errors.invalidCode'));
       } else {
@@ -48,42 +46,36 @@ const TotpDisableModal: React.FC<TotpDisableModalProps> = ({
     }
   };
 
-  // 处理验证码输入
   const handleCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
     setVerificationCode(value);
     setError('');
   };
 
-  // 重置状态
   const resetState = () => {
     setVerificationCode('');
     setError('');
   };
 
-  // 处理关闭
   const handleClose = () => {
     resetState();
     onClose();
   };
 
-  // 处理确认
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
     handleDisableTotp();
   };
 
-  // 阻止背景滚动
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '0px'; // 防止滚动条消失导致的跳动
+      document.body.style.paddingRight = '0px';
     } else {
       document.body.style.overflow = 'unset';
       document.body.style.paddingRight = 'unset';
     }
     
-    // 清理函数
     return () => {
       document.body.style.overflow = 'unset';
       document.body.style.paddingRight = 'unset';
@@ -94,7 +86,6 @@ const TotpDisableModal: React.FC<TotpDisableModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden">
-          {/* 背景遮罩 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -103,7 +94,6 @@ const TotpDisableModal: React.FC<TotpDisableModalProps> = ({
             onClick={handleClose}
           />
           
-          {/* 模态框内容 */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -112,7 +102,6 @@ const TotpDisableModal: React.FC<TotpDisableModalProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
-        {/* 标题和关闭按钮 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <FiAlertTriangle className="w-6 h-6 text-red-500" />
@@ -129,14 +118,12 @@ const TotpDisableModal: React.FC<TotpDisableModalProps> = ({
         </div>
 
         <form onSubmit={handleConfirm} className="space-y-4">
-          {/* 警告信息 */}
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
             <p className="text-sm text-red-700 dark:text-red-300">
               {t('settings.totp.disableWarning')}
             </p>
           </div>
 
-          {/* 验证码输入 */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('settings.totp.enterCodeToDisable')}
@@ -158,7 +145,6 @@ const TotpDisableModal: React.FC<TotpDisableModalProps> = ({
             </p>
           </div>
 
-          {/* 按钮 */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"

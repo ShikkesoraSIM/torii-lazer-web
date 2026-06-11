@@ -31,21 +31,17 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
       setError(null);
       setResendMessage(null);
       
-      // 防止背景滚动
       const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = `${scrollBarWidth}px`;
-      // 防止整个页面滚动
       document.documentElement.style.overflow = 'hidden';
     } else {
-      // 恢复背景滚动
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
       document.documentElement.style.overflow = '';
     }
 
     return () => {
-      // 清理函数确保在组件卸载时恢复滚动
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
       document.documentElement.style.overflow = '';
@@ -63,14 +59,11 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
       await onVerify(code.trim());
       setCode('');
     } catch (err: any) {
-      console.error('验证失败:', err);
       
-      // 处理特定的 TOTP 错误
       const errorMessage = err?.response?.data?.error;
       const errorDetail = err?.response?.data?.detail;
       const errorString = err?.message || JSON.stringify(err?.response?.data || err);
       
-      // 检查多种可能的错误格式
       if (errorMessage === 'No TOTP setup in progress or invalid data' || 
           errorString.includes('No TOTP setup in progress or invalid data')) {
         setError(t('verification.errors.totpInvalidOrExpired'));
@@ -92,7 +85,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
     
     try {
       await onSwitchMethod();
-    } catch (err) {
+    } catch {
       setError(t('verification.errors.switchFailed'));
     } finally {
       setIsLoading(false);
@@ -109,7 +102,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
     try {
       await onResendCode();
       setResendMessage(t('verification.codeResent'));
-    } catch (err) {
+    } catch {
       setError(t('verification.errors.resendFailed'));
     } finally {
       setResendLoading(false);
@@ -140,7 +133,6 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ overflow: 'hidden' }}>
-          {/* 背景遮罩 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -149,7 +141,6 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
             onClick={(e) => e.stopPropagation()}
           />
           
-          {/* 模态框内容 */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -158,7 +149,6 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
-              {/* 标题和图标 */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-osu-pink/10 dark:bg-osu-pink/20 rounded-lg">
@@ -175,7 +165,6 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
                 </div>
               </div>
 
-              {/* 验证表单 */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="verification-code" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -229,10 +218,8 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
                 </button>
               </form>
 
-              {/* 分割线 */}
               <div className="my-6 border-t border-gray-200 dark:border-gray-700"></div>
 
-              {/* 操作按钮 */}
               <div className="space-y-3">
                 <button
                   onClick={handleSwitchMethod}
@@ -260,7 +247,6 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
                 )}
               </div>
 
-              {/* 安全提示 */}
               <div className="mt-6 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
                   {t('verification.securityNotice')}

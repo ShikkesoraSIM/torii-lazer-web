@@ -25,10 +25,10 @@ const ProfileCover: React.FC<ProfileCoverProps> = ({
 
   return (
     <div className={`relative overflow-hidden w-full max-w-full ${className}`}>
-      {/* 响应式固定宽高比容器 */}
+      {/* Responsive fixed aspect-ratio container */}
       <div className="relative w-full max-w-full aspect-[4/3] sm:aspect-[16/6]">
-        {/* 背景图片 */}
-        <div 
+        {/* Background image */}
+        <div
           className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-300 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
@@ -36,18 +36,18 @@ const ProfileCover: React.FC<ProfileCoverProps> = ({
             backgroundImage: backgroundImage()
           }}
         >
-          {/* 渐变遮罩 - 手机端更强的遮罩 */}
+          {/* Gradient overlay - stronger on mobile */}
           <div className="absolute inset-0 bg-gradient-to-b sm:bg-gradient-to-r from-black/80 via-black/60 to-black/40 sm:from-black/70 sm:via-black/50 sm:to-black/30"></div>
         </div>
 
-        {/* 加载状态背景 */}
+        {/* Loading-state background */}
         {!imageLoaded && (coverUrl || fallbackUrl) && (
           <div className="absolute inset-0 cover-loading">
             <div className="absolute inset-0 bg-gradient-to-b sm:bg-gradient-to-r from-gray-400/80 via-gray-400/60 to-gray-400/40 sm:from-gray-400/70 sm:via-gray-400/50 sm:to-gray-400/30"></div>
           </div>
         )}
 
-        {/* 预加载图片 */}
+        {/* Preload image */}
         {(coverUrl || fallbackUrl) && (
           <img
             src={coverUrl || fallbackUrl}
@@ -58,7 +58,7 @@ const ProfileCover: React.FC<ProfileCoverProps> = ({
           />
         )}
 
-        {/* 内容 */}
+        {/* Content */}
         <div className="absolute inset-0 z-10 w-full max-w-full overflow-hidden">
           {children}
         </div>

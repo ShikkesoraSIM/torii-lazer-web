@@ -18,7 +18,7 @@ interface ProgressBarProps {
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   progress,
-  color = 'var(--profile-color, #ED8EA6)', // 默认使用动态 profile color
+  color = 'var(--profile-color, #ED8EA6)', // defaults to the dynamic profile color
   height = 'h-3',
   showLabel = false,
   animated = true,
@@ -30,10 +30,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     mass: 0.8
   }
 }) => {
-  // 确保进度值在0-100之间
+  // Clamp the progress value between 0 and 100
   const clampedProgress = Math.min(100, Math.max(0, progress));
 
-  // 使用 framer-motion 的 useSpring 来创建平滑的递增动画
+  // Use framer-motion's useSpring for a smooth ramp-up animation
   const animatedProgress = useSpring(clampedProgress, springConfig);
 
   return (
@@ -56,7 +56,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          {/* 光泽效果 */}
+          {/* Shine effect */}
           {animated && (
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
@@ -79,8 +79,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
-          <span>进度: {clampedProgress.toFixed(1)}%</span>
-          <span>剩余: {(100 - clampedProgress).toFixed(1)}%</span>
+          <span>Progress: {clampedProgress.toFixed(1)}%</span>
+          <span>Remaining: {(100 - clampedProgress).toFixed(1)}%</span>
         </motion.div>
       )}
     </div>

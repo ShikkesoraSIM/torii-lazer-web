@@ -1,6 +1,6 @@
 /**
- * 设备UUID管理工具
- * 使用 FingerprintJS 生成设备唯一标识符，用于设备绑定
+ * Device UUID management.
+ * Uses FingerprintJS to generate a stable per-device identifier for device binding.
  */
 
 // FingerprintJS is dynamically imported in initFingerprint() so the heavy lib
@@ -9,11 +9,11 @@
 
 const DEVICE_UUID_KEY = 'device_uuid';
 
-// FingerprintJS 实例缓存
+// Cached FingerprintJS instance
 let fpPromise: Promise<any> | null = null;
 
 /**
- * 初始化 FingerprintJS
+ * Initialize FingerprintJS
  */
 function initFingerprint() {
   if (!fpPromise) {
@@ -23,7 +23,7 @@ function initFingerprint() {
 }
 
 /**
- * 使用 FingerprintJS 生成设备指纹ID
+ * Generate a device fingerprint ID with FingerprintJS
  */
 async function generateFingerprintUUID(): Promise<string> {
   try {
@@ -32,21 +32,21 @@ async function generateFingerprintUUID(): Promise<string> {
     return result.visitorId;
   } catch (error) {
     console.error('Error generating fingerprint:', error);
-    // 降级方案：使用随机UUID
+    // Fallback: use a random UUID
     return generateFallbackUUID();
   }
 }
 
 /**
- * 降级方案：生成随机UUID
+ * Fallback: generate a random UUID
  */
 function generateFallbackUUID(): string {
-  // 使用crypto API生成安全的随机UUID
+  // Prefer the crypto API for a secure random UUID
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
-  
-  // 降级方案：使用Math.random()
+
+  // Fallback: use Math.random()
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0;
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -55,38 +55,36 @@ function generateFallbackUUID(): string {
 }
 
 /**
- * 获取或生成设备UUID
- * 优先使用 FingerprintJS 生成设备指纹，如果localStorage中已存在则直接返回
+ * Get or generate the device UUID.
+ * Prefers a FingerprintJS fingerprint; returns the stored value if one already exists.
  */
 export async function getDeviceUUID(): Promise<string> {
   try {
-    // 尝试从localStorage获取现有的UUID
+    // Try to read an existing UUID from localStorage
     let uuid = localStorage.getItem(DEVICE_UUID_KEY);
-    
+
     if (!uuid) {
-      // 如果不存在，使用 FingerprintJS 生成新的设备指纹ID
+      // None stored: generate a new fingerprint ID with FingerprintJS
       uuid = await generateFingerprintUUID();
       localStorage.setItem(DEVICE_UUID_KEY, uuid);
-      console.log('Generated new device fingerprint UUID:', uuid);
     }
-    
+
     return uuid;
   } catch (error) {
     console.error('Error getting device UUID:', error);
-    // 如果localStorage不可用，生成一个临时UUID（会话级别）
+    // localStorage unavailable: generate a temporary (session-only) UUID
     return generateFallbackUUID();
   }
 }
 
 /**
- * 重置设备UUID（用于测试或特殊场景）
- * 会重新使用 FingerprintJS 生成新的设备指纹
+ * Reset the device UUID (for testing or special cases).
+ * Regenerates a fresh fingerprint with FingerprintJS.
  */
 export async function resetDeviceUUID(): Promise<string> {
   try {
     const newUUID = await generateFingerprintUUID();
     localStorage.setItem(DEVICE_UUID_KEY, newUUID);
-    console.log('Reset device UUID:', newUUID);
     return newUUID;
   } catch (error) {
     console.error('Error resetting device UUID:', error);
@@ -95,7 +93,7 @@ export async function resetDeviceUUID(): Promise<string> {
 }
 
 /**
- * 获取当前存储的UUID（不生成新的）
+ * Get the currently stored UUID (without generating a new one)
  */
 export function getCurrentDeviceUUID(): string | null {
   try {
@@ -107,19 +105,17 @@ export function getCurrentDeviceUUID(): string | null {
 }
 
 /**
- * 强制重新生成设备指纹并更新存储
+ * Force a fresh fingerprint and update storage
  */
 export async function forceRegenerateFingerprint(): Promise<string> {
   try {
-    // 清除缓存的FingerprintJS实例
+    // Clear the cached FingerprintJS instance
     fpPromise = null;
     const newUUID = await generateFingerprintUUID();
     localStorage.setItem(DEVICE_UUID_KEY, newUUID);
-    console.log('Force regenerated device fingerprint:', newUUID);
     return newUUID;
   } catch (error) {
     console.error('Error force regenerating fingerprint:', error);
     return generateFallbackUUID();
   }
 }
-

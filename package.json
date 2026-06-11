@@ -31,8 +31,7 @@
     "react-photo-view": "^1.2.7",
     "react-qr-code": "^2.0.18",
     "react-router-dom": "^6.25.0",
-    "react-tooltip": "^5.29.1",
-    "recharts": "^3.1.2"
+    "react-tooltip": "^5.29.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

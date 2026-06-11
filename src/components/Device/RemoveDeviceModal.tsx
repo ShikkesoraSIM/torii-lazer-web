@@ -31,11 +31,11 @@ const RemoveDeviceModal: React.FC<RemoveDeviceModalProps> = ({
     onClose();
   };
 
-  // 防止背景滚动
+  // Prevent background scrolling
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '0px'; // 防止滚动条消失导致的跳动
+      document.body.style.paddingRight = '0px'; // avoid layout jump when the scrollbar disappears
     } else {
       document.body.style.overflow = 'unset';
       document.body.style.paddingRight = 'unset';
@@ -51,7 +51,7 @@ const RemoveDeviceModal: React.FC<RemoveDeviceModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* 背景遮罩 */}
+          {/* Background overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -60,7 +60,7 @@ const RemoveDeviceModal: React.FC<RemoveDeviceModalProps> = ({
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
           />
 
-          {/* 弹窗内容 */}
+          {/* Modal content */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -68,7 +68,7 @@ const RemoveDeviceModal: React.FC<RemoveDeviceModalProps> = ({
             transition={{ type: 'spring', duration: 0.3 }}
             className="relative w-full max-w-md bg-card rounded-2xl shadow-2xl overflow-hidden"
           >
-            {/* 关闭按钮 */}
+            {/* Close button */}
             <button
               onClick={handleClose}
               disabled={isRemoving}
@@ -77,33 +77,33 @@ const RemoveDeviceModal: React.FC<RemoveDeviceModalProps> = ({
               <FiX className="w-5 h-5" />
             </button>
 
-            {/* 内容区域 */}
+            {/* Content area */}
             <div className="p-6">
-              {/* 警告图标 */}
+              {/* Warning icon */}
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
                   <FiAlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
                 </div>
               </div>
 
-              {/* 标题 */}
+              {/* Title */}
               <h3 className="text-xl font-bold text-gray-900 dark:text-white text-center mb-2">
                 {title}
               </h3>
 
-              {/* 设备名称 */}
+              {/* Device name */}
               <p className="text-center text-gray-600 dark:text-gray-400 mb-4">
                 <span className="font-medium text-gray-900 dark:text-white">{deviceName}</span>
               </p>
 
-              {/* 警告信息 */}
+              {/* Warning message */}
               <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
                 <p className="text-sm text-red-700 dark:text-red-300">
                   {warningText}
                 </p>
               </div>
 
-              {/* 按钮组 */}
+              {/* Button group */}
               <div className="flex gap-3">
                 <button
                   onClick={handleClose}

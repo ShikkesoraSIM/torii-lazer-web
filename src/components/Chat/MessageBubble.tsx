@@ -37,7 +37,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       transition={{ duration: 0.2 }}
       className={`flex items-start space-x-3 ${isOwnMessage ? 'flex-row-reverse space-x-reverse' : ''} ${isGrouped ? 'mt-1' : 'mt-4'}`}
     >
-      {/* 头像 */}
+      {/* Avatar */}
       {showAvatar && !isGrouped && (
         <div className="flex-shrink-0">
           <Avatar
@@ -49,9 +49,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
       )}
       
-      {/* 消息内容 */}
+      {/* Message content */}
       <div className={`flex-1 max-w-md ${isOwnMessage ? 'text-right' : ''}`}>
-        {/* 发送者信息和时间 */}
+        {/* Sender info and timestamp */}
         {!isGrouped && (
           <div className={`flex items-center space-x-2 mb-1 ${isOwnMessage ? 'justify-end' : ''}`}>
             <span className="font-medium text-gray-900 dark:text-white text-sm">
@@ -63,7 +63,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           </div>
         )}
         
-        {/* 消息气泡 */}
+        {/* Message bubble */}
         <div className={`inline-block`}>
           <div className={`
             p-3 rounded-2xl text-sm
@@ -83,7 +83,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
       </div>
       
-      {/* 占位符，保持布局平衡 */}
+      {/* Spacer to keep the layout balanced */}
       {showAvatar && !isGrouped && !isOwnMessage && <div className="w-8" />}
       {showAvatar && !isGrouped && isOwnMessage && <div className="w-8" />}
     </motion.div>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-// 文本骨架屏 - 精确匹配文本尺寸
+// Text skeleton - matches the exact text dimensions
 
 interface TextSkeletonProps {
   children: React.ReactNode;

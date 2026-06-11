@@ -64,14 +64,15 @@ const HeroSection: React.FC = () => {
         {/* IMPORTANT: base goes FIRST so it doesn't cover the blobs */}
         <div className="absolute inset-0 bg-[#030014]" />
 
-        {/* Big soft blobs / highlights */}
-        <div className="absolute -top-48 left-1/2 h-[720px] w-[1120px] -translate-x-1/2 rounded-full bg-[#8a2be2]/18 blur-[150px]" />
-        <div className="absolute top-24 -left-56 h-[560px] w-[560px] rounded-full bg-[#ff007f]/12 blur-[150px]" />
-        <div className="absolute bottom-0 right-0 h-[620px] w-[620px] rounded-full bg-[#ff7a18]/10 blur-[170px]" />
+        {/* Big soft colour blobs. The huge blur radius is gorgeous with GPU accel
+            but costly without it, so perf-mode drops to a much cheaper blur. */}
+        <div className="absolute -top-48 left-1/2 h-[720px] w-[1120px] -translate-x-1/2 rounded-full bg-[#8a2be2]/18 blur-[150px] [html.perf-mode_&]:!blur-[55px]" />
+        <div className="absolute top-24 -left-56 h-[560px] w-[560px] rounded-full bg-[#ff007f]/12 blur-[150px] [html.perf-mode_&]:!blur-[55px]" />
+        <div className="absolute bottom-0 right-0 h-[620px] w-[620px] rounded-full bg-[#ff7a18]/10 blur-[170px] [html.perf-mode_&]:!blur-[55px]" />
 
-        {/* extra subtle mid blobs (adds life without screaming) */}
-        <div className="absolute top-[38%] left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[#ff5bbd]/10 blur-[170px]" />
-        <div className="absolute top-[55%] left-[16%] h-[440px] w-[440px] rounded-full bg-[#c084fc]/12 blur-[160px]" />
+        {/* Extra mid blobs add life with accel; dropped in perf-mode to save fills. */}
+        <div className="absolute top-[38%] left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[#ff5bbd]/10 blur-[170px] [html.perf-mode_&]:hidden" />
+        <div className="absolute top-[55%] left-[16%] h-[440px] w-[440px] rounded-full bg-[#c084fc]/12 blur-[160px] [html.perf-mode_&]:hidden" />
 
         {/* vignette + noise */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
@@ -105,21 +106,19 @@ const HeroSection: React.FC = () => {
                 Torii
               </span>
               <br />
-              <span
-                className={[
-                  'inline-block pb-2', // prevents bottom crop
-                  'bg-gradient-to-r from-[#c084fc] via-[#ff5bbd] to-[#ff7a18]',
-                  'bg-clip-text text-transparent',
-                  'text-[0.88em] md:text-[0.86em]', // slightly smaller than "Torii"
-                  'drop-shadow-[0_12px_46px_rgba(255,90,180,0.18)]',
-                ].join(' ')}
+              <a
+                href="https://shikkesora.com"
+                target="_blank"
+                rel="noreferrer"
+                title="Shikkesora: Discord, links and more"
+                className="inline-block pb-2 bg-gradient-to-r from-[#c084fc] via-[#ff5bbd] to-[#ff7a18] bg-clip-text text-transparent text-[0.88em] md:text-[0.86em] drop-shadow-[0_12px_46px_rgba(255,90,180,0.18)] transition hover:brightness-110 hover:-translate-y-0.5"
               >
                 forged in Shikke’s Dojo
-              </span>
+              </a>
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-base md:text-lg text-white/65 font-body leading-relaxed">
-              A community-run lazer server. Simple goal: play maps, grind PP, and hang out with people who actually care.
+              A dojo under the mountains. Play, grind, farm. Forge your soul without limits.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">

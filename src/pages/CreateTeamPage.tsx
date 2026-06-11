@@ -6,6 +6,7 @@ import { teamsAPI, adminAPI, handleApiError } from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
 import ImageUploadWithCrop from '../components/UI/ImageUploadWithCrop';
 import MemberSelector from '../components/UI/MemberSelector';
+import CountryFlag from '../components/UI/CountryFlag';
 import toast from 'react-hot-toast';
 import { GAME_MODE_NAMES, type User, type Team, type TeamDetailResponse, type GameMode } from '../types';
 
@@ -451,10 +452,10 @@ const CreateTeamPage: React.FC = () => {
                             {member.country?.name || t('teams.create.unknown')}
                           </span>
                           {member.country?.code && (
-                            <img
-                              src={`/image/flag/${member.country.code.toLowerCase()}.svg`}
-                              alt={member.country.name}
-                              className="w-5 h-3"
+                            <CountryFlag
+                              code={member.country.code}
+                              name={member.country.name}
+                              className="h-3"
                             />
                           )}
                         </div>

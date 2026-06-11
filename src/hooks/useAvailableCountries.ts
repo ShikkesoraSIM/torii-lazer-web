@@ -7,7 +7,7 @@ interface Country {
   name: string;
 }
 
-// 全局缓存对象，按模式存储
+// Global cache, keyed by game mode
 const countryCache: Record<string, Country[]> = {};
 
 export const useAvailableCountries = (mode: GameMode) => {
@@ -17,13 +17,13 @@ export const useAvailableCountries = (mode: GameMode) => {
 
   useEffect(() => {
     const fetchCountries = async () => {
-      // 如果已有缓存，直接使用
+      // Use the cache if available
       if (countryCache[mode]) {
         setCountries(countryCache[mode]);
         return;
       }
 
-      // 取消之前的请求
+      // Cancel any in-flight request
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -32,25 +32,25 @@ export const useAvailableCountries = (mode: GameMode) => {
       abortControllerRef.current = abortController;
 
       setIsLoading(true);
-      
+
       try {
-        // 获取第一页国家排行榜，通常包含所有有数据的国家
+        // Fetch the first page of country rankings, which usually covers every country with data
         const response = await rankingsAPI.getCountryRankings(mode, 1);
-        
+
         if (!abortController.signal.aborted && response.ranking) {
           const availableCountries: Country[] = response.ranking.map((ranking: any) => ({
             code: ranking.code,
             name: ranking.name,
           }));
 
-          // 存入缓存
+          // Store in cache
           countryCache[mode] = availableCountries;
           setCountries(availableCountries);
         }
       } catch (error) {
         if (!abortController.signal.aborted) {
-          console.error('获取可用国家列表失败:', error);
-          // 如果失败，返回空数组
+          console.error('Failed to load available countries:', error);
+          // On failure, return an empty list
           setCountries([]);
         }
       } finally {
@@ -62,7 +62,7 @@ export const useAvailableCountries = (mode: GameMode) => {
 
     fetchCountries();
 
-    // 清理函数
+    // Cleanup
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();

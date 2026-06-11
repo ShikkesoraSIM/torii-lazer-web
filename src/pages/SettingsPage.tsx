@@ -27,49 +27,39 @@ const SettingsPage: React.FC = () => {
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
   const [pendingRequest, setPendingRequest] = useState<PendingUsernameChange | null>(null);
   
-  // TOTP 相关状态
   const [totpStatus, setTotpStatus] = useState<TOTPStatus | null>(null);
   const [isLoadingTotpStatus, setIsLoadingTotpStatus] = useState(true);
   const [showTotpSetup, setShowTotpSetup] = useState(false);
   const [showTotpDisable, setShowTotpDisable] = useState(false);
 
-  // 获取TOTP状态
   const fetchTotpStatus = async () => {
     try {
       const status = await userAPI.totp.getStatus();
       setTotpStatus(status);
-    } catch (error) {
-      console.error('获取TOTP状态失败:', error);
-      // 如果获取失败，假设未启用
+    } catch {
       setTotpStatus({ enabled: false });
     } finally {
       setIsLoadingTotpStatus(false);
     }
   };
 
-  // TOTP设置成功处理
   const handleTotpSetupSuccess = () => {
     setTotpStatus({ enabled: true, created_at: new Date().toISOString() });
     toast.success(t('settings.totp.setupSuccess'));
   };
 
-  // TOTP禁用成功处理
   const handleTotpDisableSuccess = () => {
     setTotpStatus({ enabled: false });
     toast.success(t('settings.totp.disableSuccess'));
   };
 
-  // 获取当前用户待审核的用户名修改申请（若有）
   const fetchPendingUsernameRequest = async () => {
     try {
       const req = await userAPI.getUsernameChangeRequest();
       setPendingRequest(req);
-    } catch (error) {
-      console.error('获取用户名修改申请失败:', error);
-    }
+    } catch { /* non-fatal */ }
   };
 
-  // 初始化时获取TOTP状态
   useEffect(() => {
     if (isAuthenticated && user) {
       fetchTotpStatus();
@@ -150,7 +140,6 @@ const SettingsPage: React.FC = () => {
       setIsEditing(false);
       setNewUsername('');
     } catch (error) {
-      console.error('申请修改用户名失败:', error);
       const err = error as { status?: number; message?: string };
       if (err.status === 409) {
         if (err.message && /pending/i.test(err.message)) {
@@ -170,12 +159,10 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const handleAvatarUpdate = async (newAvatarUrl: string) => {
-    console.log('头像更新成功:', newAvatarUrl);
+  const handleAvatarUpdate = async (_newAvatarUrl: string) => {
     toast.success(t('settings.avatar.success'));
     setShowAvatarUpload(false);
     
-    // 延迟刷新用户信息
     setTimeout(async () => {
       await refreshUser();
     }, 2000);
@@ -183,7 +170,6 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
-      {/* 页面标题 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -197,7 +183,6 @@ const SettingsPage: React.FC = () => {
         </p>
       </motion.div>
 
-      {/* 用户名设置 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -282,7 +267,6 @@ const SettingsPage: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* 头像设置 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -328,7 +312,6 @@ const SettingsPage: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* 头图设置 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -355,19 +338,12 @@ const SettingsPage: React.FC = () => {
               username={user.username}
               coverUrl={user.cover_url}
               editable={true}
-              onCoverUpdate={(newCoverUrl) => {
-                if (import.meta.env.DEV) {
-                  console.log('头图已更新:', newCoverUrl);
-                }
-                // 这里可以选择是否立即刷新用户信息
-                // 暂时不刷新，让用户看到更新效果
-              }}
+              onCoverUpdate={() => {}}
             />
           </div>
         </div>
       </motion.div>
 
-      {/* 密码设置 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -384,7 +360,6 @@ const SettingsPage: React.FC = () => {
         <PasswordResetSection />
       </motion.div>
 
-      {/* TOTP双因素验证设置 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -464,7 +439,6 @@ const SettingsPage: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* OAuth 应用管理 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -481,7 +455,6 @@ const SettingsPage: React.FC = () => {
         <OAuthAppsSection />
       </motion.div>
 
-      {/* 用户偏好设置 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -514,7 +487,6 @@ const SettingsPage: React.FC = () => {
         <AurasSection />
       </motion.div>
 
-      {/* 设备管理 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -534,21 +506,17 @@ const SettingsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* 登录会话管理 */}
         <div className="mb-8">
           <SessionManagement />
         </div>
 
-        {/* 分割线 */}
         <div className="border-t border-card my-8"></div>
 
-        {/* 受信任设备管理 */}
         <div>
           <TrustedDeviceManagement />
         </div>
       </motion.div>
 
-      {/* 用户信息 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -627,7 +595,6 @@ const SettingsPage: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* 头像上传模态框 */}
       {showAvatarUpload && (
         <AvatarUpload
           userId={user.id}
@@ -637,7 +604,6 @@ const SettingsPage: React.FC = () => {
         />
       )}
 
-      {/* TOTP设置模态框 */}
       <div>
       <TotpSetupModal
         isOpen={showTotpSetup}
@@ -646,7 +612,6 @@ const SettingsPage: React.FC = () => {
       />
        </div>
 
-      {/* TOTP禁用模态框 */}
       <TotpDisableModal
         isOpen={showTotpDisable}
         onClose={() => setShowTotpDisable(false)}

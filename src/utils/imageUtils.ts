@@ -1,8 +1,8 @@
 /**
- * 图片优化工具
+ * Image optimization helpers
  */
 
-// 生成模糊数据URL
+// Generate a blur placeholder data URL
 export const generateBlurDataURL = (width = 8, height = 8): string => {
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -11,7 +11,7 @@ export const generateBlurDataURL = (width = 8, height = 8): string => {
   
   if (!ctx) return '';
   
-  // 创建简单的渐变作为占位符
+  // Use a simple gradient as the placeholder
   const gradient = ctx.createLinearGradient(0, 0, width, height);
   gradient.addColorStop(0, '#f3f4f6');
   gradient.addColorStop(1, '#e5e7eb');
@@ -22,7 +22,7 @@ export const generateBlurDataURL = (width = 8, height = 8): string => {
   return canvas.toDataURL('image/jpeg', 0.1);
 };
 
-// 检查图片是否可加载
+// Check whether an image can be loaded
 export const checkImageLoad = (src: string): Promise<boolean> => {
   return new Promise((resolve) => {
     const img = new Image();
@@ -32,7 +32,7 @@ export const checkImageLoad = (src: string): Promise<boolean> => {
   });
 };
 
-// 预加载图片
+// Preload an image
 export const preloadImage = (src: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -42,7 +42,7 @@ export const preloadImage = (src: string): Promise<void> => {
   });
 };
 
-// 获取图片尺寸
+// Get image dimensions
 export const getImageDimensions = (src: string): Promise<{ width: number; height: number }> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -54,7 +54,7 @@ export const getImageDimensions = (src: string): Promise<{ width: number; height
   });
 };
 
-// 检查是否为图片URL
+// Check whether a URL points to an image
 export const isImageUrl = (url: string): boolean => {
   const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
   const lowercaseUrl = url.toLowerCase();
@@ -63,7 +63,7 @@ export const isImageUrl = (url: string): boolean => {
          lowercaseUrl.includes('img');
 };
 
-// 优化图片URL（添加参数等）
+// Optimize an image URL (append params, etc.)
 export const optimizeImageUrl = (url: string, options: {
   width?: number;
   height?: number;
@@ -73,7 +73,7 @@ export const optimizeImageUrl = (url: string, options: {
   try {
     const urlObj = new URL(url);
     
-    // 如果是支持参数的图片服务，添加优化参数
+    // If the image service supports params, append optimization params
     if (options.width) urlObj.searchParams.set('w', options.width.toString());
     if (options.height) urlObj.searchParams.set('h', options.height.toString());
     if (options.quality) urlObj.searchParams.set('q', options.quality.toString());
@@ -81,7 +81,7 @@ export const optimizeImageUrl = (url: string, options: {
     
     return urlObj.toString();
   } catch {
-    // 如果URL无效，返回原始URL
+    // Invalid URL: return the original
     return url;
   }
 };

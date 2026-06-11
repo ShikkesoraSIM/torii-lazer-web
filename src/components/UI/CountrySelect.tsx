@@ -13,6 +13,7 @@ import {
   FloatingFocusManager,
 } from '@floating-ui/react';
 import { getCountryName } from '../../utils/countryName';
+import CountryFlag from './CountryFlag';
 
 export interface Country {
   code: string;
@@ -134,11 +135,11 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
 
           {selectedCountry && (
             <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
-              <img
-                src={`/image/flag/${selectedCountry.code.toLowerCase()}.svg`}
-                alt={selectedCountry.code}
-                className="w-5 h-4 rounded-sm"
-                title={selectedCountry.translatedName}
+              <CountryFlag
+                code={selectedCountry.code}
+                name={selectedCountry.translatedName}
+                className="h-4"
+                rounded="rounded-sm"
               />
             </div>
           )}
@@ -195,10 +196,11 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
                     onClick={() => handleSelectCountry(country)}
                     className="w-full px-3 py-2 text-left hover:bg-white/8 focus:bg-white/8 focus:outline-none flex items-center gap-3"
                   >
-                    <img
-                      src={`/image/flag/${country.code.toLowerCase()}.svg`}
-                      alt={country.code}
-                      className="w-5 h-4 rounded-sm"
+                    <CountryFlag
+                      code={country.code}
+                      name={country.translatedName}
+                      className="h-4"
+                      rounded="rounded-sm"
                     />
                     <span className="text-white">{country.translatedName}</span>
                     <span className="text-white/60 text-sm">{country.code}</span>

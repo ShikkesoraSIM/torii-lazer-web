@@ -22,7 +22,7 @@ interface ScoreActionsMenuProps {
   isPinned?: boolean;
   hasReplay?: boolean;
   onPinChange?: (scoreId: number, isPinned: boolean) => void;
-  onPinnedListChange?: () => void; // 置顶列表刷新回调
+  onPinnedListChange?: () => void;
   className?: string;
 }
 
@@ -63,31 +63,24 @@ const ScoreActionsMenu: React.FC<ScoreActionsMenuProps> = ({
   const handleTogglePin = async () => {
     setIsLoading(true);
     
-    // 1. 立即触发本地更新（乐观更新）
     onPinChange?.(scoreId, isPinned);
     onPinnedListChange?.();
     
-    // 2. 显示成功提示
     if (isPinned) {
       toast.success(t('profile.bestScores.actions.unpinSuccess'));
     } else {
       toast.success(t('profile.bestScores.actions.pinSuccess'));
     }
     
-    // 3. 后台发送到服务器
     try {
       if (isPinned) {
         await scoreAPI.unpinScore(scoreId);
       } else {
         await scoreAPI.pinScore(scoreId);
       }
-      // 服务器成功后不需要额外操作，因为UI已经更新
     } catch (error) {
-      // 如果服务器失败，显示错误但不回滚UI
-      // 因为服务器有缓存，可能只是缓存问题
       console.error('Pin/Unpin API failed:', error);
       handleApiError(error);
-      // 可以选择回滚，但因为服务器缓存问题，这里不回滚
     } finally {
       setIsLoading(false);
       setIsOpen(false);
@@ -99,7 +92,6 @@ const ScoreActionsMenu: React.FC<ScoreActionsMenuProps> = ({
     try {
       const blob = await scoreAPI.downloadReplay(scoreId);
       
-      // 创建下载链接
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

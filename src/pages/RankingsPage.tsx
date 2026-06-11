@@ -53,15 +53,12 @@ const RankingsPage: React.FC = () => {
   const [countryRankings, setCountryRankings] = useState<CountryResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  // 使用 ref 跟踪请求，防止竞态条件
   const abortControllerRef = useRef<AbortController | null>(null);
   
-  // 获取可用国家列表
   const { countries: availableCountries, isLoading: isLoadingCountries } = useAvailableCountries(selectedMode);
   
   // Load user rankings with request cancellation
   const loadUserRankings = useCallback(async () => {
-    // 取消之前的请求
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -78,7 +75,6 @@ const RankingsPage: React.FC = () => {
         currentPage
       );
       
-      // 只有当请求未被取消时才更新状态
       if (!abortController.signal.aborted) {
         setUserRankings(response);
       }
@@ -96,7 +92,6 @@ const RankingsPage: React.FC = () => {
 
   // Load country rankings with request cancellation
   const loadCountryRankings = useCallback(async () => {
-    // 取消之前的请求
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -108,7 +103,6 @@ const RankingsPage: React.FC = () => {
     try {
       const response = await rankingsAPI.getCountryRankings(selectedMode, currentPage);
       
-      // 只有当请求未被取消时才更新状态
       if (!abortController.signal.aborted) {
         setCountryRankings(response);
       }
@@ -127,7 +121,6 @@ const RankingsPage: React.FC = () => {
   // Reset pagination and load data
   useEffect(() => {
     setCurrentPage(1);
-    // 滚动到顶部
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [selectedMode, selectedTab, rankingType, selectedCountry]);
 
@@ -139,7 +132,6 @@ const RankingsPage: React.FC = () => {
       loadCountryRankings();
     }
     
-    // 清理函数：取消请求
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -176,7 +168,6 @@ const RankingsPage: React.FC = () => {
     setSearchParams(next, { replace: true });
   }, [selectedTab, selectedMode, rankingType, selectedCountry, currentPage, setSearchParams]);
 
-  // 页面切换时滚动到顶部
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentPage]);
