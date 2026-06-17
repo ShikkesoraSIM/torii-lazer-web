@@ -91,37 +91,27 @@ export const userAPI = {
   // Submit a username change request for admin review. Does NOT rename
   // immediately — the resolved request is applied by an admin from the panel.
   rename: async (newUsername: string): Promise<PendingUsernameChange> => {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      throw new Error('Access token not found');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/api/private/rename`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newUsername),
-    });
-
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = await response.text();
-      }
-      console.error('Username change request failed:', errorData);
-      const err = new Error(errorData?.detail || errorData?.message || `HTTP ${response.status}`) as Error & {
-        status?: number;
-      };
-      err.status = response.status;
+    // Through the shared api instance so it gets the 401 refresh+retry. The
+    // body is a bare JSON string, which axios won't auto-type, so set the
+    // header explicitly.
+    try {
+      const response = await api.post('/api/private/rename', JSON.stringify(newUsername), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      return response.data as PendingUsernameChange;
+    } catch (error: any) {
+      const status: number | undefined = error?.response?.status;
+      const data = error?.response?.data;
+      console.error('Username change request failed:', data ?? error);
+      // Preserve the { status, message } shape SettingsPage branches on (409/404/403).
+      const err = new Error(
+        data?.detail ||
+          data?.message ||
+          (status ? `HTTP ${status}` : (error instanceof Error ? error.message : 'Username change request failed'))
+      ) as Error & { status?: number };
+      if (status !== undefined) err.status = status;
       throw err;
     }
-
-    const result = await response.json();
-    return result as PendingUsernameChange;
   },
 
   // Returns the current user's pending username change request, or null.
@@ -265,49 +255,31 @@ export const userAPI = {
 
   // Change password with current password or TOTP code
   changePassword: async (newPassword: string, currentPassword?: string, totpCode?: string) => {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      throw new Error('Access token not found');
-    }
-
     const formData = new URLSearchParams();
     formData.append('new_password', newPassword);
-    
+
     if (currentPassword) {
       formData.append('current_password', currentPassword);
     }
-    
+
     if (totpCode) {
       formData.append('totp_code', totpCode);
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/private/password/change`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formData,
-    });
-
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = await response.text();
-      }
-      console.error('Password change failed:', errorData);
-      throw new Error(errorData?.detail || errorData?.message || `HTTP ${response.status}`);
+    // Through the shared api instance for the 401 refresh+retry. axios
+    // auto-sets application/x-www-form-urlencoded for a URLSearchParams body.
+    try {
+      const response = await api.post('/api/private/password/change', formData);
+      // A 204 No Content response has no body.
+      return response.status === 204 ? undefined : response.data;
+    } catch (error: any) {
+      const data = error?.response?.data;
+      console.error('Password change failed:', data ?? error);
+      // Caller matches on .message ('Invalid'/'incorrect'), so keep the detail there.
+      throw new Error(
+        data?.detail || data?.message || (error instanceof Error ? error.message : 'Password change failed')
+      );
     }
-
-    // A 204 No Content response has no body
-    if (response.status === 204) {
-      return;
-    }
-
-    const result = await response.json();
-    return result;
   },
 
   // TOTP-related endpoints
