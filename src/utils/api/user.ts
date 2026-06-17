@@ -77,27 +77,15 @@ export const userAPI = {
     formData.append('content', imageFile, fileName);
     formData.append('is_nsfw', String(isNsfw));
 
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      throw new Error('Access token not found, please log in again');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/api/private/avatar/upload`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      console.error('Avatar upload failed:', errorData);
-      throw new Error(errorData?.detail || errorData?.message || `HTTP ${response.status}`);
-    }
-
-    const result = await response.json();
-    return result;
+    // Go through the shared `api` instance instead of a raw fetch so the upload
+    // gets the auth header, the 401 refresh+retry, and the x-api-version /
+    // X-UUID headers like every other call. A bare fetch with a hand-read
+    // localStorage token bypassed the refresh interceptor, so an expired token
+    // (refreshed transparently everywhere else) silently broke uploads. axios
+    // auto-sets the multipart boundary for FormData now that the global
+    // Content-Type default is gone.
+    const response = await api.post('/api/private/avatar/upload', formData);
+    return response.data;
   },
 
   // Submit a username change request for admin review. Does NOT rename
@@ -149,32 +137,10 @@ export const userAPI = {
     formData.append('content', imageFile, fileName);
     formData.append('is_nsfw', String(isNsfw));
 
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      throw new Error('Access token not found');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/api/private/cover/upload`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = await response.text();
-      }
-      console.error('Cover upload failed:', errorData);
-      throw new Error(errorData?.detail || errorData?.message || `HTTP ${response.status}`);
-    }
-
-    const result = await response.json();
-    return result;
+    // Same as uploadAvatar: go through `api` for auth refresh + consistent
+    // headers + safe multipart, instead of a refresh-bypassing raw fetch.
+    const response = await api.post('/api/private/cover/upload', formData);
+    return response.data;
   },
 
   getRecentActivity: async (

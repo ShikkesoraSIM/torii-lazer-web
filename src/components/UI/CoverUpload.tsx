@@ -97,11 +97,15 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
       onClose();
     } catch (error: any) {
       console.error('Cover upload failed:', error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error('Cover upload failed. Please try again.');
-      }
+      // Surface the real reason (FastAPI -> response.data.detail; thrown Error
+      // -> .message). The old code only read response.data.message, which never
+      // exists here, so failures showed only the generic toast.
+      const detail = error?.response?.data?.detail ?? error?.response?.data?.message;
+      const message =
+        (typeof detail === 'string' && detail) ||
+        (error instanceof Error && error.message) ||
+        'Cover upload failed. Please try again.';
+      toast.error(message);
     } finally {
       setIsUploading(false);
     }

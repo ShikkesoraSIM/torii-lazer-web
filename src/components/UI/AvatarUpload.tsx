@@ -97,11 +97,16 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       onClose();
     } catch (error: any) {
       console.error('Avatar upload failed:', error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error('Avatar upload failed. Please try again.');
-      }
+      // Surface the real reason. FastAPI puts it in response.data.detail; a
+      // thrown Error carries it on .message. The old code only read
+      // response.data.message (which never exists here), so every failure
+      // collapsed into the generic toast with no detail.
+      const detail = error?.response?.data?.detail ?? error?.response?.data?.message;
+      const message =
+        (typeof detail === 'string' && detail) ||
+        (error instanceof Error && error.message) ||
+        'Avatar upload failed. Please try again.';
+      toast.error(message);
     } finally {
       setIsUploading(false);
     }
