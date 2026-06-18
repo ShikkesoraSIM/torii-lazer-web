@@ -16,6 +16,13 @@ export interface RecalcTask {
   stdout_tail: string;
 }
 
+export interface PreviousUsernamesResult {
+  user_id: number;
+  username: string;
+  avatar_url: string | null;
+  previous_usernames: string[];
+}
+
 export interface ManualSubmitPreview {
   can_submit: boolean;
   player_name: string;
@@ -856,6 +863,27 @@ export const adminAPI = {
       { reason: reason ?? null },
     );
     return response.data as UsernameChangeRequest;
+  },
+
+  // ─── Previous usernames (profile "formerly known as") ──────────────
+  // Admin-only edit of a user's stored previous usernames. The backend
+  // invalidates the user's profile cache on every change.
+  getUserPreviousUsernames: async (userId: number) => {
+    const response = await api.get(`/api/private/admin/users/${userId}/previous-usernames`);
+    return response.data as PreviousUsernamesResult;
+  },
+
+  removeUserPreviousUsernames: async (userId: number, names: string[]) => {
+    const response = await api.post(
+      `/api/private/admin/users/${userId}/previous-usernames/remove`,
+      { names },
+    );
+    return response.data as PreviousUsernamesResult;
+  },
+
+  clearUserPreviousUsernames: async (userId: number) => {
+    const response = await api.delete(`/api/private/admin/users/${userId}/previous-usernames`);
+    return response.data as PreviousUsernamesResult;
   },
 
   // ─── NSFW profile media review ─────────────────────────────────────

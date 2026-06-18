@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 import { api } from '../../utils/api/client';
 import AdminUserRecalcSection from './AdminUserRecalcSection';
 import AdminManualSubmitSection from './AdminManualSubmitSection';
+import AdminPastUsernamesSection from './AdminPastUsernamesSection';
 
 interface MaintenanceState {
   enabled: boolean;
@@ -214,6 +215,13 @@ const AdminMaintenance: React.FC = () => {
         honour a play whose live submission was lost.
       */}
       <AdminManualSubmitSection />
+
+      {/*
+        Past-usernames editor — same operational-tools family. Removes specific
+        entries from a user's "formerly known as" list (or wipes it) on request,
+        without hand-editing the DB. Server-side it busts the profile cache.
+      */}
+      <AdminPastUsernamesSection />
     </div>
   );
 };
