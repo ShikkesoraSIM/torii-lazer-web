@@ -165,7 +165,11 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1000,
+        // Below the shared Dialog's z-1000 so the NSFW confirm prompt (which is
+        // a Dialog) always stacks ABOVE this modal. At equal z-index the prompt
+        // sometimes rendered BEHIND this modal (DOM-order dependent), so after
+        // confirming a crop it looked like nothing happened.
+        zIndex: 999,
         padding: '1rem',
       }}
       onClick={(e) => {
