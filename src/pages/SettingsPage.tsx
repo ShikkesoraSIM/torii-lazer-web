@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiUser, FiCheck, FiX, FiImage, FiCamera, FiShield, FiMonitor, FiLock, FiSettings, FiKey } from 'react-icons/fi';
+import { FiUser, FiCheck, FiX, FiImage, FiCamera, FiShield, FiMonitor, FiLock, FiSettings, FiKey, FiTrash2 } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
@@ -17,6 +17,7 @@ import PasswordResetSection from '../components/Settings/PasswordResetSection';
 import UserPreferencesSection from '../components/Settings/UserPreferencesSection';
 import OAuthAppsSection from '../components/Settings/OAuthAppsSection';
 import AurasSection from '../components/Settings/AurasSection';
+import AvatarDefaultOptOut from '../components/Settings/AvatarDefaultOptOut';
 
 const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -25,6 +26,7 @@ const SettingsPage: React.FC = () => {
   const [newUsername, setNewUsername] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
+  const [deletingAvatar, setDeletingAvatar] = useState(false);
   const [pendingRequest, setPendingRequest] = useState<PendingUsernameChange | null>(null);
   
   const [totpStatus, setTotpStatus] = useState<TOTPStatus | null>(null);
@@ -162,10 +164,26 @@ const SettingsPage: React.FC = () => {
   const handleAvatarUpdate = async (_newAvatarUrl: string) => {
     toast.success(t('settings.avatar.success'));
     setShowAvatarUpload(false);
-    
+
     setTimeout(async () => {
       await refreshUser();
     }, 2000);
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!window.confirm('Delete your avatar and go back to a default? You can upload a new one anytime.')) {
+      return;
+    }
+    setDeletingAvatar(true);
+    try {
+      await userAPI.deleteAvatar();
+      toast.success('Avatar deleted.');
+      await refreshUser();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.detail || 'Failed to delete avatar.');
+    } finally {
+      setDeletingAvatar(false);
+    }
   };
 
   return (
@@ -296,18 +314,34 @@ const SettingsPage: React.FC = () => {
                 className="!w-16 !h-16"
               />
               <div className="flex-1">
-                <button
-                  onClick={() => setShowAvatarUpload(true)}
-                  className="btn-primary !px-4 !py-2 text-sm flex items-center gap-2"
-                >
-                  <FiCamera className="w-4 h-4" />
-                  {t('settings.avatar.change')}
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setShowAvatarUpload(true)}
+                    className="btn-primary !px-4 !py-2 text-sm flex items-center gap-2"
+                  >
+                    <FiCamera className="w-4 h-4" />
+                    {t('settings.avatar.change')}
+                  </button>
+                  {user.avatar_url && !user.avatar_url.includes('/file/avatars/default-') && (
+                    <button
+                      onClick={handleDeleteAvatar}
+                      disabled={deletingAvatar}
+                      className="!px-4 !py-2 text-sm flex items-center gap-2 rounded-lg border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                      {deletingAvatar ? 'Deleting…' : 'Delete avatar'}
+                    </button>
+                  )}
+                </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                   {t('settings.avatar.hint')}
                 </p>
               </div>
             </div>
+
+            {(!user.avatar_url || user.avatar_url.includes('/file/avatars/default-')) && (
+              <AvatarDefaultOptOut onChanged={refreshUser} />
+            )}
           </div>
         </div>
       </motion.div>

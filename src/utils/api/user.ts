@@ -88,6 +88,11 @@ export const userAPI = {
     return response.data;
   },
 
+  // Delete the uploaded avatar and fall back to a default (server-side resolve).
+  deleteAvatar: async () => {
+    await api.delete('/api/private/avatar');
+  },
+
   // Submit a username change request for admin review. Does NOT rename
   // immediately — the resolved request is applied by an admin from the panel.
   rename: async (newUsername: string): Promise<PendingUsernameChange> => {
