@@ -356,6 +356,8 @@ export const settingsPage = {
         legacyScoreOnlyDescription: 'Only display legacy scoring system scores',
         coverExpanded: 'Cover Expanded',
         coverExpandedDescription: 'Expand profile cover by default',
+        defaultAvatarPlain: 'Use the plain Torii logo avatar',
+        defaultAvatarPlainDescription: 'If you have not uploaded an avatar, use the plain Torii logo instead of a randomly-assigned default. Off by default.',
         scoreClientDisplay: 'Score Client Display',
         scoreClientDisplayDescription: 'How the client used for scores is shown in profile score cards.',
         scoreClientDisplayIcon: 'Icon only',

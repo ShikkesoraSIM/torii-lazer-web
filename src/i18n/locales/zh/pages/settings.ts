@@ -356,6 +356,8 @@ export const settingsPage = {
         legacyScoreOnlyDescription: '仅显示旧版计分系统的分数',
         coverExpanded: '展开头图',
         coverExpandedDescription: '默认展开个人资料头图',
+        defaultAvatarPlain: '使用纯 Torii 标志头像',
+        defaultAvatarPlainDescription: '如果你没有上传头像，使用纯 Torii 标志，而不是随机分配的默认头像。默认关闭。',
         scoreClientDisplay: '成绩客户端显示',
         scoreClientDisplayDescription: '设置在个人资料成绩卡片中如何显示提交客户端。',
         scoreClientDisplayIcon: '仅图标',

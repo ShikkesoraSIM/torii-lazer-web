@@ -375,6 +375,32 @@ const UserPreferencesSection: React.FC = () => {
             </label>
           </div>
 
+          {/* Default avatar: opt out of the AI-made default set, use the plain Torii logo */}
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('settings.preferences.profile.defaultAvatarPlain')}
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {t('settings.preferences.profile.defaultAvatarPlainDescription')}
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={Boolean(preferences.extra?.default_avatar_use_logo)}
+                onChange={async (e) => {
+                  await updateAndSave('extra', { ...(preferences.extra || {}), default_avatar_use_logo: e.target.checked });
+                  apiCache.clearCache();
+                  await refreshUser();
+                }}
+                disabled={savingFields.has('extra')}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-osu-pink/20 dark:peer-focus:ring-osu-pink/40 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-osu-pink peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
+            </label>
+          </div>
+
           {/* Score client display mode */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

@@ -327,6 +327,10 @@ const RegisterPage: React.FC = () => {
           <p className="text-xs text-gray-500 dark:text-gray-400">
             {t('common.registerAgreement')}
           </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Some default avatars on Torii are AI-made.{' '}
+            <Link to="/about" className="text-osu-pink hover:underline">About Torii</Link>
+          </p>
         </div>
       </div>
     </div>
