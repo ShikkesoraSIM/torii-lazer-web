@@ -6,6 +6,7 @@ import {
   FiMoon,
   FiBell,
   FiSearch,
+  FiInfo,
   FiMenu,
   FiX,
   FiSettings,
@@ -479,6 +480,17 @@ const Navbar: React.FC = () => {
                   <FiSearch size={18} />
                 </motion.button>
 
+                {/* Small About / transparency entry, reachable from any page. */}
+                <Link to="/about" title="About Torii" aria-label="About Torii">
+                  <motion.div
+                    whileHover={{ scale: 1.06 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="relative h-10 w-10 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition inline-flex items-center justify-center text-white/90"
+                  >
+                    <FiInfo size={18} />
+                  </motion.div>
+                </Link>
+
                 {/* Heart button — same shape as the other nav pills but
                     in supporter pink so it reads as "support the game"
                     without needing the label osu! has. Mirrors the
@@ -563,6 +575,17 @@ const Navbar: React.FC = () => {
               >
                 <FiSearch size={18} />
               </motion.button>
+
+              {/* About / transparency, reachable from the mobile bar too. */}
+              <Link to="/about" title="About Torii" aria-label="About Torii">
+                <motion.div
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="h-10 w-10 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-white/90 transition inline-flex items-center justify-center"
+                >
+                  <FiInfo size={18} />
+                </motion.div>
+              </Link>
 
               {/* Compact heart for the mobile bar — same popover, just
                   pinned next to the search button so it's reachable
