@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { FiHeart } from 'react-icons/fi';
 
 // Public Ko-fi page — kept inline so the footer stays self-contained.
@@ -13,9 +14,18 @@ const HomeFooter: React.FC = () => {
           <div>
             <div className="text-white/75 font-semibold">Shikkesora lazer server</div>
             <div className="mt-1">Not affiliated with ppy. Community-run private server.</div>
+            <div className="mt-1 text-white/45">
+              Some art and default avatars on Torii are AI-assisted.{' '}
+              <Link to="/about" className="underline hover:text-white transition">
+                About Torii
+              </Link>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
+            <Link className="hover:text-white transition" to="/about">
+              About Torii
+            </Link>
             <a className="hover:text-white transition" href="https://shikkesora.com" target="_blank" rel="noreferrer">
               shikkesora.com
             </a>

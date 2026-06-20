@@ -36,6 +36,7 @@ const HowToJoinPage = lazy(() => import('./pages/HowToJoinPage'));
 const BeatmapPage = lazy(() => import('./pages/BeatmapPage'));
 const BeatmapsPage = lazy(() => import('./pages/BeatmapsPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ScorePage = lazy(() => import('./pages/ScorePage'));
 const BBCodeTester = lazy(() => import('./components/BBCode/BBCodeTester'));
 const AdminPanel = lazy(() => import('./pages/Admin/AdminPanel'));
@@ -81,6 +82,7 @@ function App() {
                     <Route path="friends" element={<FriendsPage />} />
                     <Route path="how-to-join" element={<HowToJoinPage />} />
                     <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
+                    <Route path="about" element={<AboutPage />} />
                     <Route path="beatmaps/:beatmapId" element={<BeatmapPage />} />
                     <Route path="beatmapsets/:beatmapsetId" element={<BeatmapPage />} />
                     <Route path="beatmaps" element={<BeatmapsPage />} />
