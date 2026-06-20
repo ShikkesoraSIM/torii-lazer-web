@@ -327,9 +327,13 @@ const RegisterPage: React.FC = () => {
           <p className="text-xs text-gray-500 dark:text-gray-400">
             {t('common.registerAgreement')}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Some default avatars on Torii are AI-made.{' '}
-            <Link to="/about" className="text-osu-pink hover:underline">About Torii</Link>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+            A quick honest heads up: Torii is one person, me. I use AI to help build parts of it
+            (the server, the client, the website, art like these default avatars), and there is
+            still endless manual work on top of all of it. I would rather be upfront about that
+            than hide it.{' '}
+            <Link to="/about" className="text-osu-pink hover:underline">More about Torii</Link>.
+            You can switch your avatar to the plain Torii logo in settings, or upload your own.
           </p>
         </div>
       </div>
