@@ -489,8 +489,13 @@ const Navbar: React.FC = () => {
       const brand = contentWidth(brandRef.current);
       const center = navMirrorRef.current?.scrollWidth ?? 0; // absolute, already hugs content
       const right = contentWidth(rightRef.current);
-      // two column gaps (gap-4 = 16px each) plus a small safety buffer.
-      const needed = brand + center + right + 32 + 12;
+      // The layout is a [1fr auto 1fr] grid, so the two side columns are forced
+      // to the SAME width (the leftover space is split evenly). To keep the
+      // centre nav centred without the wider side overlapping it, each gutter
+      // has to fit the LARGER of the two sides. So the row only fits when
+      // center + 2*max(brand, right) + gaps <= available. (Summing brand+right
+      // under-counts, because the narrow side wastes the space the wide side needs.)
+      const needed = center + 2 * Math.max(brand, right) + 32 + 16;
       setCompactNav(needed > available);
     };
 
