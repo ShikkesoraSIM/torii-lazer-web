@@ -4,9 +4,14 @@ export interface ParsedScoreClientVersion {
   version: string | null;
   os: string | null;
   summary: string;
+  stream: ClientStream;
+  platform: ClientPlatform;
 }
 
 export type ScoreClientDisplayMode = 'icon' | 'name';
+
+export type ClientStream = 'torii' | 'nova' | 'vanilla' | 'shigetiro' | 'lazer' | 'unknown';
+export type ClientPlatform = 'windows' | 'macos' | 'linux' | 'android' | 'ios' | 'unknown';
 
 export const SCORE_CLIENT_DISPLAY_MODE_KEY = 'score_client_display_mode';
 export const DEFAULT_SCORE_CLIENT_DISPLAY_MODE: ScoreClientDisplayMode = 'icon';
@@ -18,18 +23,47 @@ const HASH_RE = /hash:([a-f0-9]{6,40})/i;
 
 const clean = (value: string | null | undefined): string => (value || '').trim();
 
-const detectClientName = (text: string, version: string | null): string => {
-  const lower = text.toLowerCase();
-  const versionLower = (version || '').toLowerCase();
+const STREAM_LABELS: Record<ClientStream, string> = {
+  torii: 'Torii',
+  nova: 'Torii Nova',
+  vanilla: 'Torii Vanilla',
+  shigetiro: 'Torii Client', // legacy Shigetiro builds, folded under the Torii name
+  lazer: 'osu!lazer',
+  unknown: 'Unknown client',
+};
 
-  if (lower.includes('torii') || versionLower.includes('torii')) return 'Torii Client';
-  if (lower.includes('shigetiro') || versionLower.includes('shigetiro')) return 'Torii Client'; // legacy builds
-  if (lower.includes('tachyon') || versionLower.includes('tachyon')) return 'Tachyon Client';
-  if (lower.includes('osu!') || lower.includes('osulazer') || lower.includes('osu lazer')) return 'osu!lazer';
+// Brand + version-suffix detection. Order matters: "Torii Nova" / "Torii Vanilla"
+// and their "-nova" / "-vanilla" version suffixes both also match a loose "torii"
+// test, so the specific streams have to win before we fall back to plain Torii.
+const detectClientStream = (text: string, version: string | null): ClientStream => {
+  const hay = `${text} ${version || ''}`.toLowerCase();
 
-  // Fallback to first token from raw label.
+  if (hay.includes('nova') || hay.includes('-nova')) return 'nova';
+  if (hay.includes('vanilla') || hay.includes('-vanilla')) return 'vanilla';
+  if (hay.includes('shigetiro')) return 'shigetiro';
+  if (hay.includes('torii')) return 'torii';
+  if (hay.includes('osu!') || hay.includes('osulazer') || hay.includes('osu lazer') || hay.includes('lazer'))
+    return 'lazer';
+
+  return 'unknown';
+};
+
+const detectPlatform = (os: string | null): ClientPlatform => {
+  const lower = (os || '').toLowerCase();
+  if (!lower) return 'unknown';
+  if (lower.includes('win')) return 'windows';
+  if (lower.includes('mac') || lower.includes('osx') || lower.includes('darwin')) return 'macos';
+  if (lower.includes('android')) return 'android';
+  if (lower.includes('ios') || lower.includes('iphone') || lower.includes('ipad')) return 'ios';
+  if (lower.includes('linux') || lower.includes('unix') || lower.includes('bsd')) return 'linux';
+  return 'unknown';
+};
+
+const clientNameForStream = (stream: ClientStream, text: string): string => {
+  if (stream !== 'unknown') return STREAM_LABELS[stream];
+  // Keep the old fallback: first token off the raw label.
   const token = text.split(/\s+/)[0]?.trim();
-  return token || 'Unknown client';
+  return token || STREAM_LABELS.unknown;
 };
 
 export const parseScoreClientVersion = (
@@ -56,7 +90,9 @@ export const parseScoreClientVersion = (
       ? `hash:${clean(hashMatch[1]).slice(0, 12)}`
       : null;
 
-  const clientName = detectClientName(working, version);
+  const stream = detectClientStream(working, version);
+  const platform = detectPlatform(os);
+  const clientName = clientNameForStream(stream, working);
   const summary = version ? `${clientName} ${version}` : clientName;
 
   return {
@@ -65,6 +101,8 @@ export const parseScoreClientVersion = (
     version,
     os,
     summary,
+    stream,
+    platform,
   };
 };
 

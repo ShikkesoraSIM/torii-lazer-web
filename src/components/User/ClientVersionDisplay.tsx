@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { FiMonitor } from 'react-icons/fi';
+import { FiMonitor, FiCommand, FiTerminal, FiSmartphone } from 'react-icons/fi';
+import type { IconType } from 'react-icons';
 import {
   FloatingPortal,
   autoUpdate,
@@ -16,6 +17,8 @@ import {
 import {
   parseScoreClientVersion,
   type ScoreClientDisplayMode,
+  type ClientStream,
+  type ClientPlatform,
 } from '../../utils/clientVersion';
 
 interface ClientVersionDisplayProps {
@@ -24,6 +27,77 @@ interface ClientVersionDisplayProps {
   className?: string;
   iconClassName?: string;
 }
+
+interface StreamTheme {
+  rgb: string; // "r, g, b" so it slots into rgba() glows
+  iconColor: string;
+  titleColor: string;
+  detailColor: string;
+  borderColor: string;
+  gradient: string;
+}
+
+// Per-stream palette: Torii red, Nova amber, Vanilla cyan. Legacy Shigetiro rides
+// the red theme; plain lazer / unknown keep the original sky look.
+const STREAM_THEMES: Record<ClientStream, StreamTheme> = {
+  torii: {
+    rgb: '244, 63, 94',
+    iconColor: 'rgb(254 205 211)',
+    titleColor: 'rgb(254 205 211)',
+    detailColor: 'rgba(254, 205, 211, 0.85)',
+    borderColor: 'rgba(244, 63, 94, 0.32)',
+    gradient: 'linear-gradient(155deg,rgba(74,19,34,0.94),rgba(53,11,20,0.94))',
+  },
+  nova: {
+    rgb: '245, 158, 11',
+    iconColor: 'rgb(253 230 138)',
+    titleColor: 'rgb(253 230 138)',
+    detailColor: 'rgba(253, 230, 138, 0.85)',
+    borderColor: 'rgba(245, 158, 11, 0.32)',
+    gradient: 'linear-gradient(155deg,rgba(74,54,19,0.94),rgba(53,37,11,0.94))',
+  },
+  vanilla: {
+    rgb: '34, 211, 238',
+    iconColor: 'rgb(207 250 254)',
+    titleColor: 'rgb(207 250 254)',
+    detailColor: 'rgba(207, 250, 254, 0.85)',
+    borderColor: 'rgba(34, 211, 238, 0.32)',
+    gradient: 'linear-gradient(155deg,rgba(15,59,66,0.94),rgba(10,42,48,0.94))',
+  },
+  shigetiro: {
+    rgb: '244, 63, 94',
+    iconColor: 'rgb(254 205 211)',
+    titleColor: 'rgb(254 205 211)',
+    detailColor: 'rgba(254, 205, 211, 0.85)',
+    borderColor: 'rgba(244, 63, 94, 0.32)',
+    gradient: 'linear-gradient(155deg,rgba(74,19,34,0.94),rgba(53,11,20,0.94))',
+  },
+  lazer: {
+    rgb: '56, 189, 248',
+    iconColor: 'rgb(224 242 254)',
+    titleColor: 'rgb(224 242 254)',
+    detailColor: 'rgba(224, 242, 254, 0.85)',
+    borderColor: 'rgba(125, 211, 252, 0.3)',
+    gradient: 'linear-gradient(155deg,rgba(19,35,74,0.94),rgba(11,20,53,0.94))',
+  },
+  unknown: {
+    rgb: '56, 189, 248',
+    iconColor: 'rgb(224 242 254)',
+    titleColor: 'rgb(224 242 254)',
+    detailColor: 'rgba(224, 242, 254, 0.85)',
+    borderColor: 'rgba(125, 211, 252, 0.3)',
+    gradient: 'linear-gradient(155deg,rgba(19,35,74,0.94),rgba(11,20,53,0.94))',
+  },
+};
+
+const PLATFORM_ICONS: Record<ClientPlatform, IconType> = {
+  windows: FiMonitor,
+  macos: FiCommand,
+  linux: FiTerminal,
+  android: FiSmartphone,
+  ios: FiSmartphone,
+  unknown: FiMonitor,
+};
 
 const ClientVersionDisplay: React.FC<ClientVersionDisplayProps> = ({
   clientVersion,
@@ -36,6 +110,9 @@ const ClientVersionDisplay: React.FC<ClientVersionDisplayProps> = ({
 
   const clientInfo = parseScoreClientVersion(clientVersion);
   if (!clientInfo) return null;
+
+  const theme = STREAM_THEMES[clientInfo.stream];
+  const PlatformIcon = PLATFORM_ICONS[clientInfo.platform];
 
   const tooltipText = [clientInfo.clientName, clientInfo.version, clientInfo.os]
     .filter(Boolean)
@@ -80,26 +157,20 @@ const ClientVersionDisplay: React.FC<ClientVersionDisplayProps> = ({
             isActive
               ? {
                   filter:
-                    'drop-shadow(0 0 3px rgba(56, 189, 248, 0.95)) drop-shadow(0 0 8px rgba(56, 189, 248, 0.72))',
+                    `drop-shadow(0 0 3px rgba(${theme.rgb}, 0.95)) drop-shadow(0 0 8px rgba(${theme.rgb}, 0.72))`,
                 }
               : {
                   filter: 'none',
                 }
           }
         >
-          <FiMonitor
+          <PlatformIcon
             className={`${iconClassName} block transition-all duration-150`}
             aria-hidden="true"
-            style={
-              isActive
-                ? {
-                  color: 'rgb(224 242 254)',
-                    overflow: 'visible',
-                  }
-                : {
-                    overflow: 'visible',
-                  }
-            }
+            style={{
+              color: theme.iconColor,
+              overflow: 'visible',
+            }}
           />
         </span>
 
@@ -115,19 +186,41 @@ const ClientVersionDisplay: React.FC<ClientVersionDisplayProps> = ({
               className: 'z-[1200] pointer-events-none',
             })}
           >
-            <div className="relative overflow-hidden rounded-xl border border-sky-300/30 bg-[linear-gradient(155deg,rgba(19,35,74,0.94),rgba(11,20,53,0.94))] px-3 py-2 shadow-[0_16px_36px_rgba(56,189,248,0.28)] backdrop-blur-xl min-w-[180px] max-w-[260px]">
-              <div className="pointer-events-none absolute -top-7 -right-4 h-14 w-14 rounded-full bg-sky-400/28 blur-xl" />
-              <div className="pointer-events-none absolute -bottom-7 -left-4 h-14 w-14 rounded-full bg-blue-500/24 blur-xl" />
+            <div
+              className="relative overflow-hidden rounded-xl border px-3 py-2 backdrop-blur-xl min-w-[180px] max-w-[260px]"
+              style={{
+                borderColor: theme.borderColor,
+                backgroundImage: theme.gradient,
+                boxShadow: `0 16px 36px rgba(${theme.rgb}, 0.28)`,
+              }}
+            >
+              <div
+                className="pointer-events-none absolute -top-7 -right-4 h-14 w-14 rounded-full blur-xl"
+                style={{ backgroundColor: `rgba(${theme.rgb}, 0.28)` }}
+              />
+              <div
+                className="pointer-events-none absolute -bottom-7 -left-4 h-14 w-14 rounded-full blur-xl"
+                style={{ backgroundColor: `rgba(${theme.rgb}, 0.24)` }}
+              />
               <div className="relative">
-                <div className="text-[12px] font-semibold text-sky-100 leading-tight">
+                <div
+                  className="text-[12px] font-semibold leading-tight"
+                  style={{ color: theme.titleColor }}
+                >
                   {clientInfo.clientName}
                 </div>
                 {detailLine ? (
-                  <div className="mt-1 text-[11px] text-sky-100/85 break-all leading-tight">
+                  <div
+                    className="mt-1 text-[11px] break-all leading-tight"
+                    style={{ color: theme.detailColor }}
+                  >
                     {detailLine}
                   </div>
                 ) : (
-                  <div className="mt-1 text-[11px] text-sky-100/75 break-all leading-tight">
+                  <div
+                    className="mt-1 text-[11px] break-all leading-tight"
+                    style={{ color: theme.detailColor }}
+                  >
                     {clientInfo.raw}
                   </div>
                 )}
