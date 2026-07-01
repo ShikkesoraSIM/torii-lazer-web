@@ -156,16 +156,49 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
     }
 
     setCrop(initialCrop);
+
+    // react-image-crop only fires onComplete on a user drag/resize, so without
+    // this the "Confirm Crop" button stays disabled (completedCrop undefined)
+    // until you nudge the selection. That is the bug where confirming the
+    // default crop did nothing and you had to click the image first. Seed
+    // completedCrop from the initial crop, converted to pixels, so confirming
+    // straight away works.
+    setCompletedCrop({
+      unit: 'px',
+      x: (initialCrop.x / 100) * width,
+      y: (initialCrop.y / 100) * height,
+      width: (initialCrop.width / 100) * width,
+      height: (initialCrop.height / 100) * height,
+    });
   }, [aspectRatio]);
 
   const handleCropConfirm = useCallback(async () => {
-    if (!completedCrop || !imgRef.current) return;
+    const image = imgRef.current;
+    if (!image) return;
+
+    // Prefer the interactively completed crop, but fall back to the current
+    // crop (converted to pixels) so confirming always has a valid region even
+    // if onComplete never fired.
+    let pixelCrop: PixelCrop | undefined = completedCrop;
+    if ((!pixelCrop || !pixelCrop.width || !pixelCrop.height) && crop) {
+      pixelCrop =
+        crop.unit === '%'
+          ? {
+              unit: 'px',
+              x: (crop.x / 100) * image.width,
+              y: (crop.y / 100) * image.height,
+              width: (crop.width / 100) * image.width,
+              height: (crop.height / 100) * image.height,
+            }
+          : (crop as PixelCrop);
+    }
+    if (!pixelCrop || !pixelCrop.width || !pixelCrop.height) return;
 
     setIsProcessing(true);
     try {
       const croppedImageBlob = await getCroppedImg(
-        imgRef.current,
-        completedCrop,
+        image,
+        pixelCrop,
         rotation,
         maxWidth,
         maxHeight,
@@ -182,7 +215,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
     } finally {
       setIsProcessing(false);
     }
-  }, [completedCrop, rotation, maxWidth, maxHeight, quality, fileName, onCropComplete]);
+  }, [completedCrop, crop, rotation, maxWidth, maxHeight, quality, fileName, onCropComplete]);
 
   const handleRotate = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -264,7 +297,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           <button
             type="button"
             onClick={handleCropConfirm}
-            disabled={!completedCrop || isProcessing || isUploading}
+            disabled={(!completedCrop && !crop) || isProcessing || isUploading}
             className="flex items-center gap-2 px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isUploading ? (
