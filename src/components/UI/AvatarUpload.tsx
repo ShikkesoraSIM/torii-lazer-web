@@ -4,7 +4,6 @@ import { FiUpload, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { userAPI } from '../../utils/api';
 import ImageCropper from './ImageCropper';
-import ConfirmationDialog from './ConfirmationDialog';
 
 interface AvatarUploadProps {
   userId?: number;
@@ -25,8 +24,6 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   const [originalFileName, setOriginalFileName] = useState<string>('');
   const [isDragOver, setIsDragOver] = useState(false);
   const [isNsfw, setIsNsfw] = useState(false);
-  const [showNsfwPrompt, setShowNsfwPrompt] = useState(false);
-  const [pendingCroppedFile, setPendingCroppedFile] = useState<File | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -113,42 +110,16 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   };
 
   const handleCropComplete = async (croppedFile: File) => {
-    if (isNsfw) {
-      await uploadAvatar(croppedFile, true);
-      return;
-    }
-
-    // Close cropper first so the confirmation dialog is always fully visible.
-    setStep('select');
-    setImgSrc('');
-    setPendingCroppedFile(croppedFile);
-    setShowNsfwPrompt(true);
-  };
-
-  const handleNsfwPromptChoice = async (nsfwChoice: boolean) => {
-    const fileToUpload = pendingCroppedFile;
-    setShowNsfwPrompt(false);
-    setPendingCroppedFile(null);
-    setIsNsfw(nsfwChoice);
-
-    if (!fileToUpload) {
-      return;
-    }
-
-    await uploadAvatar(fileToUpload, nsfwChoice);
-  };
-
-  const closeNsfwPrompt = () => {
-    setShowNsfwPrompt(false);
-    setPendingCroppedFile(null);
+    // The NSFW flag is chosen right in the cropper footer, so upload straight
+    // away with no extra dialog and no bouncing back to the select screen.
+    await uploadAvatar(croppedFile, isNsfw);
   };
 
   const handleCropCancel = () => {
     setStep('select');
     setImgSrc('');
     setOriginalFileName('');
-    setShowNsfwPrompt(false);
-    setPendingCroppedFile(null);
+    setIsNsfw(false);
   };
 
   return createPortal(
@@ -249,25 +220,12 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
               >
                 Select Image
               </button>
-
-              <button
-                type="button"
-                onClick={() => setIsNsfw((prev) => !prev)}
-                className={`mt-6 inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-semibold transition-all duration-200 active:scale-[0.98] ${
-                  isNsfw
-                    ? 'bg-red-500/30 border-red-300/60 text-red-50 shadow-[0_0_0_2px_rgba(239,68,68,0.28)]'
-                    : 'bg-red-500/14 border-red-400/35 text-red-100/95 hover:bg-red-500/20 hover:border-red-300/45'
-                }`}
-              >
-                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isNsfw ? 'bg-red-200 animate-pulse' : 'bg-red-300/85'}`} />
-                Is this NSFW / suggestive?
-              </button>
             </div>
           )}
         </div>
       </div>
 
-      {step === 'crop' && imgSrc && !showNsfwPrompt && (
+      {step === 'crop' && imgSrc && (
         <ImageCropper
           src={imgSrc}
           aspectRatio={1}
@@ -279,21 +237,11 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
           fileName={originalFileName}
           isUploading={isUploading}
           uploadingText="Uploading avatar..."
+          showNsfwToggle
+          nsfw={isNsfw}
+          onNsfwChange={setIsNsfw}
         />
       )}
-
-      <ConfirmationDialog
-        isOpen={showNsfwPrompt}
-        title="Is this image NSFW?"
-        message="Our server allows NSFW assets as long as you point it out. We use this flag to protect users who should not or do not want to see suggestive media."
-        confirmLabel="Yes, mark as NSFW"
-        secondaryLabel="No, upload as safe"
-        cancelLabel="Cancel"
-        onConfirm={() => void handleNsfwPromptChoice(true)}
-        onSecondary={() => void handleNsfwPromptChoice(false)}
-        onCancel={closeNsfwPrompt}
-        isDanger
-      />
     </div>,
     document.body
   );

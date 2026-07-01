@@ -16,6 +16,11 @@ interface ImageCropperProps {
   fileName?: string;
   isUploading?: boolean;
   uploadingText?: string;
+  // Optional NSFW toggle shown in the footer, so the flag can be set at the
+  // moment of upload instead of in a separate dialog afterwards.
+  showNsfwToggle?: boolean;
+  nsfw?: boolean;
+  onNsfwChange?: (value: boolean) => void;
 }
 
 const compressImage = (
@@ -108,7 +113,10 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   onCancel,
   fileName = 'cropped-image.jpg',
   isUploading = false,
-  uploadingText = 'Uploading...'
+  uploadingText = 'Uploading...',
+  showNsfwToggle = false,
+  nsfw = false,
+  onNsfwChange,
 }) => {
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
@@ -286,7 +294,26 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           </div>
         </div>
 
-        <div className="shrink-0 flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-card">
+        <div className="shrink-0 flex flex-wrap items-center justify-between gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-card">
+          <div>
+            {showNsfwToggle && (
+              <button
+                type="button"
+                onClick={() => onNsfwChange?.(!nsfw)}
+                disabled={isProcessing || isUploading}
+                className={`inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 ${
+                  nsfw
+                    ? 'bg-red-500/30 border-red-300/60 text-red-50 shadow-[0_0_0_2px_rgba(239,68,68,0.28)]'
+                    : 'bg-red-500/14 border-red-400/35 text-red-100/95 hover:bg-red-500/20 hover:border-red-300/45'
+                }`}
+              >
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${nsfw ? 'bg-red-200 animate-pulse' : 'bg-red-300/85'}`} />
+                {nsfw ? 'Marked NSFW' : 'Mark as NSFW / suggestive'}
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onCancel}
@@ -317,6 +344,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
               </>
             )}
           </button>
+          </div>
         </div>
       </div>
     </div>,
