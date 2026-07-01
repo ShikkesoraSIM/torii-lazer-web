@@ -13,8 +13,8 @@ const STATUS_BADGE: Record<string, string> = {
 
 const fallbackAvatar = (e: React.SyntheticEvent<HTMLImageElement>) => {
   const target = e.target as HTMLImageElement;
-  if (target.src === 'https://lazer-data.g0v0.top/default.jpg' || target.src.includes('default.jpg')) {
-    target.src = 'https://osuherz.ddns.net/default.jpg';
+  if (!target.src.endsWith('/default.jpg')) {
+    target.src = '/default.jpg';
   }
 };
 
@@ -160,7 +160,7 @@ const AdminNameChanges: React.FC = () => {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
                           <img
-                            src={req.avatar_url || 'https://osuherz.ddns.net/default.jpg'}
+                            src={req.avatar_url || '/default.jpg'}
                             alt={req.username || String(req.user_id)}
                             className="w-8 h-8 rounded-full ring-1 ring-white/10"
                             onError={fallbackAvatar}

@@ -174,14 +174,14 @@ const AdminUsers: React.FC = () => {
                             className="w-8 h-8 rounded-full ring-1 ring-white/10"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
-                              if (target.src === 'https://lazer-data.g0v0.top/default.jpg' || target.src.includes('default.jpg')) {
-                                target.src = 'https://osuherz.ddns.net/default.jpg';
+                              if (!target.src.endsWith('/default.jpg')) {
+                                target.src = '/default.jpg';
                               }
                             }}
                           />
                         ) : (
                           <img
-                            src="https://osuherz.ddns.net/default.jpg"
+                            src="/default.jpg"
                             alt={user.username}
                             className="w-8 h-8 rounded-full ring-1 ring-white/10"
                           />
