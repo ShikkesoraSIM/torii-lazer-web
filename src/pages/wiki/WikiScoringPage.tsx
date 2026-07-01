@@ -13,8 +13,7 @@ The gates, in the order they run:
 - Flashlight settings check (osu! standard, Relax and Autopilot only). This runs first, before anything else.
 - The score must have passed, the map must be ranked for pp, and every mod in the play must be allowed for pp.
 - Relax and Autopilot accuracy floor.
-- pp is calculated.
-- A single score that computes above 3000pp on a normal (non-locally-uploaded) map is treated as suspicious and forced to 0pp.`,
+- pp is calculated.`,
   },
   {
     heading: "Relax and Autopilot need 75% accuracy",
@@ -50,6 +49,10 @@ Taiko, Catch and Mania apply the same idea through the mod whitelist: Flashlight
 One catch with Adaptive Speed: the hard ban only covers osu! standard, Relax and Autopilot. For Taiko and Mania it is not hard-banned in code, so whether it earns pp there comes down to the deployed mod whitelist.`,
   },
   {
+    heading: "Mania No Release earns reduced pp",
+    body: `No Release (NR) in osu!mania stays ranked, but its pp is cut by 30% (you keep 70%). NR removes the need to time the end of hold notes, so long notes only need a press. That makes the map strictly easier while difficulty is still measured at full value, so a flat haircut keeps it fair without banning it outright.`,
+  },
+  {
     heading: "Custom rate and Easy variants are allowed",
     body: `Torii ranks custom-rate plays on purpose. These mods skip the usual fixed-value whitelist, so any speed setting still earns pp:
 
@@ -62,12 +65,6 @@ One catch with Adaptive Speed: the hard ban only covers osu! standard, Relax and
 A custom 1.3x DT, a 0.6x HT, a 1.7x NC and so on all earn pp here, and the pp calculator uses the real rate you played at. Standard osu! lazer locks these to fixed values; Torii does not.
 
 For reference, the values they would otherwise be pinned to are HT and DC at 0.75x, DT and NC at 1.5x, and Easy at 2 extra lives (Taiko Easy has no lives lock).`,
-  },
-  {
-    heading: "There is no star rating cap",
-    body: `pp is not capped by star rating. A code comment mentions a "14 star cap" but it does nothing: a map over 14 stars just writes a warning to the server log and then calculates pp normally. A 14-plus star play earns its full pp.
-
-The real upper guard is the suspicious-score check. Any single score that computes above 3000pp on a normal map is forced to 0pp and logged. It does not apply to locally-uploaded maps.`,
   },
   {
     heading: "Beatmap status: pp, leaderboards, and medals",
@@ -83,7 +80,6 @@ Medals: medals always check the map's real status and ignore the overrides compl
 
 - Skill, FC and combo medals: real status must be Ranked or Approved.
 - Mod-intro medals: real status must be Ranked, Approved, Qualified or Loved.
-- The "Deliberation" secret medal: Ranked, Approved or Loved.
 
 Medals are also never awarded on locally-uploaded maps.
 
