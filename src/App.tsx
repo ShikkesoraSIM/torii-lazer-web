@@ -37,6 +37,14 @@ const BeatmapPage = lazy(() => import('./pages/BeatmapPage'));
 const BeatmapsPage = lazy(() => import('./pages/BeatmapsPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const WikiHubPage = lazy(() => import('./pages/wiki/WikiHubPage'));
+const WikiRulesPage = lazy(() => import('./pages/wiki/WikiRulesPage'));
+const WikiScoringPage = lazy(() => import('./pages/wiki/WikiScoringPage'));
+const WikiToriiHaloPage = lazy(() => import('./pages/wiki/WikiToriiHaloPage'));
+const WikiRestrictionsPage = lazy(() => import('./pages/wiki/WikiRestrictionsPage'));
+const WikiFaqPage = lazy(() => import('./pages/wiki/WikiFaqPage'));
+const WikiFeaturesPage = lazy(() => import('./pages/wiki/WikiFeaturesPage'));
+const WikiEconomyPage = lazy(() => import('./pages/wiki/WikiEconomyPage'));
 const ScorePage = lazy(() => import('./pages/ScorePage'));
 const BBCodeTester = lazy(() => import('./components/BBCode/BBCodeTester'));
 const AdminPanel = lazy(() => import('./pages/Admin/AdminPanel'));
@@ -83,6 +91,14 @@ function App() {
                     <Route path="how-to-join" element={<HowToJoinPage />} />
                     <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
                     <Route path="about" element={<AboutPage />} />
+                    <Route path="wiki" element={<WikiHubPage />} />
+                    <Route path="wiki/rules" element={<WikiRulesPage />} />
+                    <Route path="wiki/scoring" element={<WikiScoringPage />} />
+                    <Route path="wiki/toriihalo" element={<WikiToriiHaloPage />} />
+                    <Route path="wiki/restrictions" element={<WikiRestrictionsPage />} />
+                    <Route path="wiki/faq" element={<WikiFaqPage />} />
+                    <Route path="wiki/features" element={<WikiFeaturesPage />} />
+                    <Route path="wiki/economy" element={<WikiEconomyPage />} />
                     <Route path="beatmaps/:beatmapId" element={<BeatmapPage />} />
                     <Route path="beatmapsets/:beatmapsetId" element={<BeatmapPage />} />
                     <Route path="beatmaps" element={<BeatmapsPage />} />
