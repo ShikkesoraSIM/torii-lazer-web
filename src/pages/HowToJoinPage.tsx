@@ -289,8 +289,8 @@ const STREAMS = [
     key: "torii",
     icon: "🎌",
     title: "Torii",
-    tagline: "La versión estable. Si no sabés cuál agarrar, es esta.",
-    badge: "Recomendada",
+    tagline: "The stable version. If you are not sure which one to grab, this is it.",
+    badge: "Recommended",
     accent: {
       border: "border-rose-400/30 hover:border-rose-400/60",
       bg: "from-rose-950/60 via-red-950/40 to-black/40",
@@ -299,19 +299,19 @@ const STREAMS = [
       glow: "0 0 60px rgba(244,63,94,0.10) inset",
     },
     points: [
-      ".NET 8, probado y sólido",
-      "Todas las features de Torii activas",
-      "La que corre la mayoría de la gente",
+      ".NET 8, tested and solid",
+      "Every Torii feature turned on",
+      "The one most people run",
     ],
     href: TORII_STABLE_URL,
-    cta: "Bajar Torii",
+    cta: "Download Torii",
     available: true,
   },
   {
     key: "nova",
     icon: "🌙",
     title: "Torii Nova",
-    tagline: "Canal bleeding-edge. Lo nuevo llega acá primero.",
+    tagline: "The bleeding-edge channel. New things land here first.",
     badge: "Preview",
     accent: {
       border: "border-amber-400/30 hover:border-amber-400/60",
@@ -321,20 +321,20 @@ const STREAMS = [
       glow: "0 0 60px rgba(251,191,36,0.10) inset",
     },
     points: [
-      ".NET 10, renderer Deferred y D3D12",
-      "Features experimentales antes que en estable",
-      "Puede romperse de vez en cuando",
+      ".NET 10, Deferred renderer and D3D12",
+      "Experimental features before they hit stable",
+      "Can break now and then",
     ],
     href: TORII_NOVA_URL,
-    cta: "Bajar Nova",
+    cta: "Download Nova",
     available: true,
   },
   {
     key: "vanilla",
     icon: "🧊",
     title: "Torii Vanilla",
-    tagline: "osu!lazer de upstream, cableado a Torii. Para PCs flojas y Linux.",
-    badge: "Compatibilidad",
+    tagline: "Upstream osu!lazer, wired to Torii. For low-end PCs and Linux.",
+    badge: "Compatibility",
     accent: {
       border: "border-cyan-400/30 hover:border-cyan-400/60",
       bg: "from-cyan-950/60 via-sky-950/30 to-black/40",
@@ -343,12 +343,12 @@ const STREAMS = [
       glow: "0 0 60px rgba(34,211,238,0.10) inset",
     },
     points: [
-      "lazer de arriba, sin el framework de Torii",
-      "Anda mejor en PCs flojas y en Linux/Wayland",
-      "Sin los extras de performance (Hz, Reflex, Antilag)",
+      "Upstream lazer, without the Torii framework",
+      "Runs better on low-end PCs and on Linux/Wayland",
+      "No performance extras (Hz, Reflex, Antilag)",
     ],
     href: TORII_VANILLA_URL,
-    cta: VANILLA_RELEASED ? "Bajar Vanilla" : "Próximamente",
+    cta: VANILLA_RELEASED ? "Download Vanilla" : "Coming soon",
     available: VANILLA_RELEASED,
   },
 ] as const;
@@ -401,10 +401,10 @@ export default function HowToJoinPage() {
             Join Torii Server
           </h1>
           <p className="mx-auto max-w-2xl text-white/60 text-lg">
-            Torii se juega en el{" "}
-            <span className="text-fuchsia-300 font-medium">cliente de Torii</span>.
-            Podés bajar cualquiera de estas tres versiones — todas conectan al
-            mismo servidor y comparten tu cuenta. Elegí la que mejor le venga a tu PC.
+            Torii is played on the{" "}
+            <span className="text-fuchsia-300 font-medium">Torii client</span>. Grab
+            any of these three versions. They all connect to the same server and
+            share your account, so pick whichever runs best on your PC.
           </p>
         </motion.div>
 
@@ -464,7 +464,7 @@ export default function HowToJoinPage() {
                 </a>
                 {!s.available && (
                   <p className="mt-2 text-xs text-white/30 text-center">
-                    Todavía no salió. El link te lleva a la lista de releases.
+                    Not out yet. The link takes you to the releases page.
                   </p>
                 )}
               </div>
@@ -473,7 +473,7 @@ export default function HowToJoinPage() {
         </div>
 
         <p className="mb-8 text-center text-xs text-white/35">
-          Las tres usan el mismo servidor y la misma cuenta. Podés tener más de una instalada.
+          All three use the same server and the same account. You can have more than one installed.
         </p>
 
         {/* ── Features showcase ─────────────────────────────────────────── */}
