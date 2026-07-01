@@ -108,10 +108,10 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
     }
   };
 
-  const handleCropComplete = async (croppedFile: File) => {
-    // The NSFW flag is chosen right in the cropper footer, so upload straight
-    // away with no extra dialog and no bouncing back to the select screen.
-    await uploadCover(croppedFile, isNsfw);
+  const handleCropComplete = async (croppedFile: File, nsfw: boolean) => {
+    // The cropper owns the NSFW flag now (a toggle plus a confirm on upload),
+    // so upload with whatever it reports.
+    await uploadCover(croppedFile, nsfw);
   };
 
   const handleCropCancel = () => {
@@ -177,6 +177,10 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
                 onChange={handleFileSelect}
                 className="hidden"
               />
+
+              <div className="mb-5 rounded-xl border border-red-400/30 bg-red-500/10 p-3 text-left text-xs leading-relaxed text-red-100/90">
+                <span className="font-semibold text-red-100">NSFW and suggestive images are allowed</span>, but only if you flag them. On the crop screen, use the "Mark as NSFW / suggestive" button so people who opted out do not see it. Uploading suggestive media as safe can get you warned.
+              </div>
 
               {currentCoverUrl && (
                 <div className="mb-6">

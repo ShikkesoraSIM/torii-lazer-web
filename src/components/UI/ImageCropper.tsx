@@ -11,7 +11,7 @@ interface ImageCropperProps {
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
-  onCropComplete: (croppedImage: File) => void;
+  onCropComplete: (croppedImage: File, nsfw: boolean) => void;
   onCancel: () => void;
   fileName?: string;
   isUploading?: boolean;
@@ -123,6 +123,10 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   const [rotation, setRotation] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  // When the NSFW toggle is available but left off, confirming pops one last
+  // conscious NSFW question instead of silently uploading as safe.
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [awaitingNsfw, setAwaitingNsfw] = useState(false);
 
   React.useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -217,13 +221,21 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
         type: 'image/jpeg',
       });
 
-      onCropComplete(croppedFile);
+      // If the flag is available but left off, ask once so nobody uploads
+      // suggestive media as safe by accident. If it is already on, they made
+      // the call, so just go.
+      if (showNsfwToggle && !nsfw) {
+        setPendingFile(croppedFile);
+        setAwaitingNsfw(true);
+      } else {
+        onCropComplete(croppedFile, nsfw);
+      }
     } catch (error) {
       console.error('Image crop failed:', error);
     } finally {
       setIsProcessing(false);
     }
-  }, [completedCrop, crop, rotation, maxWidth, maxHeight, quality, fileName, onCropComplete]);
+  }, [completedCrop, crop, rotation, maxWidth, maxHeight, quality, fileName, onCropComplete, showNsfwToggle, nsfw]);
 
   const handleRotate = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -347,6 +359,49 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           </div>
         </div>
       </div>
+
+      {awaitingNsfw && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/75 p-4">
+          <div className="glass-thick w-full max-w-md rounded-2xl border border-red-400/30 p-6 text-white shadow-elev-4">
+            <h3 className="mb-2 text-lg font-semibold text-red-100">One last check: is this NSFW or suggestive?</h3>
+            <p className="text-sm text-white/70">
+              Torii allows suggestive and NSFW images, but they have to be flagged so people who opted out do not see them. If this one is suggestive or NSFW, say so. Uploading it as safe when it is not can get you warned.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                disabled={isUploading}
+                onClick={() => { setAwaitingNsfw(false); setPendingFile(null); }}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                disabled={isUploading}
+                onClick={() => { onNsfwChange?.(false); if (pendingFile) onCropComplete(pendingFile, false); }}
+                className="px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 transition-colors disabled:opacity-50"
+              >
+                No, it is safe
+              </button>
+              <button
+                type="button"
+                disabled={isUploading}
+                onClick={() => { onNsfwChange?.(true); if (pendingFile) onCropComplete(pendingFile, true); }}
+                className="px-4 py-2 rounded-lg text-white bg-red-500/80 hover:bg-red-500 border border-red-400/50 transition-colors disabled:opacity-50"
+              >
+                Yes, it is NSFW
+              </button>
+            </div>
+            {isUploading && (
+              <div className="mt-3 flex items-center gap-2 text-sm text-white/60">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                {uploadingText}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>,
     document.body
   );
