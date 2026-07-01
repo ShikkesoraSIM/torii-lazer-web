@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
+﻿import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -7,6 +7,7 @@ import {
   FiBell,
   FiSearch,
   FiInfo,
+  FiBookOpen,
   FiMenu,
   FiX,
   FiSettings,
@@ -27,12 +28,11 @@ import { useAuth } from '../../hooks/useAuth';
 import { useNotificationContext } from '../../contexts/NotificationContext';
 import UserDropdown from '../UI/UserDropdown';
 import Avatar from '../UI/Avatar';
-import LanguageSelector from '../UI/LanguageSelector';
 import NavbarSearchOverlay from './NavbarSearchOverlay';
 import SupportButton from './SupportButton';
 import CountryFlag from '../UI/CountryFlag';
 import type { NavItem as NavItemType } from '../../types';
-const NavItem = memo<{ item: NavItemType }>(({ item }) => {
+const NavItem = memo<{ item: NavItemType; compact?: boolean }>(({ item, compact = false }) => {
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
   const IconComponent = item.icon;
@@ -57,12 +57,14 @@ const NavItem = memo<{ item: NavItemType }>(({ item }) => {
     >
       <Link
         to={item.path}
+        title={compact ? item.title : undefined}
+        aria-label={compact ? item.title : undefined}
         className={`relative flex items-center gap-2 rounded-full font-medium text-sm transition-all duration-200 group ${
           isActive
             ? 'text-white bg-gradient-to-r from-[#ff5bbd] via-[#ff7eb8] to-[#fda4af] shadow-lg shadow-[#ff5bbd]/25'
             : 'text-white/75 hover:text-white hover:bg-white/8'
         }`}
-        style={{ padding: '7px 12px' }}
+        style={{ padding: compact ? '7px' : '7px 12px' }}
       >
         <motion.div
           className={`h-6 w-6 rounded-full flex items-center justify-center border ${
@@ -79,7 +81,7 @@ const NavItem = memo<{ item: NavItemType }>(({ item }) => {
           {IconComponent && <IconComponent size={14} />}
         </motion.div>
 
-        <span className="whitespace-nowrap">{item.title}</span>
+        {!compact && <span className="whitespace-nowrap">{item.title}</span>}
 
         {isActive && (
           <motion.div
@@ -97,6 +99,22 @@ const NavItem = memo<{ item: NavItemType }>(({ item }) => {
           />
         )}
       </Link>
+
+      {/* In icon-only mode the label moves to a hover tooltip so the row stops
+          overflowing while each item is still identifiable. */}
+      <AnimatePresence>
+        {compact && isHovered && (
+          <motion.span
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.14 }}
+            className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-[rgba(10,10,25,0.96)] px-2.5 py-1 text-xs font-medium text-white/90 shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
+          >
+            {item.title}
+          </motion.span>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 });
@@ -431,6 +449,66 @@ const Navbar: React.FC = () => {
   const openSearch = useCallback(() => setIsSearchOpen(true), []);
   const closeSearch = useCallback(() => setIsSearchOpen(false), []);
 
+  // --- Responsive nav density -------------------------------------------
+  // Logging in adds the rankings/beatmaps/teams (and admin) tabs plus the
+  // messages bell, and a long username widens the user dropdown, so on a
+  // narrower desktop the row runs out of room and overflows. Rather than let
+  // that happen we collapse the centre nav to icon-only pills (labels move to
+  // a hover tooltip). The decision is made by measuring the brand, a hidden
+  // full-label mirror of the nav, and the right cluster against the available
+  // width. Measuring the mirror (always full) instead of the live nav means
+  // the result never depends on whether we are currently collapsed, so it
+  // cannot flip-flop.
+  const gridRef = useRef<HTMLDivElement>(null);
+  const brandRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const navMirrorRef = useRef<HTMLDivElement>(null);
+  const [compactNav, setCompactNav] = useState(false);
+
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    // The brand and the right cluster sit in 1fr grid columns, so the cells
+    // themselves stretch to the column width. We want the width of their
+    // CONTENT, so sum the children (each hugs its own content) plus the gaps.
+    const contentWidth = (el: HTMLElement | null) => {
+      if (!el) return 0;
+      const kids = el.children;
+      let w = 0;
+      for (let i = 0; i < kids.length; i++) w += (kids[i] as HTMLElement).offsetWidth;
+      if (kids.length > 1) {
+        const gap = parseFloat(getComputedStyle(el).columnGap || '0') || 0;
+        w += gap * (kids.length - 1);
+      }
+      return w;
+    };
+
+    const evaluate = () => {
+      const available = grid.clientWidth;
+      const brand = contentWidth(brandRef.current);
+      const center = navMirrorRef.current?.scrollWidth ?? 0; // absolute, already hugs content
+      const right = contentWidth(rightRef.current);
+      // two column gaps (gap-4 = 16px each) plus a small safety buffer.
+      const needed = brand + center + right + 32 + 12;
+      setCompactNav(needed > available);
+    };
+
+    evaluate();
+    const ro = new ResizeObserver(evaluate);
+    ro.observe(grid);
+    if (brandRef.current) ro.observe(brandRef.current);
+    if (rightRef.current) ro.observe(rightRef.current);
+    // Backstop the observer with a plain resize listener, and re-measure once
+    // webfonts have loaded since that shifts the label widths.
+    window.addEventListener('resize', evaluate);
+    document.fonts?.ready?.then(evaluate).catch(() => {});
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', evaluate);
+    };
+  }, [filteredNavItems, isAuthenticated, user?.username, user?.is_admin]);
+
   return (
     <>
       <header
@@ -444,13 +522,13 @@ const Navbar: React.FC = () => {
               'px-5 py-3',
             ].join(' ')}
           >
-            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
-              <div className="flex items-center justify-start">
+            <div ref={gridRef} className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
+              <div ref={brandRef} className="flex items-center justify-start">
                 <Link to="/" title={t('nav.home')} className="group flex items-center gap-3">
                   <BrandMark size={36} />
                   <div className="leading-tight">
                     <span className="block text-white font-semibold tracking-wide group-hover:text-white/90 transition">Torii</span>
-                    <span className="block text-white/55 text-xs -mt-0.5">forged in Shikke's Dojo</span>
+                    <span className="hidden xl:block text-white/55 text-xs -mt-0.5">forged in Shikke's Dojo</span>
                   </div>
                 </Link>
               </div>
@@ -458,14 +536,34 @@ const Navbar: React.FC = () => {
               <div className="flex items-center justify-center">
                 <div className="flex items-center gap-1">
                   {filteredNavItems.map((item) => (
-                    <NavItem key={item.path} item={item} />
+                    <NavItem key={item.path} item={item} compact={compactNav} />
                   ))}
+                </div>
+
+                {/* Hidden full-label mirror used only to measure how wide the
+                    nav wants to be. It is never shown and never collapses, so
+                    the compact decision stays stable. */}
+                <div
+                  ref={navMirrorRef}
+                  aria-hidden
+                  className="pointer-events-none invisible absolute -z-10 flex items-center gap-1"
+                  style={{ left: -99999, top: 0 }}
+                >
+                  {filteredNavItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <span key={item.path} className="flex items-center gap-2 text-sm font-medium" style={{ padding: '7px 12px' }}>
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full border">
+                          {Icon && <Icon size={14} />}
+                        </span>
+                        <span className="whitespace-nowrap">{item.title}</span>
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3">
-                {!isAuthenticated && <LanguageSelector variant="desktop" />}
-
+              <div ref={rightRef} className="flex items-center justify-end gap-3">
                 <motion.button
                   whileHover={{ scale: 1.06 }}
                   whileTap={{ scale: 0.95 }}
@@ -479,6 +577,19 @@ const Navbar: React.FC = () => {
                 >
                   <FiSearch size={18} />
                 </motion.button>
+
+                {/* Wiki / rules hub, reachable from any page. Sits next to the
+                    About "i" so the pair reads "help + about" without touching
+                    the center nav row. */}
+                <Link to="/wiki" title="Torii Wiki & Rules" aria-label="Torii Wiki & Rules">
+                  <motion.div
+                    whileHover={{ scale: 1.06 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="relative h-10 w-10 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition inline-flex items-center justify-center text-white/90"
+                  >
+                    <FiBookOpen size={18} />
+                  </motion.div>
+                </Link>
 
                 {/* Small About / transparency entry, reachable from any page. */}
                 <Link to="/about" title="About Torii" aria-label="About Torii">
@@ -575,6 +686,17 @@ const Navbar: React.FC = () => {
               >
                 <FiSearch size={18} />
               </motion.button>
+
+              {/* Wiki / rules, reachable from the mobile bar too. */}
+              <Link to="/wiki" title="Torii Wiki & Rules" aria-label="Torii Wiki & Rules">
+                <motion.div
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="h-10 w-10 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-white/90 transition inline-flex items-center justify-center"
+                >
+                  <FiBookOpen size={18} />
+                </motion.div>
+              </Link>
 
               {/* About / transparency, reachable from the mobile bar too. */}
               <Link to="/about" title="About Torii" aria-label="About Torii">
