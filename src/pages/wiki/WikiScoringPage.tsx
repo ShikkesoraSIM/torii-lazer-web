@@ -49,8 +49,16 @@ Taiko, Catch and Mania apply the same idea through the mod whitelist: Flashlight
 One catch with Adaptive Speed: the hard ban only covers osu! standard, Relax and Autopilot. For Taiko and Mania it is not hard-banned in code, so whether it earns pp there comes down to the deployed mod whitelist.`,
   },
   {
+    heading: "Mania difficulty uses the Sunny rework",
+    body: `osu!mania star rating and pp use the Sunny rework, the same model the Torii client runs in-game. So the pp the client previews for a mania play is the pp the server gives it, one to one. Sunny reads dense jack and long-note patterns more accurately than stock lazer, so those maps are rated fairly instead of being blown out of proportion.`,
+  },
+  {
     heading: "Mania No Release earns reduced pp",
-    body: `No Release (NR) in osu!mania stays ranked, but its pp is cut by 30% (you keep 70%). NR removes the need to time the end of hold notes, so long notes only need a press. That makes the map strictly easier while difficulty is still measured at full value, so a flat haircut keeps it fair without banning it outright.`,
+    body: `No Release (NR) in osu!mania stays ranked, but its pp is cut by 15% (you keep 85%). NR removes the need to time the end of hold notes, so long notes only need a press, which makes the map a bit easier while its difficulty is still measured at full value. A light cut keeps it fair without banning it. It was 30% before mania moved to the Sunny model; now that difficulty is measured properly, 15% is enough.`,
+  },
+  {
+    heading: "Pausing during a play reduces pp",
+    body: `Pausing mid-play lets you rest through the hard parts, so each pause takes a bite out of the pp. It is 7% per pause and it compounds: one pause keeps 93%, three keep about 80%, seven keep about 60%. There is no free first pause and no floor, and it applies to every mode. Skipping a break with the in-game skip button is not a pause and does not count.`,
   },
   {
     heading: "Custom rate and Easy variants are allowed",
