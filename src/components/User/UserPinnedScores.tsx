@@ -148,7 +148,10 @@ const ScoreCard: React.FC<{
   const accuracy = (score.accuracy * 100).toFixed(2);
   const originalPp = Math.round(score.pp || 0);
   const mods = score.mods || [];
-  const isPinned = score.current_user_attributes?.pin?.is_pinned || false;
+  // esta es la lista de pinneados: todo score que este aca ESTA pinneado, sin
+  // importar lo que traiga el flag (asi el boton siempre ofrece "Unpin" y no
+  // depende de que el endpoint mande current_user_attributes ni del cache).
+  const isPinned = true;
   const hasReplay = score.has_replay || false;
 
   const beatmapUrl =

@@ -20,14 +20,36 @@ const UserPage: React.FC = () => {
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const latestModeRef = useRef<GameMode>(selectedMode);
+  // Marca de qué perfil ya le aplicamos el modo default del dueño, para no
+  // volver a pisar la eleccion manual del que mira.
+  const appliedOwnerModeUserRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (modeFromUrl) {
       setSelectedMode(modeFromUrl);
-    } else if (user?.g0v0_playmode && selectedMode !== user.g0v0_playmode) {
-      setSelectedMode(user.g0v0_playmode);
+      appliedOwnerModeUserRef.current = userId ?? null;
+      return;
     }
-  }, [modeFromUrl, user?.g0v0_playmode, selectedMode]);
+    // Arrancamos en el modo principal del dueño del perfil UNA sola vez (cuando
+    // carga su data), y despues no tocamos mas el modo. Antes esto dependia de
+    // selectedMode y revertia cada cambio manual: al elegir relax/autopilot (o
+    // cualquier modo no-default) en el perfil de otro, snapeaba de vuelta al
+    // default del dueño y se veia como que "no funciona".
+    //
+    // OJO: la ruta no tiene key, asi que al navegar de un perfil a otro se reusa
+    // la instancia y el `user` viejo queda un toque hasta que resuelve el fetch.
+    // Solo aplicamos (y marcamos el ref) cuando la data cargada es la de ESTE
+    // perfil; matcheamos por id o username porque la URL puede traer cualquiera.
+    const loadedMatchesParam =
+      user != null &&
+      (String(user.id) === userId ||
+        (user.username != null && user.username.toLowerCase() === (userId ?? '').toLowerCase()));
+    if (loadedMatchesParam && user.g0v0_playmode && appliedOwnerModeUserRef.current !== userId) {
+      setSelectedMode(user.g0v0_playmode);
+      appliedOwnerModeUserRef.current = userId ?? null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modeFromUrl, user?.id, user?.g0v0_playmode, userId]);
 
   useEffect(() => {
     if (!userId) return;
