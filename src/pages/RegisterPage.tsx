@@ -24,6 +24,8 @@ const RegisterPage: React.FC = () => {
   const [errors, setErrors] = useState<Partial<RegisterForm>>({});
   const [turnstileToken, setTurnstileToken] = useState<string>('');
   const turnstileRef = useRef<any>(null);
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [aiAcknowledged, setAiAcknowledged] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -79,12 +81,7 @@ const RegisterPage: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      return;
-    }
-
+  const doRegister = async () => {
     const success = await register(
       formData.username,
       formData.email,
@@ -100,6 +97,27 @@ const RegisterPage: React.FC = () => {
         turnstileRef.current.reset();
       }
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+
+    // Show the AI disclosure once, right before the account is actually created.
+    if (!aiAcknowledged) {
+      setShowAiModal(true);
+      return;
+    }
+
+    await doRegister();
+  };
+
+  const handleAiAcknowledge = async () => {
+    setAiAcknowledged(true);
+    setShowAiModal(false);
+    await doRegister();
   };
 
   const handleTurnstileSuccess = useCallback((token: string) => {
@@ -131,6 +149,26 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#030014] flex justify-center px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-0 lg:items-center">
+      {showAiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" role="dialog" aria-modal="true">
+          <div className="max-w-md w-full rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl p-6">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Before you sign up</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-5 leading-relaxed">
+              Torii and some of its assets (a bit of the art, and parts of the server, client and website)
+              are built with the help of AI. We are telling you upfront instead of hiding it. You can read
+              the full statement{' '}
+              <a href="/about" target="_blank" rel="noopener noreferrer" className="text-osu-pink hover:underline font-medium">here</a>.
+            </p>
+            <button
+              type="button"
+              onClick={handleAiAcknowledge}
+              className="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-osu-pink text-white font-semibold hover:bg-osu-pink/90 transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
       <div className="max-w-md w-full space-y-3 pb-4 lg:pb-0">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto flex items-center justify-center mb-2">

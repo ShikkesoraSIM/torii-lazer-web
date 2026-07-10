@@ -251,14 +251,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = useCallback(async (username: string, email: string, password: string, turnstileToken?: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      await authAPI.register(username, email, password, turnstileToken);
-      
-      // After successful registration, automatically log in
-      const loginSuccess = await login(username, password, turnstileToken);
-      if (loginSuccess) {
+      // El register ahora devuelve el OAuth token directo (server auto-login). Antes no devolvia el
+      // token y habia que hacer un segundo login, que reusaba el token de Turnstile (single-use) ya
+      // quemado en el register -> ese login fallaba -> no redirigia -> el user reintentaba -> le salia
+      // "already taken" aunque la cuenta ya estaba creada.
+      const tokenResponse = await authAPI.register(username, email, password, turnstileToken);
+
+      if (tokenResponse?.access_token) {
+        localStorage.setItem('access_token', tokenResponse.access_token);
+        localStorage.setItem('refresh_token', tokenResponse.refresh_token);
+
+        const userData = await userAPI.getMe();
+        setUser(userData);
+        setIsAuthenticated(true);
+        CacheUtil.saveUserCache(userData);
+        void checkRestriction();
         toast.success(t('auth.context.messages.registerSuccess'));
+        return true;
       }
-      return loginSuccess;
+
+      // Fallback defensivo (servidor viejo que aun no devuelve token en el register): login normal.
+      return await login(username, password, turnstileToken);
     } catch (error) {
       const err = error as {
         response?: { status?: number; data?: { form_error?: { user?: { username?: string[]; user_email?: string[]; password?: string[] }; message?: string } } };
@@ -289,7 +302,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [t, login]);
+  }, [t, login, checkRestriction]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('access_token');
