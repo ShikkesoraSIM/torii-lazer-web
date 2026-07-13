@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { FiChevronDown } from 'react-icons/fi';
 import type { GameMode, MainGameMode } from '../../types';
@@ -30,30 +31,51 @@ const ModeDropdown: React.FC<ModeDropdownProps> = ({
   getBrandColor,
   buttonEl,
 }) => {
-  const [openAbove, setOpenAbove] = useState(false);
+  const [pos, setPos] = useState<{ left: number; top: number; openAbove: boolean } | null>(null);
 
   useEffect(() => {
-    if (!isOpen || !buttonEl) return;
+    if (!isOpen || !buttonEl) {
+      setPos(null);
+      return;
+    }
 
-    const rect = buttonEl.getBoundingClientRect();
-    const estimatedHeight = 180;
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    setOpenAbove(spaceBelow < estimatedHeight && spaceAbove > spaceBelow);
+    const update = () => {
+      const rect = buttonEl.getBoundingClientRect();
+      const estimatedHeight = 180;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      const openAbove = spaceBelow < estimatedHeight && spaceAbove > spaceBelow;
+      setPos({ left: rect.left, top: openAbove ? rect.top : rect.bottom, openAbove });
+    };
+
+    update();
+    // Reposition while the page scrolls/resizes (dropdown is fixed-positioned via a portal).
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
   }, [isOpen, buttonEl]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !pos) return null;
 
-  return (
+  // Portaled to <body> so the menu escapes any ancestor overflow-hidden (e.g. the
+  // rounded profile header panel that was clipping it and cutting off the modes).
+  return createPortal(
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className={`absolute left-0 z-[180] min-w-36 max-w-[320px] rounded-lg p-1.5 backdrop-blur-xl shadow-2xl ${
-        openAbove ? 'bottom-full mb-2' : 'top-full mt-2'
-      }`}
+      // Keep the document-level outside-click handler from closing the (now portaled)
+      // menu on mousedown before the item's click fires.
+      onMouseDown={(e) => e.stopPropagation()}
+      className="fixed z-[300] min-w-36 max-w-[320px] rounded-lg p-1.5 backdrop-blur-xl shadow-2xl"
       style={{
+        left: pos.left,
+        top: pos.top,
+        transform: pos.openAbove ? 'translateY(calc(-100% - 8px))' : 'translateY(8px)',
         background: 'var(--float-panel-bg)',
         border: '1px solid var(--border-color)',
       }}
@@ -79,7 +101,8 @@ const ModeDropdown: React.FC<ModeDropdownProps> = ({
           {GAME_MODE_NAMES[mode]}
         </motion.button>
       ))}
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 };
 
