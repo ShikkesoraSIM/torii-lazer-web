@@ -24,6 +24,26 @@ The modes it covers: osu! Relax, Taiko Relax, Catch Relax and osu! Autopilot. Th
 75.0% or higher earns pp normally. 74.9% or lower earns nothing. The in-game message is: "Relax and Autopilot scores need at least 75% accuracy to earn pp."`,
   },
   {
+    heading: "Relax flow aim (the washing machine) earns less",
+    body: `On Relax there is no tapping, so pp leans almost entirely on aim. The catch is that a lot of maps can be cleared without really aiming: you hold one smooth, continuous cursor sweep, a "washing machine", and let the auto-tap catch every note that falls under the path. Wide flowy patterns that keep turning the same way, and evenly spaced streams, are the easiest to wash.
+
+Those now earn less aim pp on Relax. The cut scales with how washable the pattern is: the flowier and more one-directional it is, the harder it drops. Sharp back-and-forth (snap) aim cannot be washed, so it is left at full value, and the nerf fades out on small circles where even a sweep needs real precision.
+
+This is Relax only. Base osu!, Autopilot and normal plays are not touched. It is the same flow-aim model the Torii client uses in-game, so the client and the server agree on it.`,
+  },
+  {
+    heading: "Very low CS and OD earn less pp",
+    body: `Tiny circle size paired with very low overall difficulty, the classic Difficulty Adjust CS0 / OD0 setup, is not punished hard enough by the raw pp calculator, so those plays used to farm huge numbers on otherwise easy maps. Torii scales their pp down.
+
+It covers osu! standard, Relax and Autopilot only, and it never touches Easy (Easy is honest and already pays reduced pp). On base, the penalty starts ramping once effective CS drops below 2.5 or OD below 4. Relax widens that to CS 4 and OD 6, because big targets and wide hit windows are far easier to abuse when you are not tapping. A map with normal CS and OD comes out unchanged, and Hard Rock, which raises both, pushes a play back out of the penalty.`,
+  },
+  {
+    heading: "Relax reading is capped to your aim",
+    body: `On Relax the only thing you actually do is move the cursor, so the reading (cognition) part of pp only means anything in proportion to that movement. On real plays reading is a tiny slice of aim. A few near-zero-movement spam maps abused this, turning reading into a big pp source while you barely had to aim.
+
+Reading is now capped at half of your aim value on Relax. Those degenerate maps collapse, and every genuine play, already well under the cap, is left exactly as calculated.`,
+  },
+  {
     heading: "Flashlight must use default settings",
     body: `On osu! standard, Relax and Autopilot, Flashlight only earns pp on its default settings. Change any of these and the whole score earns 0pp:
 
