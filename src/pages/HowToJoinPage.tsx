@@ -310,7 +310,7 @@ const STREAMS = [
   {
     key: "nova",
     icon: "🌙",
-    title: "Torii Nova",
+    title: "Nova",
     tagline: "The bleeding-edge channel. New things land here first.",
     badge: "Preview",
     accent: {
@@ -332,7 +332,7 @@ const STREAMS = [
   {
     key: "vanilla",
     icon: "🧊",
-    title: "Torii Vanilla",
+    title: "Vanilla",
     tagline: "Upstream osu!lazer, wired to Torii. For low-end PCs and Linux.",
     badge: "Compatibility",
     accent: {
@@ -471,10 +471,6 @@ export default function HowToJoinPage() {
             </motion.div>
           ))}
         </div>
-
-        <p className="mb-8 text-center text-xs text-white/35">
-          All three use the same server and the same account. You can have more than one installed.
-        </p>
 
         {/* ── Features showcase ─────────────────────────────────────────── */}
         <div ref={featuresRef} className="scroll-mt-32 mt-28">
