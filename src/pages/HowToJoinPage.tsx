@@ -579,7 +579,7 @@ export default function HowToJoinPage() {
                     <span className="font-semibold text-white text-lg">Follow the setup wizard</span>
                   </div>
                   <div className="ml-11">
-                    <p className="text-sm mb-3 text-white/55">The wizard asks if you want to import from an existing osu! install. Point it at your current osu! folder — it migrates maps, skins, and settings automatically.</p>
+                    <p className="text-sm mb-3 text-white/55">The wizard asks if you want to import from an existing osu! install. Point it at your current <a href="https://osu.ppy.sh/wiki/en/Client/Release_stream/Lazer/File_storage" target="_blank" rel="noopener noreferrer" className="text-osu-pink hover:underline">osu! Data folder</a>. It migrates maps, skins, and settings automatically.</p>
                     <div className="rounded-2xl border border-sky-400/20 bg-sky-500/5 p-4 text-sm">
                       <p className="text-sky-200 font-semibold mb-1">💡 Tip</p>
                       <p className="text-white/55">Skipped the wizard? Run it later from <span className="text-white/75 font-medium">Settings → Torii → Manage Torii data source</span>.</p>
