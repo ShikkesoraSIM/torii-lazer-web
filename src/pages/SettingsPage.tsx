@@ -28,6 +28,16 @@ const SettingsPage: React.FC = () => {
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
   const [deletingAvatar, setDeletingAvatar] = useState(false);
   const [pendingRequest, setPendingRequest] = useState<PendingUsernameChange | null>(null);
+  const isPending = pendingRequest?.status === 'pending';
+  const isResolved = !!pendingRequest && pendingRequest.status !== 'pending';
+
+  const handleDismissUsernameResult = async () => {
+    try {
+      await userAPI.acknowledgeUsernameChangeRequest();
+    } finally {
+      setPendingRequest(null);
+    }
+  };
   
   const [totpStatus, setTotpStatus] = useState<TOTPStatus | null>(null);
   const [isLoadingTotpStatus, setIsLoadingTotpStatus] = useState(true);
@@ -225,7 +235,7 @@ const SettingsPage: React.FC = () => {
                   <span className="text-lg font-medium text-gray-900 dark:text-white">
                     {user.username}
                   </span>
-                  {!pendingRequest && (
+                  {!isPending && (
                     <button
                       onClick={handleStartEdit}
                       className="btn-secondary !px-4 !py-2 text-sm"
@@ -234,16 +244,53 @@ const SettingsPage: React.FC = () => {
                     </button>
                   )}
                 </div>
-                {pendingRequest && (
+                {isPending && (
                   <div className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm">
                     <div className="font-semibold text-amber-600 dark:text-amber-300">
                       {t('settings.username.pendingReview')}
                     </div>
                     <div className="text-gray-600 dark:text-gray-300 mt-0.5">
-                      {t('settings.username.pendingDesc', { name: pendingRequest.requested_username })}
+                      {t('settings.username.pendingDesc', { name: pendingRequest!.requested_username })}
                     </div>
                   </div>
                 )}
+                  {isResolved && (
+                    <div
+                      className={`rounded-lg border px-4 py-3 text-sm ${
+                        pendingRequest!.status === 'approved'
+                          ? 'border-emerald-400/40 bg-emerald-400/10'
+                          : 'border-rose-400/40 bg-rose-400/10'
+                      }`}
+                    >
+                      <div
+                        className={`font-semibold ${
+                          pendingRequest!.status === 'approved'
+                            ? 'text-emerald-600 dark:text-emerald-300'
+                            : 'text-rose-600 dark:text-rose-300'
+                        }`}
+                      >
+                        {pendingRequest!.status === 'approved'
+                          ? t('settings.username.approvedTitle')
+                          : t('settings.username.rejectedTitle')}
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-300 mt-0.5">
+                        {pendingRequest!.status === 'approved'
+                          ? t('settings.username.approvedDesc', { name: pendingRequest!.requested_username })
+                          : t('settings.username.rejectedDesc', { name: pendingRequest!.requested_username })}
+                      </div>
+                      {pendingRequest!.status === 'rejected' && pendingRequest!.reject_reason && (
+                        <div className="text-gray-600 dark:text-gray-300 mt-1">
+                          {t('settings.username.rejectedReason', { reason: pendingRequest!.reject_reason })}
+                        </div>
+                      )}
+                      <button
+                        onClick={handleDismissUsernameResult}
+                        className="btn-secondary !px-3 !py-1.5 text-xs mt-3"
+                      >
+                        {t('settings.username.dismiss')}
+                      </button>
+                    </div>
+                  )}
               </div>
             ) : (
               <div className="space-y-4">

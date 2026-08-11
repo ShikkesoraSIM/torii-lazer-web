@@ -18,6 +18,12 @@ export const settingsPage = {
       success: '用户名修改成功！',
       requestSubmitted: '已提交用户名修改申请，等待管理员审核。',
       pendingReview: '等待审核',
+      approvedTitle: '用户名修改已通过',
+      approvedDesc: '你的用户名现在是 "{{name}}"。',
+      rejectedTitle: '用户名修改被拒绝',
+      rejectedDesc: '你申请修改为 "{{name}}" 的请求被拒绝。',
+      rejectedReason: '原因：{{reason}}',
+      dismiss: '知道了',
       pendingDesc: '您修改为“{{name}}”的申请正在等待管理员审核。',
       errors: {
         empty: '用户名不能为空',

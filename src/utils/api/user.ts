@@ -125,6 +125,10 @@ export const userAPI = {
     return (response.data as PendingUsernameChange | null) ?? null;
   },
 
+  acknowledgeUsernameChangeRequest: async (): Promise<void> => {
+    await api.post('/api/private/username-change-request/acknowledge');
+  },
+
   uploadCover: async (imageFile: File | Blob, isNsfw: boolean = false) => {
     const formData = new FormData();
     const isJpeg = imageFile.type === 'image/jpeg';

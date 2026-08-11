@@ -19,6 +19,12 @@ export const settingsPage = {
       requestSubmitted: 'Username change requested — pending admin review.',
       pendingReview: 'Pending review',
       pendingDesc: 'Your request to change to "{{name}}" is awaiting admin review.',
+      approvedTitle: 'Username change approved',
+      approvedDesc: 'Your username is now "{{name}}".',
+      rejectedTitle: 'Username change rejected',
+      rejectedDesc: 'Your request to change to "{{name}}" was rejected.',
+      rejectedReason: 'Reason: {{reason}}',
+      dismiss: 'Got it',
       errors: {
         empty: 'Username cannot be empty',
         sameAsOld: 'New username is the same as current username',
