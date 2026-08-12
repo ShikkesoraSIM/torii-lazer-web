@@ -4,7 +4,7 @@ export const layout = {
   },
   support: {
     title: 'Support Torii',
-    body: 'Donations help cover server costs and unlock a Supporter title and pink hearts aura. They grant no gameplay advantage.',
+    body: 'Donations help cover server costs.',
     osu_note: 'Please support osu! itself first if you can.',
     cta: 'Donate on Ko-fi',
   },
