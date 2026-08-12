@@ -1,10 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiHeart } from 'react-icons/fi';
-
-// Public Ko-fi page — kept inline so the footer stays self-contained.
-// If the URL changes, also update SupportButton.tsx (the navbar heart).
-const KOFI_URL = 'https://ko-fi.com/toriiserver';
 
 const HomeFooter: React.FC = () => {
   return (
@@ -31,20 +26,6 @@ const HomeFooter: React.FC = () => {
             </a>
             <a className="hover:text-white transition" href="https://lazer-api.shikkesora.com" target="_blank" rel="noreferrer">
               API
-            </a>
-            {/* Quiet supporter heart — same affordance as the navbar pill,
-                here so the footer also has a low-key route to the Ko-fi
-                page for anyone scrolling to the bottom of the home view. */}
-            <a
-              href={KOFI_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-[#ff7eb8] hover:text-[#ffb3d9] transition"
-              aria-label="Support Torii on Ko-fi"
-              title="Support Torii on Ko-fi"
-            >
-              <FiHeart size={14} fill="currentColor" />
-              <span>Support</span>
             </a>
           </div>
         </div>

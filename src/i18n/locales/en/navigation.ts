@@ -8,7 +8,6 @@ export const navigation = {
   profile: 'Profile',
   join: 'Join Server',
   settings: 'Settings',
-  support: 'Support Torii',
   login: 'Sign in',
   register: 'Sign up',
   logout: 'Sign Out',
