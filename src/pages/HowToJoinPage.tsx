@@ -5,12 +5,14 @@ import { motion } from "framer-motion";
 
 // GitHub releases. /releases/latest only ever resolves to the newest
 // non-prerelease, which is our stable -torii build, so that's what the stable
-// card points at. Nova ships as a prerelease, so it points at the releases list
-// filtered by tag suffix (the q= filter matches the tag name).
+// card points at. Nova ships as a prerelease and GitHub has no equivalent
+// "latest prerelease" URL, so the card resolves it at runtime (see novaUrl) and
+// falls back to the full releases list. Do NOT use `?q=nova`: that searches
+// release titles, not tags, and returns "No results".
 const TORII_STABLE_URL =
   "https://github.com/ShikkesoraSIM/torii-osu/releases/latest";
 const TORII_NOVA_URL =
-  "https://github.com/ShikkesoraSIM/torii-osu/releases?q=nova&expanded=true";
+  "https://github.com/ShikkesoraSIM/torii-osu/releases";
 
 const SERVER_HOST = "lazer-api.shikkesora.com";
 
@@ -328,6 +330,25 @@ export default function HowToJoinPage() {
   const featuresRef = useRef<HTMLDivElement>(null);
   const toriiSetupRef = useRef<HTMLDivElement>(null);
 
+  // Nova ships as a prerelease and GitHub has no "latest prerelease" URL, so we
+  // ask the API which -nova tag is newest. The static href stays as the fallback
+  // if the call fails or we get rate limited.
+  const [novaUrl, setNovaUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("https://api.github.com/repos/ShikkesoraSIM/torii-osu/releases?per_page=30")
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((releases: Array<{ tag_name: string; html_url: string; draft: boolean }>) => {
+        const newest = releases.find((r) => !r.draft && r.tag_name.endsWith("-nova"));
+        if (!cancelled && newest) setNovaUrl(newest.html_url);
+      })
+      .catch(() => { /* se queda con el link estatico */ });
+
+    return () => { cancelled = true; };
+  }, []);
+
   useEffect(() => {
     const prev = document.body.style.background;
     const prevHtml = document.documentElement.style.background;
@@ -419,7 +440,7 @@ export default function HowToJoinPage() {
 
               <div className="mt-auto">
                 <a
-                  href={s.href}
+                  href={s.key === "nova" ? (novaUrl ?? s.href) : s.href}
                   target="_blank"
                   rel="noreferrer"
                   className={cx(
