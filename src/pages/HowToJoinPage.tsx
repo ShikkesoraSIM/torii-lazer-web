@@ -5,21 +5,12 @@ import { motion } from "framer-motion";
 
 // GitHub releases. /releases/latest only ever resolves to the newest
 // non-prerelease, which is our stable -torii build, so that's what the stable
-// card points at. Nova ships as a prerelease and Vanilla is its own stream, so
-// those point at the releases list filtered by tag suffix (the q= filter matches
-// the tag name). If -vanilla hasn't cut a tag yet the filtered list just shows
-// "no results", which is fine as a coming-soon.
+// card points at. Nova ships as a prerelease, so it points at the releases list
+// filtered by tag suffix (the q= filter matches the tag name).
 const TORII_STABLE_URL =
   "https://github.com/ShikkesoraSIM/torii-osu/releases/latest";
 const TORII_NOVA_URL =
   "https://github.com/ShikkesoraSIM/torii-osu/releases?q=nova&expanded=true";
-const TORII_VANILLA_URL =
-  "https://github.com/ShikkesoraSIM/torii-osu/releases?q=vanilla&expanded=true";
-
-// Flip to true once the first -vanilla release is actually cut. While false the
-// Vanilla card shows a "coming soon" button that still links to the releases page.
-// First -vanilla release: v2026.701.2-vanilla (2026-07-01).
-const VANILLA_RELEASED = true;
 
 const SERVER_HOST = "lazer-api.shikkesora.com";
 
@@ -281,9 +272,9 @@ const TAG_COLORS: Record<string, string> = {
 
 // ─── Download streams ─────────────────────────────────────────────────────────
 
-// Three download streams. Same server, same account — they differ in the engine
+// Two download streams. Same server, same account — they differ in the engine
 // underneath and who each one is for. Accent colours line up with the in-client
-// badges: rojo estable, ámbar Nova, cyan Vanilla.
+// badges: rojo estable, ámbar Nova.
 const STREAMS = [
   {
     key: "torii",
@@ -328,28 +319,6 @@ const STREAMS = [
     href: TORII_NOVA_URL,
     cta: "Download Nova",
     available: true,
-  },
-  {
-    key: "vanilla",
-    icon: "🧊",
-    title: "Vanilla",
-    tagline: "Upstream osu!lazer, wired to Torii. For low-end PCs and Linux.",
-    badge: "Compatibility",
-    accent: {
-      border: "border-cyan-400/30 hover:border-cyan-400/60",
-      bg: "from-cyan-950/60 via-sky-950/30 to-black/40",
-      badgePill: "border-cyan-400/40 bg-cyan-500/15 text-cyan-200",
-      btn: "border-cyan-400/40 bg-cyan-500/15 group-hover:bg-cyan-500/25 group-hover:border-cyan-400/60",
-      glow: "0 0 60px rgba(34,211,238,0.10) inset",
-    },
-    points: [
-      "Upstream lazer, without the Torii framework",
-      "Runs better on low-end PCs and on Linux/Wayland",
-      "No performance extras (Hz, Reflex, Antilag)",
-    ],
-    href: TORII_VANILLA_URL,
-    cta: VANILLA_RELEASED ? "Download Vanilla" : "Coming soon",
-    available: VANILLA_RELEASED,
   },
 ] as const;
 
@@ -408,8 +377,8 @@ export default function HowToJoinPage() {
           </p>
         </motion.div>
 
-        {/* ── Three download streams ────────────────────────────────────── */}
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
+        {/* ── Two download streams ──────────────────────────────────────── */}
+        <div className="grid gap-6 md:grid-cols-2 mb-8">
           {STREAMS.map((s, i) => (
             <motion.div
               key={s.key}
