@@ -61,11 +61,16 @@ const AchievementIcon: React.FC<{ slug: string; alt: string; className?: string 
 };
 
 // Rank-to-icon mapping
-const getRankIcon = (rank: string) => {
+// La API manda los valores del enum (X, XH), no los nombres que se muestran
+// (SS, SSH). Aceptamos los dos: sin las claves X/XH todo SS caia al fallback y
+// se mostraba como F.
+const getRankIcon = (rank: string): string | null => {
   const rankImageMap: Record<string, string> = {
-    'SSH': '/image/grades/SS-Silver.svg',  // SS-Silver
+    'XH': '/image/grades/SS-Silver.svg',
+    'SSH': '/image/grades/SS-Silver.svg',
+    'X': '/image/grades/SS.svg',
     'SS': '/image/grades/SS.svg',
-    'SH': '/image/grades/S-Silver.svg',   // S-Silver
+    'SH': '/image/grades/S-Silver.svg',
     'S': '/image/grades/S.svg',
     'A': '/image/grades/A.svg',
     'B': '/image/grades/B.svg',
@@ -73,7 +78,9 @@ const getRankIcon = (rank: string) => {
     'D': '/image/grades/D.svg',
     'F': '/image/grades/F.svg',
   };
-  return rankImageMap[rank] || rankImageMap['F'];
+  // Sin fallback a 'F': mostrar una nota que el jugador no se saco es peor que
+  // no mostrar ninguna.
+  return rankImageMap[rank] ?? null;
 };
 
 // Activity-type icon mapping
@@ -119,9 +126,9 @@ const getActivityDescription = (activity: UserActivity, t: any) => {
             {activity.beatmap?.title}
           </BeatmapLink>
           <span className="text-xs sm:text-sm">{t('profile.activities.types.rank.middle')}</span>
-          {activity.scorerank && (
-            <img 
-              src={getRankIcon(activity.scorerank || 'C')} 
+          {activity.scorerank && getRankIcon(activity.scorerank) && (
+            <img
+              src={getRankIcon(activity.scorerank)!}
               alt={activity.scorerank}
               className="w-5 h-5"
             />
