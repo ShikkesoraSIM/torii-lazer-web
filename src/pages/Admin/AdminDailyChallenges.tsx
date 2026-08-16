@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
 import AdminModal from '../../components/Admin/AdminModal';
-import ModPicker, { isModFullyConfigured } from '../../components/Admin/ModPicker';
+import ModPicker, { isModFullyConfigured, incompatibleAcronyms } from '../../components/Admin/ModPicker';
 import BeatmapThumb from '../../components/Matchmaking/BeatmapThumb';
 import type { ApiMod, ModCatalogByRuleset } from '../../types/mods';
 import { BUNDLED_MODS_CATALOG } from '../../data/modsCatalog';
@@ -609,6 +609,33 @@ const AdminDailyChallenges: React.FC = () => {
    * `extended_limits` toggle has a sensible default of false; nobody
    * needs to "configure" it explicitly).
    */
+  /**
+   * Saca de `allowed` lo que sea incompatible con los `required` recien elegidos.
+   *
+   * El ModPicker ya evita meter un conflicto cuando elegis, pero solo mira el estado
+   * de ESE momento: si primero llenas Allowed (o le das a "select every mod") y
+   * DESPUES marcas un required, lo que ya estaba adentro se queda. Con ST + CL asi
+   * cargados el server tiraba 400 y el panel solo mostraba un toast que se iba solo.
+   * El server rechaza esa combinacion a proposito (el cliente te dejaria elegir el mod
+   * y despues el score no se podria enviar), asi que lo que hay que arreglar es no
+   * poder armarla.
+   */
+  const dropConflicting = (rulesetId: number, required: ApiMod[], allowed: ApiMod[]): ApiMod[] => {
+    const ruleset = catalog[String(rulesetId)] ?? [];
+    const bloqueados = incompatibleAcronyms(ruleset, required);
+    if (bloqueados.size === 0) return allowed;
+
+    const sacados = allowed.filter((m) => bloqueados.has(m.acronym)).map((m) => m.acronym);
+    if (sacados.length === 0) return allowed;
+
+    const requeridos = required.map((m) => m.acronym).join(', ');
+    toast(`Saque ${sacados.join(', ')} de Allowed: no se puede jugar junto con ${requeridos}.`, {
+      icon: '⚠️',
+      duration: 5000,
+    });
+    return allowed.filter((m) => !bloqueados.has(m.acronym));
+  };
+
   const findUnconfiguredMods = (rulesetId: number, mods: ApiMod[]): string[] => {
     const ruleset = catalog[String(rulesetId)] ?? [];
     return mods
@@ -1159,7 +1186,7 @@ const AdminDailyChallenges: React.FC = () => {
                 catalog={catalog}
                 rulesetId={formData.ruleset_id}
                 value={formData.required_mods}
-                onChange={(mods) => setFormData((f) => ({ ...f, required_mods: mods }))}
+                onChange={(mods) => setFormData((f) => ({ ...f, required_mods: mods, allowed_mods: dropConflicting(f.ruleset_id, mods, f.allowed_mods) }))}
                 conflictWith={formData.allowed_mods}
                 emptyLabel="Free play (no forced mods)"
               />

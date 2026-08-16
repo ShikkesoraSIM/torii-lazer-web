@@ -174,7 +174,7 @@ const initialSettingsFor = (def: ModDefinition): Record<string, number | boolean
   return any ? out : undefined;
 };
 
-const incompatibleAcronyms = (catalog: ModDefinition[], selected: ApiMod[]): Set<string> => {
+export const incompatibleAcronyms = (catalog: ModDefinition[], selected: ApiMod[]): Set<string> => {
   const out = new Set<string>();
   for (const sel of selected) {
     const def = findMod(catalog, sel.acronym);
