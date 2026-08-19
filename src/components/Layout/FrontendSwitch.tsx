@@ -33,7 +33,7 @@ const FrontendSwitch: React.FC = () => {
 
       <span className="torii-frontend-switch__tip" role="tooltip">
         <strong>Try our new frontend</strong>
-        <span>Same page, new look. Still a work in progress.</span>
+        <span>Still a work in progress.</span>
       </span>
     </a>
   );
