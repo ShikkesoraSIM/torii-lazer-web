@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 import { useAuth } from '../../hooks/useAuth';
 import { NotificationProvider } from '../../contexts/NotificationContext';
+import FrontendSwitch from './FrontendSwitch';
 
 const Layout: React.FC = () => {
   const { isAuthenticated, user, restriction } = useAuth();
@@ -76,6 +77,8 @@ const Layout: React.FC = () => {
       />
       {/* One shared country-flag tooltip for the whole app (CountryFlag points here). */}
       <Tooltip id="country-tooltip" place="bottom" float style={{ zIndex: 9999 }} />
+      {/* Salto al frontend nuevo, conservando la ruta actual. */}
+      <FrontendSwitch />
       </div>
     </NotificationProvider>
   );

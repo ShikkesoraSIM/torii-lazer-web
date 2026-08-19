@@ -1456,3 +1456,104 @@ html.perf-mode .glass-effect {
 html.perf-mode .torii-app-shell::before {
   background: linear-gradient(180deg, #030014 0%, #050a24 45%, #04081d 100%);
 }
+
+/* ---------------------------------------------------------------- switch al
+   frontend nuevo. Flota abajo a la derecha en todas las paginas y lleva la
+   ruta actual al otro frontend, asi caes donde ya estabas.
+   ------------------------------------------------------------------------ */
+.torii-frontend-switch {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--osu-pink, #ED8EA6), #a855f7);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .28);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.torii-frontend-switch:hover,
+.torii-frontend-switch:focus-visible {
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 8px 26px rgba(168, 85, 247, .5);
+}
+
+.torii-frontend-switch svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* El glow: un halo que respira detras del boton. */
+.torii-frontend-switch__glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--osu-pink, #ED8EA6), #a855f7);
+  filter: blur(12px);
+  opacity: .55;
+  animation: torii-switch-breathe 2.8s ease-in-out infinite;
+}
+
+@keyframes torii-switch-breathe {
+  0%, 100% { opacity: .40; transform: scale(1); }
+  50%      { opacity: .75; transform: scale(1.10); }
+}
+
+/* Respetar a quien pidio menos movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  .torii-frontend-switch__glow { animation: none; }
+  .torii-frontend-switch { transition: none; }
+}
+
+.torii-frontend-switch__tip {
+  position: absolute;
+  right: calc(100% + .75rem);
+  bottom: 50%;
+  transform: translateY(50%) translateX(6px);
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+  width: max-content;
+  max-width: 15rem;
+  padding: .55rem .75rem;
+  border-radius: .5rem;
+  background: var(--bg-secondary, #1f2937);
+  color: var(--text-primary, #f9fafb);
+  border: 1px solid var(--border-color, #374151);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+  font-size: .8rem;
+  line-height: 1.25;
+  text-align: left;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .16s ease, transform .16s ease;
+}
+
+.torii-frontend-switch__tip strong { font-weight: 600; }
+.torii-frontend-switch__tip span { opacity: .75; font-size: .72rem; }
+
+.torii-frontend-switch:hover .torii-frontend-switch__tip,
+.torii-frontend-switch:focus-visible .torii-frontend-switch__tip {
+  opacity: 1;
+  transform: translateY(50%) translateX(0);
+}
+
+/* En pantallas chicas el tooltip no entra al costado: va arriba del boton. */
+@media (max-width: 640px) {
+  .torii-frontend-switch { width: 2.75rem; height: 2.75rem; right: 1rem; bottom: 1rem; }
+  .torii-frontend-switch__tip {
+    right: 0;
+    bottom: calc(100% + .6rem);
+    transform: translateY(6px);
+    max-width: 12rem;
+  }
+  .torii-frontend-switch:hover .torii-frontend-switch__tip,
+  .torii-frontend-switch:focus-visible .torii-frontend-switch__tip { transform: translateY(0); }
+}
