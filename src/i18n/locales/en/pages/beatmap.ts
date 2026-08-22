@@ -38,6 +38,7 @@ export const beatmapPage = {
   'beatmap.listingDescription': 'Browse and discover beatmaps from the server.',
   'beatmap.searchPlaceholder': 'Search by title, artist or creator...',
   'beatmap.customMaps': 'Custom Maps',
+  'beatmap.aiGenerated': 'AI generated',
   'beatmap.mappedBy': 'mapped by',
   'beatmap.noResults': 'No beatmaps found',
   'beatmap.uploaded': 'Uploaded',

@@ -18,6 +18,10 @@ const modeToInt = (mode: GameMode): number => {
   return 0;
 };
 
+// el marcador que el cliente estampa en los Tags de todo mapa generado con IA.
+const isMapperatorinatorSet = (tags?: string) =>
+  (tags ?? '').split(/[\s,]+/).some((tag) => tag.toLowerCase() === 'mapperatorinator');
+
 const statusOptions = ['any', 'ranked', 'approved', 'qualified', 'loved', 'pending', 'wip', 'graveyard'] as const;
 
 const BeatmapsPage: React.FC = () => {
@@ -31,6 +35,7 @@ const BeatmapsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(queryFromUrl);
   const [status, setStatus] = useState<string>('any');
   const [isLocalOnly, setIsLocalOnly] = useState(false);
+  const [isAiOnly, setIsAiOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<SearchBeatmapsetsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +46,7 @@ const BeatmapsPage: React.FC = () => {
     setSearchQuery((prev) => (prev === queryFromUrl ? prev : queryFromUrl));
   }, [queryFromUrl]);
 
-  const fetchBeatmaps = useCallback(async (q: string, mode: GameMode, s: string, local: boolean) => {
+  const fetchBeatmaps = useCallback(async (q: string, mode: GameMode, s: string, local: boolean, ai: boolean) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -57,7 +62,8 @@ const BeatmapsPage: React.FC = () => {
         m: modeToInt(mode),
         s: s === 'any' ? 'leaderboard' : s,
         sort: 'relevance_desc',
-        is_local: local,
+        is_local: local || ai,
+        ai: ai || undefined,
       });
 
       if (!abortController.signal.aborted) {
@@ -77,10 +83,10 @@ const BeatmapsPage: React.FC = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchBeatmaps(searchQuery, selectedMode, status, isLocalOnly);
+      fetchBeatmaps(searchQuery, selectedMode, status, isLocalOnly, isAiOnly);
     }, 250);
     return () => clearTimeout(timer);
-  }, [searchQuery, selectedMode, status, isLocalOnly, fetchBeatmaps]);
+  }, [searchQuery, selectedMode, status, isLocalOnly, isAiOnly, fetchBeatmaps]);
 
   return (
     <div className="min-h-screen torii-page-stage">
@@ -120,6 +126,19 @@ const BeatmapsPage: React.FC = () => {
               >
                 <span className={`inline-block h-2.5 w-2.5 rounded-full ${isLocalOnly ? 'bg-blue-300 animate-pulse' : 'bg-slate-400'}`} />
                 {t('beatmap.customMaps') || 'Custom Maps'}
+              </button>
+
+              <button
+                type="button"
+                className={`relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold border transition-all duration-200 active:scale-[0.98] ${
+                  isAiOnly
+                    ? 'bg-pink-500/20 border-pink-400/40 text-pink-100 shadow-[0_0_0_2px_rgba(255,110,199,0.15)]'
+                    : 'bg-slate-700/30 border-white/10 text-slate-200 hover:border-white/25'
+                }`}
+                onClick={() => setIsAiOnly((prev) => !prev)}
+              >
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isAiOnly ? 'bg-pink-300 animate-pulse' : 'bg-slate-400'}`} />
+                {t('beatmap.aiGenerated') || 'AI generated'}
               </button>
             </div>
 
@@ -174,6 +193,11 @@ const BeatmapsPage: React.FC = () => {
                     {set.is_local && (
                       <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-600 text-white shadow-lg backdrop-blur-sm bg-opacity-90">
                         {t('beatmap.uploaded') || 'Uploaded'}
+                      </span>
+                    )}
+                    {isMapperatorinatorSet(set.tags) && (
+                      <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-pink-500 text-white shadow-lg backdrop-blur-sm bg-opacity-90">
+                        {t('beatmap.aiGenerated') || 'AI generated'}
                       </span>
                     )}
                   </div>
