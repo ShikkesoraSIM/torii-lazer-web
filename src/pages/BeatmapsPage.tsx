@@ -9,7 +9,7 @@ import type { GameMode } from '../types';
 import type { SearchBeatmapsetsResponse } from '../types/beatmap';
 import { beatmapAPI } from '../utils/api';
 import { formatNumber } from '../utils/format';
-import { isMapperatorinatorSet } from '../utils/beatmapFlags';
+import { isAiSet } from '../utils/beatmapFlags';
 
 const modeToInt = (mode: GameMode): number => {
   if (mode === 'osu') return 0;
@@ -195,7 +195,7 @@ const BeatmapsPage: React.FC = () => {
                         {t('beatmap.toriiBadge') || 'Torii'}
                       </span>
                     )}
-                    {isMapperatorinatorSet(set.tags) && (
+                    {isAiSet(set) && (
                       <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-500 text-white shadow-lg backdrop-blur-sm bg-opacity-90">
                         {t('beatmap.aiGenBadge') || 'AI gen'}
                       </span>

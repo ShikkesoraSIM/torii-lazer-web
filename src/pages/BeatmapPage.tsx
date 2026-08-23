@@ -11,7 +11,7 @@ import { GAME_MODE_NAMES } from '../types';
 import { AudioPlayButton, AudioPlayerControls } from '../components/UI/AudioPlayer';
 import BeatmapLeaderboard from '../components/Score/BeatmapLeaderboard';
 import toast from 'react-hot-toast';
-import { isMapperatorinatorSet } from '../utils/beatmapFlags';
+import { isAiSet } from '../utils/beatmapFlags';
 
 const BeatmapPage: React.FC = () => {
   const { beatmapId, beatmapsetId } = useParams<{ beatmapId?: string; beatmapsetId?: string }>();
@@ -240,7 +240,7 @@ const BeatmapPage: React.FC = () => {
                       {t('beatmap.toriiBadge') || 'Torii'}
                     </span>
                   )}
-                  {isMapperatorinatorSet(beatmapset.tags) && (
+                  {isAiSet(beatmapset) && (
                     <span className="px-3 py-1 bg-sky-500/90 text-white rounded-full text-xs font-bold uppercase tracking-wider">
                       {t('beatmap.aiGenBadge') || 'AI gen'}
                     </span>

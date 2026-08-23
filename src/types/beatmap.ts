@@ -107,6 +107,9 @@ export interface Beatmapset {
   favourite_count: number;
   recent_favourites: any[];
   is_local?: boolean;
+  // lo resuelve el server: para los de aca por el archivo del generador, para los
+  // de bancho por el tag del autor.
+  ai?: boolean;
 }
 
 export interface SearchBeatmapsetsResponse {
