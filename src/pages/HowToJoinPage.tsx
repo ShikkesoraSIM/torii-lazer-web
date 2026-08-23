@@ -71,8 +71,8 @@ function assetFor(platform: Platform, stream: "torii" | "nova"): { file: string;
         : { file: "install-win-x64.exe", label: "Download for Windows" };
     case "mac":
       return platform.arch === "arm64"
-        ? { file: "Torii-macOS-AppleSilicon.zip", label: "Download for Mac (Apple Silicon)", note: "Unzip, then double-click \"Install Torii.command\"." }
-        : { file: "Torii-macOS-Intel.zip", label: "Download for Mac (Intel)", note: "Unzip, then double-click \"Install Torii.command\"." };
+        ? { file: "Torii-macOS-AppleSilicon.zip", label: "Download for Mac (Apple Silicon)", note: "Unzip and run \"Install Torii.command\". If macOS blocks it, paste the Terminal line below instead: it skips the quarantine dance entirely." }
+        : { file: "Torii-macOS-Intel.zip", label: "Download for Mac (Intel)", note: "Unzip and run \"Install Torii.command\". If macOS blocks it, paste the Terminal line below instead: it skips the quarantine dance entirely." };
     case "linux":
       return platform.arch === "arm64"
         ? { file: "torii-linux-arm64.AppImage", label: "Download AppImage for Linux (ARM64)" }
