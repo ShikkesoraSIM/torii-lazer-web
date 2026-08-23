@@ -39,6 +39,8 @@ export const beatmapPage = {
   'beatmap.searchPlaceholder': '按标题、艺术家或作者搜索...',
   'beatmap.customMaps': '自定义谱面',
   'beatmap.aiGenerated': 'AI 生成',
+  'beatmap.toriiBadge': 'Torii',
+  'beatmap.aiGenBadge': 'AI 生成',
   'beatmap.mappedBy': '谱师',
   'beatmap.noResults': '未找到谱面',
   'beatmap.uploaded': '已上传',

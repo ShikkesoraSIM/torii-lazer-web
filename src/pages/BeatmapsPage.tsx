@@ -9,6 +9,7 @@ import type { GameMode } from '../types';
 import type { SearchBeatmapsetsResponse } from '../types/beatmap';
 import { beatmapAPI } from '../utils/api';
 import { formatNumber } from '../utils/format';
+import { isMapperatorinatorSet } from '../utils/beatmapFlags';
 
 const modeToInt = (mode: GameMode): number => {
   if (mode === 'osu') return 0;
@@ -18,9 +19,7 @@ const modeToInt = (mode: GameMode): number => {
   return 0;
 };
 
-// el marcador que el cliente estampa en los Tags de todo mapa generado con IA.
-const isMapperatorinatorSet = (tags?: string) =>
-  (tags ?? '').split(/[\s,]+/).some((tag) => tag.toLowerCase() === 'mapperatorinator');
+
 
 const statusOptions = ['any', 'ranked', 'approved', 'qualified', 'loved', 'pending', 'wip', 'graveyard'] as const;
 
@@ -119,12 +118,12 @@ const BeatmapsPage: React.FC = () => {
                 type="button"
                 className={`relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold border transition-all duration-200 active:scale-[0.98] ${
                   isLocalOnly
-                    ? 'bg-blue-500/20 border-blue-400/40 text-blue-100 shadow-[0_0_0_2px_rgba(59,130,246,0.15)]'
+                    ? 'bg-red-500/20 border-red-400/40 text-red-100 shadow-[0_0_0_2px_rgba(239,68,68,0.15)]'
                     : 'bg-slate-700/30 border-white/10 text-slate-200 hover:border-white/25'
                 }`}
                 onClick={() => setIsLocalOnly((prev) => !prev)}
               >
-                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isLocalOnly ? 'bg-blue-300 animate-pulse' : 'bg-slate-400'}`} />
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isLocalOnly ? 'bg-red-300 animate-pulse' : 'bg-slate-400'}`} />
                 {t('beatmap.customMaps') || 'Custom Maps'}
               </button>
 
@@ -132,12 +131,12 @@ const BeatmapsPage: React.FC = () => {
                 type="button"
                 className={`relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold border transition-all duration-200 active:scale-[0.98] ${
                   isAiOnly
-                    ? 'bg-pink-500/20 border-pink-400/40 text-pink-100 shadow-[0_0_0_2px_rgba(255,110,199,0.15)]'
+                    ? 'bg-sky-500/20 border-sky-400/40 text-sky-100 shadow-[0_0_0_2px_rgba(56,189,248,0.15)]'
                     : 'bg-slate-700/30 border-white/10 text-slate-200 hover:border-white/25'
                 }`}
                 onClick={() => setIsAiOnly((prev) => !prev)}
               >
-                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isAiOnly ? 'bg-pink-300 animate-pulse' : 'bg-slate-400'}`} />
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isAiOnly ? 'bg-sky-300 animate-pulse' : 'bg-slate-400'}`} />
                 {t('beatmap.aiGenerated') || 'AI generated'}
               </button>
             </div>
@@ -190,14 +189,15 @@ const BeatmapsPage: React.FC = () => {
                     }`}>
                       {t(`beatmap.status.${set.status}`) || set.status}
                     </span>
+                    {/* de donde salio el mapa (rojo) y como se hizo (azul); pueden ir los dos */}
                     {set.is_local && (
-                      <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-600 text-white shadow-lg backdrop-blur-sm bg-opacity-90">
-                        {t('beatmap.uploaded') || 'Uploaded'}
+                      <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-red-600 text-white shadow-lg backdrop-blur-sm bg-opacity-90">
+                        {t('beatmap.toriiBadge') || 'Torii'}
                       </span>
                     )}
                     {isMapperatorinatorSet(set.tags) && (
-                      <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-pink-500 text-white shadow-lg backdrop-blur-sm bg-opacity-90">
-                        {t('beatmap.aiGenerated') || 'AI generated'}
+                      <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-500 text-white shadow-lg backdrop-blur-sm bg-opacity-90">
+                        {t('beatmap.aiGenBadge') || 'AI gen'}
                       </span>
                     )}
                   </div>

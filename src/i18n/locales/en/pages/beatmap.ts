@@ -39,6 +39,8 @@ export const beatmapPage = {
   'beatmap.searchPlaceholder': 'Search by title, artist or creator...',
   'beatmap.customMaps': 'Custom Maps',
   'beatmap.aiGenerated': 'AI generated',
+  'beatmap.toriiBadge': 'Torii',
+  'beatmap.aiGenBadge': 'AI gen',
   'beatmap.mappedBy': 'mapped by',
   'beatmap.noResults': 'No beatmaps found',
   'beatmap.uploaded': 'Uploaded',

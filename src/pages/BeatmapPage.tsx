@@ -11,6 +11,7 @@ import { GAME_MODE_NAMES } from '../types';
 import { AudioPlayButton, AudioPlayerControls } from '../components/UI/AudioPlayer';
 import BeatmapLeaderboard from '../components/Score/BeatmapLeaderboard';
 import toast from 'react-hot-toast';
+import { isMapperatorinatorSet } from '../utils/beatmapFlags';
 
 const BeatmapPage: React.FC = () => {
   const { beatmapId, beatmapsetId } = useParams<{ beatmapId?: string; beatmapsetId?: string }>();
@@ -231,6 +232,17 @@ const BeatmapPage: React.FC = () => {
                   {beatmapset.storyboard && (
                     <span className="px-3 py-1 bg-purple-500/90 text-white rounded-full text-xs font-bold uppercase tracking-wider">
                       STORYBOARD
+                    </span>
+                  )}
+                  {/* de donde salio el mapa y como se hizo, igual que en el listado */}
+                  {beatmapset.is_local && (
+                    <span className="px-3 py-1 bg-red-600/90 text-white rounded-full text-xs font-bold uppercase tracking-wider">
+                      {t('beatmap.toriiBadge') || 'Torii'}
+                    </span>
+                  )}
+                  {isMapperatorinatorSet(beatmapset.tags) && (
+                    <span className="px-3 py-1 bg-sky-500/90 text-white rounded-full text-xs font-bold uppercase tracking-wider">
+                      {t('beatmap.aiGenBadge') || 'AI gen'}
                     </span>
                   )}
                 </div>
