@@ -108,6 +108,14 @@ rm -rf "$DEST/Torii.app"
 cp -R "$APP" "$DEST/"
 xattr -dr com.apple.quarantine "$DEST/Torii.app" 2>/dev/null || true
 
+# registrar la app con launch services: sin esto spotlight no la encuentra y
+# finder puede mostrar el icono tachado hasta que algo lo refresque.
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+if [ -x "$LSREGISTER" ]; then
+  "$LSREGISTER" -f "$DEST/Torii.app" >/dev/null 2>&1 || true
+fi
+touch "$DEST/Torii.app"
+
 echo "Installed: $DEST/Torii.app"
 
 if [ "$LAUNCH" = "1" ]; then
