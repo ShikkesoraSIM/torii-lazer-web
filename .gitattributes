@@ -1,0 +1,2 @@
+# torii: los instaladores se pegan en una terminal de mac/linux, CRLF los rompe
+public/*.sh text eol=lf

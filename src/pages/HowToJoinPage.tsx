@@ -22,6 +22,72 @@ function cx(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
 
+// ─── Platform detection ──────────────────────────────────────────────────────
+
+type Platform = {
+  os: "windows" | "mac" | "linux" | "android" | "ios" | "unknown";
+  arch: "x64" | "arm64";
+};
+
+// Best effort from the browser. Apple Silicon vs Intel can't be read from the
+// user agent (Safari says "Intel" on every Mac), so the WebGL renderer string is
+// the tell: Apple GPUs report as "Apple M1/M2/..." or "Apple GPU".
+function detectPlatform(): Platform {
+  const ua = navigator.userAgent;
+  const uaLow = ua.toLowerCase();
+
+  if (/android/.test(uaLow)) return { os: "android", arch: "arm64" };
+  if (/iphone|ipad|ipod/.test(uaLow) || (/macintosh/.test(uaLow) && navigator.maxTouchPoints > 1)) return { os: "ios", arch: "arm64" };
+
+  const armHint = /aarch64|arm64|armv8/.test(uaLow);
+
+  if (/windows/.test(uaLow)) return { os: "windows", arch: armHint ? "arm64" : "x64" };
+
+  if (/macintosh|mac os x/.test(uaLow)) {
+    let appleSilicon = true;
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = (canvas.getContext("webgl") || canvas.getContext("experimental-webgl")) as WebGLRenderingContext | null;
+      const info = gl?.getExtension("WEBGL_debug_renderer_info");
+      const renderer = info && gl ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
+      if (/intel|amd|radeon|nvidia/i.test(renderer) && !/apple/i.test(renderer)) appleSilicon = false;
+    } catch {
+      /* sin webgl: asumimos apple silicon, que es lo que tiene casi todo el mundo hoy */
+    }
+    return { os: "mac", arch: appleSilicon ? "arm64" : "x64" };
+  }
+
+  if (/linux|x11|cros/.test(uaLow)) return { os: "linux", arch: armHint ? "arm64" : "x64" };
+
+  return { os: "unknown", arch: "x64" };
+}
+
+// The exact release asset for a platform, and how to call it on the button.
+function assetFor(platform: Platform, stream: "torii" | "nova"): { file: string; label: string; note?: string } | null {
+  switch (platform.os) {
+    case "windows":
+      return platform.arch === "arm64"
+        ? { file: "install-win-arm64.exe", label: "Download for Windows (ARM64)" }
+        : { file: "install-win-x64.exe", label: "Download for Windows" };
+    case "mac":
+      return platform.arch === "arm64"
+        ? { file: "Torii-macOS-AppleSilicon.zip", label: "Download for Mac (Apple Silicon)", note: "Unzip, then double-click \"Install Torii.command\"." }
+        : { file: "Torii-macOS-Intel.zip", label: "Download for Mac (Intel)", note: "Unzip, then double-click \"Install Torii.command\"." };
+    case "linux":
+      return platform.arch === "arm64"
+        ? { file: "torii-linux-arm64.AppImage", label: "Download AppImage for Linux (ARM64)" }
+        : { file: "torii-linux-x64.AppImage", label: "Download AppImage for Linux" };
+    case "android":
+      // el apk solo sale en nova
+      return stream === "nova" ? { file: "torii.apk", label: "Download APK for Android" } : null;
+    default:
+      return null;
+  }
+}
+
+const RELEASE_DOWNLOAD = (tag: string, file: string) =>
+  `https://github.com/ShikkesoraSIM/torii-osu/releases/download/${tag}/${file}`;
+
 // ─── Small reusable pieces ────────────────────────────────────────────────────
 
 function CopyButton({
@@ -334,17 +400,28 @@ export default function HowToJoinPage() {
   // ask the API which -nova tag is newest. The static href stays as the fallback
   // if the call fails or we get rate limited.
   const [novaUrl, setNovaUrl] = useState<string | null>(null);
+  // por stream: las releases mas nuevas con sus assets, para linkear SOLO a una que
+  // de verdad tenga el archivo (un build en curso o una release vieja no lo tienen).
+  const [releasesByStream, setReleasesByStream] = useState<Record<"torii" | "nova", Array<{ tag: string; assets: string[] }>>>({ torii: [], nova: [] });
+  const [platform] = useState<Platform>(() => detectPlatform());
 
   useEffect(() => {
     let cancelled = false;
 
     fetch("https://api.github.com/repos/ShikkesoraSIM/torii-osu/releases?per_page=30")
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then((releases: Array<{ tag_name: string; html_url: string; draft: boolean }>) => {
-        const newest = releases.find((r) => !r.draft && r.tag_name.endsWith("-nova"));
-        if (!cancelled && newest) setNovaUrl(newest.html_url);
+      .then((releases: Array<{ tag_name: string; html_url: string; draft: boolean; prerelease: boolean; assets: Array<{ name: string }> }>) => {
+        if (cancelled) return;
+        const live = releases.filter((r) => !r.draft);
+        const newestNova = live.find((r) => r.tag_name.endsWith("-nova"));
+        if (newestNova) setNovaUrl(newestNova.html_url);
+        const pack = (rs: typeof live) => rs.slice(0, 8).map((r) => ({ tag: r.tag_name, assets: r.assets.map((a) => a.name) }));
+        setReleasesByStream({
+          torii: pack(live.filter((r) => !r.prerelease)),
+          nova: pack(live.filter((r) => r.tag_name.endsWith("-nova"))),
+        });
       })
-      .catch(() => { /* se queda con el link estatico */ });
+      .catch(() => { /* se queda con los links estaticos */ });
 
     return () => { cancelled = true; };
   }, []);
@@ -439,24 +516,68 @@ export default function HowToJoinPage() {
               </ul>
 
               <div className="mt-auto">
-                <a
-                  href={s.key === "nova" ? (novaUrl ?? s.href) : s.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={cx(
-                    "flex items-center justify-center gap-2 w-full rounded-2xl border px-4 py-3 text-sm font-semibold text-white transition",
-                    s.accent.btn,
-                    !s.available && "opacity-70"
-                  )}
-                >
-                  <span>{s.cta}</span>
-                  <span aria-hidden>{s.available ? "↗" : "…"}</span>
-                </a>
-                {!s.available && (
-                  <p className="mt-2 text-xs text-white/30 text-center">
-                    Not out yet. The link takes you to the releases page.
-                  </p>
-                )}
+                {(() => {
+                  const asset = assetFor(platform, s.key);
+                  const withAsset = asset ? releasesByStream[s.key].find((r) => r.assets.includes(asset.file)) : undefined;
+                  const direct = withAsset && asset ? RELEASE_DOWNLOAD(withAsset.tag, asset.file) : null;
+                  const fallback = s.key === "nova" ? (novaUrl ?? s.href) : s.href;
+                  const installLine =
+                    platform.os === "mac"
+                      ? `curl -fsSL https://lazer.shikkesora.com/install-mac.sh | bash${s.key === "nova" ? " -s -- nova" : ""}`
+                      : platform.os === "linux"
+                        ? `curl -fsSL https://lazer.shikkesora.com/install-linux.sh | bash${s.key === "nova" ? " -s -- nova" : ""}`
+                        : null;
+
+                  return (
+                    <>
+                      <a
+                        href={direct ?? fallback}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={cx(
+                          "flex items-center justify-center gap-2 w-full rounded-2xl border px-4 py-3 text-sm font-semibold text-white transition",
+                          s.accent.btn,
+                          !s.available && "opacity-70"
+                        )}
+                      >
+                        <span>{direct && asset ? asset.label : s.cta}</span>
+                        <span aria-hidden>{s.available ? (direct ? "⤓" : "↗") : "…"}</span>
+                      </a>
+
+                      {direct && asset?.note && (
+                        <p className="mt-2 text-xs text-white/45 text-center">{asset.note}</p>
+                      )}
+
+                      {platform.os === "android" && s.key === "torii" && (
+                        <p className="mt-2 text-xs text-white/45 text-center">The Android APK ships on the Nova channel.</p>
+                      )}
+
+                      {platform.os === "ios" && (
+                        <p className="mt-2 text-xs text-white/45 text-center">No iOS build yet. Grab it on a PC, Mac, Linux or Android.</p>
+                      )}
+
+                      {installLine && (
+                        <div className="mt-3 rounded-xl border border-white/10 bg-black/30 p-2.5">
+                          <div className="mb-1.5 text-[11px] uppercase tracking-wide text-white/40">or paste in Terminal (installs and keeps it updated)</div>
+                          <div className="flex items-center gap-2">
+                            <code className="min-w-0 flex-1 truncate text-xs text-white/80">{installLine}</code>
+                            <CopyButton value={installLine} accent={s.key === "nova" ? "violet" : "fuchsia"} />
+                          </div>
+                        </div>
+                      )}
+
+                      <p className="mt-2 text-xs text-white/30 text-center">
+                        {direct ? (
+                          <>Not your platform? <a className="underline hover:text-white/60" href={fallback} target="_blank" rel="noreferrer">All downloads ↗</a></>
+                        ) : s.available ? (
+                          <>Opens the releases page with every platform.</>
+                        ) : (
+                          <>Not out yet. The link takes you to the releases page.</>
+                        )}
+                      </p>
+                    </>
+                  );
+                })()}
               </div>
             </motion.div>
           ))}
