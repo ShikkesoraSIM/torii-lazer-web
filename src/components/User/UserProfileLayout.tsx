@@ -530,7 +530,16 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
         </Section>
 
         <Section>
-          <UserRecentScores userId={user.id} selectedMode={selectedMode} user={user} clientDisplayMode={scoreClientDisplayMode} />
+          <UserRecentScores
+            userId={user.id}
+            selectedMode={selectedMode}
+            user={user}
+            clientDisplayMode={scoreClientDisplayMode}
+            onPinnedListRefresh={() => {
+              pinnedScoresRefreshRef.current?.();
+              bestScoresRefreshRef.current?.();
+            }}
+          />
         </Section>
 
         <Section>

@@ -6,6 +6,8 @@ import { userAPI } from '../../utils/api';
 import type { BestScore, GameMode, User } from '../../types';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
 import LoadingSpinner from '../UI/LoadingSpinner';
+import ScoreActionsMenu from '../Score/ScoreActionsMenu';
+import { useAuth } from '../../contexts/AuthContext';
 import LazyBackgroundImage from '../UI/LazyBackgroundImage';
 import BeatmapLink from '../UI/BeatmapLink';
 import ScoreModsDisplay from './ScoreModsDisplay';
@@ -18,6 +20,7 @@ interface UserRecentScoresProps {
   user?: User;
   clientDisplayMode?: ScoreClientDisplayMode;
   className?: string;
+  onPinnedListRefresh?: () => void;
 }
 
 const formatTimeAgo = (dateString: string, t: any): string => {
@@ -75,8 +78,11 @@ const ScoreCard: React.FC<{
   profileColor: string;
   showPP?: boolean;
   clientDisplayMode?: ScoreClientDisplayMode;
+  canEdit?: boolean;
+  onPinChange?: (scoreId: number, isPinned: boolean) => void;
+  onPinnedListChange?: () => void;
   className?: string;
-}> = ({ score, t, profileColor, showPP = true, clientDisplayMode = 'icon', className = '' }) => {
+}> = ({ score, t, profileColor, showPP = true, clientDisplayMode = 'icon', canEdit = false, onPinChange, onPinnedListChange, className = '' }) => {
   // Required fields
   const rank = score.rank; // grade badge (S/A/B/C/D/F)
   const title = score.beatmapset?.title_unicode || score.beatmapset?.title || 'Unknown Title';
@@ -87,6 +93,8 @@ const ScoreCard: React.FC<{
   const originalPp = Math.round(score.pp || 0); // raw pp
   const mods = score.mods || []; // mod list
   const passed = score.passed; // whether the score passed
+  const isPinned = score.current_user_attributes?.pin?.is_pinned || false; // whether pinned
+  const hasReplay = score.has_replay || false; // whether a replay exists
 
   const beatmapUrl = score.beatmap?.url || '#';
   const coverImage = score.beatmapset?.covers?.['cover@2x'] || score.beatmapset?.covers?.cover;
@@ -188,14 +196,23 @@ const ScoreCard: React.FC<{
           </div>
 
           {/* Performance area on the right */}
-          {showPP && originalPp > 0 && (
-            <div className="absolute right-0 top-0 h-full w-20 flex items-center justify-center">
-              {/* PP value */}
+          <div className="absolute right-0 top-0 h-full flex items-center justify-center gap-2 pr-2">
+            {showPP && originalPp > 0 && (
               <div className={`text-sm font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${!passed ? 'text-gray-400 dark:text-gray-500' : 'torii-pp-gradient'}`}>
                 {originalPp} PP
               </div>
-            </div>
-          )}
+            )}
+            {/* Actions menu: only own, passed scores (the server rejects pinning fails) */}
+            {canEdit && passed && (
+              <ScoreActionsMenu
+                scoreId={score.id}
+                isPinned={isPinned}
+                hasReplay={hasReplay}
+                onPinChange={onPinChange}
+                onPinnedListChange={onPinnedListChange}
+              />
+            )}
+          </div>
         </div>
 
         {/* Mobile layout */}
@@ -263,11 +280,22 @@ const ScoreCard: React.FC<{
                     {accuracy}%
                   </div>
                 </div>
-                {showPP && originalPp > 0 && (
-                  <div className={`text-sm font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${!passed ? 'text-gray-400 dark:text-gray-500' : 'torii-pp-gradient'}`}>
-                    {originalPp} PP
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  {showPP && originalPp > 0 && (
+                    <div className={`text-sm font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${!passed ? 'text-gray-400 dark:text-gray-500' : 'torii-pp-gradient'}`}>
+                      {originalPp} PP
+                    </div>
+                  )}
+                  {canEdit && passed && (
+                    <ScoreActionsMenu
+                      scoreId={score.id}
+                      isPinned={isPinned}
+                      hasReplay={hasReplay}
+                      onPinChange={onPinChange}
+                      onPinnedListChange={onPinnedListChange}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -282,9 +310,11 @@ const UserRecentScores: React.FC<UserRecentScoresProps> = ({
   selectedMode,
   clientDisplayMode = 'icon',
   className = '',
+  onPinnedListRefresh,
 }) => {
   const { t } = useTranslation();
   const { profileColor } = useProfileColor();
+  const { user: currentUser } = useAuth();
   const [scores, setScores] = useState<BestScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -350,6 +380,21 @@ const UserRecentScores: React.FC<UserRecentScoresProps> = ({
     }
   };
 
+  const canEdit = currentUser?.id === userId;
+
+  // Flip the pin flag locally so the menu reflects the change without a refetch.
+  const handlePinChange = (scoreId: number, wasPinned: boolean) => {
+    setScores(prev => prev.map(s => s.id === scoreId
+      ? {
+          ...s,
+          current_user_attributes: {
+            ...s.current_user_attributes,
+            pin: { ...(s.current_user_attributes?.pin ?? {}), is_pinned: !wasPinned },
+          },
+        }
+      : s));
+  };
+
   if (loading) {
     return (
       <div className={`${className}`}>
@@ -413,6 +458,9 @@ const UserRecentScores: React.FC<UserRecentScoresProps> = ({
                 profileColor={profileColor}
                 showPP={score.passed}
                 clientDisplayMode={clientDisplayMode}
+                canEdit={canEdit}
+                onPinChange={handlePinChange}
+                onPinnedListChange={onPinnedListRefresh}
               />
             ))}
           </div>
