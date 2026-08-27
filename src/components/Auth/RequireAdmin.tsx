@@ -1,4 +1,5 @@
 import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 /**
@@ -15,7 +16,8 @@ import { useAuth } from '../../contexts/AuthContext';
  * pegado nunca funcionaba.
  */
 const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isBootstrapping } = useAuth();
+  const { user, isAuthenticated, isBootstrapping } = useAuth();
+  const location = useLocation();
 
   if (isBootstrapping) {
     return (
@@ -23,6 +25,13 @@ const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-pink" />
       </div>
     );
+  }
+
+  // Sin sesion se manda al login y de ahi se vuelve aca solo. Mostrarle "no
+  // tenes permiso" a alguien que simplemente no inicio sesion es una pantalla
+  // sin salida: ni le dice que le falta, ni le da como arreglarlo.
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location.pathname + location.search }} replace />;
   }
 
   if (!user?.is_admin) {

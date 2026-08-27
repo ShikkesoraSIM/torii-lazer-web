@@ -105,7 +105,7 @@ function App() {
                     <Route path="beatmaps" element={<BeatmapsPage />} />
                     <Route path="scores/:scoreId" element={<ScorePage />} />
                     <Route path="bbcode-test" element={<BBCodeTester />} />
-                    <Route path="admin" element={<AdminPanel />} />
+                    <Route path="admin" element={<RequireAdmin><AdminPanel /></RequireAdmin>} />
                     {/* Las dos de beatmaps colgaban sueltas sin ningun control:
                         cualquiera deslogueado abria el panel de moderacion. */}
                     <Route

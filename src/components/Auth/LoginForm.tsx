@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { Turnstile } from '@marsidev/react-turnstile';
@@ -13,6 +13,7 @@ const LoginForm: React.FC = () => {
   const { login, isLoading } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState<LoginFormType>({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
@@ -29,7 +30,11 @@ const LoginForm: React.FC = () => {
 
     const success = await login(formData.username, formData.password, turnstileToken);
     if (success) {
-      navigate('/profile');
+      // Volver a donde querias ir. Si llegaste al login porque intentaste abrir
+      // algo que pide sesion (el panel, por ejemplo), mandarte a tu perfil te
+      // obliga a buscar de nuevo a mano lo que ya habias pedido.
+      const from = (location.state as { from?: string } | null)?.from;
+      navigate(from ?? '/profile', { replace: true });
     } else {
       // Refresh turnstile on error
       if (turnstileRef.current) {

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
@@ -54,8 +53,7 @@ interface AdminStats {
 const SECTION_OWNER_ID = 3;
 
 const AdminPanel: React.FC = () => {
-  const { user, isBootstrapping } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,16 +61,11 @@ const AdminPanel: React.FC = () => {
   const canSeeOwnerSection = user?.id === SECTION_OWNER_ID;
 
   useEffect(() => {
-    // Nada de decidir mientras todavia estamos averiguando quien sos: en una
-    // carga fria user arranca null aunque seas admin, y sin esta guarda el
+    // El permiso lo decide RequireAdmin en la ruta: si llegamos hasta aca, es
+    // porque sos admin. Antes se chequeaba aca adentro con un navigate('/'), y
+    // en una carga fria user todavia era null aunque fueras admin, asi que el
     // panel se auto-expulsaba a la portada antes de que llegara la respuesta.
-    // Por eso entrar por link no funcionaba nunca y por boton siempre si.
-    if (isBootstrapping) return;
-
-    if (!user || !user.is_admin) {
-      navigate('/');
-      return;
-    }
+    // Por eso entrar por link nunca funcionaba y por boton siempre si.
 
     const loadStats = async () => {
       try {
@@ -87,24 +80,7 @@ const AdminPanel: React.FC = () => {
     };
 
     loadStats();
-  }, [user, navigate, isBootstrapping]);
-
-  if (isBootstrapping) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-pink" />
-      </div>
-    );
-  }
-
-  if (!user || !user.is_admin) {
-    return (
-      <div className="p-6">
-        <h2 className="text-xl font-semibold">Admin</h2>
-        <p className="mt-3">You do not have permission to view this page.</p>
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <main className="max-w-7xl mx-auto px-0 md:px-4 lg:px-6 py-4 md:py-6">
