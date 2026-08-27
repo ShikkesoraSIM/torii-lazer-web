@@ -2,12 +2,21 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import UserProfileLayout from '../components/User/UserProfileLayout';
+import ProfilePage from './ProfilePage';
+import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../utils/api';
 import type { User, GameMode, BestScore } from '../types';
 
 const UserPage: React.FC = () => {
   const { t } = useTranslation();
   const { userId } = useParams<{ userId: string }>();
+  const { user: authUser, isBootstrapping } = useAuth();
+
+  // /users/{tu id} es tu perfil, con todo lo que eso implica (cambiar de modo
+  // se guarda, por ejemplo). La diferencia con /profile es que ESTA url se
+  // puede copiar y mandar: /profile muestra al que la abre, asi que pasarsela
+  // a alguien nunca mostro tu perfil, le mostraba el de el.
+  const isSelf = !isBootstrapping && authUser != null && String(authUser.id) === userId;
   const [searchParams] = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [prefetchedBestScores, setPrefetchedBestScores] = useState<BestScore[] | null>(null);
@@ -53,6 +62,10 @@ const UserPage: React.FC = () => {
 
   useEffect(() => {
     if (!userId) return;
+    // Si el perfil es el tuyo lo dibuja ProfilePage con la data que el contexto
+    // ya tiene, asi que pedirla de nuevo seria tirar un fetch de perfil + uno
+    // de scores a la basura en cada visita a tu propio perfil.
+    if (isSelf) return;
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -105,7 +118,7 @@ const UserPage: React.FC = () => {
     return () => {
       abortController.abort();
     };
-  }, [userId, selectedMode, t]);
+  }, [userId, selectedMode, t, isSelf]);
 
   if (loading) {
     return (
@@ -123,6 +136,13 @@ const UserPage: React.FC = () => {
         <p className="text-gray-600">{error || t('profile.errors.checkId')}</p>
       </div>
     );
+  }
+
+  // Va aca abajo y no arriba de todo a proposito: los hooks tienen que correr
+  // siempre en el mismo orden, asi que primero se declaran todos y recien
+  // despues se decide que dibujar.
+  if (isSelf) {
+    return <ProfilePage />;
   }
 
   return (

@@ -7,7 +7,7 @@ import type { GameMode } from '../types';
 
 const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
-  const { user, isAuthenticated, isLoading, updateUserMode, updateUser } = useAuth();
+  const { user, isAuthenticated, isLoading, isBootstrapping, updateUserMode, updateUser } = useAuth();
   const [selectedMode, setSelectedMode] = useState<GameMode>('osu');
   
   const isUpdatingModeRef = useRef(false);
@@ -37,7 +37,11 @@ const ProfilePage: React.FC = () => {
       });
   }, [selectedMode, isAuthenticated, updateUserMode, user?.g0v0_playmode]);
 
-  if (isLoading) {
+  // isBootstrapping va junto con isLoading: esta rama del spinner existia
+  // desde siempre pero era inalcanzable en una carga fria, porque isLoading
+  // solo se prende cuando hay un login EN CURSO, no mientras averiguamos si ya
+  // habia sesion. Por eso se caia derecho a "necesitas iniciar sesion".
+  if (isLoading || isBootstrapping) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-pink" />

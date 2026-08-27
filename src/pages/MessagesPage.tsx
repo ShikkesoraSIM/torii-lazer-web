@@ -42,7 +42,7 @@ type ChannelFilter = 'all' | 'private' | 'team' | 'public';
 
 const MessagesPage: React.FC = () => {
   const { t } = useTranslation();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isBootstrapping } = useAuth();
   const [activeTab, setActiveTab] = useState<ActiveTab>('channels');
   const [channels, _setChannels] = useState<ChatChannel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<ChatChannel | null>(null);
@@ -1344,6 +1344,18 @@ const MessagesPage: React.FC = () => {
       );
     }
   };
+
+  // Mientras no sepamos quien sos no se decide nada. Sin esto la pantalla de
+  // "necesitas iniciar sesion" le ganaba la carrera a la respuesta del server y
+  // le aparecia a gente que SI estaba logueada, nada mas por abrir el link
+  // directo en vez de llegar por un boton.
+  if (isBootstrapping) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-pink" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

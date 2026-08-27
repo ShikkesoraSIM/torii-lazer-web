@@ -54,7 +54,7 @@ interface AdminStats {
 const SECTION_OWNER_ID = 3;
 
 const AdminPanel: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isBootstrapping } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -63,6 +63,12 @@ const AdminPanel: React.FC = () => {
   const canSeeOwnerSection = user?.id === SECTION_OWNER_ID;
 
   useEffect(() => {
+    // Nada de decidir mientras todavia estamos averiguando quien sos: en una
+    // carga fria user arranca null aunque seas admin, y sin esta guarda el
+    // panel se auto-expulsaba a la portada antes de que llegara la respuesta.
+    // Por eso entrar por link no funcionaba nunca y por boton siempre si.
+    if (isBootstrapping) return;
+
     if (!user || !user.is_admin) {
       navigate('/');
       return;
@@ -81,7 +87,15 @@ const AdminPanel: React.FC = () => {
     };
 
     loadStats();
-  }, [user, navigate]);
+  }, [user, navigate, isBootstrapping]);
+
+  if (isBootstrapping) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-pink" />
+      </div>
+    );
+  }
 
   if (!user || !user.is_admin) {
     return (

@@ -11,6 +11,10 @@ interface AuthContextType {
   restriction: RestrictionStatus | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  // Si todavia estamos averiguando quien sos. Distinto de isLoading, que es
+  // "hay un login en curso". Mientras esto sea true nadie puede decidir nada
+  // sobre la sesion: ver el comentario en isBootstrapping.
+  isBootstrapping: boolean;
   login: (username: string, password: string, turnstileToken?: string) => Promise<boolean>;
   register: (username: string, email: string, password: string, turnstileToken?: string) => Promise<boolean>;
   logout: () => void;
@@ -100,6 +104,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // auth-check takes.
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Arranca en true y baja recien cuando terminamos de mirar si hay sesion.
+  //
+  // Sin esto, durante todo el arranque el estado era IDENTICO al de alguien
+  // deslogueado (user null, isAuthenticated false, isLoading false), asi que
+  // cualquier pantalla que pregunte "estas logueado?" contestaba que no y te
+  // mandaba a la home antes de que la respuesta llegara. Por eso entrar a un
+  // link pegado te tiraba a la portada mientras que llegar por un boton
+  // andaba: para cuando apretas el boton la respuesta ya llego hace rato.
+  //
+  // Y por eso pasaba "a veces": es una carrera entre bajar el chunk de la
+  // pagina y que conteste getMe(). getMe() sale perdiendo cuando la api esta
+  // en otro dominio (dns + tls + preflight), cuando es la primera visita (hay
+  // que calcular la huella del dispositivo antes de mandar el request) y
+  // cuando abris en una pestania nueva (el cache es por pestania, siempre
+  // vacio). Las tres cosas pasan justo cuando alguien abre un link que le
+  // pasaron, que es exactamente el caso que se rompia.
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [restriction, setRestriction] = useState<RestrictionStatus | null>(null);
   const { t } = useTranslation();
 
@@ -191,7 +212,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     };
 
-    checkAuth();
+    // finally y no un setIsBootstrapping al final del cuerpo: checkAuth sale
+    // por tres lados distintos (sin token, cache valido, y el camino largo por
+    // la api) y si alguno se olvida de bajar la bandera la pagina se queda
+    // girando para siempre.
+    void checkAuth().finally(() => setIsBootstrapping(false));
   }, []);
 
   const login = useCallback(async (username: string, password: string, turnstileToken?: string): Promise<boolean> => {
@@ -356,6 +381,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       restriction,
       isLoading,
       isAuthenticated,
+      isBootstrapping,
       login,
       register,
       logout,
@@ -363,7 +389,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       refreshUser,
       updateUser,
     }),
-    [user, restriction, isLoading, isAuthenticated, login, register, logout, updateUserMode, refreshUser, updateUser],
+    [
+      user,
+      restriction,
+      isLoading,
+      isAuthenticated,
+      isBootstrapping,
+      login,
+      register,
+      logout,
+      updateUserMode,
+      refreshUser,
+      updateUser,
+    ],
   );
 
   return (

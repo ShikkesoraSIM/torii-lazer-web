@@ -20,7 +20,7 @@ const TABS: FriendTab[] = ['followers', 'following', 'mutuals'];
 
 const FriendsPage: React.FC = () => {
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isBootstrapping } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const initialTab = searchParams.get('tab') as FriendTab | null;
@@ -33,6 +33,11 @@ const FriendsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // No pedir la lista antes de saber si hay sesion: el request salia sin
+    // token, volvia 401 y pintaba un error rojo que se arreglaba solo un
+    // segundo despues. Ahora directamente no sale hasta que sabemos.
+    if (isBootstrapping) return;
+
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -62,7 +67,7 @@ const FriendsPage: React.FC = () => {
     };
     // Refetch when auth resolves — on a hard refresh the token may not be
     // ready on the first mount, so don't silently bail when unauthenticated.
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isBootstrapping]);
 
   useEffect(() => {
     setSearchParams({ tab }, { replace: true });

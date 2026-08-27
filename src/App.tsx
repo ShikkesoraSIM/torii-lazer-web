@@ -1,6 +1,7 @@
 
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import RequireAdmin from './components/Auth/RequireAdmin';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './contexts/AuthContext';
 import { AudioProvider } from './components/UI/AudioPlayer';
@@ -21,7 +22,7 @@ import HomePage from './pages/HomePage';
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const PasswordResetPage = lazy(() => import('./pages/PasswordResetPage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const ProfileRedirect = lazy(() => import('./pages/ProfileRedirect'));
 const UserPage = lazy(() => import('./pages/UserPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const RankingsPage = lazy(() => import('./pages/RankingsPage'));
@@ -76,7 +77,7 @@ function App() {
                     <Route path="login" element={<LoginPage />} />
                     <Route path="register" element={<RegisterPage />} />
                     <Route path="password-reset" element={<PasswordResetPage />} />
-                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="profile" element={<ProfileRedirect />} />
                     <Route path="users/:userId" element={<UserPage />} />
                     <Route path="settings" element={<SettingsPage />} />
                     <Route path="rankings" element={<RankingsPage />} />
@@ -105,8 +106,16 @@ function App() {
                     <Route path="scores/:scoreId" element={<ScorePage />} />
                     <Route path="bbcode-test" element={<BBCodeTester />} />
                     <Route path="admin" element={<AdminPanel />} />
-                    <Route path="admin/beatmaps" element={<AdminBeatmap />} />
-                    <Route path="admin/beatmaps/:id" element={<AdminBeatmapRankstatus />} />
+                    {/* Las dos de beatmaps colgaban sueltas sin ningun control:
+                        cualquiera deslogueado abria el panel de moderacion. */}
+                    <Route
+                      path="admin/beatmaps"
+                      element={<RequireAdmin><AdminBeatmap /></RequireAdmin>}
+                    />
+                    <Route
+                      path="admin/beatmaps/:id"
+                      element={<RequireAdmin><AdminBeatmapRankstatus /></RequireAdmin>}
+                    />
                     <Route
                       path="*"
                       element={

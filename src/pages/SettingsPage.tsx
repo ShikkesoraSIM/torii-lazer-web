@@ -21,7 +21,7 @@ import AvatarDefaultOptOut from '../components/Settings/AvatarDefaultOptOut';
 
 const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { user, isAuthenticated, isLoading, refreshUser } = useAuth();
+  const { user, isAuthenticated, isLoading, isBootstrapping, refreshUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,7 +79,8 @@ const SettingsPage: React.FC = () => {
     }
   }, [isAuthenticated, user]);
 
-  if (isLoading) {
+  // Ver ProfilePage: isLoading no cubre el arranque.
+  if (isLoading || isBootstrapping) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-pink"></div>
