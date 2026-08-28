@@ -65,7 +65,17 @@ const UserPage: React.FC = () => {
     // Si el perfil es el tuyo lo dibuja ProfilePage con la data que el contexto
     // ya tiene, asi que pedirla de nuevo seria tirar un fetch de perfil + uno
     // de scores a la basura en cada visita a tu propio perfil.
-    if (isSelf) return;
+    //
+    // Pero hay que APAGAR loading antes de salir. Arranca en true y el unico
+    // lugar que lo baja es el finally del fetch de abajo, que aca no corre: tu
+    // propio perfil se quedaba girando para siempre y era la unica pagina de
+    // todo el sitio que no podias ver. Y cuando isSelf se prende con el fetch
+    // en vuelo pasa lo mismo por otro lado: el cleanup lo aborta y el finally
+    // se saltea el setLoading porque justamente esta abortado.
+    if (isSelf) {
+      setLoading(false);
+      return;
+    }
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -120,6 +130,14 @@ const UserPage: React.FC = () => {
     };
   }, [userId, selectedMode, t, isSelf]);
 
+  // Tu propio perfil se decide ANTES que loading y que error: no depende de
+  // ningun fetch de esta pantalla, sale entero del contexto de auth. Preguntar
+  // por loading primero lo dejaba tapado atras de un spinner que nadie iba a
+  // apagar.
+  if (isSelf) {
+    return <ProfilePage />;
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -136,13 +154,6 @@ const UserPage: React.FC = () => {
         <p className="text-gray-600">{error || t('profile.errors.checkId')}</p>
       </div>
     );
-  }
-
-  // Va aca abajo y no arriba de todo a proposito: los hooks tienen que correr
-  // siempre en el mismo orden, asi que primero se declaran todos y recien
-  // despues se decide que dibujar.
-  if (isSelf) {
-    return <ProfilePage />;
   }
 
   return (
