@@ -59,14 +59,13 @@ Taiko, Catch and Mania apply the same idea through the mod whitelist: Flashlight
     heading: "Mods that never earn pp",
     body: `These bans are enforced in code and cannot be loosened by config:
 
-- Adaptive Speed (AS), osu! standard / Relax / Autopilot only. Always 0pp in that family.
+- Adaptive Speed (AS), every ruleset. The track speed follows you in real time while difficulty is measured once at base rate, so it is off server-wide.
 - Magnetised (MG), osu! standard / Relax / Autopilot only. Always 0pp in that family.
 - Bloom (BM), every ruleset. Its pp calculation is broken, so it is off server-wide.
 - Wind Down (WD), every ruleset. It ramps the song speed down over the map, so the effective rate ends up below base while difficulty is still measured at base rate. That would pay out pp for an easier play, so it is banned everywhere. Wind Up (WU) stays allowed because it only makes a play harder.
+- Constant Speed (CS), Taiko and Mania. It removes the scroll speed changes a map was rated with, so the play is easier than its star rating says. Unranked on official osu! for the same reason.
 - Mania Difficulty Adjust (DA) with Overall Difficulty 6 or lower. Always 0pp.
-- Mania Invert (IN). Always 0pp.
-
-One catch with Adaptive Speed: the hard ban only covers osu! standard, Relax and Autopilot. For Taiko and Mania it is not hard-banned in code, so whether it earns pp there comes down to the deployed mod whitelist.`,
+- Mania Invert (IN). Always 0pp.`,
   },
   {
     heading: "Mania difficulty uses the Sunny rework",
