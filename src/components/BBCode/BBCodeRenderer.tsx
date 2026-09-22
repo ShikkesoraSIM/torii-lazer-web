@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
+import { sanitizeBBCodeHtml } from '../../utils/sanitizeHtml';
 import '../../styles/bbcode.css';
 
 interface BBCodeRendererProps {
@@ -9,6 +10,7 @@ interface BBCodeRendererProps {
 /**
  */
 const BBCodeRenderer: React.FC<BBCodeRendererProps> = ({ html, className = '' }) => {
+  const safeHtml = useMemo(() => sanitizeBBCodeHtml(html), [html]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -184,7 +186,7 @@ const BBCodeRenderer: React.FC<BBCodeRendererProps> = ({ html, className = '' })
     <div
       ref={containerRef}
       className={`bbcode-renderer ${className}`}
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
       aria-live="polite"
     />
   );

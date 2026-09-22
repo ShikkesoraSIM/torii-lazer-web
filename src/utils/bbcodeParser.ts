@@ -283,14 +283,17 @@ export class BBCodeParser {
       hasParam: true,
       paramRequired: false,
       allowNested: false,
-      validator: (param?: string) => {
-        if (!param) return new TagValidationResult(true);
-        const url = param.replace(/^=/, '');
-        return new TagValidationResult(/^https?:\/\/.+/.test(url), et("invalidUrl"));
+      validator: (param?: string, content?: string) => {
+        // torii: la forma [url]x[/url] sin parametro no se validaba y el
+        // contenido iba derecho al href: [url]javascript:...[/url] era un link
+        // ejecutable. Se valida la URL venga de donde venga.
+        const url = param ? param.replace(/^=/, '') : content;
+        return new TagValidationResult(this.safeHttpUrl(url) !== null, et("invalidUrl"));
       },
       renderer: (content: string, param?: string) => {
-        const url = param ? param.replace(/^=/, '') : content;
-        const displayText = param ? content : url;
+        const url = this.safeHttpUrl(param ? param.replace(/^=/, '') : content);
+        const displayText = param ? content : (url ?? content);
+        if (!url) return this.escapeHtml(displayText);
         return `<a rel="nofollow" href="${this.escapeHtml(url)}">${this.escapeHtml(displayText)}</a>`;
       }
     });
@@ -348,7 +351,7 @@ export class BBCodeParser {
       isBlock: true,
       validator: (_param?: string, content?: string) => {
         if (!content) return new TagValidationResult(false, et("missingUrl"));
-        return new TagValidationResult(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(content), et("invalidImageUrl"));
+        return new TagValidationResult(/^https?:\/\/[^\s"'<>]+\.(jpg|jpeg|png|gif|webp)$/i.test(content), et("invalidImageUrl"));
       },
       renderer: (content: string) => {
         return `<img alt="" src="${this.escapeHtml(content)}" loading="lazy" />`;
@@ -381,7 +384,7 @@ export class BBCodeParser {
       isBlock: true,
       validator: (_param?: string, content?: string) => {
         if (!content) return new TagValidationResult(false, et("missingUrl"));
-        return new TagValidationResult(/^https?:\/\/.+\.(mp3|wav|ogg|m4a)$/i.test(content), et("invalidAudioUrl"));
+        return new TagValidationResult(/^https?:\/\/[^\s"'<>]+\.(mp3|wav|ogg|m4a)$/i.test(content), et("invalidAudioUrl"));
       },
       renderer: (content: string) => {
         return `<audio controls preload="none" src="${this.escapeHtml(content)}"></audio>`;
@@ -471,9 +474,28 @@ export class BBCodeParser {
       text = String(text || '');
     }
 
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    // torii: antes era textContent -> innerHTML, que escapa < > & pero NO las
+    // comillas (asi serializa el navegador un nodo de texto). Como el resultado
+    // va adentro de atributos (href, src, title) un [img] con
+    // `https://x" onerror="alert(1)//a.png` cerraba el src y colgaba un handler.
+    // Escapar a mano las cinco cosas sirve para texto y para atributos, y de
+    // paso no depende de `document`.
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  /**
+   * torii: una URL que puede ir en un href/src. Solo http(s), sin comillas ni
+   * espacios ni angulares; devuelve null si no sirve, y el que llama muestra el
+   * texto sin link en vez de arriesgar `javascript:`.
+   */
+  private safeHttpUrl(url: string | undefined): string | null {
+    const trimmed = (url ?? '').trim();
+    return /^https?:\/\/[^\s"'<>]+$/i.test(trimmed) ? trimmed : null;
   }
 
   /**
@@ -530,11 +552,17 @@ export class BBCodeParser {
             );
           } else {
             // Linked area: use an anchor tag (official approach)
-            const safeHref = this.escapeHtml(href);
+            // torii: el href no se validaba, cualquier esquema entraba al <a>.
+            // Si no es http(s) queda como area sin link, igual que "#".
+            const safeUrl = this.safeHttpUrl(href);
             const safeTitle = this.escapeHtml(title);
-            links.push(
-              `<a class="imagemap__link" href="${safeHref}" style="${style}" title="${safeTitle}"></a>`
-            );
+            if (!safeUrl) {
+              links.push(`<span class="imagemap__link" style="${style}" title="${safeTitle}"></span>`);
+            } else {
+              links.push(
+                `<a class="imagemap__link" href="${this.escapeHtml(safeUrl)}" style="${style}" title="${safeTitle}"></a>`
+              );
+            }
           }
         } catch {
           // Skip lines that fail to parse

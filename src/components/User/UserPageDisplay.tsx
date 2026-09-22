@@ -7,6 +7,7 @@ import { FaEdit, FaUser } from 'react-icons/fa';
 import ContentContainer from '../UI/ContentContainer';
 import UserPageEditModal from './UserPageEditModal';
 import { parseBBCode } from '../../utils/bbcodeParser';
+import { sanitizeBBCodeHtml } from '../../utils/sanitizeHtml';
 
 interface UserPageDisplayProps {
   user: User;
@@ -150,10 +151,10 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
       <ContentContainer maxHeight={300} className="user-page-content">
         <div className="prose prose-sm dark:prose-invert max-w-none">
           {userPage.html ? (
-            <div dangerouslySetInnerHTML={{ __html: userPage.html }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeBBCodeHtml(userPage.html) }} />
           ) : userPage.raw ? (
             // No HTML but raw content exists: use the local BBCode parser
-            <div dangerouslySetInnerHTML={{ __html: parseBBCode(String(userPage.raw || '')).html }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeBBCodeHtml(parseBBCode(String(userPage.raw || '')).html) }} />
           ) : (
             <div className="text-gray-500 dark:text-gray-400 italic">
               {t('profile.userPage.processing')}
