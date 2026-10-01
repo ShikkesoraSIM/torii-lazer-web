@@ -13,13 +13,31 @@ Every point change is written to a ledger, which is the real record. The number 
   },
   {
     heading: "Top plays",
-    body: `A top play is a score that becomes your new pp-best on a map, either your first pp score there or a higher-pp score than your previous best on it.
+    body: `A top play is a score that becomes your new pp-best on a map: your first pp score there, or a higher-pp score than your previous best on it. Each mode keeps its own list of top plays, and relax and autopilot count as their own modes.
 
-- Reward: 100 points per new top play.
-- Requirement: you need at least 50 top plays in that mode before any new top play starts paying. This stops fresh accounts from farming their first scores.
-- Daily cap: at most 5 top-play awards per day, rolling over at UTC midnight.
+The reward has two parts. Both depend on where the play lands among your best plays in that mode and on how many top plays you already have there (your tenure).
 
-So the most you can get from top plays in a day is 500 points, and only once you are past the 50 top-play mark.`,
+- Rank base: a new #1 pays the most (250), then top 5 (120), top 25 (45), top 50 (20) and top 100 (8). Below #100 the base is zero. With fewer than 500 top plays in the mode the base is roughly half of that (120 for a #1, 60 for a top 5, and so on).
+- pp bonus: the pp the play added to your weighted total in that mode, one point per pp, capped at 150 (60 under 500 top plays). A 1200pp play that moves your total by 3pp pays 3 here, not 1200.
+- A PB that adds less than 1pp to your total pays no rank base, only the pp bonus. Beating your own #1 by 0.01pp is not a reward.
+
+Gates and limits:
+
+- You need 50 top plays in that mode before top plays pay anything beyond crumbs (3 to 8 points).
+- Daily soft cap: once you have earned 500 top-play points in a UTC day, further top plays pay only their pp bonus, no rank base. The in-game points card tells you when this happens.
+- Daily hard cap: 800 top-play points per UTC day, counted across all modes together. Past it, top plays pay zero until midnight UTC.
+- Relax and autopilot plays pay 40% of the normal amount, because pp there is cheap.
+- Plays outside your main mode pay 60% of the normal amount. See the next section.`,
+  },
+  {
+    heading: "Your main mode and the other modes",
+    body: `Your main mode is the mode where you have the most pp, with relax and autopilot counted as separate modes. It is not a setting: it follows your pp and can change over time. If two modes are tied, the mode you just played counts as main.
+
+A top play in any other mode pays 60% of what the same play would pay in your main mode. Both the rank base and the pp bonus are scaled. The in-game points card says so when it applies ("not your main mode"), and your points history shows the percentage next to the award.
+
+Why: every mode has its own top-play list, so in a mode you barely play almost any decent score is a new #1 or top 5, and your pp total there moves a lot with each play. That rewards being new to something, not being good at it. Before this rule, the player with the most points ever had earned 89% of them in modes that were not their main one. Playing several modes still pays more than playing one, just not several times more.
+
+Relax and autopilot stack with this: a relax play outside your main mode pays 40% of 60%.`,
   },
   {
     heading: "Daily play and streak",
