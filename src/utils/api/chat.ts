@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { AxiosRequestConfig } from 'axios';
 
 export const chatAPI = {
   getChannels: async () => {
@@ -60,8 +61,8 @@ export const chatAPI = {
     return response.data;
   },
 
-  joinChannel: async (channelId: string | number) => {
-    const response = await api.post(`/api/v2/chat/channels/${channelId}/join`);
+  joinChannel: async (channelId: string | number, userId: number, config?: AxiosRequestConfig) => {
+    const response = await api.put(`/api/v2/chat/channels/${channelId}/users/${userId}`, undefined, config);
     return response.data;
   },
 

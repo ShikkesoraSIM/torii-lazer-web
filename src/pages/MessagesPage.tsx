@@ -1,3 +1,4 @@
+import { insertChatMessage } from '../utils/chatMessages';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -76,10 +77,13 @@ const MessagesPage: React.FC = () => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const selectedChannelRef = useRef<ChatChannel | null>(null);
+  const channelDetailRequestRef = useRef<AbortController | null>(null);
   const channelsRef = useRef<ChatChannel[]>([]);
   const initialLoadRef = useRef<boolean>(true);
   const userScrolledUpRef = useRef<boolean>(false);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => () => channelDetailRequestRef.current?.abort(), []);
 
   const setChannels = useCallback((value: ChatChannel[] | ((prev: ChatChannel[]) => ChatChannel[])) => {
     _setChannels(prev => {
@@ -403,6 +407,21 @@ const MessagesPage: React.FC = () => {
     selectedChannelRef.current = channel;
   const requestToken = Symbol('channel-load');
   (selectChannel as any).currentToken = requestToken;
+    channelDetailRequestRef.current?.abort();
+    channelDetailRequestRef.current = null;
+    if (user) {
+      const controller = new AbortController();
+      channelDetailRequestRef.current = controller;
+      void chatAPI.joinChannel(channel.channel_id, user.id, { signal: controller.signal }).then((detail: ChatChannel) => {
+        if (controller.signal.aborted || detail?.channel_id !== channel.channel_id) return;
+        setChannels(prev => prev.map(item => item.channel_id === channel.channel_id ? { ...item, ...detail } : item));
+        if (selectedChannelRef.current?.channel_id === channel.channel_id) {
+          const updated = { ...selectedChannelRef.current, ...detail };
+          selectedChannelRef.current = updated;
+          setSelectedChannel(updated);
+        }
+      }).catch(() => {});
+    }
     
     if (isMobile) {
       setShowSidebar(false);
@@ -499,6 +518,7 @@ const MessagesPage: React.FC = () => {
   };
 
   const addMessageToList = useCallback((message: ChatMessage, _source: 'api' | 'websocket') => {
+    apiCache.invalidateChannelMessages(message.channel_id);
     
     const currentChannel = selectedChannelRef.current;
     if (!currentChannel || message.channel_id !== currentChannel.channel_id) {
@@ -511,16 +531,8 @@ const MessagesPage: React.FC = () => {
     };
     
     setMessages(prev => {
-      const existsById = prev.find(m => m.message_id === message.message_id);
-      if (existsById) {
-        return prev;
-      }
-      
-      
-      const newMessages = [...prev, messageWithLocalTime];
-      newMessages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-      
-  messagesRef.current = newMessages;
+      const newMessages = insertChatMessage(prev, messageWithLocalTime);
+      messagesRef.current = newMessages;
       return newMessages;
     });
 
@@ -1720,7 +1732,7 @@ const MessagesPage: React.FC = () => {
                 }
                 
                 return (
-                  <div key={`message-${message.message_id}-${message.channel_id}-${index}`} data-message-id={message.message_id}>
+                  <div key={`message-${message.message_id}-${message.channel_id}`} data-message-id={message.message_id}>
                     <MessageBubble
                       message={message}
                       currentUser={user || undefined}
