@@ -208,7 +208,8 @@ export const userAPI = {
     userId: number,
     mode: string = 'osu',
     limit: number = 6,
-    offset: number = 0
+    offset: number = 0,
+    config?: AxiosRequestConfig,
   ) => {
     const params = new URLSearchParams();
     params.append('limit', limit.toString());
@@ -217,8 +218,10 @@ export const userAPI = {
 
     const url = `/api/v2/users/${userId}/scores/best?${params.toString()}`;
     const response = await api.get(url, {
+      ...config,
       headers: {
         'x-api-version': '20220705',
+        ...config?.headers,
       },
     });
     return response.data;

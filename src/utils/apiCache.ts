@@ -7,11 +7,29 @@ class APICache {
   private channelMessagesCache = new Map<number, { data: ChatMessage[]; timestamp: number }>();
   private channelListCache: { data: ChatChannel[]; timestamp: number } | null = null;
   private pendingRequests = new Map<string, Promise<any>>();
+  private activeUserRequests = 0;
+  private userRequestQueue: Array<() => void> = [];
 
   private readonly USER_CACHE_DURATION = 5 * 60 * 1000;
   private readonly MISSING_USER_CACHE_DURATION = 30 * 60 * 1000;
   private readonly CHANNEL_MESSAGES_CACHE_DURATION = 2 * 60 * 1000;
   private readonly CHANNEL_LIST_CACHE_DURATION = 30 * 1000;
+
+  private async fetchUser(userId: number): Promise<User> {
+    if (this.activeUserRequests < 5) {
+      this.activeUserRequests++;
+    } else {
+      await new Promise<void>(resolve => this.userRequestQueue.push(resolve));
+    }
+
+    try {
+      return await userAPI.getUser(userId);
+    } finally {
+      const next = this.userRequestQueue.shift();
+      if (next) next();
+      else this.activeUserRequests--;
+    }
+  }
 
   async getUser(userId: number): Promise<User | null> {
     const cacheKey = `user-${userId}`;
@@ -31,7 +49,7 @@ class APICache {
     }
 
     try {
-      const promise = userAPI.getUser(userId);
+      const promise = this.fetchUser(userId);
       this.pendingRequests.set(cacheKey, promise);
 
       const userData = await promise;
@@ -69,23 +87,17 @@ class APICache {
 
     if (toFetch.length > 0) {
       const batchSize = 5;
-      const promises: Promise<void>[] = [];
-
       for (let i = 0; i < toFetch.length; i += batchSize) {
         const batch = toFetch.slice(i, i + batchSize);
-        const batchPromise = Promise.allSettled(
+        await Promise.allSettled(
           batch.map(async (userId) => {
             const user = await this.getUser(userId);
             if (user) {
               results.set(userId, user);
             }
           })
-        ).then(() => {});
-
-        promises.push(batchPromise);
+        );
       }
-
-      await Promise.all(promises);
     }
 
     return results;

@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { AxiosRequestConfig } from 'axios';
 
 export interface NavbarSearchUser {
   id: number;
@@ -24,8 +25,14 @@ export interface NavbarSearchResponse {
 }
 
 export const searchAPI = {
-  navbarSearch: async (query: string, usersLimit: number = 6, teamsLimit: number = 6) => {
+  navbarSearch: async (
+    query: string,
+    usersLimit: number = 6,
+    teamsLimit: number = 6,
+    config?: AxiosRequestConfig,
+  ) => {
     const response = await api.get<NavbarSearchResponse>('/api/v2/search', {
+      ...config,
       params: {
         q: query,
         users_limit: usersLimit,

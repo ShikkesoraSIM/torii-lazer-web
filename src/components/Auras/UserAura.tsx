@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getAuraPreset } from './registry';
 import Particle from './Particle';
 import type { ParticleConfig } from './types';
@@ -65,9 +65,9 @@ const UserAura: React.FC<UserAuraProps> = ({ auraId, children, className }) => {
     };
   }, [preset]);
 
-  const handleParticleDone = (id: number) => {
+  const handleParticleDone = useCallback((id: number) => {
     setParticles(curr => curr.filter(p => p.id !== id));
-  };
+  }, []);
 
   if (!preset) {
     // Cheap path — no DOM nodes, no spawn loop.

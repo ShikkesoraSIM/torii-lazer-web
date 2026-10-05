@@ -31,6 +31,13 @@ const shouldDebugCoverMedia = (): boolean => {
 
 export const isCoverDebugEnabled = (): boolean => shouldDebugCoverMedia();
 
+export const needsUserCoverHydration = (user?: UserWithCover | null): boolean =>
+  !!user && user.cover_url === undefined && (
+    user.cover === undefined || (
+      user.cover !== null && user.cover.url === undefined && user.cover.custom_url === undefined
+    )
+  );
+
 const debugCoverMedia = (
   message: string,
   payload: Record<string, unknown>

@@ -1,14 +1,18 @@
 import { api } from './client';
+import type { AxiosRequestConfig } from 'axios';
 
 export const beatmapAPI = {
-  searchBeatmaps: async (params: Record<string, string | number | boolean | undefined>) => {
+  searchBeatmaps: async (
+    params: Record<string, string | number | boolean | undefined>,
+    config?: AxiosRequestConfig,
+  ) => {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         searchParams.append(key, String(value));
       }
     });
-    const response = await api.get(`/api/v2/beatmapsets/search?${searchParams.toString()}`);
+    const response = await api.get(`/api/v2/beatmapsets/search?${searchParams.toString()}`, config);
     return response.data;
   },
 

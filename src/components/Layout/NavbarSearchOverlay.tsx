@@ -143,19 +143,20 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
     }
 
     const fetchId = ++fetchIdRef.current;
+    const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       setIsLoading(true);
       try {
         const [searchResult, beatmapResult] = await Promise.allSettled([
-          searchAPI.navbarSearch(trimmedQuery, MAX_USER_RESULTS, MAX_TEAM_RESULTS),
+          searchAPI.navbarSearch(trimmedQuery, MAX_USER_RESULTS, MAX_TEAM_RESULTS, { signal: controller.signal }),
           beatmapAPI.searchBeatmaps({
             q: trimmedQuery,
             s: 'leaderboard',
             sort: 'relevance_desc',
-          }),
+          }, { signal: controller.signal }),
         ]);
 
-        if (fetchId !== fetchIdRef.current) return;
+        if (controller.signal.aborted || fetchId !== fetchIdRef.current) return;
 
         let nextUsers: NavbarSearchUser[] = [];
         let nextTeams: NavbarSearchTeam[] = [];
@@ -169,7 +170,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
           searchUnavailable = error?.response?.status === 404;
           // Backward-compatible fallback: exact username lookup.
           try {
-            const exactUser = await userAPI.getUser(trimmedQuery);
+            const exactUser = await userAPI.getUser(trimmedQuery, undefined, { signal: controller.signal });
             if (exactUser?.id && exactUser?.username) {
               nextUsers = [
                 {
@@ -192,24 +193,28 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
             ? (beatmapResult.value?.beatmapsets ?? []).slice(0, MAX_BEATMAP_RESULTS)
             : [];
 
+        if (controller.signal.aborted || fetchId !== fetchIdRef.current) return;
         setDirectorySearchUnavailable(searchUnavailable);
         setUsers(nextUsers);
         setTeams(nextTeams);
         setBeatmaps(nextBeatmaps);
       } catch (error) {
-        if (fetchId === fetchIdRef.current) {
+        if (!controller.signal.aborted && fetchId === fetchIdRef.current) {
           resetResults();
           setDirectorySearchUnavailable(false);
         }
         console.error('Navbar search failed:', error);
       } finally {
-        if (fetchId === fetchIdRef.current) {
+        if (!controller.signal.aborted && fetchId === fetchIdRef.current) {
           setIsLoading(false);
         }
       }
     }, 220);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
   }, [query, isOpen]);
 
   const hasResults = beatmaps.length > 0 || users.length > 0 || teams.length > 0;

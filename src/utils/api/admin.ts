@@ -1,6 +1,5 @@
 import { api } from './client';
 import type { ModCatalogByRuleset } from '../../types/mods';
-import { BUNDLED_MODS_CATALOG } from '../../data/modsCatalog';
 
 export interface RecalcTask {
   id: number;
@@ -457,11 +456,11 @@ export const adminAPI = {
     try {
       const response = await api.get('/api/private/admin/mods-catalog');
       const normalized = normalize(response.data?.rulesets);
-      return normalized ?? BUNDLED_MODS_CATALOG;
+      return normalized ?? (await import('../../data/modsCatalog')).BUNDLED_MODS_CATALOG;
     } catch {
       // 404 (endpoint missing on old server) or any network error —
       // fall back to the bundled copy.
-      return BUNDLED_MODS_CATALOG;
+      return (await import('../../data/modsCatalog')).BUNDLED_MODS_CATALOG;
     }
   },
 

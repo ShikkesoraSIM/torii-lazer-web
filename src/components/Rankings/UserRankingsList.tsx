@@ -3,7 +3,7 @@ import { FiAward } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import UserRankingCard from './UserRankingCard';
 import { apiCache } from '../../utils/apiCache';
-import { isCoverDebugEnabled, pickUserCoverCandidates } from '../../utils/profileMedia';
+import { isCoverDebugEnabled, needsUserCoverHydration, pickUserCoverCandidates } from '../../utils/profileMedia';
 import type { TopUsersResponse, GameMode, RankingType, UserRanking, User } from '../../types';
 
 interface Props {
@@ -24,7 +24,7 @@ const UserRankingsList: React.FC<Props> = ({ rankings, currentPage, selectedMode
     if (!rankings || !rankings.ranking.length) return;
 
     const userIdsToHydrate = rankings.ranking
-      .filter((entry) => pickUserCoverCandidates(entry.user).length === 0)
+      .filter((entry) => needsUserCoverHydration(entry.user))
       .map((entry) => entry.user.id);
 
     if (isCoverDebugEnabled()) {

@@ -94,8 +94,8 @@ const UserPage: React.FC = () => {
     const scoresPrefetchKey = `${numericUserId}:${selectedMode}`;
 
     Promise.allSettled([
-      userAPI.getUser(userId, selectedMode),
-      userAPI.getBestScores(numericUserId, selectedMode, 6, 0),
+      userAPI.getUser(userId, selectedMode, { signal: abortController.signal }),
+      userAPI.getBestScores(numericUserId, selectedMode, 6, 0, { signal: abortController.signal }),
     ])
       .then(([userResult, bestScoresResult]) => {
         if (userResult.status !== 'fulfilled') {
