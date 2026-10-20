@@ -13,6 +13,7 @@ import {
   FiSettings,
   FiGlobe,
   FiCheck,
+  FiLogIn,
   FiLogOut,
 } from 'react-icons/fi';
 import {
@@ -516,7 +517,7 @@ const Navbar: React.FC = () => {
   return (
     <>
       <header
-        className={`hidden md:flex fixed ${restriction?.is_restricted ? '' : 'top-4'} left-0 right-0 z-50 justify-center px-4`}
+        className={`hidden lg:flex fixed ${restriction?.is_restricted ? '' : 'top-4'} left-0 right-0 z-50 justify-center px-4`}
         style={restriction?.is_restricted ? { top: 'calc(var(--restriction-banner-h, 0px) + 0.25rem)' } : undefined}
       >
         <div className="w-full max-w-7xl">
@@ -657,20 +658,20 @@ const Navbar: React.FC = () => {
       </header>
 
       <header
-        className={`md:hidden fixed ${restriction?.is_restricted ? '' : 'top-0'} left-0 right-0 z-50 px-3 pt-3`}
+        className={`lg:hidden fixed ${restriction?.is_restricted ? '' : 'top-0'} left-0 right-0 z-50 px-3 pt-3`}
         style={restriction?.is_restricted ? { top: 'calc(var(--restriction-banner-h, 0px) + 0.25rem)' } : undefined}
       >
         <div className="rounded-3xl torii-nav-liquid">
           <div className="flex items-center justify-between px-4 py-3">
-            <Link to="/" title={t('nav.home')} className="group flex items-center gap-3">
+            <Link to="/" title={t('nav.home')} className="group flex shrink-0 items-center gap-2">
               <BrandMark size={36} />
-              <div className="leading-tight">
+              <div className="hidden min-[360px]:block leading-tight">
                 <span className="block text-white font-semibold group-hover:text-white/90 transition">Torii</span>
-                <span className="text-white/55 text-xs -mt-0.5 hidden min-[420px]:block">forged in Shikke's Dojo</span>
+                <span className="text-white/55 text-xs -mt-0.5 hidden min-[600px]:block">forged in Shikke's Dojo</span>
               </div>
             </Link>
 
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5">
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.95 }}
@@ -725,9 +726,12 @@ const Navbar: React.FC = () => {
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Link
                     to="/login"
-                    className="px-4 py-2 text-sm font-semibold text-white bg-white/10 hover:bg-white/15 rounded-2xl transition-all duration-200 border border-white/10"
+                    title={t('nav.login')}
+                    aria-label={t('nav.login')}
+                    className="inline-flex h-10 w-10 min-[480px]:w-auto min-[480px]:px-4 items-center justify-center whitespace-nowrap text-sm font-semibold text-white bg-white/10 hover:bg-white/15 rounded-2xl transition-all duration-200 border border-white/10"
                   >
-                    {t('nav.login')}
+                    <FiLogIn size={18} className="min-[480px]:hidden" aria-hidden="true" />
+                    <span className="hidden min-[480px]:inline">{t('nav.login')}</span>
                   </Link>
                 </motion.div>
               )}

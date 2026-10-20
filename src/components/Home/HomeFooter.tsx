@@ -1,37 +1,21 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 
-const HomeFooter: React.FC = () => {
+export default function HomeFooter() {
   return (
-    <footer className="border-t border-white/10 bg-black/20 backdrop-blur-xl">
-      <div className="mx-auto w-full max-w-6xl px-4 py-8 text-sm text-white/60">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div>
-            <div className="text-white/75 font-semibold">Shikkesora lazer server</div>
-            <div className="mt-1">Not affiliated with ppy. Community-run private server.</div>
-            <div className="mt-1 text-white/45">
-              Some art and default avatars on Torii are AI-assisted.{' '}
-              <Link to="/about" className="underline hover:text-white transition">
-                About Torii
-              </Link>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Link className="hover:text-white transition" to="/about">
-              About Torii
-            </Link>
-            <a className="hover:text-white transition" href="https://shikkesora.com" target="_blank" rel="noreferrer">
-              shikkesora.com
-            </a>
-            <a className="hover:text-white transition" href="https://lazer-api.shikkesora.com" target="_blank" rel="noreferrer">
-              API
-            </a>
-          </div>
+    <footer className="torii-home__footer">
+      <div className="torii-home__footer-inner">
+        <div>
+          <p className="torii-home__footer-brand">Torii</p>
+          <p>A community-run osu! server. Not affiliated with ppy.</p>
+          <p>Built on osu! and g0v0, with thanks to their contributors.</p>
+          <p className="torii-home__art-credit">Some art and default avatars on Torii are AI-assisted.</p>
         </div>
+        <nav aria-label="About Torii">
+          <Link to="/about">About Torii</Link>
+          <a href="https://shikkesora.com" target="_blank" rel="noreferrer">shikkesora.com</a>
+          <a href="https://lazer-api.shikkesora.com" target="_blank" rel="noreferrer">API</a>
+        </nav>
       </div>
     </footer>
   );
-};
-
-export default HomeFooter;
+}

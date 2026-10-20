@@ -1,73 +1,51 @@
 export const homePage = {
   hero: {
-    tagline: 'Probably the best osu! private server',
-    description:
-      'Shikke Lazer Dojo! is a osu! private server <bold>built for the lazer client</bold>. We support the standard / taiko / catch / mania rulesets, RX/AP pp calculation, and unlimited renames so you can play your way.',
+    welcome: 'welcome to',
+    tagline: 'Train in the mountains, without limits.',
+    description: 'PP on unranked maps. Ranked rate changes, community maps & most mods.',
+    downloadCta: 'Download Torii',
+    browseBeatmaps: 'Browse beatmaps',
+    createAccount: 'Create an account',
+    beatmaps: 'Beatmaps',
+    setupGuide: 'Setup guide',
+    serverRules: 'Server rules',
+    explore: 'Explore Torii',
     statusOperational: 'All services are operational',
     statusCommunity: 'Join our Discord community for support and updates',
-    joinCta: 'Join Now',
+    joinCta: 'Join Torii',
     viewProfile: 'View profile',
     viewRankings: 'View rankings',
     register: 'Sign up',
     login: 'Sign in',
-    featuresTitle: 'Feature highlights',
-    featuresSubtitle: 'Discover the rich features and services we provide for you',
+    featuresTitle: 'What you get here',
+    featuresSubtitle: 'A few extras on top of osu!',
     community: {
       discord: 'Discord',
       github: 'GitHub',
       discordTag: 'Shikkes Dojo',
     },
   },
-
   features: {
     items: [
       {
-        title: 'Works on every platform',
-        content:
-          'Shikke Lazer Dojo! is designed for lazer, which means you can play on any system that supports osu! lazer without platform limitations.',
-        imageAlt: 'Works on every platform',
+        title: 'pp on (almost) every map',
+        content: 'Loved, pending, graveyard and community maps can award pp.',
+        imageAlt: 'Unranked map pp',
       },
       {
-        title: 'Faster beatmap downloads',
-        content:
-          'We use Sayobot mirror services to deliver speedy downloads for players in China, so grabbing maps is no longer a waiting game.',
-        imageAlt: 'Faster beatmap downloads',
+        title: 'mods that still count',
+        content: 'Rate changes and Difficulty Adjust are ranked here, along with most mods.',
+        imageAlt: 'Ranked mods',
       },
       {
-        title: 'Active community support',
-        content:
-          'Our official Discord server provide the perfect place to ask for help, share highlights, or just hang out.',
-        imageAlt: 'Active community support',
+        title: 'make it yours',
+        content: "Change the game's colours and earn name colours, auras and trails by playing.",
+        imageAlt: 'Torii customisation',
       },
       {
-        title: 'Ultimate customization',
-        content:
-          'Freely change your username, upload custom banners, and create a dazzling profile and signature—let your creativity run wild.',
-        imageAlt: 'Ultimate customization',
-      },
-      {
-        title: 'Developer friendly',
-        content:
-          'Our server follows the official osu! v1/v2 API specs so you can integrate bots and services into Shikkesora faster and easier.',
-        imageAlt: 'Developer friendly',
-      },
-      {
-        title: 'Open and transparent',
-        content:
-          'Both the server and client are open source. The server also provides hook support so you can extend it with plugins (in development).',
-        imageAlt: 'Open and transparent',
-      },
-      {
-        title: 'User-submitted beatmaps',
-        content:
-          'Submit your own beatmaps or ranked-ineligible maps from the official server and get them approved here (in development).',
-        imageAlt: 'User-submitted beatmaps',
-      },
-      {
-        title: 'Ruleset leaderboards',
-        content:
-          'We support custom ruleset score calculations and submissions, plus robust leaderboard support (in development).',
-        imageAlt: 'Ruleset leaderboards',
+        title: 'relax and autopilot rank',
+        content: 'Separate pp, leaderboards and profile tabs for Relax and Autopilot.',
+        imageAlt: 'Relax and Autopilot rankings',
       },
     ],
   },
