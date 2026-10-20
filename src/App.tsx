@@ -7,6 +7,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { AudioProvider } from './components/UI/AudioPlayer';
 import { VerificationProvider } from './contexts/VerificationContext';
 import { ProfileColorProvider } from './contexts/ProfileColorContext';
+import { FrontendExperienceProvider } from './contexts/FrontendExperienceContext';
 import ScrollToTop from './components/ScrollToTop';
 import Layout from './components/Layout/Layout';
 import LoadingSpinner from './components/UI/LoadingSpinner';
@@ -69,9 +70,10 @@ function App() {
         <VerificationProvider>
           <AudioProvider>
             <Router>
-              <ScrollToTop />
-              <Suspense fallback={<PageFallback />}>
-                <Routes>
+              <FrontendExperienceProvider>
+                <ScrollToTop />
+                <Suspense fallback={<PageFallback />}>
+                  <Routes>
                   <Route path="/" element={<Layout />}>
                     <Route index element={<HomePage />} />
                     <Route path="login" element={<LoginPage />} />
@@ -104,6 +106,7 @@ function App() {
                     <Route path="beatmapsets/:beatmapsetId" element={<BeatmapPage />} />
                     <Route path="beatmaps" element={<BeatmapsPage />} />
                     <Route path="scores/:scoreId" element={<ScorePage />} />
+                    <Route path="frontend-choice" element={<div className="frontend-choice-page" />} />
                     <Route path="bbcode-test" element={<BBCodeTester />} />
                     <Route path="admin" element={<RequireAdmin><AdminPanel /></RequireAdmin>} />
                     {/* Las dos de beatmaps colgaban sueltas sin ningun control:
@@ -125,8 +128,9 @@ function App() {
                       }
                     />
                   </Route>
-                </Routes>
-              </Suspense>
+                  </Routes>
+                </Suspense>
+              </FrontendExperienceProvider>
             </Router>
           </AudioProvider>
         </VerificationProvider>

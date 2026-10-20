@@ -1457,10 +1457,7 @@ html.perf-mode .torii-app-shell::before {
   background: linear-gradient(180deg, #030014 0%, #050a24 45%, #04081d 100%);
 }
 
-/* ---------------------------------------------------------------- switch al
-   frontend nuevo. Flota abajo a la derecha en todas las paginas y lleva la
-   ruta actual al otro frontend, asi caes donde ya estabas.
-   ------------------------------------------------------------------------ */
+/* Abre el selector de frontend sin perder la pagina actual. */
 .torii-frontend-switch {
   position: fixed;
   right: 1.25rem;
@@ -1468,48 +1465,33 @@ html.perf-mode .torii-app-shell::before {
   z-index: 60;
   display: grid;
   place-items: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 9999px;
-  color: #fff;
-  background: linear-gradient(135deg, var(--osu-pink, #ED8EA6), #a855f7);
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 1px solid #ffffff26;
+  border-radius: 50%;
+  color: var(--osu-pink, #ED8EA6);
+  background: #242428;
   box-shadow: 0 4px 14px rgba(0, 0, 0, .28);
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform .28s cubic-bezier(.4, 0, .2, 1), border-color .2s ease, background-color .2s ease;
 }
 
 .torii-frontend-switch:hover,
 .torii-frontend-switch:focus-visible {
-  transform: translateY(-2px) scale(1.06);
-  box-shadow: 0 8px 26px rgba(168, 85, 247, .5);
+  transform: translateY(-1px) scale(1.035);
+  border-color: var(--osu-pink, #ED8EA6);
+  background: #303035;
+}
+
+.torii-frontend-switch:focus-visible {
+  outline: 2px solid var(--osu-pink, #ED8EA6);
+  outline-offset: 4px;
 }
 
 .torii-frontend-switch svg {
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.5rem;
+  height: 1.5rem;
   position: relative;
   z-index: 1;
-}
-
-/* El glow: un halo que respira detras del boton. */
-.torii-frontend-switch__glow {
-  position: absolute;
-  inset: -6px;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, var(--osu-pink, #ED8EA6), #a855f7);
-  filter: blur(12px);
-  opacity: .55;
-  animation: torii-switch-breathe 2.8s ease-in-out infinite;
-}
-
-@keyframes torii-switch-breathe {
-  0%, 100% { opacity: .40; transform: scale(1); }
-  50%      { opacity: .75; transform: scale(1.10); }
-}
-
-/* Respetar a quien pidio menos movimiento. */
-@media (prefers-reduced-motion: reduce) {
-  .torii-frontend-switch__glow { animation: none; }
-  .torii-frontend-switch { transition: none; }
 }
 
 .torii-frontend-switch__tip {
@@ -1524,9 +1506,9 @@ html.perf-mode .torii-app-shell::before {
   max-width: 15rem;
   padding: .55rem .75rem;
   border-radius: .5rem;
-  background: var(--bg-secondary, #1f2937);
-  color: var(--text-primary, #f9fafb);
-  border: 1px solid var(--border-color, #374151);
+  background: #242428;
+  color: #f6f6f7;
+  border: 1px solid #ffffff26;
   box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
   font-size: .8rem;
   line-height: 1.25;
@@ -1547,7 +1529,7 @@ html.perf-mode .torii-app-shell::before {
 
 /* En pantallas chicas el tooltip no entra al costado: va arriba del boton. */
 @media (max-width: 640px) {
-  .torii-frontend-switch { width: 2.75rem; height: 2.75rem; right: 1rem; bottom: 1rem; }
+  .torii-frontend-switch { width: 3.25rem; height: 3.25rem; right: 1rem; bottom: 1rem; }
   .torii-frontend-switch__tip {
     right: 0;
     bottom: calc(100% + .6rem);

@@ -77,7 +77,7 @@ const Layout: React.FC = () => {
       />
       {/* One shared country-flag tooltip for the whole app (CountryFlag points here). */}
       <Tooltip id="country-tooltip" place="bottom" float style={{ zIndex: 9999 }} />
-      {/* Salto al frontend nuevo, conservando la ruta actual. */}
+      {/* Volver a elegir el frontend, conservando la ruta actual. */}
       <FrontendSwitch />
       </div>
     </NotificationProvider>
