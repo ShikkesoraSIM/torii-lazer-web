@@ -1,5 +1,7 @@
 .torii-home {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   color: #fff;
   background: #030014;
   font-family: Outfit, system-ui, sans-serif;
@@ -10,6 +12,15 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .torii-home__hero {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .torii-home__image,
@@ -23,12 +34,12 @@
 
 .torii-home__image {
   object-fit: cover;
-  object-position: 65% center;
+  object-position: 68% top;
 }
 
 .torii-home__hero::after {
   content: '';
-  background: linear-gradient(180deg, rgba(3, 0, 20, 0.3), rgba(3, 0, 20, 0.5) 42%, #030014 100%);
+  background: linear-gradient(180deg, rgba(3, 0, 20, 0.2), rgba(3, 0, 20, 0.45) 55%, #030014 100%);
 }
 
 .torii-home__content {
@@ -254,6 +265,7 @@
 }
 
 .torii-home__footer {
+  margin-top: auto;
   border-top: 1px solid #ffffff1a;
   background: #00000033;
   color: #ffffff99;
@@ -309,7 +321,7 @@
   }
 
   .torii-home__image {
-    object-position: 68% center;
+    object-position: 68% top;
   }
 
   .torii-home__hero::after {
