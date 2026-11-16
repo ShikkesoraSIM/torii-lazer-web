@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserRound } from 'lucide-react';
 import { api } from '../../utils/api/client';
@@ -12,14 +12,25 @@ interface ProfilesResponse {
 
 export default function PlayerProfileSelector({ userId, mode }: { userId: number; mode: GameMode }) {
   const navigate = useNavigate();
-  const { data, isPending, isError, refetch } = useQuery({
-    queryKey: ['player-profiles', userId, mode],
-    queryFn: async ({ signal }) => (await api.get<ProfilesResponse>(`/api/private/torii/profiles/${userId}`, { params: { mode }, signal })).data,
-    staleTime: 60_000,
-    retry: false,
-  });
+  const [data, setData] = useState<ProfilesResponse>();
+  const [isError, setIsError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    setData(undefined);
+    setIsError(false);
+    void api.get<ProfilesResponse>(`/api/private/torii/profiles/${userId}`, {
+      params: { mode }, signal: controller.signal,
+    }).then(response => {
+      if (!controller.signal.aborted) setData(response.data);
+    }).catch(() => {
+      if (!controller.signal.aborted) setIsError(true);
+    });
+    return () => controller.abort();
+  }, [userId, mode, attempt]);
+  const isPending = !data && !isError;
   if (isPending) return <span className="mt-2 block text-xs text-white/50">Loading player profiles...</span>;
-  if (isError) return <button type="button" className="mt-2 text-xs text-white/60 underline" onClick={() => void refetch()}>Retry player profiles</button>;
+  if (isError) return <button type="button" className="mt-2 text-xs text-white/60 underline" onClick={() => setAttempt(value => value + 1)}>Retry player profiles</button>;
   if (!data) return null;
   const selected = data.profiles.some(profile => profile.user_id === userId) ? userId : '';
   return (
