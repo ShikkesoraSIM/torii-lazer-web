@@ -135,7 +135,7 @@ const UserPage: React.FC = () => {
   // por loading primero lo dejaba tapado atras de un spinner que nadie iba a
   // apagar.
   if (isSelf) {
-    return <ProfilePage />;
+    return <ProfilePage key={modeFromUrl || 'default'} initialMode={modeFromUrl || undefined} />;
   }
 
   if (loading) {

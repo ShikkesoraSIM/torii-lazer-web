@@ -9,6 +9,7 @@ import LevelProgress from '../UI/LevelProgress';
 import { type User, type GameMode, type BestScore } from '../../types';
 import FriendStats from './FriendStats';
 import UserRecentActivity from './UserRecentActivity';
+import PlayerProfileSelector from './PlayerProfileSelector';
 import UserPinnedScores from './UserPinnedScores';
 import UserBestScores from './UserBestScores';
 import UserRecentScores from './UserRecentScores';
@@ -318,6 +319,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
 
               <div className="min-w-0 flex-1 md:pb-1">
                 <h1 className="font-heading text-2xl font-bold tracking-wide text-white md:text-3xl">{user.username}</h1>
+                <PlayerProfileSelector key={`${user.id}:${selectedMode}`} userId={user.id} mode={selectedMode} />
 
                 {(user as any).groups?.length > 0 && (
                   <div className="mt-1.5">

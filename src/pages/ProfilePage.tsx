@@ -5,20 +5,20 @@ import { useAuth } from '../hooks/useAuth';
 import UserProfileLayout from '../components/User/UserProfileLayout';
 import type { GameMode } from '../types';
 
-const ProfilePage: React.FC = () => {
+const ProfilePage: React.FC<{ initialMode?: GameMode }> = ({ initialMode }) => {
   const { t } = useTranslation();
   const { user, isAuthenticated, isLoading, isBootstrapping, updateUserMode, updateUser } = useAuth();
-  const [selectedMode, setSelectedMode] = useState<GameMode>('osu');
+  const [selectedMode, setSelectedMode] = useState<GameMode>(initialMode || 'osu');
   
   const isUpdatingModeRef = useRef(false);
   const latestModeRef = useRef<GameMode>(selectedMode);
 
   useEffect(() => {
-    if (user?.g0v0_playmode && user.g0v0_playmode !== selectedMode) {
+    if (!initialMode && user?.g0v0_playmode && user.g0v0_playmode !== selectedMode) {
       setSelectedMode(user.g0v0_playmode);
       latestModeRef.current = user.g0v0_playmode;
     }
-  }, [user?.g0v0_playmode]);
+  }, [user?.g0v0_playmode, initialMode]);
 
   useEffect(() => {
     if (!isAuthenticated || isUpdatingModeRef.current) return;
