@@ -1,5 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import {
+  FolderSync,
+  Gauge,
+  Palette,
+  Sliders,
+  Smartphone,
+  Sparkles,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -13,8 +23,6 @@ const TORII_STABLE_URL =
   "https://github.com/ShikkesoraSIM/torii/releases/latest";
 const TORII_NOVA_URL =
   "https://github.com/ShikkesoraSIM/torii/releases";
-
-const SERVER_HOST = "lazer-api.shikkesora.com";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -137,209 +145,66 @@ function CopyButton({
   );
 }
 
-function CodeBox({
-  label,
-  value,
-  accent = "fuchsia",
-}: {
-  label: string;
-  value: string;
-  accent?: "fuchsia" | "violet";
-}) {
-  return (
-    <div className={cx("mt-3 rounded-2xl border bg-black/30 p-4", accent === "fuchsia" ? "border-fuchsia-400/20" : "border-violet-400/20")}>
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="text-xs uppercase tracking-wider text-white/40">{label}</div>
-        <CopyButton value={value} accent={accent} />
-      </div>
-      <code className={cx("block select-text break-all rounded-xl border border-white/10 bg-black/20 px-3 py-2 font-mono text-sm", accent === "fuchsia" ? "text-fuchsia-200" : "text-violet-200")}>
-        {value}
-      </code>
-    </div>
-  );
-}
-
 // ─── Feature card data ────────────────────────────────────────────────────────
 
-interface FeatureItem {
-  icon: string;
+interface CompactFeature {
+  icon: React.ReactNode;
   title: string;
   tag: string;
-  tagColor: string;
+  accent: string;
   description: string;
-  preview: React.ReactNode | null;
 }
 
-const FEATURES: FeatureItem[] = [
+const COMPACT_FEATURES: CompactFeature[] = [
   {
-    icon: "📊",
-    title: "pp-dev calculations",
-    tag: "standard",
-    tagColor: "fuchsia",
+    icon: <TrendingUp className="h-4 w-4 text-fuchsia-300" />,
+    title: "Torii pp & Mania Sunny",
+    tag: "Ranking",
+    accent: "border-fuchsia-400/25 bg-fuchsia-500/10 text-fuchsia-200",
     description:
-      "Torii uses the latest pp-dev algorithm — the newest version of the performance system, period.",
-    preview: null,
+      "Standard plays use server-side pp-dev, and osu!mania star rating runs on the Sunny rework.",
   },
   {
-    icon: "📋",
-    title: "Daily Briefing",
-    tag: "exclusive",
-    tagColor: "pink",
+    icon: <Sliders className="h-4 w-4 text-rose-300" />,
+    title: "Exclusive Mods",
+    tag: "Gameplay",
+    accent: "border-rose-400/25 bg-rose-500/10 text-rose-200",
     description:
-      "Every time you open the client, Torii shows a smart daily summary: rank changes, pp gained or lost from recalculations, your top-gaining and worst-losing scores, and more.",
-    preview: (
-      <div className="mt-3 rounded-xl border border-pink-400/20 bg-black/30 p-3 text-xs">
-        <div className="text-[10px] uppercase tracking-widest text-pink-400 mb-1">Rank Pulse</div>
-        <div className="text-white font-semibold text-sm mb-0.5">Your rank held steady</div>
-        <div className="text-white/50 text-[11px] mb-3">#100 → #100 / 693pp (+0.00pp)</div>
-        <div className="text-[10px] uppercase tracking-widest text-pink-400 mb-1">Recalculation Watch</div>
-        <div className="space-y-1">
-          <div className="flex items-center gap-1.5">
-            <span className="text-green-400 text-[10px]">▲</span>
-            <span className="text-green-300 text-[11px]">+17.36pp</span>
-            <span className="text-white/40 text-[11px] truncate">Party Favor - Booty Loose...</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-red-400 text-[10px]">▼</span>
-            <span className="text-red-300 text-[11px]">-9.37pp</span>
-            <span className="text-white/40 text-[11px] truncate">Erika - I Don't Know...</span>
-          </div>
-        </div>
-      </div>
-    ),
+      "Play with Amplify (AM) spacing, Classic scoring, ScoreV2, or VR on Meta Quest and SteamVR.",
   },
   {
-    icon: "🎨",
-    title: "Custom UI hue",
-    tag: "exclusive",
-    tagColor: "pink",
+    icon: <Gauge className="h-4 w-4 text-amber-300" />,
+    title: "Satori GC & 8000 Hz",
+    tag: "Performance",
+    accent: "border-amber-400/25 bg-amber-500/10 text-amber-200",
     description:
-      "Dial in the exact color you want for the entire client — menus, overlays, song select, settings panel. One slider, full 360° control. Apply it everywhere or just in specific places.",
-    preview: (
-      <div className="mt-3 rounded-xl border border-purple-400/20 bg-black/30 p-3 text-xs">
-        <div className="text-white/50 text-[11px] mb-2">Custom UI hue</div>
-        <div className="flex items-center gap-3">
-          <div className="h-2 flex-1 rounded-full" style={{ background: "linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)" }} />
-          <span className="text-white font-bold text-sm rounded-lg px-2 py-1" style={{ background: "#7c3aed" }}>280°</span>
-        </div>
-        <div className="mt-2 text-white/40 text-[10px]">Applied to: menus · overlays · settings panel</div>
-      </div>
-    ),
+      "Built on .NET 10 and .NET 11 with Satori GC, thread rates up to 8000 Hz, and Potato Mode for low-end PCs.",
   },
   {
-    icon: "⚡",
-    title: "Performance extras",
-    tag: "performance",
-    tagColor: "orange",
+    icon: <Zap className="h-4 w-4 text-sky-300" />,
+    title: "In-game QoL",
+    tag: "Quality of Life",
+    accent: "border-sky-400/25 bg-sky-500/10 text-sky-200",
     description:
-      "Unlimited FPS, NVIDIA Reflex support, AMD Anti-Lag 2 — the performance-first extras baked right into the Torii client.",
-    preview: (
-      <div className="mt-3 rounded-xl border border-orange-400/20 bg-black/30 p-3 text-xs">
-        <div className="space-y-1.5 text-[11px]">
-          {["Unlimited FPS", "NVIDIA Reflex", "AMD Anti-Lag 2"].map(item => (
-            <div key={item} className="flex items-center gap-2">
-              <span className="text-orange-400">⚡</span>
-              <span className="text-white/70">{item}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    ),
+      "Skip long mid-map breaks, protect runs with Confirm Retry/Quit after 60s, and use beatmap theme music.",
   },
   {
-    icon: "🎹",
-    title: "Mania Sunny rework",
-    tag: "mania",
-    tagColor: "yellow",
+    icon: <Smartphone className="h-4 w-4 text-emerald-300" />,
+    title: "Android & Oboe Audio",
+    tag: "Mobile",
+    accent: "border-emerald-400/25 bg-emerald-500/10 text-emerald-200",
     description:
-      "Mania pp runs the Sunny algorithm rework — a more accurate model for key-based gameplay that better captures jack, stream, and LN difficulty.",
-    preview: (
-      <div className="mt-3 rounded-xl border border-yellow-400/20 bg-black/30 p-3 text-xs">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="rounded bg-yellow-500/20 border border-yellow-400/30 px-2 py-0.5 text-yellow-200 text-[11px] font-bold">Mania</span>
-          <span className="text-white/40 text-[11px]">Sunny rework active</span>
-        </div>
-        <div className="text-white/55 text-[11px]">Skill-based weighting for 4K–8K, jack, stream, and LN patterns.</div>
-      </div>
-    ),
+      "Native ARM64 Android build with low-latency Google Oboe audio (around 15 to 30 ms).",
   },
   {
-    icon: "🏅",
-    title: "User title badges",
-    tag: "exclusive",
-    tagColor: "violet",
+    icon: <FolderSync className="h-4 w-4 text-violet-300" />,
+    title: "Data Folder Wizard",
+    tag: "Setup",
+    accent: "border-violet-400/25 bg-violet-500/10 text-violet-200",
     description:
-      "Server groups and roles show up as colored badges next to usernames throughout the client — in chat, leaderboards, and profiles. Each badge has its own color and style.",
-    preview: (
-      <div className="mt-3 rounded-xl border border-violet-400/20 bg-black/30 p-3 text-xs">
-        <div className="flex flex-wrap gap-1.5">
-          {([
-            { label: "NYA", color: "#f472b6" },
-            { label: "DEV", color: "#818cf8" },
-            { label: "MOD", color: "#34d399" },
-          ] as const).map(({ label, color }) => (
-            <span
-              key={label}
-              className="rounded px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide border"
-              style={{ color, borderColor: `${color}55`, background: `${color}18` }}
-            >
-              {label}
-            </span>
-          ))}
-        </div>
-        <div className="mt-2 text-white/40 text-[10px]">Visible in chat, leaderboards & profiles.</div>
-      </div>
-    ),
-  },
-  {
-    icon: "💾",
-    title: "Choose your data folder",
-    tag: "setup",
-    tagColor: "sky",
-    description:
-      "The setup wizard can use an existing compatible data folder. This shares that folder rather than copying it. Back up your data before switching.",
-    preview: (
-      <div className="mt-3 rounded-xl border border-sky-400/20 bg-black/30 p-3 text-xs">
-        <div className="space-y-1.5 text-[11px]">
-          {["Choose an existing compatible folder", "Or start with a separate Torii folder", "Keep a backup before switching"].map(item => (
-            <div key={item} className="flex items-center gap-2">
-              <span className="text-green-400 font-bold">✓</span>
-              <span className="text-white/60">{item}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    ),
-  },
-  {
-    icon: "🔀",
-    title: "Multi-server in one click",
-    tag: "exclusive",
-    tagColor: "pink",
-    description:
-      "Switch between Torii, g0v0, vipsu, m1pp and other compatible servers directly from the settings panel. No manual URL editing — just tap and reconnect.",
-    preview: (
-      <div className="mt-3 rounded-xl border border-blue-400/20 bg-black/30 p-3 text-xs">
-        <div className="text-white/50 text-[11px] mb-2">Popular Torii-compatible servers</div>
-        <div className="flex flex-wrap gap-1.5">
-          {(["Torii", "g0v0", "vipsu", "m1pp"] as const).map((s, i) => (
-            <span key={s} className={cx("rounded-full px-3 py-1 text-[11px] font-semibold border", i === 0 ? "bg-fuchsia-500/20 border-fuchsia-400/40 text-fuchsia-200" : "bg-white/5 border-white/10 text-white/60")}>{s}</span>
-          ))}
-        </div>
-      </div>
-    ),
+      "Start fresh or point Torii at an existing compatible folder in place without duplicating all your maps.",
   },
 ];
-
-const TAG_COLORS: Record<string, string> = {
-  fuchsia: "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200",
-  pink: "border-pink-400/30 bg-pink-500/10 text-pink-200",
-  violet: "border-violet-400/30 bg-violet-500/10 text-violet-200",
-  yellow: "border-yellow-400/30 bg-yellow-500/10 text-yellow-200",
-  green: "border-green-400/30 bg-green-500/10 text-green-200",
-  sky: "border-sky-400/30 bg-sky-500/10 text-sky-200",
-  orange: "border-orange-400/30 bg-orange-500/10 text-orange-200",
-};
 
 // ─── Download streams ─────────────────────────────────────────────────────────
 
@@ -703,61 +568,133 @@ export default function HowToJoinPage() {
         })()}
 
         {/* ── Features showcase ─────────────────────────────────────────── */}
-        <div ref={featuresRef} className="scroll-mt-32 mt-28">
+        <div ref={featuresRef} className="scroll-mt-32 mt-24">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-12"
+            transition={{ duration: 0.45 }}
+            className="mb-10 flex flex-col gap-2 md:flex-row md:items-end md:justify-between"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              What's inside the Torii client
-            </h2>
-            <p className="text-white/50 max-w-xl mx-auto text-sm">
-              These are actual features you get from day one — not promises.
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-widest text-fuchsia-300/80">
+                Built into Torii
+              </span>
+              <h2 className="mt-1 text-3xl font-bold tracking-tight text-white md:text-4xl">
+                What you get in the client
+              </h2>
+            </div>
+            <p className="max-w-md text-sm text-white/55">
+              Everything below ships out of the box on Windows, macOS, Linux, Android, and Meta Quest.
             </p>
           </motion.div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {FEATURES.map((f, i) => (
+          {/* Featured bento row */}
+          <div className="mb-4 grid gap-4 lg:grid-cols-2">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col justify-between rounded-2xl border border-fuchsia-400/20 bg-gradient-to-br from-fuchsia-950/35 via-white/[0.02] to-black/30 p-6 backdrop-blur"
+            >
+              <div>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-fuchsia-400/30 bg-fuchsia-500/15">
+                    <Palette className="h-4 w-4 text-fuchsia-300" />
+                  </div>
+                  <span className="rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-fuchsia-200">
+                    Customization
+                  </span>
+                </div>
+                <h3 className="text-lg font-semibold text-white">Classic UI, Custom Hue &amp; BG Editor</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-white/60">
+                  Toggle the classic stable layout for song select, results, and gameplay, dial any 360° UI hue, or edit and pin your main menu backgrounds.
+                </p>
+              </div>
+              <div className="mt-5 rounded-xl border border-white/10 bg-black/35 p-3.5">
+                <div className="mb-2 flex items-center justify-between text-[11px] text-white/55">
+                  <span>UI Theme &amp; Hue</span>
+                  <span className="rounded bg-fuchsia-500/20 px-2 py-0.5 font-mono text-fuchsia-200">280° · Classic UI</span>
+                </div>
+                <div
+                  className="h-2 w-full rounded-full"
+                  style={{ background: "linear-gradient(to right, #f43f5e, #f59e0b, #10b981, #06b6d4, #6366f1, #d946ef, #f43f5e)" }}
+                />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.06 }}
+              className="flex flex-col justify-between rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-950/35 via-white/[0.02] to-black/30 p-6 backdrop-blur"
+            >
+              <div>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-violet-400/30 bg-violet-500/15">
+                    <Sparkles className="h-4 w-4 text-violet-300" />
+                  </div>
+                  <span className="rounded-full border border-violet-400/30 bg-violet-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-violet-200">
+                    Profiles &amp; Rank
+                  </span>
+                </div>
+                <h3 className="text-lg font-semibold text-white">Player Profiles &amp; Daily Briefing</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-white/60">
+                  Create separate profiles with their own mod rules and rate/pitch settings, and see rank, pp, and recalc changes every time you log in.
+                </p>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-2.5 rounded-xl border border-white/10 bg-black/35 p-3.5 text-xs">
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider text-violet-300/80">Rank Pulse</div>
+                  <div className="mt-0.5 font-semibold text-white">#100 → #94</div>
+                  <div className="text-[11px] text-emerald-300">+17.36pp today</div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider text-violet-300/80">Recalc Replay</div>
+                  <div className="mt-0.5 font-semibold text-white">Top plays diff</div>
+                  <div className="text-[11px] text-white/50">Old pp → New pp</div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Compact 6-card grid */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {COMPACT_FEATURES.map((f, i) => (
               <motion.div
                 key={f.title}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.06 }}
-                className="rounded-2xl border border-white/8 bg-white/3 p-5 backdrop-blur hover:border-white/14 hover:bg-white/5 transition flex flex-col"
+                transition={{ duration: 0.35, delay: i * 0.04 }}
+                className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.025] p-5 backdrop-blur transition hover:border-white/20 hover:bg-white/[0.04]"
               >
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <span className="text-2xl select-none">{f.icon}</span>
-                  <span className={cx("rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide shrink-0", TAG_COLORS[f.tagColor])}>
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-black/30">
+                    {f.icon}
+                  </div>
+                  <span className={cx("rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide", f.accent)}>
                     {f.tag}
                   </span>
                 </div>
-                <h3 className="text-white font-semibold text-sm mb-2">{f.title}</h3>
-                <p className="text-white/50 text-xs leading-relaxed">{f.description}</p>
-                {f.preview}
+                <h3 className="text-sm font-semibold text-white">{f.title}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-white/55">{f.description}</p>
               </motion.div>
             ))}
           </div>
 
           {/* CTA below features */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-            className="mt-10 text-center"
-          >
+          <div className="mt-8 text-center">
             <button
               onClick={() => scrollTo(toriiSetupRef)}
-              className="inline-flex items-center gap-2 rounded-2xl border border-fuchsia-400/40 bg-fuchsia-500/15 px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-fuchsia-500/25 hover:border-fuchsia-400/60"
+              className="inline-flex items-center gap-2 rounded-2xl border border-fuchsia-400/35 bg-fuchsia-500/15 px-7 py-3 text-sm font-semibold text-white transition hover:border-fuchsia-400/60 hover:bg-fuchsia-500/25"
             >
-              Set up the Torii client
+              <span>Quick setup guide</span>
               <span className="text-fuchsia-300">↓</span>
             </button>
-          </motion.div>
+          </div>
         </div>
 
         {/* ── Torii client setup ────────────────────────────────────────── */}
@@ -768,77 +705,55 @@ export default function HowToJoinPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
           >
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl select-none">🎌</span>
-              <h3 className="text-3xl font-bold text-white">Torii client setup</h3>
+            <div className="mb-8">
+              <span className="text-xs font-semibold uppercase tracking-widest text-fuchsia-300/80">
+                4 steps
+              </span>
+              <h3 className="mt-1 text-3xl font-bold tracking-tight text-white">Quick setup</h3>
+              <p className="mt-1 text-sm text-white/50">Download, pick your data folder, and log in. Nothing else to configure.</p>
             </div>
-            <p className="text-white/45 mb-8 ml-12">Download, run, done. The wizard handles the rest.</p>
 
-            <div className="rounded-3xl border border-fuchsia-400/15 bg-white/3 p-8 backdrop-blur">
-              <ol className="space-y-10 text-white/70">
+            <div className="grid gap-4 md:grid-cols-2">
+              {[
+                {
+                  step: "1",
+                  title: "Grab the download for your device",
+                  body: "Use the Torii or Nova button at the top of this page. It detects your OS and picks the right installer, AppImage, Mac zip, or APK.",
+                },
+                {
+                  step: "2",
+                  title: "Run the installer or app",
+                  body: "On Windows run the setup .exe. On macOS or Linux you can also paste the Terminal one-liner on the card to install and keep it updated.",
+                },
+                {
+                  step: "3",
+                  title: "Choose your data folder",
+                  body: "In the first-run wizard, start a fresh Torii folder or point it at an existing compatible folder. Sharing an existing folder uses it in place without copying, so back it up first.",
+                },
+                {
+                  step: "4",
+                  title: "Log in and play",
+                  body: "Sign in with your Torii account or create one right inside the client. Connection is built in, with no server URLs to enter.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.step}
+                  className="rounded-2xl border border-white/10 bg-white/[0.025] p-6 backdrop-blur"
+                >
+                  <div className="mb-3 flex items-center gap-3">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-fuchsia-400/35 bg-fuchsia-500/15 text-xs font-bold text-fuchsia-200">
+                      {item.step}
+                    </span>
+                    <h4 className="text-base font-semibold text-white">{item.title}</h4>
+                  </div>
+                  <p className="text-sm leading-relaxed text-white/60">{item.body}</p>
+                </div>
+              ))}
+            </div>
 
-                <li>
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-sm font-bold text-fuchsia-200">1</span>
-                    <span className="font-semibold text-white text-lg">Download the Torii client</span>
-                  </div>
-                  <div className="ml-11">
-                    <p className="text-sm mb-3 text-white/55">Head to the latest GitHub release and grab the Windows portable build.</p>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-fuchsia-400/20 bg-black/30 p-4">
-                      <a className="break-all text-fuchsia-300 underline text-sm" href={TORII_STABLE_URL} target="_blank" rel="noreferrer">
-                        {TORII_STABLE_URL}
-                      </a>
-                      <CopyButton value={TORII_STABLE_URL} accent="fuchsia" />
-                    </div>
-                  </div>
-                </li>
-
-                <li>
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-sm font-bold text-fuchsia-200">2</span>
-                    <span className="font-semibold text-white text-lg">Extract and run</span>
-                  </div>
-                  <div className="ml-11 text-sm text-white/55">
-                    Unzip into a new folder and launch <code className="text-fuchsia-200 bg-fuchsia-500/10 rounded px-1.5 py-0.5">torii.exe</code>. The setup wizard appears on first launch.
-                  </div>
-                </li>
-
-                <li>
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-sm font-bold text-fuchsia-200">3</span>
-                    <span className="font-semibold text-white text-lg">Follow the setup wizard</span>
-                  </div>
-                  <div className="ml-11">
-                    <p className="text-sm mb-3 text-white/55">Choose a separate Torii data folder, or select an existing compatible folder. Selecting an existing folder shares its data; it does not make a backup or copy. Back it up first and close other clients using it. Torii may close after confirmation; open it again to continue.</p>
-                    <div className="rounded-2xl border border-sky-400/20 bg-sky-500/5 p-4 text-sm">
-                      <p className="text-sky-200 font-semibold mb-1">💡 Tip</p>
-                      <p className="text-white/55">Skipped the wizard? Run it later from <span className="text-white/75 font-medium">Settings → Torii → Manage Torii data source</span>.</p>
-                    </div>
-                  </div>
-                </li>
-
-                <li>
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-sm font-bold text-fuchsia-200">4</span>
-                    <span className="font-semibold text-white text-lg">Server is pre-configured</span>
-                  </div>
-                  <div className="ml-11">
-                    <p className="text-sm mb-3 text-white/55">The Torii client points to the server by default. If you ever need to set it manually (e.g. switching servers), go to <span className="text-white/75">Settings → Torii → Server</span>:</p>
-                    <CodeBox label="Server Address" value={SERVER_HOST} accent="fuchsia" />
-                  </div>
-                </li>
-
-                <li>
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-sm font-bold text-fuchsia-200">5</span>
-                    <span className="font-semibold text-white text-lg">Log in and play</span>
-                  </div>
-                  <div className="ml-11 text-sm text-white/55">
-                    Log in with your Torii account (or register one) and you're ready. All exclusive features are active by default.
-                  </div>
-                </li>
-
-              </ol>
+            <div className="mt-4 rounded-2xl border border-sky-400/20 bg-sky-500/5 px-5 py-3.5 text-xs text-white/60">
+              <span className="font-semibold text-sky-200">Tip:</span> Skipped the folder wizard? Open it anytime from{" "}
+              <span className="font-medium text-white/85">Settings → Torii → Manage Torii data source</span>.
             </div>
           </motion.div>
         </div>
