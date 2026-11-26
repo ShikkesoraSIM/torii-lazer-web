@@ -349,7 +349,7 @@ export default function HowToJoinPage() {
             Torii is played on the{" "}
             <span className="text-fuchsia-300 font-medium">Torii client</span>. Grab
             either of these two versions. They both connect to the same server and
-            share your account, so pick whichever runs best on your PC.
+            share your account, so pick whichever runs best on your device.
           </p>
           <p className="mx-auto mt-5 max-w-2xl text-sm text-white/70">
             Torii is an independent community project, not an official osu! client or service.
