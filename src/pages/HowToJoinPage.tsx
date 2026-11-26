@@ -559,7 +559,7 @@ export default function HowToJoinPage() {
                   {vrTab === "quest" ? (
                     <div className="space-y-2.5 leading-relaxed">
                       <ol className="list-decimal list-inside space-y-1.5 text-white/60">
-                        <li>Enable <span className="text-white/85 font-medium">Developer Mode</span> once in the Meta Horizon mobile app (Devices → Headset Settings → Developer Mode).</li>
+                        <li>Enable <span className="text-white/85 font-medium">Developer Mode</span> once in the Meta Horizon mobile app (Devices <ArrowRight className="inline h-3 w-3 text-white/45" aria-hidden /> Headset Settings <ArrowRight className="inline h-3 w-3 text-white/45" aria-hidden /> Developer Mode).</li>
                         <li>Download <code className="text-violet-200 bg-violet-500/10 rounded px-1 py-0.5">torii-vr.apk</code> above and install it via <span className="text-white/85 font-medium">SideQuest</span> (drag &amp; drop), <span className="text-white/85 font-medium">Meta Quest Developer Hub</span>, or ADB:</li>
                       </ol>
                       <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-2">
@@ -567,12 +567,12 @@ export default function HowToJoinPage() {
                         <CopyButton value="adb install -r torii-vr.apk" accent="violet" />
                       </div>
                       <p className="text-white/45">
-                        Open it from <span className="text-white/75">App Library → Unknown Sources → Torii VR</span>. Runs side-by-side with the phone APK without overwriting it.
+                        Open it from <span className="text-white/75">App Library <ArrowRight className="inline h-3 w-3 text-white/45" aria-hidden /> Unknown Sources <ArrowRight className="inline h-3 w-3 text-white/45" aria-hidden /> Torii VR</span>. Runs side-by-side with the phone APK without overwriting it.
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-2 leading-relaxed text-white/60">
-                      <p>Install the regular <span className="text-white/85 font-medium">Torii</span> PC client and start <span className="text-white/85 font-medium">SteamVR</span> before launching Torii — it will offer to switch to VR mode automatically (or toggle it in Settings).</p>
+                      <p>Install the regular <span className="text-white/85 font-medium">Torii</span> PC client and start <span className="text-white/85 font-medium">SteamVR</span> before launching Torii. It will offer to switch to VR mode automatically, or you can toggle it in Settings.</p>
                       <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-2">
                         <code className="min-w-0 flex-1 truncate font-mono text-xs text-violet-200">torii.exe --vr</code>
                         <CopyButton value="torii.exe --vr" accent="violet" />
