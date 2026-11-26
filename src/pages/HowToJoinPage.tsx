@@ -158,11 +158,11 @@ interface CompactFeature {
 const COMPACT_FEATURES: CompactFeature[] = [
   {
     icon: <TrendingUp className="h-4 w-4 text-fuchsia-300" />,
-    title: "Torii pp & Mania Sunny",
+    title: "Torii pp & Sunny Rework",
     tag: "Ranking",
     accent: "border-fuchsia-400/25 bg-fuchsia-500/10 text-fuchsia-200",
     description:
-      "Standard plays use server-side pp-dev, and osu!mania star rating runs on the Sunny rework.",
+      "Standard plays in torii use server-side pp-dev, and torii keys star rating runs on the Sunny rework.",
   },
   {
     icon: <Sliders className="h-4 w-4 text-rose-300" />,
