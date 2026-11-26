@@ -10,9 +10,9 @@ import { motion } from "framer-motion";
 // falls back to the full releases list. Do NOT use `?q=nova`: that searches
 // release titles, not tags, and returns "No results".
 const TORII_STABLE_URL =
-  "https://github.com/ShikkesoraSIM/torii-osu/releases/latest";
+  "https://github.com/ShikkesoraSIM/torii/releases/latest";
 const TORII_NOVA_URL =
-  "https://github.com/ShikkesoraSIM/torii-osu/releases";
+  "https://github.com/ShikkesoraSIM/torii/releases";
 
 const SERVER_HOST = "lazer-api.shikkesora.com";
 
@@ -25,7 +25,7 @@ function cx(...classes: Array<string | false | undefined | null>) {
 // ─── Platform detection ──────────────────────────────────────────────────────
 
 type Platform = {
-  os: "windows" | "mac" | "linux" | "android" | "ios" | "unknown";
+  os: "windows" | "mac" | "linux" | "android" | "quest" | "ios" | "unknown";
   arch: "x64" | "arm64";
 };
 
@@ -36,6 +36,7 @@ function detectPlatform(): Platform {
   const ua = navigator.userAgent;
   const uaLow = ua.toLowerCase();
 
+  if (/oculusbrowser|quest/.test(uaLow)) return { os: "quest", arch: "arm64" };
   if (/android/.test(uaLow)) return { os: "android", arch: "arm64" };
   if (/iphone|ipad|ipod/.test(uaLow) || (/macintosh/.test(uaLow) && navigator.maxTouchPoints > 1)) return { os: "ios", arch: "arm64" };
 
@@ -80,13 +81,15 @@ function assetFor(platform: Platform, stream: "torii" | "nova"): { file: string;
     case "android":
       // el apk solo sale en nova
       return stream === "nova" ? { file: "torii.apk", label: "Download APK for Android" } : null;
+    case "quest":
+      return stream === "torii" ? { file: "torii-vr.apk", label: "Download APK for Meta Quest" } : null;
     default:
       return null;
   }
 }
 
 const RELEASE_DOWNLOAD = (tag: string, file: string) =>
-  `https://github.com/ShikkesoraSIM/torii-osu/releases/download/${tag}/${file}`;
+  `https://github.com/ShikkesoraSIM/torii/releases/download/${tag}/${file}`;
 
 // ─── Small reusable pieces ────────────────────────────────────────────────────
 
@@ -171,10 +174,10 @@ const FEATURES: FeatureItem[] = [
   {
     icon: "📊",
     title: "pp-dev calculations",
-    tag: "osu! standard",
+    tag: "standard",
     tagColor: "fuchsia",
     description:
-      "Torii uses the latest pp-dev algorithm — more up-to-date than what bancho osu! runs. It's the newest version of the pp system, period.",
+      "Torii uses the latest pp-dev algorithm — the newest version of the performance system, period.",
     preview: null,
   },
   {
@@ -246,10 +249,10 @@ const FEATURES: FeatureItem[] = [
   {
     icon: "🎹",
     title: "Mania Sunny rework",
-    tag: "osu!mania",
+    tag: "mania",
     tagColor: "yellow",
     description:
-      "osu!mania pp runs the Sunny algorithm rework — a more accurate model for key-based gameplay that better captures jack, stream, and LN difficulty.",
+      "Mania pp runs the Sunny algorithm rework — a more accurate model for key-based gameplay that better captures jack, stream, and LN difficulty.",
     preview: (
       <div className="mt-3 rounded-xl border border-yellow-400/20 bg-black/30 p-3 text-xs">
         <div className="flex items-center gap-2 mb-2">
@@ -290,18 +293,18 @@ const FEATURES: FeatureItem[] = [
   },
   {
     icon: "💾",
-    title: "Zero-loss migration",
+    title: "Choose your data folder",
     tag: "setup",
     tagColor: "sky",
     description:
-      "The built-in setup wizard detects your existing osu! install and migrates maps, skins, scores, and settings automatically. No manual copying. No starting from scratch.",
+      "The setup wizard can use an existing compatible data folder. This shares that folder rather than copying it. Back up your data before switching.",
     preview: (
       <div className="mt-3 rounded-xl border border-sky-400/20 bg-black/30 p-3 text-xs">
         <div className="space-y-1.5 text-[11px]">
-          {["Maps & beatmaps", "Skins", "Settings & keybinds", "Local scores"].map(item => (
+          {["Choose an existing compatible folder", "Or start with a separate Torii folder", "Keep a backup before switching"].map(item => (
             <div key={item} className="flex items-center gap-2">
               <span className="text-green-400 font-bold">✓</span>
-              <span className="text-white/60">{item} migrated automatically</span>
+              <span className="text-white/60">{item}</span>
             </div>
           ))}
         </div>
@@ -358,7 +361,7 @@ const STREAMS = [
       glow: "0 0 60px rgba(244,63,94,0.10) inset",
     },
     points: [
-      ".NET 8, tested and solid",
+      ".NET 10 with Satori GC",
       "Every Torii feature turned on",
       "The one most people run",
     ],
@@ -380,7 +383,7 @@ const STREAMS = [
       glow: "0 0 60px rgba(251,191,36,0.10) inset",
     },
     points: [
-      ".NET 10, Deferred renderer and D3D12",
+      "Experimental .NET 11 with Satori GC",
       "Experimental features before they hit stable",
       "Can break now and then",
     ],
@@ -404,11 +407,13 @@ export default function HowToJoinPage() {
   // de verdad tenga el archivo (un build en curso o una release vieja no lo tienen).
   const [releasesByStream, setReleasesByStream] = useState<Record<"torii" | "nova", Array<{ tag: string; assets: string[] }>>>({ torii: [], nova: [] });
   const [platform] = useState<Platform>(() => detectPlatform());
+  const [vrHelpOpen, setVrHelpOpen] = useState(false);
+  const [vrTab, setVrTab] = useState<"quest" | "pcvr">("quest");
 
   useEffect(() => {
     let cancelled = false;
 
-    fetch("https://api.github.com/repos/ShikkesoraSIM/torii-osu/releases?per_page=30")
+    fetch("https://api.github.com/repos/ShikkesoraSIM/torii/releases?per_page=30")
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((releases: Array<{ tag_name: string; html_url: string; draft: boolean; prerelease: boolean; assets: Array<{ name: string }> }>) => {
         if (cancelled) return;
@@ -470,8 +475,13 @@ export default function HowToJoinPage() {
           <p className="mx-auto max-w-2xl text-white/60 text-lg">
             Torii is played on the{" "}
             <span className="text-fuchsia-300 font-medium">Torii client</span>. Grab
-            any of these three versions. They all connect to the same server and
+            either of these two versions. They both connect to the same server and
             share your account, so pick whichever runs best on your PC.
+          </p>
+          <p className="mx-auto mt-5 max-w-2xl text-sm text-white/70">
+            Torii is an independent community project, not an official osu! client or service.
+            It is not affiliated with, endorsed by, or supported by ppy Pty Ltd.
+            osu! is a trademark of ppy Pty Ltd. References to osu! identify the upstream project and compatibility only.
           </p>
         </motion.div>
 
@@ -583,6 +593,115 @@ export default function HowToJoinPage() {
           ))}
         </div>
 
+        {/* ── Understated VR card (Meta Quest & SteamVR) ────────────────── */}
+        {(() => {
+          const vrRelease =
+            releasesByStream.torii.find((r) => r.assets.includes("torii-vr.apk")) ??
+            releasesByStream.nova.find((r) => r.assets.includes("torii-vr.apk"));
+          const vrApkHref = vrRelease ? RELEASE_DOWNLOAD(vrRelease.tag, "torii-vr.apk") : TORII_STABLE_URL;
+
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.25 }}
+              className="mb-8 rounded-2xl border border-white/10 bg-white/[0.025] px-6 py-4 backdrop-blur"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 text-xl select-none" aria-hidden>🥽</span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-semibold text-white">Torii for VR</span>
+                      <span className="rounded-full border border-violet-400/25 bg-violet-500/10 px-2.5 py-0.5 text-[11px] font-medium text-violet-200/90">
+                        Quest 2 / Pro / 3 / 3S · SteamVR
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-white/50">
+                      Standalone OpenXR build for Meta Quest (passthrough + controller/pen tracking) or PCVR via SteamVR.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <a
+                    href={vrApkHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-violet-400/30 bg-violet-500/10 px-3.5 py-2 text-xs font-semibold text-violet-100 transition hover:border-violet-400/50 hover:bg-violet-500/20"
+                  >
+                    <span>{vrRelease ? "Download torii-vr.apk" : "Quest APK (Releases)"}</span>
+                    <span aria-hidden>{vrRelease ? "⤓" : "↗"}</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setVrHelpOpen((v) => !v)}
+                    className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-black/25 px-3 py-2 text-xs font-medium text-white/65 transition hover:border-white/20 hover:text-white/90"
+                  >
+                    <span>How to install</span>
+                    <span aria-hidden>{vrHelpOpen ? "▴" : "▾"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {vrHelpOpen && (
+                <div className="mt-4 border-t border-white/10 pt-4 text-xs text-white/65">
+                  <div className="mb-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setVrTab("quest")}
+                      className={cx(
+                        "rounded-lg border px-2.5 py-1 font-semibold transition",
+                        vrTab === "quest"
+                          ? "border-violet-400/40 bg-violet-500/15 text-violet-200"
+                          : "border-white/10 bg-black/20 text-white/50 hover:text-white/80"
+                      )}
+                    >
+                      Meta Quest (Standalone)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVrTab("pcvr")}
+                      className={cx(
+                        "rounded-lg border px-2.5 py-1 font-semibold transition",
+                        vrTab === "pcvr"
+                          ? "border-violet-400/40 bg-violet-500/15 text-violet-200"
+                          : "border-white/10 bg-black/20 text-white/50 hover:text-white/80"
+                      )}
+                    >
+                      PCVR (SteamVR)
+                    </button>
+                  </div>
+
+                  {vrTab === "quest" ? (
+                    <div className="space-y-2.5 leading-relaxed">
+                      <ol className="list-decimal list-inside space-y-1.5 text-white/60">
+                        <li>Enable <span className="text-white/85 font-medium">Developer Mode</span> once in the Meta Horizon mobile app (Devices → Headset Settings → Developer Mode).</li>
+                        <li>Download <code className="text-violet-200 bg-violet-500/10 rounded px-1 py-0.5">torii-vr.apk</code> above and install it via <span className="text-white/85 font-medium">SideQuest</span> (drag &amp; drop), <span className="text-white/85 font-medium">Meta Quest Developer Hub</span>, or ADB:</li>
+                      </ol>
+                      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-2">
+                        <code className="min-w-0 flex-1 truncate font-mono text-xs text-violet-200">adb install -r torii-vr.apk</code>
+                        <CopyButton value="adb install -r torii-vr.apk" accent="violet" />
+                      </div>
+                      <p className="text-white/45">
+                        Open it from <span className="text-white/75">App Library → Unknown Sources → Torii VR</span>. Runs side-by-side with the phone APK without overwriting it.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 leading-relaxed text-white/60">
+                      <p>Install the regular <span className="text-white/85 font-medium">Torii</span> PC client and start <span className="text-white/85 font-medium">SteamVR</span> before launching Torii — it will offer to switch to VR mode automatically (or toggle it in Settings).</p>
+                      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-2">
+                        <code className="min-w-0 flex-1 truncate font-mono text-xs text-violet-200">torii.exe --vr</code>
+                        <CopyButton value="torii.exe --vr" accent="violet" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          );
+        })()}
+
         {/* ── Features showcase ─────────────────────────────────────────── */}
         <div ref={featuresRef} className="scroll-mt-32 mt-28">
           <motion.div
@@ -651,7 +770,7 @@ export default function HowToJoinPage() {
           >
             <div className="flex items-center gap-3 mb-2">
               <span className="text-3xl select-none">🎌</span>
-              <h3 className="text-3xl font-bold text-white">Torii osu! Client — setup</h3>
+              <h3 className="text-3xl font-bold text-white">Torii client setup</h3>
             </div>
             <p className="text-white/45 mb-8 ml-12">Download, run, done. The wizard handles the rest.</p>
 
@@ -680,7 +799,7 @@ export default function HowToJoinPage() {
                     <span className="font-semibold text-white text-lg">Extract and run</span>
                   </div>
                   <div className="ml-11 text-sm text-white/55">
-                    Unzip anywhere and launch <code className="text-fuchsia-200 bg-fuchsia-500/10 rounded px-1.5 py-0.5">osu!.exe</code>. The setup wizard appears on first launch.
+                    Unzip into a new folder and launch <code className="text-fuchsia-200 bg-fuchsia-500/10 rounded px-1.5 py-0.5">torii.exe</code>. The setup wizard appears on first launch.
                   </div>
                 </li>
 
@@ -690,7 +809,7 @@ export default function HowToJoinPage() {
                     <span className="font-semibold text-white text-lg">Follow the setup wizard</span>
                   </div>
                   <div className="ml-11">
-                    <p className="text-sm mb-3 text-white/55">The wizard asks if you want to import from an existing osu! install. Point it at your current <a href="https://osu.ppy.sh/wiki/en/Client/Release_stream/Lazer/File_storage" target="_blank" rel="noopener noreferrer" className="text-osu-pink hover:underline">osu! Data folder</a>. It migrates maps, skins, and settings automatically.</p>
+                    <p className="text-sm mb-3 text-white/55">Choose a separate Torii data folder, or select an existing compatible folder. Selecting an existing folder shares its data; it does not make a backup or copy. Back it up first and close other clients using it. Torii may close after confirmation; open it again to continue.</p>
                     <div className="rounded-2xl border border-sky-400/20 bg-sky-500/5 p-4 text-sm">
                       <p className="text-sky-200 font-semibold mb-1">💡 Tip</p>
                       <p className="text-white/55">Skipped the wizard? Run it later from <span className="text-white/75 font-medium">Settings → Torii → Manage Torii data source</span>.</p>
