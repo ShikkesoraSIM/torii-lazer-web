@@ -1,13 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
+  ArrowDown,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  ExternalLink,
   FolderSync,
   Gauge,
+  Glasses,
+  Layers,
+  Lock,
   Palette,
   Sliders,
-  Smartphone,
-  Sparkles,
   TrendingUp,
+  Volume2,
   Zap,
 } from "lucide-react";
 
@@ -157,44 +165,44 @@ interface CompactFeature {
 
 const COMPACT_FEATURES: CompactFeature[] = [
   {
-    icon: <TrendingUp className="h-4 w-4 text-fuchsia-300" />,
-    title: "Torii pp & Sunny Rework",
-    tag: "Ranking",
-    accent: "border-fuchsia-400/25 bg-fuchsia-500/10 text-fuchsia-200",
-    description:
-      "Standard plays in torii use server-side pp-dev, and torii keys star rating runs on the Sunny rework.",
-  },
-  {
     icon: <Sliders className="h-4 w-4 text-rose-300" />,
     title: "Exclusive Mods",
     tag: "Gameplay",
     accent: "border-rose-400/25 bg-rose-500/10 text-rose-200",
     description:
-      "Play with Amplify (AM) spacing, Classic scoring, ScoreV2, or VR on Meta Quest and SteamVR.",
+      "Amplify (AM) scales note spacing while keeping patterns playable, Pitch Adjust (PA) shifts pitch without changing speed, Score V2 (SV2), and more.",
   },
   {
     icon: <Gauge className="h-4 w-4 text-amber-300" />,
-    title: "Satori GC & 8000 Hz",
-    tag: "Performance",
+    title: "Performance & Satori GC",
+    tag: "Speed",
     accent: "border-amber-400/25 bg-amber-500/10 text-amber-200",
     description:
-      "Built on .NET 10 and .NET 11 with Satori GC, thread rates up to 8000 Hz, and Potato Mode for low-end PCs.",
+      "Packed with client optimizations, the latest Satori GC, up to 8000 Hz input and audio polling, Potato Mode, and more.",
+  },
+  {
+    icon: <Volume2 className="h-4 w-4 text-cyan-300" />,
+    title: "Custom Audio Engine",
+    tag: "Nova",
+    accent: "border-cyan-400/25 bg-cyan-500/10 text-cyan-200",
+    description:
+      "Nova runs our own native audio engine with low latency, low CPU overhead, and clean audio transitions, and more.",
+  },
+  {
+    icon: <TrendingUp className="h-4 w-4 text-fuchsia-300" />,
+    title: "Torii pp & Sunny Rework",
+    tag: "Ranking",
+    accent: "border-fuchsia-400/25 bg-fuchsia-500/10 text-fuchsia-200",
+    description:
+      "Standard plays in torii use server-side pp-dev, torii keys runs on the Sunny rework, and more.",
   },
   {
     icon: <Zap className="h-4 w-4 text-sky-300" />,
-    title: "In-game QoL",
-    tag: "Quality of Life",
+    title: "In-game Quality of Life",
+    tag: "QoL",
     accent: "border-sky-400/25 bg-sky-500/10 text-sky-200",
     description:
-      "Skip long mid-map breaks, protect runs with Confirm Retry/Quit after 60s, and use beatmap theme music.",
-  },
-  {
-    icon: <Smartphone className="h-4 w-4 text-emerald-300" />,
-    title: "Android & Oboe Audio",
-    tag: "Mobile",
-    accent: "border-emerald-400/25 bg-emerald-500/10 text-emerald-200",
-    description:
-      "Native ARM64 Android build with low-latency Google Oboe audio (around 15 to 30 ms).",
+      "Skip long breaks, protect runs with Confirm Retry/Quit after 60s, use beatmap theme music, and more.",
   },
   {
     icon: <FolderSync className="h-4 w-4 text-violet-300" />,
@@ -202,7 +210,7 @@ const COMPACT_FEATURES: CompactFeature[] = [
     tag: "Setup",
     accent: "border-violet-400/25 bg-violet-500/10 text-violet-200",
     description:
-      "Start fresh or point Torii at an existing compatible folder in place without duplicating all your maps.",
+      "Start fresh or point Torii at an existing compatible folder in place without duplicating your maps.",
   },
 ];
 
@@ -416,7 +424,15 @@ export default function HowToJoinPage() {
                         )}
                       >
                         <span>{direct && asset ? asset.label : s.cta}</span>
-                        <span aria-hidden>{s.available ? (direct ? "⤓" : "↗") : "…"}</span>
+                        {s.available ? (
+                          direct ? (
+                            <Download className="h-4 w-4" aria-hidden />
+                          ) : (
+                            <ExternalLink className="h-4 w-4" aria-hidden />
+                          )
+                        ) : (
+                          <span aria-hidden>...</span>
+                        )}
                       </a>
 
                       {direct && asset?.note && (
@@ -443,7 +459,7 @@ export default function HowToJoinPage() {
 
                       <p className="mt-2 text-xs text-white/30 text-center">
                         {direct ? (
-                          <>Not your platform? <a className="underline hover:text-white/60" href={fallback} target="_blank" rel="noreferrer">All downloads ↗</a></>
+                          <>Not your platform? <a className="inline-flex items-center gap-1 underline hover:text-white/60" href={fallback} target="_blank" rel="noreferrer">All downloads <ExternalLink className="h-3 w-3" aria-hidden /></a></>
                         ) : s.available ? (
                           <>Opens the releases page with every platform.</>
                         ) : (
@@ -474,7 +490,9 @@ export default function HowToJoinPage() {
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
-                  <span className="mt-0.5 text-xl select-none" aria-hidden>🥽</span>
+                  <div className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-violet-400/25 bg-violet-500/10">
+                    <Glasses className="h-4 w-4 text-violet-300" aria-hidden />
+                  </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-semibold text-white">Torii for VR</span>
@@ -496,7 +514,7 @@ export default function HowToJoinPage() {
                     className="inline-flex items-center gap-1.5 rounded-xl border border-violet-400/30 bg-violet-500/10 px-3.5 py-2 text-xs font-semibold text-violet-100 transition hover:border-violet-400/50 hover:bg-violet-500/20"
                   >
                     <span>{vrRelease ? "Download torii-vr.apk" : "Quest APK (Releases)"}</span>
-                    <span aria-hidden>{vrRelease ? "⤓" : "↗"}</span>
+                    {vrRelease ? <Download className="h-3.5 w-3.5" aria-hidden /> : <ExternalLink className="h-3.5 w-3.5" aria-hidden />}
                   </a>
                   <button
                     type="button"
@@ -504,7 +522,7 @@ export default function HowToJoinPage() {
                     className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-black/25 px-3 py-2 text-xs font-medium text-white/65 transition hover:border-white/20 hover:text-white/90"
                   >
                     <span>How to install</span>
-                    <span aria-hidden>{vrHelpOpen ? "▴" : "▾"}</span>
+                    {vrHelpOpen ? <ChevronUp className="h-3.5 w-3.5" aria-hidden /> : <ChevronDown className="h-3.5 w-3.5" aria-hidden />}
                   </button>
                 </div>
               </div>
@@ -589,8 +607,8 @@ export default function HowToJoinPage() {
             </p>
           </motion.div>
 
-          {/* Featured bento row */}
-          <div className="mb-4 grid gap-4 lg:grid-cols-2">
+          {/* Featured bento row: 3 clean cards */}
+          <div className="mb-4 grid gap-4 lg:grid-cols-3">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -604,18 +622,18 @@ export default function HowToJoinPage() {
                     <Palette className="h-4 w-4 text-fuchsia-300" />
                   </div>
                   <span className="rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-fuchsia-200">
-                    Customization
+                    Colors
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-white">Classic UI, Custom Hue &amp; BG Editor</h3>
+                <h3 className="text-lg font-semibold text-white">Custom Hue for UI and Accents</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-white/60">
-                  Toggle the classic stable layout for song select, results, and gameplay, dial any 360° UI hue, or edit and pin your main menu backgrounds.
+                  Pick any 360-degree color for menus, overlays, and UI accents, and tune it to match your setup.
                 </p>
               </div>
               <div className="mt-5 rounded-xl border border-white/10 bg-black/35 p-3.5">
                 <div className="mb-2 flex items-center justify-between text-[11px] text-white/55">
-                  <span>UI Theme &amp; Hue</span>
-                  <span className="rounded bg-fuchsia-500/20 px-2 py-0.5 font-mono text-fuchsia-200">280° · Classic UI</span>
+                  <span>UI &amp; Accent Hue</span>
+                  <span className="font-mono text-fuchsia-200">0° - 360°</span>
                 </div>
                 <div
                   className="h-2 w-full rounded-full"
@@ -628,34 +646,70 @@ export default function HowToJoinPage() {
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.06 }}
+              transition={{ duration: 0.4, delay: 0.05 }}
+              className="flex flex-col justify-between rounded-2xl border border-sky-400/20 bg-gradient-to-br from-sky-950/30 via-white/[0.02] to-black/30 p-6 backdrop-blur"
+            >
+              <div>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-400/30 bg-sky-500/15">
+                    <Layers className="h-4 w-4 text-sky-300" />
+                  </div>
+                  <span className="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-sky-200">
+                    Themes
+                  </span>
+                </div>
+                <h3 className="text-lg font-semibold text-white">Multiple UI Themes</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-white/60">
+                  Switch between clean UI themes including Torii Glass, Torii Classic, Midnight, Grayscale, and more.
+                </p>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-1.5 rounded-xl border border-white/10 bg-black/35 p-3.5 text-[11px]">
+                {["Torii Glass", "Torii Classic", "Midnight", "Grayscale"].map((theme, idx) => (
+                  <span
+                    key={theme}
+                    className={cx(
+                      "rounded-lg border px-2.5 py-1 font-medium",
+                      idx === 0
+                        ? "border-sky-400/40 bg-sky-500/15 text-sky-200"
+                        : "border-white/10 bg-white/[0.04] text-white/65"
+                    )}
+                  >
+                    {theme}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.1 }}
               className="flex flex-col justify-between rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-950/35 via-white/[0.02] to-black/30 p-6 backdrop-blur"
             >
               <div>
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-violet-400/30 bg-violet-500/15">
-                    <Sparkles className="h-4 w-4 text-violet-300" />
+                    <Lock className="h-4 w-4 text-violet-300" />
                   </div>
                   <span className="rounded-full border border-violet-400/30 bg-violet-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-violet-200">
-                    Profiles &amp; Rank
+                    Profiles
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-white">Player Profiles &amp; Daily Briefing</h3>
+                <h3 className="text-lg font-semibold text-white">Locked Training Profiles</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-white/60">
-                  Create separate profiles with their own mod rules and rate/pitch settings, and see rank, pp, and recalc changes every time you log in.
+                  Make separate profiles to force specific rules like Low AR or DT. Each profile locks you out of other mods and tracks its own stats and pp.
                 </p>
               </div>
-              <div className="mt-5 grid grid-cols-2 gap-2.5 rounded-xl border border-white/10 bg-black/35 p-3.5 text-xs">
+              <div className="mt-5 flex items-center justify-between rounded-xl border border-white/10 bg-black/35 p-3.5 text-xs">
                 <div>
-                  <div className="text-[10px] uppercase tracking-wider text-violet-300/80">Rank Pulse</div>
-                  <div className="mt-0.5 font-semibold text-white">#100 → #94</div>
-                  <div className="text-[11px] text-emerald-300">+17.36pp today</div>
+                  <div className="text-[10px] uppercase tracking-wider text-violet-300/80">Active Profile</div>
+                  <div className="mt-0.5 font-semibold text-white">Low AR Practice</div>
                 </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-wider text-violet-300/80">Recalc Replay</div>
-                  <div className="mt-0.5 font-semibold text-white">Top plays diff</div>
-                  <div className="text-[11px] text-white/50">Old pp → New pp</div>
-                </div>
+                <span className="inline-flex items-center gap-1 rounded-lg border border-violet-400/30 bg-violet-500/15 px-2.5 py-1 text-[11px] font-medium text-violet-200">
+                  <Lock className="h-3 w-3" aria-hidden />
+                  <span>Locked</span>
+                </span>
               </div>
             </motion.div>
           </div>
@@ -692,7 +746,7 @@ export default function HowToJoinPage() {
               className="inline-flex items-center gap-2 rounded-2xl border border-fuchsia-400/35 bg-fuchsia-500/15 px-7 py-3 text-sm font-semibold text-white transition hover:border-fuchsia-400/60 hover:bg-fuchsia-500/25"
             >
               <span>Quick setup guide</span>
-              <span className="text-fuchsia-300">↓</span>
+              <ArrowDown className="h-4 w-4 text-fuchsia-300" aria-hidden />
             </button>
           </div>
         </div>
@@ -751,9 +805,12 @@ export default function HowToJoinPage() {
               ))}
             </div>
 
-            <div className="mt-4 rounded-2xl border border-sky-400/20 bg-sky-500/5 px-5 py-3.5 text-xs text-white/60">
-              <span className="font-semibold text-sky-200">Tip:</span> Skipped the folder wizard? Open it anytime from{" "}
-              <span className="font-medium text-white/85">Settings → Torii → Manage Torii data source</span>.
+            <div className="mt-4 flex flex-wrap items-center gap-1.5 rounded-2xl border border-sky-400/20 bg-sky-500/5 px-5 py-3.5 text-xs text-white/60">
+              <span className="font-semibold text-sky-200">Tip:</span>
+              <span>Skipped the folder wizard? Open it anytime from</span>
+              <span className="inline-flex items-center gap-1 font-medium text-white/85">
+                Settings <ArrowRight className="h-3 w-3 text-white/50" aria-hidden /> Torii <ArrowRight className="h-3 w-3 text-white/50" aria-hidden /> Manage Torii data source
+              </span>
             </div>
           </motion.div>
         </div>
