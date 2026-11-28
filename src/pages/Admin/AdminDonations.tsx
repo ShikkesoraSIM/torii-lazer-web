@@ -154,7 +154,7 @@ const UnmatchedRow: React.FC<{
           <button
             type="submit"
             disabled={submitting || !username.trim()}
-            className="px-4 py-2 text-sm font-semibold rounded-lg bg-osu-pink text-white hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="torii-btn-primary !px-4 !py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? '…' : 'Match'}
           </button>

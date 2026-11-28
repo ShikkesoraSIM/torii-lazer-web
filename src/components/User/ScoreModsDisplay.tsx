@@ -61,35 +61,6 @@ const getSpeedInfo = (mod: ScoreMod): { multiplier: number; showCustomRate: bool
   return { multiplier: explicitMultiplier, showCustomRate: isCustom };
 };
 
-const getDifficultyAdjustLabel = (mod: ScoreMod): string | null => {
-  if (!DIFFICULTY_ADJUST_MODS.has(mod.acronym)) return null;
-
-  const settings = typeof mod.settings === 'object' && mod.settings ? mod.settings : {};
-  const source = settings as Record<string, unknown>;
-
-  const extract = (keys: string[]): number | null => {
-    for (const key of keys) {
-      const parsed = parsePositiveNumber(source[key]);
-      if (parsed !== null) return parsed;
-    }
-    return null;
-  };
-
-  const changedStats: Array<[string, number | null]> = [
-    ['AR', extract(['approach_rate', 'approachRate', 'ar'])],
-    ['OD', extract(['overall_difficulty', 'overallDifficulty', 'od'])],
-    ['CS', extract(['circle_size', 'circleSize', 'cs'])],
-    ['HP', extract(['drain_rate', 'drainRate', 'hp', 'hp_drain'])],
-  ];
-
-  const parts = changedStats
-    .filter(([, value]) => value !== null)
-    .map(([name, value]) => `${name}${(value as number).toFixed(1).replace(/\.0$/, '')}`);
-
-  if (parts.length === 0) return null;
-  return `${mod.acronym} ${parts.join(' ')}`;
-};
-
 const getDifficultyAdjustParts = (mod: ScoreMod): Array<{ stat: string; value: string }> => {
   if (!DIFFICULTY_ADJUST_MODS.has(mod.acronym)) return [];
 
@@ -121,7 +92,7 @@ const ModChip: React.FC<{ mod: ScoreMod }> = ({ mod }) => {
   const speedInfo = getSpeedInfo(mod);
   const speed = speedInfo?.multiplier ?? null;
   const daParts = getDifficultyAdjustParts(mod);
-  const daLabel = getDifficultyAdjustLabel(mod);
+  const daLabel = daParts.length > 0 ? `${mod.acronym} ${daParts.map((p) => `${p.stat}${p.value}`).join(' ')}` : null;
   const isDifficultyAdjust = daParts.length > 0;
   const isSpeedAdjust = speedInfo !== null;
   const showSpeedRate = speedInfo?.showCustomRate ?? false;
@@ -157,7 +128,7 @@ const ModChip: React.FC<{ mod: ScoreMod }> = ({ mod }) => {
             {daParts.map((part) => (
               <span
                 key={part.stat}
-                className="inline-flex items-center gap-0.5 rounded-md px-1 py-[1px] bg-black/25 border border-white/15 text-[9px]"
+                className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-[1px] bg-black/25 border border-white/15 text-[9px]"
               >
                 <span className="text-violet-200/95">{part.stat}</span>
                 <span className="text-white">{part.value}</span>
@@ -171,7 +142,7 @@ const ModChip: React.FC<{ mod: ScoreMod }> = ({ mod }) => {
             {mod.acronym}
           </span>
           {showSpeedRate && (
-            <span className="inline-flex items-center gap-0.5 rounded-md px-1 py-[1px] bg-black/25 border border-white/15 text-[9px]">
+            <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-[1px] bg-black/25 border border-white/15 text-[9px]">
               <span className="text-white">{speedInfo.multiplier.toFixed(2)}x</span>
             </span>
           )}

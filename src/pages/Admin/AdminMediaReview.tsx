@@ -106,7 +106,7 @@ const AdminMediaReview: React.FC = () => {
           </select>
           <button
             onClick={loadItems}
-            className="px-4 py-2 bg-osu-pink hover:bg-osu-pink/90 text-white rounded-xl font-medium transition-colors"
+            className="torii-btn-primary !px-4 !py-2"
           >
             Refresh
           </button>
@@ -154,11 +154,11 @@ const AdminMediaReview: React.FC = () => {
                         <span className="text-gray-500 font-mono text-[11px]">#{item.user_id}</span>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-purple-500/15 text-purple-300 border-purple-500/40">
+                        <span className="rounded-full torii-badge text-[10px] uppercase tracking-wider px-2.5 py-0.5 bg-purple-500/15 text-purple-300 border-purple-500/40">
                           {item.media_type}
                         </span>
                         <span
-                          className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border ${
+                          className={`rounded-full torii-badge text-[10px] uppercase tracking-wider px-2.5 py-0.5 ${
                             STATUS_BADGE[item.status] || 'bg-white/10 text-white/55 border-white/20'
                           }`}
                         >

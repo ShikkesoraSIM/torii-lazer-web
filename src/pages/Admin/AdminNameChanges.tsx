@@ -114,7 +114,7 @@ const AdminNameChanges: React.FC = () => {
           />
           <button
             onClick={loadRequests}
-            className="px-4 py-2 bg-osu-pink hover:bg-osu-pink/90 text-white rounded-xl font-medium transition-colors"
+            className="torii-btn-primary !px-4 !py-2"
           >
             Refresh
           </button>
@@ -186,7 +186,7 @@ const AdminNameChanges: React.FC = () => {
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border ${
+                          className={`rounded-full torii-badge text-[10px] uppercase tracking-wider px-2.5 py-0.5 ${
                             STATUS_BADGE[req.status] || 'bg-white/10 text-white/60 border-white/20'
                           }`}
                         >

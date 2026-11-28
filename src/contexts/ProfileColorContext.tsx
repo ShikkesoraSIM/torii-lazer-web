@@ -20,8 +20,21 @@ interface ProfileColorProviderProps {
   children: ReactNode;
 }
 
-export const DEFAULT_PROFILE_COLOR = '#ED8EA6'; // default osu-pink color
+export const getDefaultProfileColor = (): string =>
+  typeof document !== 'undefined' && document.documentElement.classList.contains('theme-aero')
+    ? '#0EA5E9'
+    : '#4F8FFF';
+
+export const DEFAULT_PROFILE_COLOR = '#4F8FFF';
 const LOCAL_STORAGE_KEY = 'user_profile_color'; // localStorage key
+
+const readStoredProfileColor = (): string | null => {
+  try {
+    return localStorage.getItem(LOCAL_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+};
 
 /**
  * ProfileColorProvider - globally manages the personal color setting
@@ -30,67 +43,55 @@ const LOCAL_STORAGE_KEY = 'user_profile_color'; // localStorage key
  * Color priority:
  * 1. Color returned by the server (highest priority)
  * 2. User color stored in localStorage
- * 3. Default color
+ * 3. Theme-aware default color
  */
 export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
-  const [profileColor, setProfileColorState] = useState<string>(() => {
-    // Read from localStorage on init
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      return stored || DEFAULT_PROFILE_COLOR;
-    } catch {
-      return DEFAULT_PROFILE_COLOR;
-    }
-  });
-	// Keep the server-loaded or successfully-saved color, used for resets
-	const [savedProfileColor, setSavedProfileColor] = useState<string>(() => {
-    // Read from localStorage on init
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      return stored || DEFAULT_PROFILE_COLOR;
-    } catch {
-      return DEFAULT_PROFILE_COLOR;
-    }
-  });
+  const [profileColor, setProfileColorState] = useState<string>(
+    () => readStoredProfileColor() || getDefaultProfileColor(),
+  );
+  // Keep the server-loaded or successfully-saved color, used for resets
+  const [savedProfileColor, setSavedProfileColor] = useState<string>(
+    () => readStoredProfileColor() || getDefaultProfileColor(),
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   // Load the user's personal color setting
   useEffect(() => {
     const loadProfileColor = async () => {
+      const themeDefault = getDefaultProfileColor();
+      const storedColor = readStoredProfileColor();
+      const initialColor = storedColor || themeDefault;
+
+      setProfileColorState(initialColor);
+      setSavedProfileColor(initialColor);
+      applyColorToDOM(initialColor);
+      setIsLoading(false);
+
       if (!isAuthenticated) {
-        // When logged out, use the stored color or the default
-        const storedColor = localStorage.getItem(LOCAL_STORAGE_KEY) || DEFAULT_PROFILE_COLOR;
-        setProfileColorState(storedColor);
-        setSavedProfileColor(storedColor);
-        applyColorToDOM(storedColor);
-        setIsLoading(false);
         return;
       }
-
-      // Apply the stored color immediately to avoid a delay
-      const storedColor = localStorage.getItem(LOCAL_STORAGE_KEY) || DEFAULT_PROFILE_COLOR;
-      setProfileColorState(storedColor);
-      setSavedProfileColor(storedColor);
-      applyColorToDOM(storedColor);
-      setIsLoading(false);
 
       try {
         // Fetch the user's saved color from the server in the background
         const preferences = await preferencesAPI.getPreferences();
-        let serverColor = preferences.profile_colour || DEFAULT_PROFILE_COLOR;
+        let serverColor = preferences.profile_colour || '';
 
         // Ensure the color value starts with #
         if (serverColor && !serverColor.startsWith('#')) {
           serverColor = `#${serverColor}`;
         }
 
-        // Only update when the server color differs from what's stored
-        if (serverColor !== storedColor) {
-          setProfileColorState(serverColor);
-          setSavedProfileColor(serverColor);
-          localStorage.setItem(LOCAL_STORAGE_KEY, serverColor);
-          applyColorToDOM(serverColor);
+        const resolvedColor = serverColor || getDefaultProfileColor();
+
+        // Only update when the server color differs from what's currently applied
+        if (resolvedColor !== initialColor) {
+          setProfileColorState(resolvedColor);
+          setSavedProfileColor(resolvedColor);
+          if (serverColor) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, resolvedColor);
+          }
+          applyColorToDOM(resolvedColor);
         }
       } catch (error) {
         console.error('Failed to load profile color:', error);
@@ -100,6 +101,26 @@ export const ProfileColorProvider: React.FC<ProfileColorProviderProps> = ({ chil
 
     loadProfileColor();
   }, [isAuthenticated, user]);
+
+  // Keep default profile color synced when theme-aero class is toggled
+  useEffect(() => {
+    if (typeof document === 'undefined' || typeof MutationObserver === 'undefined') return;
+
+    const observer = new MutationObserver(() => {
+      if (readStoredProfileColor()) return;
+      const nextDefault = getDefaultProfileColor();
+      setProfileColorState(nextDefault);
+      setSavedProfileColor(nextDefault);
+      applyColorToDOM(nextDefault);
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Apply the color to the DOM CSS variables
   const applyColorToDOM = (color: string) => {
@@ -212,4 +233,3 @@ export const useProfileColor = (): ProfileColorContextType => {
   }
   return context;
 };
-

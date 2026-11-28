@@ -16,9 +16,9 @@ interface BadgesProps {
 
 // Map badge descriptions to text color (group colour)
 const BADGE_COLORS: Record<string, string> = {
-  'Dev': '#ED8EA6',      // Pink
-  'Admin': '#60a5fa',    // Blue
-  'Streamer': '#ED8EA6'
+  'Dev': 'var(--torii-accent)',
+  'Admin': '#60a5fa',
+  'Streamer': 'var(--torii-accent)'
 };
 
 const Badges: React.FC<BadgesProps> = ({ badges = [], max = 6 }) => {
@@ -50,7 +50,7 @@ const Badges: React.FC<BadgesProps> = ({ badges = [], max = 6 }) => {
             <span
               key={idx}
               title={b?.description || ''}
-              className="user-group-badge user-group-badge--profile-page"
+              className="torii-badge user-group-badge user-group-badge--profile-page"
               style={{ color: specialBadge.color } as React.CSSProperties}
             >
               {specialBadge.name}

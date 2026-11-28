@@ -159,12 +159,37 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
   const selectedMainMode = (Object.keys(GAME_MODE_GROUPS) as MainGameMode[])
     .find(mainMode => GAME_MODE_GROUPS[mainMode].includes(selectedMode)) || 'osu';
 
+  const isDefaultAccent =
+    !profileColor ||
+    profileColor.toUpperCase() === '#4F8FFF' ||
+    profileColor.toUpperCase() === '#0EA5E9';
+
   const getBrandColor = (mode: GameMode): string => {
     const colorValue = GAME_MODE_COLORS[mode];
-    if (colorValue.includes('var(--profile-color')) {
-      return profileColor;
+    if (colorValue.includes('var(--profile-color') || colorValue.includes('var(--torii-accent')) {
+      return isDefaultAccent ? 'var(--torii-accent, #4F8FFF)' : profileColor;
     }
     return colorValue;
+  };
+
+  const getModeButtonStyle = (
+    isActive: boolean,
+    brand: string,
+    extra?: React.CSSProperties,
+  ): React.CSSProperties => {
+    if (!isActive) {
+      return { ...extra };
+    }
+    if (isDefaultAccent) {
+      return { color: 'white', ...extra };
+    }
+    return {
+      background: `linear-gradient(180deg, color-mix(in srgb, ${brand} 86%, white 14%) 0%, ${brand} 100%)`,
+      borderColor: `${brand}66`,
+      boxShadow: `0 8px 22px -6px ${brand}66, inset 0 1px 0 rgba(255, 255, 255, 0.32)`,
+      color: 'white',
+      ...extra,
+    };
   };
 
   useEffect(() => {
@@ -218,17 +243,11 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
                   onClick={() => handleMainModeClick(mainMode)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`relative flex items-center justify-center rounded-lg font-medium text-sm transition-colors duration-200 overflow-hidden border ${
-                    isActive ? 'shadow-lg' : 'shadow-sm'
+                  className={`relative flex items-center justify-center rounded-full !p-0 font-medium text-sm transition-colors duration-200 overflow-hidden ${
+                    isActive ? 'torii-btn-primary' : 'torii-btn-glass'
                   }`}
-                  style={{
-                    height: '40px',
-                    backgroundColor: isActive ? brand : 'var(--card-bg)',
-                    borderColor: isActive ? `${brand}66` : 'var(--border-color)',
-                    boxShadow: isActive ? `0 4px 14px ${brand}30` : undefined,
-                    color: isActive ? 'white' : 'var(--text-primary)',
-                  }}
-                  animate={{ width: shouldExpand ? '60px' : '48px' }}
+                  style={getModeButtonStyle(isActive, brand, { height: '40px' })}
+                  animate={{ width: shouldExpand ? '62px' : '48px' }}
                   transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
                 >
                   <motion.div
@@ -253,7 +272,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
                       >
                         <FiChevronDown
                           size={13}
-                          style={isActive ? { color: 'white', opacity: 0.8 } : { color: 'var(--text-secondary)', opacity: 0.6 }}
+                          style={isActive ? { color: 'white', opacity: 0.85 } : { color: 'var(--text-secondary)', opacity: 0.65 }}
                         />
                       </motion.div>
                     </motion.div>
@@ -261,7 +280,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
 
                   {!isActive && (
                     <motion.div
-                      className="absolute inset-0 rounded-lg opacity-0"
+                      className="absolute inset-0 rounded-full opacity-0 pointer-events-none"
                       animate={{ opacity: isHovered ? 0.08 : 0 }}
                       transition={{ duration: 0.2 }}
                       style={{ backgroundColor: brand }}
@@ -300,30 +319,27 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
           .find(m => GAME_MODE_GROUPS[m].includes(mode));
         const brand = getBrandColor(mode);
 
+        const isActive = selectedMode === mode;
+
         return (
           <motion.button
             key={mode}
             onClick={() => onModeChange(mode)}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="relative rounded-xl font-medium transition-all duration-200 flex flex-col items-center justify-center gap-2 overflow-hidden group border shadow-sm"
-            style={{
-              width: '80px',
-              height: '64px',
-              backgroundColor: selectedMode === mode ? brand : 'var(--card-bg)',
-              borderColor: selectedMode === mode ? `${brand}66` : 'var(--border-color)',
-              boxShadow: selectedMode === mode ? `0 4px 16px ${brand}25` : undefined,
-              color: selectedMode === mode ? 'white' : 'var(--text-primary)',
-            }}
+            className={`relative !rounded-2xl !p-0 font-medium transition-all duration-200 flex flex-col items-center justify-center gap-2 overflow-hidden group ${
+              isActive ? 'torii-btn-primary' : 'torii-btn-glass'
+            }`}
+            style={getModeButtonStyle(isActive, brand, { width: '80px', height: '64px' })}
           >
             <motion.div
-              animate={{ scale: selectedMode === mode ? 1.05 : 1 }}
+              animate={{ scale: isActive ? 1.05 : 1 }}
               whileHover={{
-                scale: selectedMode !== mode ? 1.1 : 1.05,
-                rotate: selectedMode !== mode ? 5 : 0
+                scale: !isActive ? 1.1 : 1.05,
+                rotate: !isActive ? 5 : 0
               }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              style={{ color: selectedMode === mode ? 'white' : 'currentColor' }}
+              style={{ color: isActive ? 'white' : 'currentColor' }}
             >
               <ToriiModeIcon mode={mainMode ?? 'osu'} className="w-5 h-5 transition-colors duration-200" />
             </motion.div>
@@ -332,18 +348,18 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
               {GAME_MODE_NAMES[mode]}
             </motion.span>
 
-            {selectedMode !== mode && (
+            {!isActive && (
               <motion.div
-                className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-15 transition-opacity duration-200"
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-15 transition-opacity duration-200 pointer-events-none"
                 style={{ backgroundColor: brand }}
               />
             )}
 
-            {selectedMode === mode && (
+            {isActive && (
               <motion.div
                 layoutId="selected-bg-full"
-                className="absolute inset-0 rounded-xl"
-                style={{ backgroundColor: brand, opacity: 0.18 }}
+                className="absolute inset-0 rounded-2xl pointer-events-none"
+                style={{ backgroundColor: brand, opacity: 0.12 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               />
             )}

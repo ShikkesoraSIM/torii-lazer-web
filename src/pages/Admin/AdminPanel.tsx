@@ -90,7 +90,7 @@ const AdminPanel: React.FC = () => {
       <div className="glass relative rounded-2xl mb-6 overflow-visible">
         <div className="relative z-10 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
+            <span className="torii-section-bar" />
             <div className="text-base md:text-lg font-bold">Admin Panel</div>
           </div>
         </div>
@@ -194,16 +194,16 @@ const AdminPanel: React.FC = () => {
             <div className="glass rounded-2xl overflow-visible">
               <div className="px-3 md:px-6 py-3 md:py-4 border-b border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
+                  <span className="torii-section-bar" />
                   <div className="text-base md:text-lg font-bold">Navigation</div>
                 </div>
               </div>
               <nav className="px-3 md:px-5 py-3 md:py-4 space-y-1.5">
                 <button
                   onClick={() => setActiveTab('users')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'users'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -217,9 +217,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('beatmaps')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'beatmaps'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -233,9 +233,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('beatmap-list')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'beatmap-list'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -249,9 +249,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('badges')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'badges'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -265,9 +265,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('teams')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'teams'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -281,9 +281,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('daily-challenges')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'daily-challenges'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -297,9 +297,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('matchmaking')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'matchmaking'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -314,9 +314,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('announcements')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'announcements'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -330,9 +330,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('login-audit')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'login-audit'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -346,9 +346,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('name-changes')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'name-changes'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -364,9 +364,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('media-review')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'media-review'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -385,9 +385,9 @@ const AdminPanel: React.FC = () => {
                 {canSeeOwnerSection && (
                 <button
                   onClick={() => setActiveTab('anticheat')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'anticheat'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -404,9 +404,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('donations')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'donations'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -423,9 +423,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('maintenance')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'maintenance'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -441,9 +441,9 @@ const AdminPanel: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('changelog')}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-osu-pink/40 ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii/40 ${
                     activeTab === 'changelog'
-                      ? 'bg-osu-pink/10 text-osu-pink font-medium'
+                      ? 'bg-torii/10 text-torii font-medium'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -466,7 +466,7 @@ const AdminPanel: React.FC = () => {
             <div className="glass rounded-2xl overflow-visible">
               <div className="px-3 md:px-6 py-3 md:py-4 border-b border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
+                  <span className="torii-section-bar" />
                   <div className="text-base md:text-lg font-bold">
                     {activeTab === 'users' && 'User Management'}
                     {activeTab === 'beatmaps' && 'Beatmap Blacklist'}

@@ -162,7 +162,7 @@ const BeatmapPage: React.FC = () => {
     );
   }
 
-  if (error || !beatmapset) {
+  if (error || !beatmapset || !selectedBeatmap) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
         <div className="text-center max-w-md rounded-2xl border border-white/10 bg-card p-8 shadow-elev-2">
@@ -170,42 +170,10 @@ const BeatmapPage: React.FC = () => {
             {error || t('beatmap.notFound')}
           </h1>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              to="/beatmaps"
-              className="px-4 py-2 bg-torii text-white rounded-xl hover:bg-torii-hover font-semibold text-sm transition-colors"
-            >
+            <Link to="/beatmaps" className="torii-btn-primary text-sm">
               {t('nav.beatmaps', { defaultValue: 'Browse Beatmaps' })}
             </Link>
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="px-4 py-2 border border-white/15 bg-white/5 text-white rounded-xl hover:bg-white/10 text-sm transition-colors"
-            >
-              {t('beatmap.goBack')}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!selectedBeatmap) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] px-4">
-        <div className="text-center max-w-md rounded-2xl border border-white/10 bg-card p-8 shadow-elev-2">
-          <h1 className="text-xl sm:text-2xl font-bold text-red-400 mb-4">{t('beatmap.notFound')}</h1>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              to="/beatmaps"
-              className="px-4 py-2 bg-torii text-white rounded-xl hover:bg-torii-hover font-semibold text-sm transition-colors"
-            >
-              {t('nav.beatmaps', { defaultValue: 'Browse Beatmaps' })}
-            </Link>
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="px-4 py-2 border border-white/15 bg-white/5 text-white rounded-xl hover:bg-white/10 text-sm transition-colors"
-            >
+            <button type="button" onClick={() => navigate(-1)} className="torii-btn-glass text-sm">
               {t('beatmap.goBack')}
             </button>
           </div>
@@ -242,26 +210,26 @@ const BeatmapPage: React.FC = () => {
               <div className="text-white">
                 {/* Badges */}
                 <div className="flex flex-wrap items-center gap-2 mb-3">
-                  <span className="px-2.5 sm:px-3 py-1 rounded-full text-2xs sm:text-xs font-bold uppercase tracking-wider bg-torii/90 text-white">
+                  <span className="px-2.5 sm:px-3 py-1 rounded-full torii-badge text-2xs sm:text-xs uppercase tracking-wider bg-torii/90 text-white">
                     {t(`beatmap.status.${beatmapset.status}`, { defaultValue: beatmapset.status })}
                   </span>
                   {beatmapset.video && (
-                    <span className="px-2.5 sm:px-3 py-1 bg-red-500/90 text-white rounded-full text-2xs sm:text-xs font-bold uppercase tracking-wider">
+                    <span className="px-2.5 sm:px-3 py-1 bg-red-500/90 text-white rounded-full torii-badge text-2xs sm:text-xs uppercase tracking-wider">
                       VIDEO
                     </span>
                   )}
                   {beatmapset.storyboard && (
-                    <span className="px-2.5 sm:px-3 py-1 bg-purple-500/90 text-white rounded-full text-2xs sm:text-xs font-bold uppercase tracking-wider">
+                    <span className="px-2.5 sm:px-3 py-1 bg-purple-500/90 text-white rounded-full torii-badge text-2xs sm:text-xs uppercase tracking-wider">
                       STORYBOARD
                     </span>
                   )}
                   {beatmapset.is_local && (
-                    <span className="px-2.5 sm:px-3 py-1 bg-red-600/90 text-white rounded-full text-2xs sm:text-xs font-bold uppercase tracking-wider">
+                    <span className="px-2.5 sm:px-3 py-1 bg-red-600/90 text-white rounded-full torii-badge text-2xs sm:text-xs uppercase tracking-wider">
                       {t('beatmap.toriiBadge', { defaultValue: 'Torii' })}
                     </span>
                   )}
                   {isAiSet(beatmapset) && (
-                    <span className="px-2.5 sm:px-3 py-1 bg-sky-500/90 text-white rounded-full text-2xs sm:text-xs font-bold uppercase tracking-wider">
+                    <span className="px-2.5 sm:px-3 py-1 bg-sky-500/90 text-white rounded-full torii-badge text-2xs sm:text-xs uppercase tracking-wider">
                       {t('beatmap.aiGenBadge', { defaultValue: 'AI gen' })}
                     </span>
                   )}
@@ -336,10 +304,10 @@ const BeatmapPage: React.FC = () => {
                           onClick={() => handleDifficultySelect(beatmap)}
                           data-tooltip-id="difficulty-tooltip"
                           data-tooltip-content={`${beatmap.version} - ${beatmap.difficulty_rating.toFixed(2)}★`}
-                          className={`group relative px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm border-2 ${
+                          className={`group relative px-4 py-2.5 rounded-full torii-badge transition-all duration-200 font-medium text-sm border-2 ${
                             isSelected
-                              ? 'border-osu-pink shadow-lg scale-105'
-                              : 'border-transparent hover:border-osu-pink/30 hover:scale-102'
+                              ? 'border-torii shadow-lg scale-105'
+                              : 'border-transparent hover:border-torii/30 hover:scale-102'
                           }`}
                           style={{
                             backgroundColor: bgColor,
@@ -357,7 +325,7 @@ const BeatmapPage: React.FC = () => {
                           </div>
                           
                           {isSelected && (
-                            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 rotate-45 border-r-2 border-b-2 border-osu-pink"
+                            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 rotate-45 border-r-2 border-b-2 border-torii"
                                  style={{ backgroundColor: bgColor }}
                             />
                           )}
@@ -385,7 +353,7 @@ const BeatmapPage: React.FC = () => {
             {/* Selected Beatmap Details */}
             {selectedBeatmap && (
               <div className="card-standard overflow-hidden">
-                <div className="px-6 py-4 border-b border-white/10 bg-gradient-to-r from-osu-pink/10 to-transparent">
+                <div className="px-6 py-4 border-b border-white/10 bg-gradient-to-r from-torii/10 to-transparent">
                   <div className="flex items-center justify-between">
                     <h2 className="font-heading text-lg font-bold text-text-primary">
                       {selectedBeatmap.version}
@@ -400,7 +368,7 @@ const BeatmapPage: React.FC = () => {
                   {/* Main Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center p-4 bg-white/[0.04] border border-white/10 rounded-xl">
-                      <div className="text-2xl font-bold text-osu-pink mb-1 tabular-nums">
+                      <div className="text-2xl font-bold text-torii mb-1 tabular-nums">
                         {formatDuration(selectedBeatmap.total_length)}
                       </div>
                       <div className="text-xs text-text-muted uppercase tracking-wide">
@@ -408,7 +376,7 @@ const BeatmapPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-center p-4 bg-white/[0.04] border border-white/10 rounded-xl">
-                      <div className="text-2xl font-bold text-osu-pink mb-1 tabular-nums">
+                      <div className="text-2xl font-bold text-torii mb-1 tabular-nums">
                         {formatBPM(selectedBeatmap.bpm)}
                       </div>
                       <div className="text-xs text-text-muted uppercase tracking-wide">
@@ -416,7 +384,7 @@ const BeatmapPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-center p-4 bg-white/[0.04] border border-white/10 rounded-xl">
-                      <div className="text-2xl font-bold text-osu-pink mb-1 tabular-nums">
+                      <div className="text-2xl font-bold text-torii mb-1 tabular-nums">
                         {formatNumber(selectedBeatmap.max_combo)}
                       </div>
                       <div className="text-xs text-text-muted uppercase tracking-wide">
@@ -424,7 +392,7 @@ const BeatmapPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-center p-4 bg-white/[0.04] border border-white/10 rounded-xl">
-                      <div className="text-2xl font-bold text-osu-pink mb-1">
+                      <div className="text-2xl font-bold text-torii mb-1">
                         {GAME_MODE_NAMES[selectedBeatmap.mode as keyof typeof GAME_MODE_NAMES] || selectedBeatmap.mode}
                       </div>
                       <div className="text-xs text-text-muted uppercase tracking-wide">
@@ -476,7 +444,7 @@ const BeatmapPage: React.FC = () => {
               <div className="card-standard overflow-hidden">
                 <div className="px-6 py-4 border-b border-white/10 bg-white/[0.03]">
                   <h2 className="font-heading text-lg font-bold text-text-primary flex items-center gap-2">
-                    <span className="text-osu-pink">●</span>
+                    <span className="text-torii">●</span>
                     {t('beatmap.leaderboard') || 'Leaderboard'}
                   </h2>
                 </div>
@@ -491,7 +459,7 @@ const BeatmapPage: React.FC = () => {
           <div className="space-y-6">
             {/* Beatmapset Info */}
             <div className="card-standard overflow-hidden">
-              <div className="px-6 py-4 border-b border-white/10 bg-gradient-to-r from-osu-pink/20 to-torii/10">
+              <div className="px-6 py-4 border-b border-white/10 bg-gradient-to-r from-torii/15 to-transparent">
                 <h3 className="font-heading text-lg font-bold text-text-primary">
                   {t('beatmap.information')}
                 </h3>
@@ -499,7 +467,7 @@ const BeatmapPage: React.FC = () => {
               <div className="p-6 space-y-4 text-sm">
                 <div className="flex justify-between items-start">
                   <span className="text-text-muted font-medium">{t('beatmap.creator')}</span>
-                  <span className="font-semibold text-text-primary hover:text-osu-pink transition-colors cursor-pointer">
+                  <span className="font-semibold text-text-primary hover:text-torii transition-colors cursor-pointer">
                     {beatmapset.creator}
                   </span>
                 </div>
@@ -542,7 +510,7 @@ const BeatmapPage: React.FC = () => {
                 
                 <div className="flex justify-between items-start">
                   <span className="text-text-muted font-medium">{t('beatmap.playCount')}</span>
-                  <span className="font-semibold text-osu-pink tabular-nums">
+                  <span className="font-semibold text-torii tabular-nums">
                     {formatNumber(beatmapset.play_count)}
                   </span>
                 </div>
@@ -550,7 +518,7 @@ const BeatmapPage: React.FC = () => {
                 
                 <div className="flex justify-between items-start">
                   <span className="text-text-muted font-medium">{t('beatmap.favouriteCount')}</span>
-                  <span className="font-semibold text-osu-pink flex items-center gap-1 tabular-nums">
+                  <span className="font-semibold text-torii flex items-center gap-1 tabular-nums">
                     <span>❤</span>
                     {formatNumber(beatmapset.favourite_count)}
                   </span>
@@ -571,7 +539,7 @@ const BeatmapPage: React.FC = () => {
                     {beatmapset.tags.split(' ').filter(tag => tag.trim()).map((tag, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-white/[0.06] border border-white/10 text-text-secondary rounded-full text-xs font-medium hover:bg-osu-pink/15 hover:border-osu-pink/30 hover:text-osu-pink transition-colors cursor-pointer"
+                        className="px-3 py-1 bg-white/[0.06] border border-white/10 text-text-secondary rounded-full text-xs font-medium hover:bg-torii/15 hover:border-torii/30 hover:text-torii transition-colors cursor-pointer"
                       >
                         {tag}
                       </span>
@@ -593,42 +561,36 @@ const BeatmapPage: React.FC = () => {
                   href={downloadUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full text-center px-4 py-3 bg-osu-pink hover:bg-osu-pink/90 text-white font-semibold rounded-xl transition-all shadow-elev-1 hover:shadow-elev-2"
+                  className="torii-btn-primary w-full"
                 >
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    {t('beatmap.download')}
-                  </span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  {t('beatmap.download')}
                 </a>
                 {beatmapset.preview_url && (
                   <a
                     href={beatmapset.preview_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full text-center px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all shadow-elev-1 hover:shadow-elev-2"
+                    className="torii-btn-glass w-full"
                   >
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                      {t('beatmap.preview')}
-                    </span>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    {t('beatmap.preview')}
                   </a>
                 )}
                 <a
                   href={osuBeatmapsetUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full text-center px-4 py-3 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold rounded-xl transition-all"
+                  className="torii-btn-glass w-full"
                 >
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                    {t('beatmap.viewOnOsu')}
-                  </span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  {t('beatmap.viewOnOsu')}
                 </a>
               </div>
             </div>

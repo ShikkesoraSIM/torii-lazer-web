@@ -255,8 +255,8 @@ const AdminBeatmapBlacklist: React.FC = () => {
           <div className="inline-flex p-0.5 bg-white/5 border border-white/10 rounded-full text-xs">
             <button
               type="button"
-              className={`px-3 py-1 rounded-full transition-colors ${
-                addMode === 'set' ? 'bg-osu-pink text-white' : 'text-gray-300 hover:text-white'
+              className={`rounded-full transition-colors ${
+                addMode === 'set' ? 'torii-btn-primary !px-3 !py-1' : 'torii-btn-glass !px-3 !py-1 text-gray-300'
               }`}
               onClick={() => setAddMode('set')}
             >
@@ -264,8 +264,8 @@ const AdminBeatmapBlacklist: React.FC = () => {
             </button>
             <button
               type="button"
-              className={`px-3 py-1 rounded-full transition-colors ${
-                addMode === 'single' ? 'bg-osu-pink text-white' : 'text-gray-300 hover:text-white'
+              className={`rounded-full transition-colors ${
+                addMode === 'single' ? 'torii-btn-primary !px-3 !py-1' : 'torii-btn-glass !px-3 !py-1 text-gray-300'
               }`}
               onClick={() => setAddMode('single')}
             >
@@ -307,8 +307,8 @@ const AdminBeatmapBlacklist: React.FC = () => {
           {(['all', 'sets', 'singles'] as ScopeFilter[]).map((s) => (
             <button
               key={s}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                scope === s ? 'bg-osu-pink text-white' : 'text-gray-300 hover:text-white'
+              className={`rounded-full transition-colors ${
+                scope === s ? 'torii-btn-primary !px-3 !py-1' : 'torii-btn-glass !px-3 !py-1 text-gray-300'
               }`}
               onClick={() => setScope(s)}
             >

@@ -14,7 +14,7 @@ const AdminAnticheat: React.FC = () => {
       onClick={() => setSubTab(id)}
       className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
         subTab === id
-          ? 'border-osu-pink text-osu-pink'
+          ? 'border-torii text-torii'
           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
       }`}
     >

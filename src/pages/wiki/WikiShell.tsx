@@ -85,7 +85,7 @@ export function WikiShell({
         {showBack && (
           <Link
             to="/wiki"
-            className="inline-flex items-center gap-1.5 text-sm text-white/45 hover:text-white/80 transition mb-6"
+            className="torii-btn-glass rounded-full !py-1.5 !px-3.5 text-xs mb-6"
           >
             <span aria-hidden>&larr;</span>
             <span>Wiki</span>

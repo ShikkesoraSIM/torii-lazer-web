@@ -164,9 +164,9 @@ const TeamDetailPage: React.FC = () => {
           <p className="text-text-muted mb-6">{t('teams.detail.notFoundDescription')}</p>
           <Link
             to="/teams"
-            className="inline-flex items-center px-4 py-2 bg-osu-pink text-white rounded-xl hover:bg-osu-pink/90 transition-colors"
+            className="torii-btn-primary"
           >
-            <FiArrowLeft className="mr-2" />
+            <FiArrowLeft />
             {t('teams.detail.backToTeams')}
           </Link>
         </div>
@@ -275,7 +275,7 @@ const TeamDetailPage: React.FC = () => {
                   href={safeWebsite}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-base font-semibold text-osu-pink hover:underline break-all"
+                  className="text-base font-semibold text-torii hover:underline break-all"
                 >
                   {team.website}
                 </a>
@@ -334,19 +334,21 @@ const TeamDetailPage: React.FC = () => {
 
                     <div className="flex items-center gap-2 sm:flex-shrink-0">
                       <button
+                        type="button"
                         onClick={() => handleAcceptRequest(request)}
                         disabled={isManagingRequests}
-                        className="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        className="torii-btn-primary text-sm disabled:opacity-50"
                       >
-                        <FiUserCheck className="mr-2" />
+                        <FiUserCheck />
                         {t('teams.detail.acceptRequest')}
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleRejectRequest(request)}
                         disabled={isManagingRequests}
-                        className="inline-flex items-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                        className="torii-btn-glass text-sm text-red-300 hover:text-red-200 disabled:opacity-50"
                       >
-                        <FiUserX className="mr-2" />
+                        <FiUserX />
                         {t('teams.detail.rejectRequest')}
                       </button>
                     </div>

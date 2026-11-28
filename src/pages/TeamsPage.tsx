@@ -80,8 +80,7 @@ const TeamsPage: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const actionClass =
-    'inline-flex items-center px-4 py-2 rounded-2xl border border-white/20 bg-torii hover:bg-torii-hover text-white transition-all self-start sm:self-auto shadow-elev-2';
+  const actionClass = 'torii-btn-primary self-start sm:self-auto';
 
   return (
     <div className="min-h-screen torii-page-stage">
@@ -101,18 +100,18 @@ const TeamsPage: React.FC = () => {
               user?.team ? (
                 user.id === user.team.leader_id ? (
                   <Link to={`/teams/${user.team.id}/edit`} className={actionClass}>
-                    <FiEdit className="mr-2" />
+                    <FiEdit />
                     {t('teams.editTeam')}
                   </Link>
                 ) : (
                   <Link to={`/teams/${user.team.id}`} className={actionClass}>
-                    <FiEye className="mr-2" />
+                    <FiEye />
                     {t('teams.viewTeam')}
                   </Link>
                 )
               ) : (
                 <Link to="/teams/create" className={actionClass}>
-                  <FiPlus className="mr-2" />
+                  <FiPlus />
                   {t('teams.createTeam')}
                 </Link>
               )
@@ -152,7 +151,7 @@ const TeamsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setReloadNonce((n) => n + 1)}
-                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-sm font-semibold transition-colors"
+                className="torii-btn-primary text-sm"
               >
                 {t('common.retry', { defaultValue: 'Retry' })}
               </button>

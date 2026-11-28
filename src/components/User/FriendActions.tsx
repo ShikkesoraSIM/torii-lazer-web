@@ -137,8 +137,8 @@ const FriendActions: React.FC<FriendActionsProps> = ({
               {isMutual ? (
                 // Mutual follow - two-person icon + heart
                 <>
-                  <FiUsers className="w-4 h-4 text-profile-color" />
-                  <FiHeart className="absolute -top-0.5 -right-0.5 w-2 h-2 text-profile-color fill-current" />
+                  <FiUsers className="w-4 h-4 text-torii" />
+                  <FiHeart className="absolute -top-0.5 -right-0.5 w-2 h-2 text-torii fill-current" />
                 </>
               ) : (
                 // One-way follow - user icon + minus
@@ -151,7 +151,7 @@ const FriendActions: React.FC<FriendActionsProps> = ({
           ),
           action: onRemove,
           className: isMutual 
-            ? "text-profile-color hover:bg-profile-color/10 dark:text-profile-color dark:hover:bg-profile-color/10 font-medium" 
+            ? "text-torii hover:bg-torii/10 font-medium" 
             : "text-orange-600 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-500/10 font-medium",
         },
       ];
@@ -248,8 +248,8 @@ const FriendActions: React.FC<FriendActionsProps> = ({
         // Mutual follow - two-person icon + pink heart + pulse
         return (
           <span className="relative flex items-center justify-center">
-            <FiUsers className="w-4 h-4 text-profile-color" />
-            <FiHeart className="absolute -top-0.5 -right-0.5 w-2 h-2 text-profile-color fill-current animate-pulse" />
+            <FiUsers className="w-4 h-4 text-torii" />
+            <FiHeart className="absolute -top-0.5 -right-0.5 w-2 h-2 text-torii fill-current animate-pulse" />
           </span>
         );
       } else {
@@ -310,11 +310,8 @@ const FriendActions: React.FC<FriendActionsProps> = ({
           whileHover={{ scale: !isSelf && !loading && !isActionLoading ? 1.02 : 1 }}
           whileTap={{ scale: !isSelf && !loading && !isActionLoading ? 0.98 : 1 }}
           className={`
-            bg-gray-100 dark:bg-gray-800 
-            px-3 py-2 rounded-full flex items-center gap-2 text-sm
-            text-gray-700 dark:text-gray-300
+            torii-btn-glass !px-3 !py-2 rounded-full flex items-center gap-2 text-sm
             disabled:opacity-50 disabled:cursor-not-allowed select-none
-            transition-all duration-200
             cursor-default
           `}
         >
@@ -342,11 +339,8 @@ const FriendActions: React.FC<FriendActionsProps> = ({
         whileTap={{ scale: !isActionLoading ? 0.98 : 1 }}
         {...getReferenceProps()}
         className={`
-          bg-gray-100 dark:bg-gray-800 
-          hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer
-          px-3 py-2 rounded-full flex items-center gap-2 text-sm
-          text-gray-700 dark:text-gray-300
-          transition-all duration-200
+          torii-btn-glass !px-3 !py-2 rounded-full flex items-center gap-2 text-sm
+          cursor-pointer
           focus:outline-none focus:ring-2 focus:ring-blue-500/20
           disabled:opacity-50 disabled:cursor-not-allowed
           ${isOpen ? 'ring-2 ring-blue-500/20' : ''}

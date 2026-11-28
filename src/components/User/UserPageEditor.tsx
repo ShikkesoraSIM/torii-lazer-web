@@ -252,7 +252,7 @@ const UserPageEditor: React.FC<UserPageEditorProps> = ({
           <button
             onClick={handleSave}
             disabled={!hasChanges || saving || content.length > 60000}
-            className="flex items-center gap-2 px-4 py-2 bg-osu-pink hover:opacity-90 disabled:bg-gray-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed"
+            className="torii-btn-primary rounded-full px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? (
               <>

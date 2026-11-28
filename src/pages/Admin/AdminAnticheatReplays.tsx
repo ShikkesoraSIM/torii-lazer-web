@@ -331,7 +331,7 @@ const AdminAnticheatReplays: React.FC = () => {
             setPage(0);
             loadRows();
           }}
-          className="ml-auto px-3 py-1.5 text-sm rounded-md bg-osu-pink text-white hover:bg-osu-pink/90 transition-colors"
+          className="ml-auto torii-btn-primary !px-3 !py-1.5 text-sm"
         >
           Refresh
         </button>
@@ -339,7 +339,7 @@ const AdminAnticheatReplays: React.FC = () => {
           type="button"
           onClick={handleBulkRun}
           disabled={bulkLaunching || (bulkJob !== null && bulkJob.status === 'running')}
-          className="px-3 py-1.5 text-sm rounded-md border border-osu-pink text-osu-pink hover:bg-osu-pink/10 disabled:opacity-40 transition-colors"
+          className="torii-btn-glass !px-3 !py-1.5 text-sm text-torii disabled:opacity-40"
         >
           {bulkJob && bulkJob.status === 'running' ? 'Bulk running…' : 'Bulk re-analyze'}
         </button>
@@ -352,7 +352,7 @@ const AdminAnticheatReplays: React.FC = () => {
             <div>
               <span className="font-medium">Bulk job</span>
               <span className="ml-2 text-xs text-gray-500 font-mono">{bulkJob.id.slice(0, 8)}</span>
-              <span className={`ml-3 inline-block px-2 py-0.5 rounded text-xs font-medium ${
+              <span className={`ml-3 rounded-full torii-badge px-2.5 py-0.5 text-xs font-medium ${
                 bulkJob.status === 'completed'
                   ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
                   : bulkJob.status === 'failed'
@@ -426,7 +426,7 @@ const AdminAnticheatReplays: React.FC = () => {
                     >
                       <td className="px-3 py-2">
                         {r.analysis ? (
-                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${severityBadgeClass(r.analysis.verdict)}`}>
+                          <span className={`rounded-full torii-badge px-2.5 py-0.5 text-xs font-medium ${severityBadgeClass(r.analysis.verdict)}`}>
                             {r.analysis.verdict}
                           </span>
                         ) : (
@@ -440,7 +440,7 @@ const AdminAnticheatReplays: React.FC = () => {
                         <Link
                           to={`/users/${r.user_id}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="text-osu-pink hover:underline"
+                          className="text-torii hover:underline"
                         >
                           {r.username ?? `#${r.user_id}`}
                         </Link>
@@ -500,7 +500,7 @@ const AdminAnticheatReplays: React.FC = () => {
                                         {detail.analysis_full.reasons.map((reason, idx) => (
                                           <li key={idx} className="text-xs bg-card/50 border border-card rounded p-2">
                                             <div className="flex items-center gap-2 mb-1">
-                                              <span className={`inline-block px-1.5 py-0.5 rounded font-medium ${severityBadgeClass(reason.severity)}`}>
+                                              <span className={`rounded-full torii-badge px-2 py-0.5 text-[11px] font-medium ${severityBadgeClass(reason.severity)}`}>
                                                 {reason.severity}
                                               </span>
                                               <span className="font-mono">{reason.detector}</span>
@@ -567,7 +567,7 @@ const AdminAnticheatReplays: React.FC = () => {
                                             <td className="px-2 py-1">
                                               <Link
                                                 to={`/scores/${sib.score_id}`}
-                                                className="text-osu-pink hover:underline"
+                                                className="text-torii hover:underline"
                                               >
                                                 #{sib.score_id}
                                               </Link>
@@ -612,7 +612,7 @@ const AdminAnticheatReplays: React.FC = () => {
                                     <ul className="text-xs space-y-1">
                                       {detail.alerts.map((a) => (
                                         <li key={a.id} className="bg-card/50 border border-card rounded px-2 py-1">
-                                          <span className={`inline-block px-1.5 py-0.5 rounded font-medium mr-2 ${severityBadgeClass(a.severity)}`}>
+                                          <span className={`rounded-full torii-badge px-2 py-0.5 text-[11px] font-medium mr-2 ${severityBadgeClass(a.severity)}`}>
                                             {a.severity}
                                           </span>
                                           <span className="text-gray-700 dark:text-gray-200">{a.title}</span>

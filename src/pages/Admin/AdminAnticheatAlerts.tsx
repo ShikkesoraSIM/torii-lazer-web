@@ -199,7 +199,7 @@ const AdminAnticheatAlerts: React.FC = () => {
             setPage(0);
             loadAlerts();
           }}
-          className="ml-auto px-3 py-1.5 text-sm rounded-md bg-osu-pink text-white hover:bg-osu-pink/90 transition-colors"
+          className="ml-auto torii-btn-primary !px-3 !py-1.5 text-sm"
         >
           Refresh
         </button>
@@ -242,7 +242,7 @@ const AdminAnticheatAlerts: React.FC = () => {
                       onClick={() => toggleExpanded(a.id)}
                     >
                       <td className="px-3 py-2">
-                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${severityBadgeClass(a.severity)}`}>
+                        <span className={`rounded-full torii-badge px-2.5 py-0.5 text-xs font-medium ${severityBadgeClass(a.severity)}`}>
                           {a.severity}
                         </span>
                       </td>
@@ -254,7 +254,7 @@ const AdminAnticheatAlerts: React.FC = () => {
                           <Link
                             to={`/users/${a.user_id}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="text-osu-pink hover:underline"
+                            className="text-torii hover:underline"
                           >
                             #{a.user_id}
                           </Link>
@@ -265,7 +265,7 @@ const AdminAnticheatAlerts: React.FC = () => {
                           <Link
                             to={`/scores/${a.score_id}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="text-osu-pink hover:underline"
+                            className="text-torii hover:underline"
                           >
                             #{a.score_id}
                           </Link>
@@ -360,7 +360,7 @@ const AdminAnticheatAlerts: React.FC = () => {
             type="button"
             onClick={submitInspector}
             disabled={loadingInspector}
-            className="px-3 py-1.5 text-sm rounded-md bg-osu-pink text-white hover:bg-osu-pink/90 disabled:opacity-50 transition-colors"
+            className="torii-btn-primary !px-3 !py-1.5 text-sm disabled:opacity-50"
           >
             Inspect
           </button>
@@ -393,7 +393,7 @@ const AdminAnticheatAlerts: React.FC = () => {
             <div className="text-sm">
               <Link
                 to={`/users/${summary.user_id}`}
-                className="text-osu-pink hover:underline font-medium"
+                className="text-torii hover:underline font-medium"
               >
                 {summary.username} (#{summary.user_id})
               </Link>
@@ -432,7 +432,7 @@ const AdminAnticheatAlerts: React.FC = () => {
                                     {i > 0 && ', '}
                                     <Link
                                       to={`/users/${uid}`}
-                                      className="text-osu-pink hover:underline"
+                                      className="text-torii hover:underline"
                                     >
                                       #{uid}
                                     </Link>

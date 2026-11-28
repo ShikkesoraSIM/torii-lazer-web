@@ -1,8 +1,8 @@
 ﻿.user-group-badge {
   align-items: center;
-  background-color: #474551ab;
-  border-radius: 20px;
-  color: var(--group-colour, hsl(var(--hsl-c1)));
+  background-color: var(--btn-bg);
+  border-radius: 9999px;
+  color: var(--group-colour, var(--torii-accent));
   display: inline-flex;
   font-size: 10px;
   font-weight: 600;

@@ -178,12 +178,12 @@ const RegisterPage: React.FC = () => {
               Torii and some of its assets (a bit of the art, and parts of the server, client and website)
               are built with the help of AI. We are telling you upfront instead of hiding it. You can read
               the full statement{' '}
-              <a href="/about" target="_blank" rel="noopener noreferrer" className="text-osu-pink hover:underline font-medium">here</a>.
+              <a href="/about" target="_blank" rel="noopener noreferrer" className="text-torii hover:text-torii-hover hover:underline font-medium">here</a>.
             </p>
             <button
               type="button"
               onClick={handleAiAcknowledge}
-              className="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-osu-pink text-white font-semibold hover:bg-osu-pink/90 transition-colors"
+              className="torii-btn-primary w-full inline-flex items-center justify-center"
             >
               Got it
             </button>
@@ -360,7 +360,7 @@ const RegisterPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleRetryTurnstile}
-                    className="text-osu-pink hover:underline font-medium"
+                    className="text-torii hover:text-torii-hover hover:underline font-medium"
                   >
                     Retry verification
                   </button>
@@ -372,7 +372,7 @@ const RegisterPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading || !turnstileToken}
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-elev-1 text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-torii disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                className="torii-btn-primary w-full flex justify-center items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <LoadingSpinner size="sm" />
@@ -387,7 +387,7 @@ const RegisterPage: React.FC = () => {
                 {t('auth.register.hasAccount')}{' '}
                 <Link
                   to="/login"
-                  className="font-medium text-osu-pink hover:text-osu-pink/80 transition-colors"
+                  className="font-medium text-torii hover:text-torii-hover transition-colors"
                 >
                   {t('auth.register.loginNow')}
                 </Link>
@@ -405,7 +405,7 @@ const RegisterPage: React.FC = () => {
             (the server, the client, the website, art like these default avatars), and there is
             still endless manual work on top of all of it. I would rather be upfront about that
             than hide it.{' '}
-            <Link to="/about" className="text-osu-pink hover:underline">More about Torii</Link>.
+            <Link to="/about" className="text-torii hover:text-torii-hover hover:underline">More about Torii</Link>.
             You can switch your avatar to the plain Torii logo in settings, or upload your own.
           </p>
         </div>

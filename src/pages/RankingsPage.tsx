@@ -204,9 +204,9 @@ const RankingsPage: React.FC = () => {
           </div>
           <Link
             to="/rankings/matchmaking"
-            className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-torii/15 border border-torii/40 hover:border-torii/80 hover:bg-torii/25 hover:shadow-elev-2 transition-all self-start md:self-auto"
+            className="torii-btn-glass group text-sm self-start md:self-auto"
           >
-            <span className="text-sm font-semibold text-text-primary">
+            <span>
               {t('rankings.matchmakingLadder', { defaultValue: 'Matchmaking ladder' })}
             </span>
             <span className="text-xs text-text-muted group-hover:text-torii transition-colors" aria-hidden="true">
@@ -228,33 +228,21 @@ const RankingsPage: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 xl:flex-1">
           <div className="flex-1">
-            <div className="inline-flex torii-liquid-soft rounded-2xl p-1.5 sm:p-2 min-h-[44px] sm:min-h-[48px] items-center gap-1" role="tablist">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={selectedTab === 'users'}
-                onClick={() => setSelectedTab('users')}
-                className={`relative px-3 sm:px-4 py-2 rounded-xl font-medium transition-colors duration-150 text-sm sm:text-base ${
-                  selectedTab === 'users'
-                    ? 'text-white border border-torii bg-torii shadow-elev-1'
-                    : 'text-text-secondary hover:text-text-primary border border-transparent'
-                }`}
-              >
-                <span className="relative z-10">{t('rankings.tabs.users')}</span>
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={selectedTab === 'countries'}
-                onClick={() => setSelectedTab('countries')}
-                className={`relative px-3 sm:px-4 py-2 rounded-xl font-medium transition-colors duration-150 text-sm sm:text-base ${
-                  selectedTab === 'countries'
-                    ? 'text-white border border-torii bg-torii shadow-elev-1'
-                    : 'text-text-secondary hover:text-text-primary border border-transparent'
-                }`}
-              >
-                <span className="relative z-10">{t('rankings.tabs.countries')}</span>
-              </button>
+            <div className="inline-flex torii-liquid-soft rounded-2xl p-1.5 sm:p-2 min-h-[44px] sm:min-h-[48px] items-center gap-1.5" role="tablist">
+              {allowedTabs.map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  role="tab"
+                  aria-selected={selectedTab === tab}
+                  onClick={() => setSelectedTab(tab)}
+                  className={`text-sm sm:text-base ${
+                    selectedTab === tab ? 'torii-btn-primary' : 'torii-btn-glass'
+                  }`}
+                >
+                  {t(`rankings.tabs.${tab}`)}
+                </button>
+              ))}
             </div>
           </div>
 

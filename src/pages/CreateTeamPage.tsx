@@ -470,16 +470,16 @@ const CreateTeamPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="px-6 py-3 border border-card text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="torii-btn-glass"
               >
                 {t('teams.create.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center px-6 py-3 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="torii-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <FiSave className="mr-2" />
+                <FiSave />
                 {isSubmitting ? t('teams.create.saving') : isEditing ? t('teams.create.saveChanges') : t('teams.create.createTeam')}
               </button>
             </div>

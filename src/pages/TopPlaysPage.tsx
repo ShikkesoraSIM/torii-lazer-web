@@ -168,7 +168,7 @@ const TopPlaysPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setReloadKey((k) => k + 1)}
-                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-sm font-semibold transition-colors"
+                className="torii-btn-primary text-sm"
               >
                 {t('common.retry', { defaultValue: 'Retry' })}
               </button>
@@ -241,14 +241,14 @@ const TopPlaysPage: React.FC = () => {
                 {/* Stats */}
                 <div className="flex items-center gap-3 text-right">
                   {mods && (
-                    <span className="hidden md:inline text-xs font-mono text-osu-pink">
+                    <span className="hidden md:inline text-xs font-mono text-torii">
                       +{mods}
                     </span>
                   )}
                   <span className="text-sm tabular-nums text-text-secondary">
                     {formatAccuracy(s.accuracy)}
                   </span>
-                  <span className="text-sm font-bold tabular-nums text-osu-pink min-w-[5rem]">
+                  <span className="text-sm font-bold tabular-nums text-torii min-w-[5rem]">
                     {formatPp(s.pp)}
                   </span>
                 </div>
@@ -267,7 +267,7 @@ const TopPlaysPage: React.FC = () => {
             type="button"
             onClick={onPrev}
             disabled={page <= 1}
-            className="px-4 py-2 rounded-xl torii-liquid-soft text-text-primary disabled:opacity-40 hover:border-torii/40 transition-colors"
+            className="torii-btn-glass text-sm disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ← Prev
           </button>
@@ -278,7 +278,7 @@ const TopPlaysPage: React.FC = () => {
             type="button"
             onClick={onNext}
             disabled={!hasMore}
-            className="px-4 py-2 rounded-xl torii-liquid-soft text-text-primary disabled:opacity-40 hover:border-torii/40 transition-colors"
+            className="torii-btn-glass text-sm disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next →
           </button>

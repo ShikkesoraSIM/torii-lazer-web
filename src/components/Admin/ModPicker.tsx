@@ -437,7 +437,7 @@ const ModPicker: React.FC<ModPickerProps> = ({
         <button
           type="button"
           onClick={selectAllInTab}
-          className="px-2.5 py-1 rounded-md bg-osu-pink/10 text-osu-pink border border-osu-pink/30 hover:bg-osu-pink/20 transition-colors"
+          className="torii-btn-glass !px-2.5 !py-1 text-torii"
           title={`Select every mod in the ${MOD_TYPE_LABEL[activeType]} tab (skipping conflicts)`}
         >
           + Select all in {MOD_TYPE_LABEL[activeType]}
@@ -445,7 +445,7 @@ const ModPicker: React.FC<ModPickerProps> = ({
         <button
           type="button"
           onClick={selectAllAvailable}
-          className="px-2.5 py-1 rounded-md bg-osu-pink/20 text-osu-pink border border-osu-pink/40 hover:bg-osu-pink/30 transition-colors font-medium"
+          className="torii-btn-glass !px-2.5 !py-1 text-torii font-medium"
           title="Pick every compatible mod across every tab — useful for an 'anything goes' free-mod day"
         >
           ✦ Select every mod (all tabs)

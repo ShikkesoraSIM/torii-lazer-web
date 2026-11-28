@@ -320,7 +320,7 @@ const UserPageEditModal: React.FC<UserPageEditModalProps> = ({
           <button
             onClick={handleSave}
             disabled={isSaving || !hasUnsavedChanges || content.length > 60000}
-            className="flex items-center gap-2 px-6 py-2 bg-osu-pink hover:opacity-90 text-white rounded-lg transition-colors disabled:opacity-50"
+            className="torii-btn-primary rounded-full px-6 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? (
               <>

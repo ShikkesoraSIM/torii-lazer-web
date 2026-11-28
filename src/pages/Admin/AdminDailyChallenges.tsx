@@ -863,7 +863,7 @@ const AdminDailyChallenges: React.FC = () => {
               setFormData(blankForm(findNextFreeDate(challenges)));
               setShowCreateModal(true);
             }}
-            className="px-4 py-2 rounded-xl bg-gradient-to-br from-osu-pink to-fuchsia-500 hover:from-osu-pink/90 hover:to-fuchsia-500/90 text-white shadow-[0_4px_24px_-4px_rgba(255,0,127,0.5)] transition-all whitespace-nowrap text-sm font-medium"
+            className="torii-btn-primary !px-4 !py-2 text-sm whitespace-nowrap"
           >
             + Add Daily Challenge
           </button>
@@ -935,7 +935,7 @@ const AdminDailyChallenges: React.FC = () => {
                     type="button"
                     onClick={() => setSpotlightDate(today)}
                     title="Snap spotlight back to today"
-                    className="ml-1 px-2.5 h-8 inline-flex items-center rounded-lg bg-osu-pink/10 hover:bg-osu-pink/20 text-osu-pink border border-osu-pink/30 text-xs font-medium transition-colors"
+                    className="ml-1 torii-btn-glass !px-2.5 !py-1 h-8 text-xs text-torii"
                   >
                     ⌂ Today
                   </button>
@@ -970,7 +970,7 @@ const AdminDailyChallenges: React.FC = () => {
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
                     Hit <span className="text-emerald-400">🎲 Random Pick</span> or{' '}
-                    <span className="text-osu-pink">+ Add</span> to fill {spotlightDate}.
+                    <span className="text-torii">+ Add</span> to fill {spotlightDate}.
                   </div>
                 </motion.div>
               )}
@@ -1244,7 +1244,7 @@ const AdminDailyChallenges: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-osu-pink text-white rounded-xl hover:bg-osu-pink/90 shadow-lg shadow-osu-pink/20 transition-all font-medium"
+                className="torii-btn-primary !px-6 !py-2"
               >
                 {editingChallenge ? 'Update Challenge' : 'Create Challenge'}
               </button>
@@ -1405,7 +1405,7 @@ const AdminDailyChallenges: React.FC = () => {
               <span>
                 {randomShowMods ? '▼' : '▶'} Configure required / allowed mods
                 {(randomRequiredMods.length > 0 || randomAllowedMods.length > 0) && (
-                  <span className="ml-2 text-xs text-osu-pink">
+                  <span className="ml-2 text-xs text-torii">
                     ({randomRequiredMods.length + randomAllowedMods.length} configured)
                   </span>
                 )}
@@ -1537,7 +1537,7 @@ const AdminDailyChallenges: React.FC = () => {
                     setRandomBusy(false);
                   }
                 }}
-                className="px-4 py-2 bg-osu-pink hover:bg-osu-pink/90 text-white rounded-lg font-medium disabled:opacity-50"
+                className="torii-btn-primary !px-4 !py-2 disabled:opacity-50"
               >
                 Create with this beatmap
               </button>

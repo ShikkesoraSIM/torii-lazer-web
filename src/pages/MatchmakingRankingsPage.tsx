@@ -213,7 +213,7 @@ const MatchmakingRankingsPage: React.FC = () => {
     return (
       <div className="torii-page-stage min-h-screen px-4 py-12">
         <div className="mm-glass max-w-3xl mx-auto p-10 text-center">
-          <FaTrophy className="mx-auto text-5xl text-osu-pink mb-4 opacity-60" />
+          <FaTrophy className="mx-auto text-5xl text-torii mb-4 opacity-60" />
           <h1 className="text-2xl font-bold text-foreground mb-2">Matchmaking</h1>
           <p className="text-gray-400">{poolsError}</p>
         </div>
@@ -252,7 +252,7 @@ const MatchmakingRankingsPage: React.FC = () => {
     return (
       <div className="torii-page-stage min-h-screen px-4 py-12">
         <div className="mm-glass max-w-3xl mx-auto p-10 text-center">
-          <FaTrophy className="mx-auto text-5xl text-osu-pink mb-4 opacity-60" />
+          <FaTrophy className="mx-auto text-5xl text-torii mb-4 opacity-60" />
           <h1 className="text-2xl font-bold text-foreground mb-2">Matchmaking</h1>
           <p className="text-gray-400">
             No pools are currently active. Check back later — admins are still curating the
@@ -275,7 +275,7 @@ const MatchmakingRankingsPage: React.FC = () => {
           transition={{ duration: 0.4 }}
           className="relative overflow-hidden mm-glass-pop"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-osu-pink/20 via-fuchsia-500/5 to-cyan-500/15 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-torii/20 via-fuchsia-500/5 to-cyan-500/15 pointer-events-none" />
           {/* Decorative grid */}
           <div
             className="absolute inset-0 opacity-[0.04] pointer-events-none"
@@ -289,7 +289,7 @@ const MatchmakingRankingsPage: React.FC = () => {
           <div className="relative z-10 p-4 sm:p-6 md:p-8 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-8 items-center">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className="inline-block w-1.5 h-5 bg-torii rounded-full" />
+                <span className="torii-section-bar" />
                 <span className="uppercase tracking-[0.25em] text-2xs text-torii font-bold">
                   Live ranked ladder
                 </span>
@@ -308,7 +308,7 @@ const MatchmakingRankingsPage: React.FC = () => {
             {top1 && (
               <Link
                 to={`/users/${top1.user_id}`}
-                className="group relative flex items-center gap-4 px-4 sm:px-5 py-4 rounded-2xl bg-gradient-to-br from-torii/20 via-osu-pink/10 to-transparent border border-torii/35 hover:border-torii/75 hover:shadow-elev-2 transition-all w-full min-w-0 lg:w-auto lg:min-w-[18rem]"
+                className="group relative flex items-center gap-4 px-4 sm:px-5 py-4 rounded-2xl bg-gradient-to-br from-torii/20 via-torii/10 to-transparent border border-torii/35 hover:border-torii/75 hover:shadow-elev-2 transition-all w-full min-w-0 lg:w-auto lg:min-w-[18rem]"
               >
                 <FaCrown className="absolute -top-2.5 -right-2.5 text-yellow-300 text-2xl drop-shadow-[0_0_8px_rgba(252,211,77,0.7)]" />
                 {top1.user?.avatar_url ? (
@@ -324,7 +324,7 @@ const MatchmakingRankingsPage: React.FC = () => {
                   <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5">
                     Top of the ladder
                   </p>
-                  <p className="font-bold text-foreground truncate group-hover:text-osu-pink transition-colors">
+                  <p className="font-bold text-foreground truncate group-hover:text-torii transition-colors">
                     {top1.user?.username ?? `user ${top1.user_id}`}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
@@ -347,7 +347,7 @@ const MatchmakingRankingsPage: React.FC = () => {
         {selectedPool && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <StatCard
-              icon={<FaUsers className="text-osu-pink" />}
+              icon={<FaUsers className="text-torii" />}
               label="Players ever"
               value={selectedPool.unique_players ?? 0}
             />
@@ -373,13 +373,11 @@ const MatchmakingRankingsPage: React.FC = () => {
             return (
               <button
                 key={p.id}
+                type="button"
                 onClick={() => setSelectedPoolId(p.id)}
-                className={`group relative px-5 py-2.5 rounded-xl border transition-all backdrop-blur-md text-sm font-semibold
-                  ${
-                    active
-                      ? 'bg-gradient-to-br from-osu-pink/25 to-fuchsia-500/15 border-osu-pink/60 text-foreground shadow-[0_0_16px_rgba(236,72,153,0.25)]'
-                      : 'bg-card/60 border-card text-gray-300 hover:bg-card hover:border-osu-pink/40 hover:text-osu-pink'
-                  }`}
+                className={`group relative text-sm ${
+                  active ? 'torii-btn-primary' : 'torii-btn-glass'
+                }`}
               >
                 <div className="flex items-center gap-2.5">
                   <span>{RULESET_LABEL[p.ruleset_id] ?? `mode ${p.ruleset_id}`}</span>
@@ -399,7 +397,7 @@ const MatchmakingRankingsPage: React.FC = () => {
                 {active && (
                   <motion.span
                     layoutId="active-pool-underline"
-                    className="absolute -bottom-1 left-3 right-3 h-0.5 bg-osu-pink rounded-full"
+                    className="absolute -bottom-1 left-3 right-3 h-0.5 bg-torii rounded-full"
                   />
                 )}
               </button>
@@ -434,11 +432,11 @@ const MatchmakingRankingsPage: React.FC = () => {
                   {myPoolStats && (
                     <Link
                       to={`/users/${myPoolStats.user_id}`}
-                      className="block px-5 py-3 rounded-2xl bg-gradient-to-r from-osu-pink/15 via-osu-pink/5 to-transparent border border-osu-pink/30 hover:border-osu-pink/70 transition-all group"
+                      className="block px-5 py-3 rounded-2xl bg-gradient-to-r from-torii/15 via-torii/5 to-transparent border border-torii/30 hover:border-torii/70 transition-all group"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
-                          <span className="px-2 py-0.5 rounded text-xs font-bold tracking-wider uppercase bg-osu-pink/20 text-osu-pink">
+                          <span className="px-2 py-0.5 rounded-full torii-badge text-xs uppercase bg-torii/20 text-torii">
                             Your placement
                           </span>
                           <span className="text-sm text-foreground font-semibold truncate">
@@ -474,7 +472,7 @@ const MatchmakingRankingsPage: React.FC = () => {
                         rhythm and the eye reads the heading naturally. */}
                     <header className="px-5 pt-4 pb-3 flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <FaTrophy className="text-osu-pink" />
+                        <FaTrophy className="text-torii" />
                         <h2 className="font-bold text-foreground text-sm uppercase tracking-wider">
                           Leaderboard
                         </h2>
@@ -560,7 +558,7 @@ const MatchmakingRankingsPage: React.FC = () => {
                               starRating={bm.difficulty_rating}
                             />
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm font-semibold text-foreground truncate group-hover:text-osu-pink transition-colors">
+                              <p className="text-sm font-semibold text-foreground truncate group-hover:text-torii transition-colors">
                                 {bm.artist} — {bm.title}
                               </p>
                               <p className="text-xs text-gray-400 truncate">
@@ -672,7 +670,7 @@ const Podium: React.FC<PodiumProps> = ({ top1, top2, top3, currentUserId }) => {
                   alt=""
                   className={`rounded-2xl object-cover shadow-lg ring-2 transition-all
                     ${place === 1 ? 'w-20 h-20' : 'w-14 h-14'} ${badge.ring}
-                    ${isMe ? 'ring-osu-pink/80' : ''}`}
+                    ${isMe ? 'ring-torii/80' : ''}`}
                 />
               ) : (
                 <div
@@ -681,13 +679,13 @@ const Podium: React.FC<PodiumProps> = ({ top1, top2, top3, currentUserId }) => {
               )}
 
               <p
-                className={`mt-3 font-bold text-foreground truncate w-full group-hover:text-osu-pink transition-colors ${
+                className={`mt-3 font-bold text-foreground truncate w-full group-hover:text-torii transition-colors ${
                   place === 1 ? 'text-lg' : 'text-sm'
                 }`}
               >
                 {entry.user?.username ?? `user ${entry.user_id}`}
                 {isMe && (
-                  <span className="ml-1 align-middle inline-block px-1 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-osu-pink/20 text-osu-pink">
+                  <span className="ml-1 align-middle px-1.5 py-0.5 rounded-full torii-badge text-[9px] uppercase bg-torii/20 text-torii">
                     you
                   </span>
                 )}
@@ -751,18 +749,18 @@ const LeaderboardRow: React.FC<LeaderboardRowProps> = ({ entry, isMe }) => {
             alt=""
             className={`w-10 h-10 rounded-full object-cover transition-all ${
               isMe
-                ? 'shadow-[0_0_18px_rgba(236,72,153,0.45)] ring-1 ring-osu-pink/60'
-                : 'group-hover:ring-1 group-hover:ring-osu-pink/40'
+                ? 'shadow-[0_0_18px_rgba(236,72,153,0.45)] ring-1 ring-torii/60'
+                : 'group-hover:ring-1 group-hover:ring-torii/40'
             }`}
           />
         ) : (
           <div className="w-10 h-10 rounded-full bg-card-hover" />
         )}
         <div className="min-w-0">
-          <p className="font-semibold text-foreground truncate group-hover:text-osu-pink transition-colors flex items-center gap-2">
+          <p className="font-semibold text-foreground truncate group-hover:text-torii transition-colors flex items-center gap-2">
             <span className="truncate">{entry.user?.username ?? `user ${entry.user_id}`}</span>
             {isMe && (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-osu-pink/20 text-osu-pink shrink-0">
+              <span className="px-2 py-0.5 rounded-full torii-badge text-[10px] uppercase bg-torii/20 text-torii shrink-0">
                 you
               </span>
             )}

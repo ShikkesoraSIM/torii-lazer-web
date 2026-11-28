@@ -421,7 +421,7 @@ const AdminLoginAudit: React.FC = () => {
             <button
               onClick={() => loadLogs(logsPage + 1, true)}
               disabled={loadingLogs}
-              className="px-3 py-2 rounded-lg bg-osu-pink/90 text-white hover:bg-osu-pink disabled:opacity-50"
+              className="torii-btn-primary !px-3 !py-2 disabled:opacity-50"
             >
               Load more
             </button>
@@ -469,7 +469,7 @@ const AdminLoginAudit: React.FC = () => {
               <button
                 onClick={handleManualAssignHash}
                 disabled={manualAssignLoading || !manualAssignReady}
-                className="px-3 py-2 rounded-lg bg-osu-pink/90 text-white hover:bg-osu-pink disabled:opacity-50"
+                className="torii-btn-primary !px-3 !py-2 disabled:opacity-50"
                 title="Create or update mapping for this hash"
               >
                 {manualAssignLoading ? 'Saving...' : 'Assign / Update'}

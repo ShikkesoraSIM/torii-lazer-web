@@ -137,7 +137,7 @@ const AdminManualSubmitSection: React.FC = () => {
           <button
             onClick={handlePreview}
             disabled={busy || !file}
-            className="px-4 py-2 bg-osu-pink hover:bg-osu-pink/90 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
+            className="torii-btn-primary !px-4 !py-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {busy && !preview ? 'Reading…' : 'Preview'}
           </button>
@@ -160,7 +160,7 @@ const AdminManualSubmitSection: React.FC = () => {
             <span className="text-sm font-semibold text-white">{preview.player_name || '(no name in replay)'}</span>
             <span className="text-xs px-2 py-0.5 rounded bg-white/10 text-gray-200 uppercase">{preview.mode}</span>
             {preview.mods.length > 0 && (
-              <span className="text-xs text-osu-pink font-mono">+{preview.mods.join('')}</span>
+              <span className="text-xs text-torii font-mono">+{preview.mods.join('')}</span>
             )}
           </div>
 

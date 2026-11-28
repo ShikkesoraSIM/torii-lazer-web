@@ -51,10 +51,10 @@ const NavItem = memo<{ item: NavItemType; isActive: boolean; compact?: boolean }
           aria-label={compact ? item.title : undefined}
           aria-current={isActive ? 'page' : undefined}
           className={`relative flex items-center gap-2 rounded-full font-medium text-sm transition-all duration-150 ${
-            compact ? 'p-[7px]' : 'px-3 py-[7px]'
+            compact ? '!p-[7px]' : '!px-3 !py-[7px]'
           } ${
             isActive
-              ? 'text-white bg-torii shadow-elev-1 border border-white/25'
+              ? 'torii-btn-primary text-white'
               : 'text-white/75 hover:text-white hover:bg-white/[0.08] border border-transparent'
           }`}
         >
@@ -315,7 +315,7 @@ const BrandMark = memo<{ size?: number }>(({ size = 36 }) => {
   return (
     <div
       style={{ width: size, height: size }}
-      className="rounded-full border border-white/15 bg-gradient-to-br from-torii/25 via-sky-400/15 to-osu-pink/15 shadow-[0_0_16px_rgba(79,143,255,0.22)] flex items-center justify-center"
+      className="rounded-full border border-white/15 bg-gradient-to-br from-torii/25 via-sky-400/15 to-torii/15 shadow-[0_0_16px_rgba(79,143,255,0.22)] flex items-center justify-center"
     >
       <img
         src="/image/logos/logo.png"
@@ -568,7 +568,7 @@ const Navbar: React.FC = () => {
                     </Link>
                     <Link
                       to="/register"
-                      className="text-white text-sm font-semibold px-4 py-2 rounded-full bg-torii hover:bg-torii-hover border border-torii transition"
+                      className="torii-btn-primary text-sm !px-4 !py-2 rounded-full"
                     >
                       {t('nav.register')}
                     </Link>
@@ -637,7 +637,7 @@ const Navbar: React.FC = () => {
                 <Link
                   to="/profile"
                   aria-label={user.username}
-                  className="flex items-center p-1.5 rounded-2xl hover:bg-white/5 transition-colors duration-150"
+                  className="flex items-center p-1.5 rounded-full hover:bg-white/5 transition-colors duration-150"
                 >
                   <Avatar
                     userId={user.id}
@@ -651,7 +651,7 @@ const Navbar: React.FC = () => {
                   to="/login"
                   title={t('nav.login')}
                   aria-label={t('nav.login')}
-                  className="inline-flex h-10 w-10 min-[480px]:w-auto min-[480px]:px-4 items-center justify-center whitespace-nowrap text-sm font-semibold text-white bg-torii hover:bg-torii-hover rounded-2xl transition-colors duration-150 border border-torii"
+                  className="torii-btn-primary h-10 w-10 min-[480px]:w-auto !p-0 min-[480px]:!px-4 rounded-full text-sm whitespace-nowrap"
                 >
                   <FiLogIn size={18} className="min-[480px]:hidden" aria-hidden="true" />
                   <span className="hidden min-[480px]:inline">{t('nav.login')}</span>

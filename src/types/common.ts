@@ -24,20 +24,23 @@ export const GAME_MODE_NAMES: Record<GameMode, string> = {
 export const getProfileColor = () => {
   if (typeof window !== 'undefined') {
     const color = getComputedStyle(document.documentElement).getPropertyValue('--profile-color').trim();
-    return color || '#ED8EA6';
+    if (color) return color;
+    return document.documentElement.classList.contains('theme-aero') ? '#0EA5E9' : '#4F8FFF';
   }
-  return '#ED8EA6';
+  return '#4F8FFF';
 };
 
+const DEFAULT_MODE_COLOR = 'var(--torii-accent, #4F8FFF)';
+
 export const GAME_MODE_COLORS: Record<GameMode, string> = {
-  osu: 'var(--profile-color, #ED8EA6)',
-  osurx: 'var(--profile-color, #ED8EA6)',
-  osuap: 'var(--profile-color, #ED8EA6)',
-  taiko: 'var(--profile-color, #ED8EA6)',
-  taikorx: 'var(--profile-color, #ED8EA6)',
-  fruits: 'var(--profile-color, #ED8EA6)',
-  fruitsrx: 'var(--profile-color, #ED8EA6)',
-  mania: 'var(--profile-color, #ED8EA6)',
+  osu: DEFAULT_MODE_COLOR,
+  osurx: DEFAULT_MODE_COLOR,
+  osuap: DEFAULT_MODE_COLOR,
+  taiko: DEFAULT_MODE_COLOR,
+  taikorx: DEFAULT_MODE_COLOR,
+  fruits: DEFAULT_MODE_COLOR,
+  fruitsrx: DEFAULT_MODE_COLOR,
+  mania: DEFAULT_MODE_COLOR,
 };
 
 export type Theme = 'dark' | 'aero';

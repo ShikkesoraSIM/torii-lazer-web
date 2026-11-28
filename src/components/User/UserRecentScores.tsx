@@ -177,7 +177,7 @@ const ScoreCard: React.FC<{
                   />
                   <Link
                     to={`/scores/${score.id}`}
-                    className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
+                    className="text-torii hover:text-torii-hover transition-colors font-medium"
                   >
                     View score
                   </Link>
@@ -266,7 +266,7 @@ const ScoreCard: React.FC<{
                 />
                 <Link
                   to={`/scores/${score.id}`}
-                  className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
+                  className="text-torii hover:text-torii-hover transition-colors font-medium"
                 >
                   View score
                 </Link>
@@ -400,7 +400,7 @@ const UserRecentScores: React.FC<UserRecentScoresProps> = ({
       <div className={`${className}`}>
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
+            <span className="torii-section-bar" />
             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {t('profile.recentScores.title')}
             </h3>
@@ -416,7 +416,7 @@ const UserRecentScores: React.FC<UserRecentScoresProps> = ({
       <div className={`${className}`}>
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
+            <span className="torii-section-bar" />
             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {t('profile.recentScores.title')}
             </h3>
@@ -433,7 +433,7 @@ const UserRecentScores: React.FC<UserRecentScoresProps> = ({
     <div className={`${className}`}>
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
+          <span className="torii-section-bar" />
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {t('profile.recentScores.title')}
           </h3>
@@ -470,8 +470,7 @@ const UserRecentScores: React.FC<UserRecentScoresProps> = ({
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="inline-flex h-9 min-w-[120px] items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-white ring-1 ring-white/20 transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-                style={{ background: `linear-gradient(180deg, ${profileColor}, ${profileColor}d4)`, boxShadow: `0 8px 24px -10px ${profileColor}` }}
+                className="torii-btn-glass rounded-full h-9 min-w-[120px] px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loadingMore ? (
                   <>

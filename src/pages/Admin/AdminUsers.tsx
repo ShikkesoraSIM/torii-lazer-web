@@ -111,7 +111,7 @@ const AdminUsers: React.FC = () => {
           />
           <button
             onClick={loadUsers}
-            className="px-4 py-2 bg-osu-pink hover:bg-osu-pink/90 text-white rounded-xl font-medium transition-colors"
+            className="torii-btn-primary !px-4 !py-2"
           >
             Refresh
           </button>
@@ -204,11 +204,11 @@ const AdminUsers: React.FC = () => {
                     </td>
                     <td className="py-3 px-4">
                       {user.is_restricted ? (
-                        <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-red-500/15 text-red-300 border-red-500/40">
+                        <span className="rounded-full torii-badge text-[10px] uppercase tracking-wider px-2.5 py-0.5 bg-red-500/15 text-red-300 border-red-500/40">
                           Banned
                         </span>
                       ) : (
-                        <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/40">
+                        <span className="rounded-full torii-badge text-[10px] uppercase tracking-wider px-2.5 py-0.5 bg-emerald-500/15 text-emerald-300 border-emerald-500/40">
                           Active
                         </span>
                       )}
@@ -216,17 +216,17 @@ const AdminUsers: React.FC = () => {
                     <td className="py-3 px-4">
                       <div className="flex flex-wrap gap-1">
                         {user.is_admin && (
-                          <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-purple-500/15 text-purple-300 border-purple-500/40">
+                          <span className="rounded-full torii-badge text-[10px] uppercase tracking-wider px-2.5 py-0.5 bg-purple-500/15 text-purple-300 border-purple-500/40">
                             Admin
                           </span>
                         )}
                         {user.is_gmt && (
-                          <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-blue-500/15 text-blue-300 border-blue-500/40">
+                          <span className="rounded-full torii-badge text-[10px] uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/15 text-blue-300 border-blue-500/40">
                             GMT
                           </span>
                         )}
                         {user.is_qat && (
-                          <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border bg-amber-500/15 text-amber-300 border-amber-500/40">
+                          <span className="rounded-full torii-badge text-[10px] uppercase tracking-wider px-2.5 py-0.5 bg-amber-500/15 text-amber-300 border-amber-500/40">
                             QAT
                           </span>
                         )}
@@ -236,7 +236,7 @@ const AdminUsers: React.FC = () => {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEdit(user)}
-                          className="px-3 py-1 bg-osu-pink hover:bg-osu-pink/90 text-white rounded-lg transition-colors text-xs font-medium"
+                          className="torii-btn-primary !px-3 !py-1 text-xs"
                         >
                           Edit
                         </button>

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { Users } from 'lucide-react';
 import { friendsAPI, handleApiError } from '../utils/api';
@@ -92,26 +91,18 @@ const FriendsPage: React.FC = () => {
         </div>
 
         <div className="mb-4 sm:mb-6">
-          <div className="inline-flex torii-liquid-soft rounded-2xl p-1.5 sm:p-2 min-h-[44px] sm:min-h-[48px] items-center gap-1">
+          <div className="inline-flex torii-liquid-soft rounded-2xl p-1.5 sm:p-2 min-h-[44px] sm:min-h-[48px] items-center gap-1.5">
             {TABS.map((tabKey) => (
               <button
                 key={tabKey}
+                type="button"
                 onClick={() => setTab(tabKey)}
-                className={`relative px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium transition-colors duration-200 text-sm sm:text-base ${
-                  tab === tabKey ? 'text-white' : 'text-white/70 hover:text-white'
+                className={`text-sm sm:text-base ${
+                  tab === tabKey ? 'torii-btn-primary' : 'torii-btn-glass'
                 }`}
               >
-                {tab === tabKey && (
-                  <motion.span
-                    layoutId="friends-tab-pill"
-                    className="absolute inset-0 rounded-xl border border-white/20 bg-white/14 shadow-[0_8px_24px_rgba(0,0,0,0.22)]"
-                    transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.6 }}
-                  />
-                )}
-                <span className="relative z-10">
-                  {t(`friends.tabs.${tabKey}`)}
-                  {!loading && ` (${countFor(tabKey)})`}
-                </span>
+                {t(`friends.tabs.${tabKey}`)}
+                {!loading && ` (${countFor(tabKey)})`}
               </button>
             ))}
           </div>

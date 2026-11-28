@@ -114,7 +114,7 @@ const SettingsPage: React.FC = () => {
           </p>
           <Link
             to="/login"
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-torii hover:bg-torii-hover text-white font-semibold transition-colors"
+            className="torii-btn-primary inline-flex items-center justify-center"
           >
             {t('auth.login.submit')}
           </Link>
@@ -230,7 +230,7 @@ const SettingsPage: React.FC = () => {
 
       <section className="card-standard p-6">
         <div className="flex items-center gap-3 mb-6">
-          <FiUser className="w-6 h-6 text-osu-pink" />
+          <FiUser className="w-6 h-6 text-torii" />
           <h2 className="font-heading text-xl font-semibold text-text-primary">
             {t('settings.username.title')}
           </h2>
@@ -250,7 +250,7 @@ const SettingsPage: React.FC = () => {
                   {!isPending && (
                     <button
                       onClick={handleStartEdit}
-                      className="btn-secondary !px-4 !py-2 text-sm"
+                      className="torii-btn-glass !px-4 !py-2 text-sm"
                     >
                       {t('settings.username.change')}
                     </button>
@@ -297,7 +297,7 @@ const SettingsPage: React.FC = () => {
                       )}
                       <button
                         onClick={handleDismissUsernameResult}
-                        className="btn-secondary !px-3 !py-1.5 text-xs mt-3"
+                        className="torii-btn-glass !px-3 !py-1.5 text-xs mt-3"
                       >
                         {t('settings.username.dismiss')}
                       </button>
@@ -324,7 +324,7 @@ const SettingsPage: React.FC = () => {
                   <button
                     onClick={handleSubmitUsername}
                     disabled={isSubmitting}
-                    className="flex items-center gap-2 btn-primary !px-4 !py-2 !text-sm !inline-flex disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="torii-btn-primary !px-4 !py-2 !text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <FiCheck className="w-4 h-4" />
                     {isSubmitting ? t('settings.username.saving') : t('settings.username.save')}
@@ -332,7 +332,7 @@ const SettingsPage: React.FC = () => {
                   <button
                     onClick={handleCancelEdit}
                     disabled={isSubmitting}
-                    className="flex items-center gap-2 btn-secondary !px-4 !py-2 !text-sm !inline-flex disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="torii-btn-glass !px-4 !py-2 !text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <FiX className="w-4 h-4" />
                     {t('settings.username.cancel')}
@@ -344,9 +344,9 @@ const SettingsPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="bg-card rounded-xl shadow-lg p-6">
+      <section className="card-standard p-6">
         <div className="flex items-center gap-3 mb-6">
-          <FiCamera className="w-6 h-6 text-osu-pink" />
+          <FiCamera className="w-6 h-6 text-torii" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             {t('settings.avatar.title')}
           </h2>
@@ -371,7 +371,7 @@ const SettingsPage: React.FC = () => {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setShowAvatarUpload(true)}
-                    className="btn-primary !px-4 !py-2 text-sm flex items-center gap-2"
+                    className="torii-btn-primary !px-4 !py-2 text-sm inline-flex items-center gap-2"
                   >
                     <FiCamera className="w-4 h-4" />
                     {t('settings.avatar.change')}
@@ -400,9 +400,9 @@ const SettingsPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="bg-card rounded-xl shadow-lg p-6">
+      <section className="card-standard p-6">
         <div className="flex items-center gap-3 mb-6">
-          <FiImage className="w-6 h-6 text-osu-pink" />
+          <FiImage className="w-6 h-6 text-torii" />
           <h2 className="text-xl font-semibold text-white">
             {t('settings.cover.title')}
           </h2>
@@ -427,9 +427,9 @@ const SettingsPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="bg-card rounded-xl shadow-lg p-6">
+      <section className="card-standard p-6">
         <div className="flex items-center gap-3 mb-6">
-          <FiLock className="w-6 h-6 text-osu-pink" />
+          <FiLock className="w-6 h-6 text-torii" />
           <h2 className="text-xl font-semibold text-white">
             {t('settings.password.title')}
           </h2>
@@ -438,9 +438,9 @@ const SettingsPage: React.FC = () => {
         <PasswordResetSection />
       </section>
 
-      <section className="bg-card rounded-xl shadow-lg p-6">
+      <section className="card-standard p-6">
         <div className="flex items-center gap-3 mb-6">
-          <FiShield className="w-6 h-6 text-osu-pink" />
+          <FiShield className="w-6 h-6 text-torii" />
           <h2 className="text-xl font-semibold text-white">
             {t('settings.totp.title')}
           </h2>
@@ -483,7 +483,7 @@ const SettingsPage: React.FC = () => {
                   {!totpStatus.enabled ? (
                     <button
                       onClick={() => setShowTotpSetup(true)}
-                      className="btn-primary !px-4 !py-2 text-sm"
+                      className="torii-btn-primary !px-4 !py-2 text-sm"
                     >
                       {t('settings.totp.enable')}
                     </button>
@@ -503,7 +503,7 @@ const SettingsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={fetchTotpStatus}
-                  className="btn-secondary !px-3 !py-1.5 text-xs"
+                  className="torii-btn-glass !px-3 !py-1.5 text-xs"
                 >
                   {t('common.retry', 'Retry')}
                 </button>
@@ -519,9 +519,9 @@ const SettingsPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="bg-card rounded-xl shadow-lg p-6">
+      <section className="card-standard p-6">
         <div className="flex items-center gap-3 mb-6">
-          <FiKey className="w-6 h-6 text-osu-pink" />
+          <FiKey className="w-6 h-6 text-torii" />
           <h2 className="text-xl font-semibold text-white">
             {t('settings.oauth.title')}
           </h2>
@@ -532,9 +532,9 @@ const SettingsPage: React.FC = () => {
         </Suspense>
       </section>
 
-      <section className="bg-card rounded-xl shadow-lg p-6">
+      <section className="card-standard p-6">
         <div className="flex items-center gap-3 mb-6">
-          <FiSettings className="w-6 h-6 text-osu-pink" />
+          <FiSettings className="w-6 h-6 text-torii" />
           <h2 className="text-xl font-semibold text-white">
             {t('settings.preferences.title')}
           </h2>
@@ -552,15 +552,15 @@ const SettingsPage: React.FC = () => {
       </section>
 
       {/* User Aura cosmetic picker */}
-      <section className="bg-card rounded-xl shadow-lg p-6">
+      <section className="card-standard p-6">
         <Suspense fallback={<div className="py-8 flex justify-center"><LoadingSpinner size="md" /></div>}>
           <AurasSection />
         </Suspense>
       </section>
 
-      <section className="bg-card rounded-xl shadow-lg p-6">
+      <section className="card-standard p-6">
         <div className="flex items-center gap-3 mb-6">
-          <FiMonitor className="w-6 h-6 text-osu-pink" />
+          <FiMonitor className="w-6 h-6 text-torii" />
           <h2 className="text-xl font-semibold text-white">
             {t('settings.device.title')}
           </h2>
@@ -585,7 +585,7 @@ const SettingsPage: React.FC = () => {
         </Suspense>
       </section>
 
-      <section className="bg-card rounded-xl shadow-lg p-6">
+      <section className="card-standard p-6">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
           {t('settings.account.title')}
         </h2>

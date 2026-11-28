@@ -69,7 +69,7 @@ const AdminBeatmapRankstatus: React.FC = () => {
           </div>
 
           <div className="flex gap-2">
-            <button onClick={handleUpdate} className="px-4 py-2 bg-osu-pink text-white rounded">Update</button>
+            <button onClick={handleUpdate} className="torii-btn-primary !px-4 !py-2">Update</button>
             <button onClick={handleBan} className="px-4 py-2 bg-red-600 text-white rounded">Import to banned</button>
           </div>
         </div>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { User } from '../../types';
 import { useAuth } from '../../hooks/useAuth';
-import { useProfileColor } from '../../contexts/ProfileColorContext';
 import { FaEdit, FaUser } from 'react-icons/fa';
 import ContentContainer from '../UI/ContentContainer';
 import UserPageEditModal from './UserPageEditModal';
@@ -22,7 +21,6 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
 }) => {
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
-  const { profileColor } = useProfileColor();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Style tweak to remove image borders
@@ -68,7 +66,7 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
           <div className="pt-0 pb-16 min-h-[200px] md:min-h-[250px] flex flex-col">
             {/* Title in the top-left */}
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
+              <span className="torii-section-bar" />
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {t('profile.userPage.title')}
               </h3>
@@ -81,8 +79,7 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
               </p>
               <button
                 onClick={handleEditClick}
-                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
-                style={{ background: `linear-gradient(180deg, ${profileColor}, ${profileColor}d4)`, boxShadow: `0 12px 32px -10px ${profileColor}` }}
+                className="torii-btn-primary rounded-full text-sm"
               >
                 <FaEdit className="w-4 h-4" />
                 <span>{t('profile.userPage.writeButton')}</span>
@@ -94,7 +91,7 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
           <div className="pt-0 pb-16 min-h-[250px] md:min-h-[300px] flex flex-col">
             {/* Title in the top-left */}
             <div className="flex items-center gap-3 mb-12">
-              <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
+              <span className="torii-section-bar" />
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {t('profile.userPage.title')}
               </h3>
@@ -130,7 +127,7 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
       {/* Header title and edit button */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
+          <span className="torii-section-bar" />
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {t('profile.userPage.title')}
           </h3>
@@ -138,8 +135,7 @@ const UserPageDisplay: React.FC<UserPageDisplayProps> = ({
         {canEdit && (
           <button
             onClick={handleEditClick}
-            className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
-            style={{ background: `linear-gradient(180deg, ${profileColor}, ${profileColor}d4)`, boxShadow: `0 10px 28px -10px ${profileColor}` }}
+            className="torii-btn-glass rounded-full px-4 py-2 text-sm"
           >
             <FaEdit className="w-3 h-3" />
             <span>{t('profile.userPage.editButton')}</span>

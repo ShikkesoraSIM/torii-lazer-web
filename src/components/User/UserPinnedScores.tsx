@@ -234,7 +234,7 @@ const ScoreCard: React.FC<{
                   />
                   <Link
                     to={`/scores/${score.id}`}
-                    className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium flex-shrink-0"
+                    className="text-torii hover:text-torii-hover transition-colors font-medium flex-shrink-0"
                   >
                     {t('profile.bestScores.viewScore', 'View score')}
                   </Link>
@@ -315,7 +315,7 @@ const ScoreCard: React.FC<{
                 />
                 <Link
                   to={`/scores/${score.id}`}
-                  className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
+                  className="text-torii hover:text-torii-hover transition-colors font-medium"
                 >
                   View score
                 </Link>
@@ -563,7 +563,7 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
       <div className={`${className}`}>
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
+            <span className="torii-section-bar" />
             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {t('profile.pinnedScores.title')}
             </h3>
@@ -579,7 +579,7 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
       <div className={`${className}`}>
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
+            <span className="torii-section-bar" />
             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {t('profile.pinnedScores.title')}
             </h3>
@@ -596,7 +596,7 @@ const UserPinnedScores: React.FC<UserPinnedScoresProps> = ({
     <div className={`${className}`}>
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-6 rounded-full" style={{ backgroundColor: profileColor }}></div>
+          <span className="torii-section-bar" />
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {t('profile.pinnedScores.title')}
           </h3>

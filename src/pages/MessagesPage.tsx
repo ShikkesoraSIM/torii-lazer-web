@@ -1326,7 +1326,7 @@ const MessagesPage: React.FC = () => {
   if (isBootstrapping) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-pink" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-torii" />
       </div>
     );
   }
@@ -1343,7 +1343,7 @@ const MessagesPage: React.FC = () => {
           </p>
           <Link
             to="/login"
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] text-white text-sm font-semibold transition-colors"
+            className="torii-btn-primary text-sm"
           >
             {t('auth.login.submit', 'Sign in')}
           </Link>
@@ -1394,7 +1394,7 @@ const MessagesPage: React.FC = () => {
                     flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-lg text-sm font-medium
                     transition-all duration-200
                     ${activeTab === 'channels'
-                      ? 'bg-white/15 text-osu-pink shadow-elev-1'
+                      ? 'bg-white/15 text-torii shadow-elev-1'
                       : 'text-text-secondary hover:text-text-primary'
                     }
                   `}
@@ -1408,7 +1408,7 @@ const MessagesPage: React.FC = () => {
                     flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-lg text-sm font-medium
                     transition-all duration-200 relative
                     ${activeTab === 'notifications'
-                      ? 'bg-white/15 text-osu-pink shadow-elev-1'
+                      ? 'bg-white/15 text-torii shadow-elev-1'
                       : 'text-text-secondary hover:text-text-primary'
                     }
                   `}
@@ -1434,10 +1434,10 @@ const MessagesPage: React.FC = () => {
                           key={filter.key}
                           onClick={() => setChannelFilter(filter.key)}
                           className={`
-                            py-1.5 px-2 rounded-lg text-center font-medium transition-all duration-200
+                            !py-1.5 !px-2 text-xs text-center font-medium
                             ${channelFilter === filter.key
-                              ? 'bg-osu-pink text-white'
-                              : 'bg-white/5 text-text-secondary hover:bg-white/10 hover:text-text-primary'
+                              ? 'torii-btn-primary'
+                              : 'torii-btn-glass text-text-secondary'
                             }
                           `}
                         >
@@ -1481,7 +1481,7 @@ const MessagesPage: React.FC = () => {
                           toast.error(t('messages.toasts.refreshFailed'));
                         }
                       }}
-                      className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-green-500/10 text-green-500 hover:bg-green-500/20 rounded-lg transition-colors text-sm font-medium"
+                      className="w-full torii-btn-glass !py-2 !px-3 text-sm"
                       title={t('messages.sidebar.tooltips.refreshChannels')}
                       aria-label={t('messages.sidebar.tooltips.refreshChannels')}
                     >
@@ -1491,7 +1491,7 @@ const MessagesPage: React.FC = () => {
 
                     <button
                       onClick={() => setShowNewPMModal(true)}
-                      className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-osu-pink/10 text-osu-pink hover:bg-osu-pink/20 rounded-lg transition-colors text-sm font-medium"
+                      className="w-full torii-btn-primary !py-2 !px-3 text-sm"
                     >
                       <FiPlus size={16} />
                       <span>{t('messages.sidebar.actions.newPrivateChat')}</span>
@@ -1528,7 +1528,7 @@ const MessagesPage: React.FC = () => {
                       onClick={() => {
                         refresh();
                       }}
-                      className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-lg transition-colors text-sm font-medium"
+                      className="w-full torii-btn-glass !py-2 !px-3 text-sm"
                       title={t('messages.sidebar.tooltips.refreshNotifications')}
                       aria-label={t('messages.sidebar.tooltips.refreshNotifications')}
                     >
@@ -1538,7 +1538,7 @@ const MessagesPage: React.FC = () => {
                     
                     <button
                       onClick={batchMarkPrivateNotificationsAsRead}
-                      className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 rounded-lg transition-colors text-sm font-medium"
+                      className="w-full torii-btn-glass !py-2 !px-3 text-sm"
                       title={t('messages.sidebar.tooltips.markPrivateRead')}
                       aria-label={t('messages.sidebar.tooltips.markPrivateRead')}
                     >
@@ -1607,7 +1607,7 @@ const MessagesPage: React.FC = () => {
                                     <span className="text-xs text-gray-500 dark:text-gray-400">
                                       {t('messages.sidebar.from')}
                                     </span>
-                                    <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">
+                                    <span className="rounded-full torii-badge px-2.5 py-0.5 text-xs text-torii bg-torii/15 border-torii/30">
                                       {(() => {
                                         const cachedUser = getUserInfoFromCache(notification.source_user_id!);
                                         return cachedUser?.username || t('messages.sidebar.unknownUser');
@@ -1642,7 +1642,7 @@ const MessagesPage: React.FC = () => {
                                 {!notification.is_read && (
                                   <button
                                     onClick={() => handleNotificationMarkAsRead(notification)}
-                                    className="text-xs text-osu-pink hover:text-osu-pink/80 mt-2"
+                                    className="text-xs text-torii hover:text-torii/80 mt-2"
                                   >
                                     {t('messages.sidebar.markAsRead')}
                                   </button>
@@ -1729,7 +1729,7 @@ const MessagesPage: React.FC = () => {
               {isMobile && (
                 <button
                   onClick={() => setShowSidebar(true)}
-                  className="mb-4 p-3 bg-osu-pink text-white rounded-lg"
+                  className="mb-4 !p-3 torii-btn-primary"
                   aria-label={t('messages.sidebar.openSidebar')}
                 >
                   <FiMessageCircle size={24} />

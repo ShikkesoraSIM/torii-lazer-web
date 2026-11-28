@@ -355,7 +355,7 @@ const AdminMatchmaking: React.FC = () => {
             setCreateForm(DEFAULT_POOL_FORM);
             setShowCreate(true);
           }}
-          className="px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 transition-colors whitespace-nowrap"
+          className="torii-btn-primary !px-4 !py-2 whitespace-nowrap"
         >
           + New pool
         </button>
@@ -428,7 +428,7 @@ const AdminMatchmaking: React.FC = () => {
 
                   <button
                     onClick={() => setEditingPoolId(expanded ? null : pool.id)}
-                    className="px-3 py-1.5 rounded-lg bg-card-hover hover:bg-osu-pink/10 hover:text-osu-pink transition-colors text-sm"
+                    className="torii-btn-glass !px-3 !py-1.5 text-sm"
                   >
                     {expanded ? 'Close' : 'Manage'}
                   </button>
@@ -521,7 +521,7 @@ const AdminMatchmaking: React.FC = () => {
                       <div className="flex flex-wrap gap-2 mt-4">
                         <button
                           onClick={handleSaveEdit}
-                          className="px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 transition-colors text-sm"
+                          className="torii-btn-primary !px-4 !py-2 text-sm"
                         >
                           Save changes
                         </button>
@@ -586,7 +586,7 @@ const AdminMatchmaking: React.FC = () => {
                         <button
                           disabled={bulkBusy}
                           onClick={handleBulkAdd}
-                          className="px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 disabled:opacity-60 transition-colors text-sm"
+                          className="torii-btn-primary !px-4 !py-2 text-sm disabled:opacity-60"
                         >
                           {bulkBusy ? 'Adding…' : `Add ${parseBeatmapIds(bulkInput).length || ''} beatmaps`.trim()}
                         </button>
@@ -678,7 +678,7 @@ const AdminMatchmaking: React.FC = () => {
                       <button
                         disabled={mapsetBulkBusy}
                         onClick={handleBulkAddSets}
-                        className="mt-3 px-4 py-2 bg-osu-pink/90 text-white rounded-lg hover:bg-osu-pink disabled:opacity-60 transition-colors text-sm"
+                        className="mt-3 torii-btn-primary !px-4 !py-2 text-sm disabled:opacity-60"
                       >
                         {mapsetBulkBusy
                           ? 'Importing…'
@@ -896,7 +896,7 @@ const AdminMatchmaking: React.FC = () => {
               <button
                 disabled={createBusy}
                 onClick={handleCreate}
-                className="px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 disabled:opacity-60 text-sm"
+                className="torii-btn-primary !px-4 !py-2 text-sm disabled:opacity-60"
               >
                 {createBusy ? 'Creating…' : 'Create pool'}
               </button>

@@ -23,12 +23,14 @@ const PLAYMODE_ICONS: Record<string, string> = {
 }
 
 export function TitleBadge({ group, size = 'md' }: TitleBadgeProps) {
-  const colour = group.colour ?? '#ffffff'
+  const rawColour = group.colour?.trim()
+  const isWhite = !rawColour || /^#fff(?:fff)?$/i.test(rawColour)
+  const colour = isWhite ? 'var(--torii-accent)' : rawColour
 
   const sizeClasses = {
-    sm: 'text-[10px] px-1.5 py-0.5 gap-0.5',
-    md: 'text-xs px-2 py-0.5 gap-1',
-    lg: 'text-sm px-2.5 py-1 gap-1',
+    sm: 'text-[10px] px-2 py-0.5 gap-0.5',
+    md: 'text-xs px-2.5 py-0.5 gap-1',
+    lg: 'text-sm px-3 py-1 gap-1',
   }[size]
 
   // Glow pulse animation only for admin / dev
@@ -39,17 +41,16 @@ export function TitleBadge({ group, size = 'md' }: TitleBadgeProps) {
     <span
       title={group.name}
       className={`
-        inline-flex items-center rounded font-bold uppercase tracking-wide
-        border select-none shrink-0
+        torii-badge rounded-full uppercase select-none shrink-0
         ${sizeClasses}
         ${isElite ? 'animate-title-glow' : ''}
       `}
       style={{
-        color: colour,
-        borderColor: `${colour}80`,
-        background: `${colour}33`,
-        textShadow: isElite ? `0 0 8px ${colour}99` : undefined,
-        boxShadow: isElite ? `0 0 10px ${colour}33` : undefined,
+        color: `color-mix(in srgb, ${colour} 72%, var(--text-primary))`,
+        borderColor: `color-mix(in srgb, ${colour} 45%, transparent)`,
+        background: `color-mix(in srgb, ${colour} 18%, transparent)`,
+        textShadow: isElite ? `0 0 8px color-mix(in srgb, ${colour} 50%, transparent)` : undefined,
+        boxShadow: isElite ? `0 0 10px color-mix(in srgb, ${colour} 22%, transparent)` : undefined,
       }}
     >
       {group.short_name}

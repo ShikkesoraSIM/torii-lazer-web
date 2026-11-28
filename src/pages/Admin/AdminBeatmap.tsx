@@ -187,7 +187,7 @@ const AdminBeatmap: React.FC = () => {
 
             {/* Right side status and actions */}
             <div className="flex-shrink-0 flex items-center gap-2">
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
+              <span className={`rounded-full torii-badge px-2.5 py-0.5 text-xs font-medium ${
                 beatmapset.rank_status === 'ranked' 
                   ? 'bg-green-900 text-green-300'
                   : beatmapset.rank_status === 'approved'
@@ -203,7 +203,7 @@ const AdminBeatmap: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleBeatmapClick(beatmapset.id)}
-                className="px-2.5 py-1 bg-osu-pink text-white rounded hover:bg-osu-pink/80 transition-colors text-xs"
+                className="torii-btn-primary !px-2.5 !py-1 text-xs"
               >
                 View
               </button>
@@ -260,7 +260,7 @@ const AdminBeatmap: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                  <span className={`rounded-full torii-badge px-2.5 py-0.5 text-xs font-medium ${
                     beatmapset.rank_status === 'ranked' 
                       ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
                       : beatmapset.rank_status === 'approved'
@@ -275,7 +275,7 @@ const AdminBeatmap: React.FC = () => {
                   </span>
                   <button
                     onClick={() => handleBeatmapClick(beatmapset.id)}
-                    className="px-2 py-1 bg-osu-pink text-white rounded hover:bg-osu-pink/80 transition-colors text-xs"
+                    className="torii-btn-primary !px-2 !py-1 text-xs"
                   >
                     View
                   </button>

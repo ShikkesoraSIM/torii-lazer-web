@@ -179,10 +179,10 @@ const BeatmapsPage: React.FC = () => {
                     type="button"
                     aria-pressed={active}
                     onClick={() => setStatus(option)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wide border transition-all duration-150 ${
+                    className={`!px-3 !py-1.5 text-xs uppercase tracking-wide ${
                       active
-                        ? 'bg-torii text-white border-torii shadow-elev-1'
-                        : 'text-text-secondary border-border-color bg-btn-bg hover:border-border-hover hover:text-text-primary'
+                        ? 'torii-btn-primary'
+                        : 'torii-btn-glass text-text-secondary'
                     }`}
                   >
                     {t(`beatmap.status.${option}`, { defaultValue: option })}
@@ -213,7 +213,7 @@ const BeatmapsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="px-4 py-2 rounded-xl border border-border-color bg-btn-bg text-sm font-medium text-text-primary hover:bg-btn-bg-hover transition-colors"
+                  className="torii-btn-glass text-sm"
                 >
                   {t('common.resetFilters', { defaultValue: 'Reset filters' })}
                 </button>
@@ -234,22 +234,22 @@ const BeatmapsPage: React.FC = () => {
                 >
                   <LazyBackgroundImage src={set.covers?.card || '/default.jpg'} className="h-32 w-full object-cover">
                     <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
-                      <span className={`px-2 py-1 rounded text-3xs font-bold uppercase tracking-wider ${
-                        set.status === 'ranked' ? 'bg-green-500 text-white' :
-                        set.status === 'approved' ? 'bg-blue-500 text-white' :
-                        set.status === 'qualified' ? 'bg-purple-500 text-white' :
-                        set.status === 'loved' ? 'bg-pink-500 text-white' :
-                        'bg-slate-600 text-white'
+                      <span className={`px-2.5 py-0.5 rounded-full torii-badge text-3xs uppercase tracking-wider ${
+                        set.status === 'ranked' ? 'bg-green-500/90 text-white' :
+                        set.status === 'approved' ? 'bg-blue-500/90 text-white' :
+                        set.status === 'qualified' ? 'bg-purple-500/90 text-white' :
+                        set.status === 'loved' ? 'bg-pink-500/90 text-white' :
+                        'bg-slate-600/90 text-white'
                       }`}>
                         {t(`beatmap.status.${set.status}`, { defaultValue: set.status })}
                       </span>
                       {set.is_local && (
-                        <span className="px-2 py-1 rounded text-3xs font-bold uppercase tracking-wider bg-red-600/95 text-white shadow-md">
+                        <span className="px-2.5 py-0.5 rounded-full torii-badge text-3xs uppercase tracking-wider bg-red-600/95 text-white shadow-md">
                           {t('beatmap.toriiBadge', { defaultValue: 'Torii' })}
                         </span>
                       )}
                       {isAiSet(set) && (
-                        <span className="px-2 py-1 rounded text-3xs font-bold uppercase tracking-wider bg-sky-500/95 text-white shadow-md">
+                        <span className="px-2.5 py-0.5 rounded-full torii-badge text-3xs uppercase tracking-wider bg-sky-500/95 text-white shadow-md">
                           {t('beatmap.aiGenBadge', { defaultValue: 'AI gen' })}
                         </span>
                       )}

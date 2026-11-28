@@ -285,7 +285,7 @@ const PasswordResetPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading || !formData.email || !turnstileToken}
-                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-elev-1 text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-torii disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  className="torii-btn-primary w-full flex justify-center items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? <LoadingSpinner size="sm" /> : t('auth.passwordReset.sendCode')}
                 </button>
@@ -294,7 +294,7 @@ const PasswordResetPage: React.FC = () => {
               <div className="text-center">
                 <Link
                   to="/login"
-                  className="text-sm font-medium text-osu-pink hover:text-osu-pink/80 transition-colors flex items-center justify-center gap-1"
+                  className="text-sm font-medium text-torii hover:text-torii-hover transition-colors flex items-center justify-center gap-1"
                 >
                   <FiArrowLeft className="w-4 h-4" />
                   {t('auth.passwordReset.backToLogin')}
@@ -337,7 +337,7 @@ const PasswordResetPage: React.FC = () => {
                     type="button"
                     onClick={handleResendCode}
                     disabled={resendCountdown > 0 || isLoading}
-                    className="text-xs text-osu-pink hover:text-osu-pink/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-xs text-torii hover:text-torii-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {resendCountdown > 0 
                       ? t('auth.passwordReset.resendAvailableIn', { seconds: resendCountdown })
@@ -442,7 +442,7 @@ const PasswordResetPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading || !formData.resetCode || !formData.newPassword || !formData.confirmPassword || !turnstileToken}
-                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-elev-1 text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-torii disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  className="torii-btn-primary w-full flex justify-center items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? <LoadingSpinner size="sm" /> : t('auth.passwordReset.resetPassword')}
                 </button>
@@ -452,7 +452,7 @@ const PasswordResetPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setStep('request')}
-                  className="text-sm font-medium text-osu-pink hover:text-osu-pink/80 transition-colors flex items-center justify-center gap-1 mx-auto"
+                  className="text-sm font-medium text-torii hover:text-torii-hover transition-colors flex items-center justify-center gap-1 mx-auto"
                 >
                   <FiArrowLeft className="w-4 h-4" />
                   {t('auth.passwordReset.backToLogin')}

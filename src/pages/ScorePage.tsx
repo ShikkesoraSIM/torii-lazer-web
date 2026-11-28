@@ -500,7 +500,7 @@ const ScorePage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-14 w-14 border-b-2 border-osu-pink" />
+        <div className="animate-spin rounded-full h-14 w-14 border-b-2 border-torii" />
       </div>
     );
   }
@@ -512,7 +512,7 @@ const ScorePage: React.FC = () => {
           <h1 className="text-xl font-semibold text-red-500 mb-4">{error || 'Score not found'}</h1>
           <button
             onClick={() => navigate(-1)}
-            className="px-4 py-2 rounded-lg bg-osu-pink text-white hover:bg-osu-pink/90 transition-colors"
+            className="torii-btn-primary"
           >
             {t('beatmap.goBack') || 'Go back'}
           </button>
@@ -550,7 +550,7 @@ const ScorePage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 lg:px-6 pt-6 space-y-7">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-slate-100 hover:text-white transition-colors px-3 py-2 rounded-xl torii-liquid-soft"
+          className="torii-btn-glass !px-3.5 !py-2 text-sm text-slate-100 hover:text-white"
         >
           <span aria-hidden="true">&larr;</span>
           <span>{t('beatmap.goBack') || 'Back'}</span>
@@ -583,7 +583,7 @@ const ScorePage: React.FC = () => {
                     Played by{' '}
                     <Link
                       to={`/users/${score.user.id}?mode=${mode}`}
-                      className="font-semibold hover:text-osu-pink transition-colors"
+                      className="font-semibold hover:text-torii transition-colors"
                     >
                       {score.user.username}
                     </Link>
@@ -604,19 +604,19 @@ const ScorePage: React.FC = () => {
                     </p>
                   )}
                   <div className="flex flex-wrap gap-2 mt-4">
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/12 border border-white/20 text-slate-100">
+                    <span className="px-3 py-1 rounded-full torii-badge text-xs font-semibold bg-white/12 text-slate-100">
                       {formatMode(mode)}
                     </span>
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/12 border border-white/20 text-slate-100">
+                    <span className="px-3 py-1 rounded-full torii-badge text-xs font-semibold bg-white/12 text-slate-100">
                       {getMods(score)}
                     </span>
                     {globalRank && (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-osu-pink/75 border border-white/20 text-white">
+                      <span className="px-3 py-1 rounded-full torii-badge text-xs font-semibold bg-torii/75 text-white">
                         GLOBAL #{globalRank.toLocaleString()}
                       </span>
                     )}
                     {countryRank && (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/12 border border-white/20 text-slate-100">
+                      <span className="px-3 py-1 rounded-full torii-badge text-xs font-semibold bg-white/12 text-slate-100">
                         COUNTRY #{countryRank.toLocaleString()}
                       </span>
                     )}
@@ -627,7 +627,7 @@ const ScorePage: React.FC = () => {
                     </span>
                     <button
                       onClick={() => handleCopy(String(score.id), 'Score ID')}
-                      className="px-2.5 py-1 rounded-lg bg-white/12 border border-white/20 text-slate-100 hover:bg-white/20 transition-colors"
+                      className="torii-btn-glass !px-2.5 !py-1 text-xs text-slate-100"
                     >
                       Copy ID
                     </button>
@@ -636,7 +636,7 @@ const ScorePage: React.FC = () => {
                     </span>
                     <button
                       onClick={() => handleCopy(String(score.beatmap_id), 'Beatmap ID')}
-                      className="px-2.5 py-1 rounded-lg bg-white/12 border border-white/20 text-slate-100 hover:bg-white/20 transition-colors"
+                      className="torii-btn-glass !px-2.5 !py-1 text-xs text-slate-100"
                     >
                       Copy map ID
                     </button>
@@ -685,7 +685,7 @@ const ScorePage: React.FC = () => {
                 <p className="text-slate-400 text-xs uppercase tracking-wide">Beatmap</p>
                 <Link
                   to={beatmapPath}
-                  className="mt-2 block text-white font-semibold hover:text-osu-pink transition-colors"
+                  className="mt-2 block text-white font-semibold hover:text-torii transition-colors"
                 >
                   {score.beatmapset?.title_unicode || score.beatmapset?.title || 'Unknown Beatmap'}
                 </Link>

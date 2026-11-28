@@ -371,8 +371,8 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, onClose }
                               ? `${t.label} — grants particle aura`
                               : t.label}
                             className={`
-                              inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wide
-                              border transition-all duration-150 select-none
+                              rounded-full torii-badge px-2.5 py-1 text-xs uppercase tracking-wide
+                              transition-all duration-150 select-none
                               ${active ? 'opacity-100' : 'opacity-40 hover:opacity-70'}
                             `}
                             style={{
@@ -495,11 +495,11 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, onClose }
                 Grant Supporter
               </label>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
-                Manually grant N months of supporter time. Sets <code className="text-pink-400">is_supporter</code> +{' '}
-                <code className="text-pink-400">has_supported</code>, extends{' '}
-                <code className="text-pink-400">donor_end_at</code> by 30×N days, and bumps the loyalty tier — identical
+                Manually grant N months of supporter time. Sets <code className="text-torii">is_supporter</code> +{' '}
+                <code className="text-torii">has_supported</code>, extends{' '}
+                <code className="text-torii">donor_end_at</code> by 30×N days, and bumps the loyalty tier — identical
                 effect to a real Ko-fi donation match. The user must <strong>log out and log back in</strong> for the
-                client to refetch their <code className="text-pink-400">/me</code> cache and unlock supporter-gated
+                client to refetch their <code className="text-torii">/me</code> cache and unlock supporter-gated
                 features (UI accent hue picker, etc.).
               </p>
 
@@ -539,7 +539,7 @@ const AdminUserEditModal: React.FC<AdminUserEditModalProps> = ({ user, onClose }
                   type="button"
                   onClick={handleGrantSupporter}
                   disabled={grantingSupporter}
-                  className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                  className="torii-btn-primary !px-4 !py-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   {grantingSupporter ? 'Granting…' : 'Grant'}
                 </button>

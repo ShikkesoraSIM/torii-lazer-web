@@ -294,7 +294,7 @@ const AdminChangelogEditor: React.FC = () => {
           <h3 className="text-base font-semibold text-white">Builds</h3>
           <button
             onClick={() => setShowCreateBuild((v) => !v)}
-            className="px-3 py-1.5 text-xs bg-osu-pink hover:bg-osu-pink/90 text-white rounded-lg font-medium"
+            className="torii-btn-primary !px-3 !py-1.5 text-xs"
           >
             {showCreateBuild ? 'Cancel' : '+ New build'}
           </button>
@@ -350,7 +350,7 @@ const AdminChangelogEditor: React.FC = () => {
                     onClick={() => setSelectedBuildId(b.id)}
                     className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                       isSelected
-                        ? 'bg-osu-pink/20 border border-osu-pink/40'
+                        ? 'bg-torii/20 border border-torii/40'
                         : 'border border-transparent hover:border-white/15'
                     }`}
                   >
@@ -384,7 +384,7 @@ const AdminChangelogEditor: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowCreateEntry((v) => !v)}
-                className="px-3 py-1.5 text-xs bg-osu-pink hover:bg-osu-pink/90 text-white rounded-lg font-medium"
+                className="torii-btn-primary !px-3 !py-1.5 text-xs"
               >
                 + Entry
               </button>
@@ -474,15 +474,15 @@ const AdminChangelogEditor: React.FC = () => {
                       className="flex items-start gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10"
                     >
                       <span
-                        className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border ${typeMeta.color}`}
+                        className={`rounded-full torii-badge text-[10px] uppercase tracking-wider px-2.5 py-0.5 ${typeMeta.color}`}
                       >
                         {typeMeta.label}
                       </span>
-                      <span className="text-[10px] uppercase tracking-wider text-gray-400 px-2 py-0.5 rounded bg-white/5 border border-white/10">
+                      <span className="rounded-full torii-badge text-[10px] uppercase tracking-wider text-gray-400 px-2.5 py-0.5 bg-white/5 border-white/10">
                         {CATEGORY_LABELS[e.category as Category] ?? e.category}
                       </span>
                       {e.major && (
-                        <span className="text-[10px] uppercase tracking-wider text-osu-pink px-2 py-0.5 rounded bg-osu-pink/10 border border-osu-pink/30">
+                        <span className="rounded-full torii-badge text-[10px] uppercase tracking-wider text-torii px-2.5 py-0.5 bg-torii/10 border-torii/30">
                           Major
                         </span>
                       )}

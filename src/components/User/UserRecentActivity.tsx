@@ -319,7 +319,7 @@ const UserRecentActivity: React.FC<UserRecentActivityProps> = ({ userId, classNa
     <div className={`${className}`}>
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-6 bg-osu-pink rounded-full"></div>
+          <span className="torii-section-bar" />
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {t('profile.activities.title')}
           </h3>
@@ -377,8 +377,7 @@ const UserRecentActivity: React.FC<UserRecentActivityProps> = ({ userId, classNa
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="inline-flex h-9 min-w-[120px] items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-white ring-1 ring-white/20 transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-                style={{ background: `linear-gradient(180deg, ${profileColor}, ${profileColor}d4)`, boxShadow: `0 8px 24px -10px ${profileColor}` }}
+                className="torii-btn-primary h-9 min-w-[120px] px-5 text-sm disabled:opacity-50"
               >
                 {loadingMore ? (
                   <>

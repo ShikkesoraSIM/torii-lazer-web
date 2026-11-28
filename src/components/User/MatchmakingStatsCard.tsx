@@ -35,7 +35,7 @@ interface MatchmakingStatsCardProps {
 // The numbers must match what the rankings page uses or users will
 // see one tier on their profile and a different one on the ladder.
 const RATING_TIERS = [
-  { min: 2000, label: 'Master', color: 'text-pink-300', accent: 'rgba(236,72,153,1)', bg: 'from-pink-500/30 to-fuchsia-600/15' },
+  { min: 2000, label: 'Master', color: 'text-indigo-300', accent: 'rgba(129,140,248,1)', bg: 'from-indigo-500/30 to-violet-600/15' },
   { min: 1700, label: 'Diamond', color: 'text-cyan-300', accent: 'rgba(34,211,238,1)', bg: 'from-cyan-400/25 to-sky-500/10' },
   { min: 1500, label: 'Gold', color: 'text-yellow-300', accent: 'rgba(253,224,71,1)', bg: 'from-yellow-400/25 to-amber-500/10' },
   { min: 1300, label: 'Silver', color: 'text-gray-200', accent: 'rgba(229,231,235,1)', bg: 'from-gray-300/25 to-gray-400/10' },
@@ -153,9 +153,9 @@ const MatchmakingStatsCard: React.FC<MatchmakingStatsCardProps> = ({ userId }) =
           a nested glass card, so the section feels native instead of
           a floating overlay. */}
       <div className="flex items-center gap-3">
-        <div className="w-1 h-6 rounded-full bg-osu-pink" />
+        <span className="torii-section-bar" />
         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-          <FaTrophy className="text-osu-pink text-base" />
+          <FaTrophy className="text-torii text-base" />
           Matchmaking
         </h2>
       </div>
@@ -410,7 +410,7 @@ const RecentMatchesList: React.FC<RecentMatchesListProps> = ({
             {/* Result indicator — coloured pill with translucent fill
                 + matching border so it reads as a clear status. */}
             <span
-              className={`shrink-0 w-12 text-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${RESULT_BG[h.result]}`}
+              className={`shrink-0 w-12 justify-center px-2 py-0.5 rounded-full torii-badge text-[10px] font-bold uppercase tracking-wider border ${RESULT_BG[h.result]}`}
             >
               {h.result}
             </span>

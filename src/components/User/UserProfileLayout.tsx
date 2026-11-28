@@ -222,22 +222,28 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
 
   // Apply the viewed user's accent colour on enter, restore on leave.
   useEffect(() => {
-    const getViewedUserColor = () => {
-      // Own page: prefer the locally-saved colour to avoid an API-latency flash.
-      if (currentUser?.id === user.id) {
-        try {
-          const storedColor = localStorage.getItem('user_profile_color');
-          if (storedColor) return storedColor;
-        } catch (e) {
-          console.error('Failed to read from localStorage:', e);
-        }
-      }
-      const rawColor = user.profile_colour || 'ED8EA6';
-      return rawColor.startsWith('#') ? rawColor : `#${rawColor}`;
-    };
+    const isLegacyDefaultPink = (c?: string | null) =>
+      !c || c.replace('#', '').toUpperCase() === 'ED8EA6';
 
-    const viewedColor = getViewedUserColor();
-    setProfileColorLocal(viewedColor);
+    // Own page: prefer the locally-saved colour if it's a real custom pick.
+    if (currentUser?.id === user.id) {
+      try {
+        const storedColor = localStorage.getItem('user_profile_color');
+        if (storedColor && !isLegacyDefaultPink(storedColor)) {
+          setProfileColorLocal(storedColor);
+          return () => resetProfileColor();
+        }
+      } catch (e) {
+        console.error('Failed to read from localStorage:', e);
+      }
+    }
+
+    if (!isLegacyDefaultPink(user.profile_colour)) {
+      const rawColor = user.profile_colour!;
+      setProfileColorLocal(rawColor.startsWith('#') ? rawColor : `#${rawColor}`);
+    } else {
+      resetProfileColor();
+    }
 
     return () => {
       resetProfileColor();
