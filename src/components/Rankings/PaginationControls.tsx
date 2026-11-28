@@ -13,7 +13,7 @@ export default function PaginationControls({ total, currentPage, onPageChange }:
 
   const base =
     'px-2.5 sm:px-4 py-2 min-h-[38px] rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii';
-  const inactive = `${base} border border-white/10 bg-white/[0.05] text-white/75 hover:bg-white/10 hover:text-white`;
+  const inactive = `${base} border border-border-color bg-btn-bg text-text-secondary hover:bg-btn-bg-hover hover:text-text-primary`;
   const active = `${base} border border-torii bg-torii text-white shadow-elev-1`;
 
   const pages: ReactNode[] = [];

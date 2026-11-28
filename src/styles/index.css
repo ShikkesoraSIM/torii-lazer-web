@@ -276,9 +276,9 @@
   --osu-pink: #ED8EA6;
 
   /* Deep Navy / Torii Blue background & surface tokens (Chrome 80+ / Safari 14+ / Firefox 78+ safe, no oklch) */
-  --page-bg: #030014;
-  --bg-primary: #030014;
-  --bg-secondary: #0b0e24;
+  --page-bg: #0a0e1a;
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #0f1528;
 
   --card-bg: rgba(24, 30, 66, 0.78);
   --card-bg-hover: rgba(34, 42, 92, 0.88);
@@ -1118,10 +1118,10 @@ span.imagemap__link:hover {
 }
 
 :root {
-  --torii-bg-base: #030014;
-  --torii-blob-a: rgba(176, 69, 255, 0.2);
-  --torii-blob-b: rgba(66, 163, 255, 0.16);
-  --torii-blob-c: rgba(255, 91, 189, 0.14);
+  --torii-bg-base: #0a0e1a;
+  --torii-blob-a: rgba(79, 143, 255, 0.14);
+  --torii-blob-b: rgba(56, 189, 248, 0.11);
+  --torii-blob-c: rgba(125, 213, 212, 0.08);
   --torii-surface: linear-gradient(165deg, rgba(36, 45, 108, 0.78), rgba(19, 26, 66, 0.64));
   --torii-surface-soft: linear-gradient(165deg, rgba(30, 38, 92, 0.62), rgba(16, 22, 56, 0.52));
   --torii-nav-surface: linear-gradient(180deg, rgba(28, 35, 92, 0.9), rgba(14, 19, 52, 0.78));
@@ -1323,9 +1323,9 @@ textarea {
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* Canonical brand gradient (one source of truth; was duplicated as hex + rgba). */
+/* Canonical brand gradient (Torii blue to aqua-teal). */
 .text-gradient-brand {
-  background-image: linear-gradient(135deg, #c084fc 0%, #ff5bbd 50%, #ff7a18 100%);
+  background-image: linear-gradient(135deg, #4f8fff 0%, #7dd5d4 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1414,4 +1414,257 @@ html.perf-mode .cover-loading {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   FRUTIGER AERO ALTERNATIVE THEME (html.theme-aero)
+   Sky-to-aqua backdrop, glossy white-ice glass with top specular highlights,
+   and crisp ocean-navy ink for high legibility across all pages.
+   ─────────────────────────────────────────────────────────────────────────── */
+html.theme-aero {
+  color-scheme: light;
+  --torii-blue-rgb: 14 165 233;       /* #0EA5E9 */
+  --torii-blue-hover-rgb: 2 132 199;  /* #0284C7 */
+  --torii-blue-deep-rgb: 12 74 110;   /* #0C4A6E */
+  --torii-teal-rgb: 6 182 212;        /* #06B6D4 */
+
+  --page-bg: #b8ebff;
+  --bg-primary: #b8ebff;
+  --bg-secondary: #e2f6ff;
+
+  --card-bg: rgba(255, 255, 255, 0.72);
+  --card-bg-hover: rgba(255, 255, 255, 0.88);
+  --border-color: rgba(255, 255, 255, 0.82);
+  --border-hover: rgba(14, 165, 233, 0.45);
+
+  --text-primary: rgba(10, 37, 64, 0.94);
+  --text-secondary: rgba(22, 66, 102, 0.82);
+  --text-muted: rgba(56, 98, 132, 0.76);
+
+  --btn-bg: rgba(255, 255, 255, 0.76);
+  --btn-bg-hover: rgba(255, 255, 255, 0.94);
+  --btn-bg-active: rgba(186, 230, 253, 0.92);
+
+  --bg-accent-light: rgba(14, 165, 233, 0.12);
+  --bg-accent-medium: rgba(14, 165, 233, 0.22);
+
+  --float-panel-bg: rgba(242, 251, 255, 0.92);
+  --navbar-bg: rgba(235, 248, 255, 0.82);
+
+  --torii-bg-base: #b8e6ff;
+  --torii-blob-a: rgba(255, 255, 255, 0.78);
+  --torii-blob-b: rgba(96, 165, 250, 0.36);
+  --torii-blob-c: rgba(147, 197, 253, 0.42);
+
+  --torii-surface: linear-gradient(170deg, rgba(255, 255, 255, 0.84) 0%, rgba(224, 245, 255, 0.66) 50%, rgba(196, 236, 255, 0.58) 100%);
+  --torii-surface-soft: linear-gradient(170deg, rgba(255, 255, 255, 0.72) 0%, rgba(214, 242, 255, 0.54) 100%);
+  --torii-nav-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(220, 245, 255, 0.74) 100%);
+  --torii-border: rgba(255, 255, 255, 0.9);
+  --torii-border-soft: rgba(255, 255, 255, 0.76);
+  --torii-glow-shadow: 0 16px 40px rgba(14, 116, 144, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+
+  --torii-panel-bg: linear-gradient(170deg, rgba(255, 255, 255, 0.82) 0%, rgba(224, 245, 255, 0.66) 100%);
+  --torii-panel-soft-bg: linear-gradient(170deg, rgba(255, 255, 255, 0.68) 0%, rgba(210, 240, 255, 0.52) 100%);
+  --torii-panel-border: rgba(255, 255, 255, 0.85);
+  --torii-panel-border-strong: rgba(255, 255, 255, 0.96);
+  --torii-panel-shadow: 0 14px 36px rgba(14, 116, 144, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.94);
+}
+
+html.theme-aero .torii-app-shell::before {
+  background:
+    radial-gradient(48rem 48rem at -8% -14%, var(--torii-blob-a), transparent 70%),
+    radial-gradient(52rem 52rem at 108% 18%, var(--torii-blob-b), transparent 72%),
+    radial-gradient(44rem 44rem at 38% 108%, var(--torii-blob-c), transparent 70%),
+    linear-gradient(180deg, #eef9ff 0%, #c8ebff 36%, #8ed4ff 72%, #52b6f7 100%);
+}
+
+html.theme-aero .torii-app-shell::after {
+  background:
+    radial-gradient(90rem 26rem at 50% -6rem, rgba(255, 255, 255, 0.55), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(186, 242, 255, 0.08) 16rem, rgba(16, 128, 178, 0.12) 100%);
+}
+
+html.theme-aero .glass {
+  background: var(--torii-surface);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--torii-glow-shadow);
+}
+
+html.theme-aero .glass-thin {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+}
+
+html.theme-aero .glass-thick {
+  background: rgba(242, 251, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 50px rgba(14, 116, 144, 0.2), inset 0 1px 0 #fff;
+}
+
+html.theme-aero .torii-nav-liquid {
+  box-shadow: 0 12px 32px rgba(14, 116, 144, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+html.theme-aero .form-input,
+html.theme-aero .mm-input {
+  background: linear-gradient(180deg, rgba(226, 242, 255, 0.92) 0%, rgba(255, 255, 255, 0.96) 60%, rgba(236, 248, 255, 0.94) 100%);
+  border-color: rgba(120, 174, 232, 0.65);
+  color: #0f2942;
+  box-shadow: inset 0 2px 4px rgba(28, 62, 114, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+html.theme-aero .form-input::placeholder,
+html.theme-aero .mm-input::placeholder {
+  color: rgba(51, 85, 119, 0.65);
+}
+
+/* Keep hardcoded text-white / text-white/* legible inside Aero light-glass panels */
+html.theme-aero .torii-app-shell .text-white {
+  color: var(--text-primary);
+}
+html.theme-aero .torii-app-shell .bg-torii .text-white,
+html.theme-aero .torii-app-shell .bg-torii,
+html.theme-aero .torii-app-shell .bg-osu-pink,
+html.theme-aero .torii-app-shell .bg-red-500,
+html.theme-aero .torii-app-shell .bg-red-600,
+html.theme-aero .torii-app-shell .bg-emerald-600,
+html.theme-aero .torii-app-shell .bg-green-500,
+html.theme-aero .torii-app-shell .bg-blue-500,
+html.theme-aero .torii-app-shell .bg-purple-500,
+html.theme-aero .torii-app-shell .bg-pink-500,
+html.theme-aero .torii-app-shell .bg-sky-500\/95,
+html.theme-aero .torii-app-shell .bg-red-600\/95,
+html.theme-aero .torii-app-shell .bg-slate-600,
+html.theme-aero .torii-app-shell .text-white[class*='bg-torii'],
+html.theme-aero .torii-app-shell .text-white[class*='bg-osu-pink'],
+html.theme-aero .torii-app-shell .text-white[class*='bg-red-'],
+html.theme-aero .torii-app-shell .text-white[class*='bg-emerald-'],
+html.theme-aero .torii-app-shell .text-white[class*='bg-green-'] {
+  color: #ffffff;
+}
+html.theme-aero .torii-app-shell [class*='text-white/'] {
+  color: var(--text-secondary);
+}
+html.theme-aero .torii-app-shell .border-white\/10,
+html.theme-aero .torii-app-shell .border-white\/15 {
+  border-color: rgba(14, 116, 144, 0.16);
+}
+html.theme-aero .torii-app-shell .bg-white\/5,
+html.theme-aero .torii-app-shell .bg-white\/\[0\.03\],
+html.theme-aero .torii-app-shell .bg-white\/\[0\.04\] {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Hue-shift Torii logo (keep exact shape, shift to pure sky-blue & white without green) */
+html.theme-aero img[src*="/image/logos/logo"] {
+  filter: sepia(1) hue-rotate(175deg) saturate(2.4) brightness(1.12);
+}
+
+html.theme-aero .torii-dark-only-backdrop {
+  display: none;
+}
+
+/* Navbar mobile dropdown & tooltips in Aero */
+html.theme-aero [class*="bg-[#0d122c]"] {
+  background-color: rgba(242, 251, 255, 0.94) !important;
+  border-color: rgba(14, 116, 144, 0.2) !important;
+  color: var(--text-primary);
+}
+
+/* Join Server & Wiki pages in Frutiger Aero */
+html.theme-aero .torii-join-page [class*="from-rose-950"],
+html.theme-aero .torii-join-page [class*="from-amber-950"],
+html.theme-aero .torii-join-page [class*="from-fuchsia-950"],
+html.theme-aero .torii-join-page [class*="from-sky-950"],
+html.theme-aero .torii-join-page [class*="from-violet-950"],
+html.theme-aero .torii-join-page [class*="bg-white/[0.025]"],
+html.theme-aero .torii-wiki-page [class*="bg-white/[0.02]"],
+html.theme-aero .torii-wiki-page [class*="bg-white/[0.03]"] {
+  background-image: var(--torii-panel-bg) !important;
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: var(--torii-panel-shadow) !important;
+}
+
+html.theme-aero .torii-join-page [class*="bg-black/2"],
+html.theme-aero .torii-join-page [class*="bg-black/3"],
+html.theme-aero .torii-wiki-page [class*="bg-black/2"],
+html.theme-aero .torii-wiki-page [class*="bg-black/3"] {
+  background-color: rgba(255, 255, 255, 0.68) !important;
+  border-color: rgba(14, 116, 144, 0.18) !important;
+}
+
+html.theme-aero .torii-join-page [class*="text-fuchsia-"],
+html.theme-aero .torii-join-page [class*="text-rose-"],
+html.theme-aero .torii-join-page [class*="text-sky-"],
+html.theme-aero .torii-join-page [class*="text-cyan-"],
+html.theme-aero .torii-wiki-page [class*="text-fuchsia-"],
+html.theme-aero .torii-wiki-page [class*="text-sky-"],
+html.theme-aero .torii-wiki-page [class*="text-cyan-"] {
+  color: #0369a1 !important;
+}
+
+html.theme-aero .torii-join-page [class*="text-amber-"],
+html.theme-aero .torii-wiki-page [class*="text-amber-"] {
+  color: #b45309 !important;
+}
+
+html.theme-aero .torii-join-page [class*="text-violet-"],
+html.theme-aero .torii-wiki-page [class*="text-violet-"] {
+  color: #5b21b6 !important;
+}
+
+html.theme-aero .torii-join-page [class*="text-emerald-"],
+html.theme-aero .torii-wiki-page [class*="text-emerald-"] {
+  color: #047857 !important;
+}
+
+html.theme-aero .torii-join-page code {
+  color: #0c4a6e !important;
+}
+
+html.theme-aero .torii-join-page .bg-white\/40 {
+  background-color: #0284c7 !important;
+}
+
+/* Global Aero safety net for remaining dark-navy cards, cover scrims & light-gray text */
+html.theme-aero .torii-app-shell .text-slate-100,
+html.theme-aero .torii-app-shell .text-slate-200,
+html.theme-aero .torii-app-shell .text-gray-200 {
+  color: var(--text-primary);
+}
+html.theme-aero .torii-app-shell .text-slate-300,
+html.theme-aero .torii-app-shell .text-slate-400,
+html.theme-aero .torii-app-shell .text-gray-300,
+html.theme-aero .torii-app-shell .text-gray-400,
+html.theme-aero .torii-app-shell .text-gray-500 {
+  color: var(--text-secondary);
+}
+html.theme-aero .torii-app-shell [class*="bg-[linear-gradient(140deg,rgba(19,24,58"],
+html.theme-aero .torii-app-shell [class*="bg-[linear-gradient(165deg,rgba(20,24,60"],
+html.theme-aero .torii-app-shell [class*="bg-[linear-gradient(165deg,rgba(18,22,53"] {
+  background-image: var(--torii-panel-bg) !important;
+  border-color: var(--torii-panel-border) !important;
+  box-shadow: var(--torii-panel-shadow) !important;
+}
+html.theme-aero .torii-app-shell [class*="bg-[#090d25]"] {
+  background-color: #e6f4ff !important;
+}
+html.theme-aero .torii-app-shell [class*="from-[#0a0f2edd]"] {
+  --tw-gradient-from: rgba(240, 249, 255, 0.88) !important;
+  --tw-gradient-via: rgba(224, 244, 255, 0.74) !important;
+  --tw-gradient-to: rgba(240, 249, 255, 0.92) !important;
+}
+html.theme-aero .torii-app-shell .bg-white\/10,
+html.theme-aero .torii-app-shell .bg-white\/12,
+html.theme-aero .torii-app-shell .bg-white\/15,
+html.theme-aero .torii-app-shell .bg-white\/\[0\.05\] {
+  background-color: rgba(255, 255, 255, 0.65);
+}
+html.theme-aero .torii-app-shell .border-white\/20,
+html.theme-aero .torii-app-shell .border-white\/25 {
+  border-color: rgba(14, 116, 144, 0.22);
+}
+html.theme-aero .torii-app-shell .mm-row:hover {
+  background-color: rgba(14, 165, 233, 0.08);
 }

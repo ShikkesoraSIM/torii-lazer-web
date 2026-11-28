@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiInfo, FiAlertTriangle, FiAlertOctagon, FiCheckCircle } from "react-icons/fi";
@@ -11,21 +11,6 @@ import { FiInfo, FiAlertTriangle, FiAlertOctagon, FiCheckCircle } from "react-ic
 
 export function cx(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
-}
-
-// Sets the page background to the deep navy the rest of the content pages use,
-// and restores whatever was there on unmount (same trick HowToJoinPage uses).
-function useWikiBackground() {
-  useEffect(() => {
-    const prevBody = document.body.style.background;
-    const prevHtml = document.documentElement.style.background;
-    document.body.style.background = "#030014";
-    document.documentElement.style.background = "#030014";
-    return () => {
-      document.body.style.background = prevBody;
-      document.documentElement.style.background = prevHtml;
-    };
-  }, []);
 }
 
 export type Accent = "fuchsia" | "violet" | "rose" | "sky" | "emerald" | "amber";
@@ -66,7 +51,7 @@ const ACCENT_BAR: Record<Accent, string> = {
   amber: "bg-amber-400",
 };
 
-// Page shell: dark full-bleed bg + blobs + a header with an optional "back to
+// Page shell: full-bleed stage + header with an optional "back to
 // wiki" breadcrumb. Everything routed under /wiki renders inside this.
 export function WikiShell({
   title,
@@ -83,11 +68,9 @@ export function WikiShell({
   showBack?: boolean;
   children: React.ReactNode;
 }) {
-  useWikiBackground();
-
   return (
-    <div className="relative min-h-screen bg-[#030014]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <div className="relative min-h-screen torii-page-stage torii-wiki-page">
+      <div className="torii-dark-only-backdrop pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <div
           className="absolute inset-0"
           style={{
@@ -95,7 +78,7 @@ export function WikiShell({
               'radial-gradient(600px circle at 12% 28%, rgba(217,70,239,0.14), transparent 70%), radial-gradient(640px circle at 88% 42%, rgba(139,92,246,0.16), transparent 70%), radial-gradient(600px circle at 45% 95%, rgba(56,189,248,0.10), transparent 70%)',
           }}
         />
-        <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#030014] via-[#030014]/95 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#0a0e1a] via-[#0a0e1a]/90 to-transparent" />
       </div>
 
       <div className="relative mx-auto max-w-5xl px-6 pb-32 pt-24 md:pt-28">

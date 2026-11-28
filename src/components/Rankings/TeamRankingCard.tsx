@@ -4,7 +4,6 @@ import { FiUsers, FiTrendingUp } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import RankBadge from '../UI/RankBadge';
 import LazyBackgroundImage from '../UI/LazyBackgroundImage';
-import { GAME_MODE_COLORS } from '../../types';
 import type { TeamRanking, Team, GameMode, RankingType } from '../../types';
 
 interface Props {
@@ -63,7 +62,7 @@ const TeamRankingCard: React.FC<Props> = ({
       : `${formatNumber(ranking.ranked_score || 0)}`;
 
   const cardBaseClass =
-    'group relative overflow-hidden rounded-2xl border border-white/10 shadow-[0_12px_34px_rgba(0,0,0,0.28)] transition-all duration-300 hover:border-white/20 hover:shadow-[0_18px_44px_rgba(0,0,0,0.36)]';
+    'group relative overflow-hidden rounded-2xl border border-border-color shadow-elev-1 transition-all duration-300 hover:border-border-hover hover:shadow-elev-2';
 
   const content = (
     <div className="relative flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5 sm:py-4">
@@ -72,7 +71,7 @@ const TeamRankingCard: React.FC<Props> = ({
       </div>
 
       <div className="flex-shrink-0">
-        <div className="w-12 h-6 sm:w-16 sm:h-8 rounded-md overflow-hidden border border-white/20 bg-white/5">
+        <div className="w-12 h-6 sm:w-16 sm:h-8 rounded-md overflow-hidden border border-border-color bg-btn-bg">
           <img
             src={team.flag_url}
             alt={`${team.name} flag`}
@@ -85,10 +84,10 @@ const TeamRankingCard: React.FC<Props> = ({
       </div>
 
       <div className="flex-1 min-w-0">
-        <span className="font-semibold text-sm sm:text-base text-white truncate block">
+        <span className="font-semibold text-sm sm:text-base text-text-primary truncate block">
           {team.name}
         </span>
-        <div className="flex items-center gap-3 sm:gap-5 mt-0.5 text-white/65">
+        <div className="flex items-center gap-3 sm:gap-5 mt-0.5 text-text-secondary tabular-nums">
           <div className="flex items-center gap-1">
             <FiUsers className="w-3 h-3" />
             <span className="text-xs">
@@ -105,7 +104,7 @@ const TeamRankingCard: React.FC<Props> = ({
       </div>
 
       <div className="text-right flex-shrink-0">
-        <div className="text-base sm:text-[1.65rem] font-bold leading-none" style={{ color: GAME_MODE_COLORS[selectedMode] }}>
+        <div className="text-base sm:text-[1.65rem] font-bold leading-none tabular-nums text-torii">
           {valueText}
         </div>
       </div>
@@ -115,10 +114,10 @@ const TeamRankingCard: React.FC<Props> = ({
   return (
     <Link to={`/teams/${team.id}?mode=${selectedMode}`} className="block">
       {!coverUrl ? (
-        <div className={`${cardBaseClass} bg-[linear-gradient(140deg,rgba(19,24,58,0.9),rgba(11,15,37,0.84))]`}>
+        <div className={`${cardBaseClass} bg-card`}>
           <div className="absolute inset-0 bg-gradient-to-r from-white/6 via-transparent to-transparent opacity-70" />
           {isTopThree && (
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-300/15 via-orange-300/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-torii/15 via-sky-400/10 to-transparent" />
           )}
           {content}
         </div>
@@ -127,7 +126,7 @@ const TeamRankingCard: React.FC<Props> = ({
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f2edd] via-[#0a0f2eb8] to-[#090d25e6] group-hover:from-[#080c24e6] group-hover:via-[#080c24c9] group-hover:to-[#080c24ee] transition-all duration-300" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-white/5" />
           {isTopThree && (
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-300/18 via-orange-300/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-torii/15 via-sky-400/10 to-transparent" />
           )}
           {content}
         </LazyBackgroundImage>

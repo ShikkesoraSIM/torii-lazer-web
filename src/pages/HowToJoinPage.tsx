@@ -330,32 +330,20 @@ export default function HowToJoinPage() {
     };
   }, []);
 
-  useEffect(() => {
-    const prev = document.body.style.background;
-    const prevHtml = document.documentElement.style.background;
-    document.body.style.background = "#030014";
-    document.documentElement.style.background = "#030014";
-
-    return () => {
-      document.body.style.background = prev;
-      document.documentElement.style.background = prevHtml;
-    };
-  }, []);
-
   const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) =>
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#030014]">
+    <div className="relative min-h-screen overflow-hidden torii-page-stage torii-join-page">
       {/* Lightweight radial-gradient ambient backdrops (no large CSS filter:blur pass). */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="torii-dark-only-backdrop pointer-events-none absolute inset-0"
         style={{
           background:
             "radial-gradient(560px circle at 10% 30%, rgba(217, 70, 239, 0.14), transparent 70%), radial-gradient(640px circle at 88% 42%, rgba(139, 92, 246, 0.18), transparent 70%), radial-gradient(640px circle at 50% 95%, rgba(56, 189, 248, 0.10), transparent 70%)",
         }}
       >
-        <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#030014] via-[#030014]/95 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#0a0e1a] via-[#0a0e1a]/90 to-transparent" />
       </div>
 
       <div className="relative mx-auto max-w-6xl px-6 pb-32 pt-24 md:pt-28">

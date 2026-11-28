@@ -1,9 +1,14 @@
 .torii-home {
+  --home-bg: #0a0e1a;
+  --home-surface: rgba(18, 24, 46, 0.72);
+  --home-border: rgba(255, 255, 255, 0.1);
+  --home-accent: #4f8fff;
+  --home-accent-hover: #3b7cf5;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  color: #fff;
-  background: #030014;
+  color: #f8fafc;
+  background: var(--home-bg);
   font-family: Outfit, system-ui, sans-serif;
   letter-spacing: 0;
 }
@@ -39,7 +44,7 @@
 
 .torii-home__hero::after {
   content: '';
-  background: linear-gradient(180deg, rgba(3, 0, 20, 0.2), rgba(3, 0, 20, 0.45) 55%, #030014 100%);
+  background: linear-gradient(180deg, rgba(10, 14, 26, 0.25), rgba(10, 14, 26, 0.58) 58%, var(--home-bg) 100%);
 }
 
 .torii-home__content {
@@ -50,26 +55,28 @@
 }
 
 .torii-home__server-label {
-  display: table;
-  margin: 0 auto 24px;
-  padding: 8px 16px;
-  border: 1px solid #ffffff1a;
-  border-radius: 999px;
-  background: rgba(3, 0, 20, 0.55);
-  color: #ffffffb3;
-  font-size: 12px;
+  display: inline-block;
+  margin: 0 auto 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(203, 213, 225, 0.75);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .torii-home__brand-mark {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 20px;
-  border: 1px solid #ffffff1a;
-  border-radius: 28px;
-  background: rgba(3, 0, 20, 0.7);
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 18px;
+  border: 1px solid var(--home-border);
+  border-radius: 18px;
+  background: rgba(15, 20, 40, 0.75);
 }
 
 .torii-home__brand-mark img {
@@ -87,23 +94,26 @@
   margin: 0;
   color: #fff;
   font-size: 64px;
-  font-weight: 650;
-  line-height: 1.1;
-  text-shadow: 0 4px 24px #03001480;
+  font-weight: 700;
+  line-height: 1.08;
+  text-shadow: 0 4px 24px rgba(10, 14, 26, 0.65);
 }
 
 .torii-home__dojo {
   display: inline-block;
   margin-top: 8px;
-  padding-bottom: 4px;
-  color: #c084fc;
-  background: linear-gradient(90deg, #c084fc, #ff5bbd, #ff7a18);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 38px;
-  font-weight: 650;
-  line-height: 1.25;
+  padding-bottom: 2px;
+  color: rgba(203, 213, 225, 0.88);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.torii-home__dojo:hover {
+  color: #7dd5d4;
 }
 
 .torii-home__tagline {
@@ -135,23 +145,23 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 50px;
-  padding: 13px 28px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #c084fc, #ff5bbd 55%, #ff7a18);
+  min-height: 48px;
+  padding: 12px 26px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: var(--home-accent);
   color: #fff;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.5;
   text-decoration: none;
-  transition: transform 180ms ease, filter 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
 }
 
 .torii-home__button:hover {
   color: #fff;
-  border-color: #ffffff80;
-  filter: brightness(1.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--home-accent-hover);
   transform: translateY(-1px);
 }
 
@@ -177,10 +187,10 @@
   gap: 8px;
   width: min(768px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 12px 20px;
-  border: 1px solid #ffffff1a;
-  border-radius: 999px;
-  background: #ffffff0a;
+  padding: 10px 16px;
+  border: 1px solid var(--home-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .torii-home__shortcuts a {
@@ -190,18 +200,14 @@
   gap: 10px;
   min-height: 44px;
   padding: 4px;
-  color: #ffffffa6;
+  color: rgba(226, 232, 240, 0.72);
   font-size: 13px;
   transition: color 180ms ease;
 }
 
 .torii-home__shortcuts svg {
-  box-sizing: content-box;
   flex-shrink: 0;
-  padding: 8px;
-  border: 1px solid #ffffff1a;
-  border-radius: 16px;
-  background: #ffffff0d;
+  color: #7dd5d4;
 }
 
 .torii-home__shortcuts a:hover {
@@ -222,36 +228,19 @@
 
 .torii-home__feature {
   padding: 24px;
-  border: 1px solid #ffffff1a;
-  border-radius: 24px;
-  background: linear-gradient(145deg, #ff7a1829, #ffffff09);
-  transition: border-color 180ms ease;
-}
-
-.torii-home__feature:nth-child(2) {
-  background: linear-gradient(145deg, #ff5bbd29, #ffffff09);
-}
-
-.torii-home__feature:nth-child(3) {
-  background: linear-gradient(145deg, #c084fc29, #ffffff09);
-}
-
-.torii-home__feature:nth-child(4) {
-  background: linear-gradient(145deg, #8b5cf629, #ffffff09);
+  border: 1px solid var(--home-border);
+  border-radius: 16px;
+  background: var(--home-surface);
+  transition: border-color 180ms ease, background-color 180ms ease;
 }
 
 .torii-home__feature:hover {
-  border-color: #ffffff38;
+  border-color: rgba(79, 143, 255, 0.35);
 }
 
 .torii-home__feature > svg {
-  box-sizing: content-box;
-  margin-bottom: 16px;
-  padding: 10px;
-  border: 1px solid #ffffff1a;
-  border-radius: 16px;
-  background: #ffffff0d;
-  color: #ffffffe6;
+  margin-bottom: 14px;
+  color: #7dd5d4;
 }
 
 .torii-home h3 {
@@ -402,4 +391,135 @@
   .torii-home__feature-list {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Frutiger Aero Alternative Theme (html.theme-aero)
+   ─────────────────────────────────────────────────────────────────────────── */
+html.theme-aero .torii-home {
+  --home-bg: #c6eeff;
+  --home-surface: linear-gradient(170deg, rgba(255, 255, 255, 0.82) 0%, rgba(224, 247, 255, 0.66) 100%);
+  --home-border: rgba(255, 255, 255, 0.9);
+  --home-accent: #0ea5e9;
+  --home-accent-hover: #0284c7;
+  color: #0c2d42;
+  background: linear-gradient(180deg, #e0f7ff 0%, #c8f0ff 55%, #b2e8ff 100%);
+}
+
+html.theme-aero .torii-home__hero::after {
+  background: linear-gradient(180deg, rgba(235, 249, 255, 0.12) 0%, rgba(214, 244, 255, 0.45) 55%, #d6f4ff 100%);
+}
+
+html.theme-aero .torii-home__server-label {
+  color: #0369a1;
+}
+
+html.theme-aero .torii-home__brand-mark {
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(12px);
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 1px 0 #fff, 0 8px 24px rgba(2, 132, 199, 0.16);
+}
+
+html.theme-aero .torii-home h1 {
+  color: #082a45;
+  text-shadow: 0 2px 14px rgba(255, 255, 255, 0.7);
+}
+
+html.theme-aero .torii-home__dojo {
+  color: #0284c7;
+  background: linear-gradient(90deg, #0369a1, #0284c7, #38bdf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+html.theme-aero .torii-home__tagline {
+  color: #0f3b57;
+}
+
+html.theme-aero .torii-home__description {
+  color: #2c5d78;
+}
+
+html.theme-aero .torii-home__button {
+  background: linear-gradient(180deg, #7dd3fc 0%, #0ea5e9 49%, #0284c7 50%, #38bdf8 100%);
+  border-color: rgba(255, 255, 255, 0.78);
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 45, 95, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 6px 18px rgba(14, 165, 233, 0.35);
+}
+
+html.theme-aero .torii-home__button:hover {
+  filter: brightness(1.06);
+}
+
+html.theme-aero .torii-home__button--secondary {
+  background: rgba(255, 255, 255, 0.68);
+  border-color: rgba(255, 255, 255, 0.92);
+  color: #0c3554;
+  text-shadow: none;
+  box-shadow: inset 0 1px 0 #fff, 0 4px 12px rgba(14, 116, 144, 0.12);
+}
+
+html.theme-aero .torii-home__button--secondary:hover {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+html.theme-aero .torii-home__shortcuts {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(14px);
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 1px 0 #fff, 0 10px 28px rgba(14, 116, 144, 0.14);
+}
+
+html.theme-aero .torii-home__shortcuts a {
+  color: #164e6e;
+}
+
+html.theme-aero .torii-home__shortcuts a:hover {
+  color: #0369a1;
+}
+
+html.theme-aero .torii-home__shortcuts svg,
+html.theme-aero .torii-home__feature > svg {
+  color: #0284c7;
+}
+
+html.theme-aero .torii-home__feature {
+  background: var(--home-surface);
+  backdrop-filter: blur(12px);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 #fff, 0 10px 24px rgba(14, 116, 144, 0.1);
+}
+
+html.theme-aero .torii-home__feature:hover {
+  border-color: rgba(14, 165, 233, 0.55);
+}
+
+html.theme-aero .torii-home h3 {
+  color: #0c2d42;
+}
+
+html.theme-aero .torii-home__feature p {
+  color: #2c5d78;
+}
+
+html.theme-aero .torii-home__footer {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  border-top-color: rgba(255, 255, 255, 0.85);
+  color: #315f7a;
+}
+
+html.theme-aero .torii-home__footer-brand {
+  color: #0c2d42;
+}
+
+html.theme-aero .torii-home__art-credit {
+  color: #4b7994;
+}
+
+html.theme-aero .torii-home__footer a:hover {
+  color: #0284c7;
 }

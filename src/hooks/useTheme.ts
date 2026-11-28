@@ -1,24 +1,79 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Theme } from '../types';
 
-const noop = () => {};
+const THEME_STORAGE_KEY = 'torii-theme';
+const THEME_EVENT = 'torii-theme-changed';
 
-/**
- * Torii is dark-only by design. The light-mode tokens were never finished and
- * the glass surfaces are forced dark via CSS, so a real light mode renders
- * broken. This hook locks the app to dark (index.html also ships
- * class="dark" so the very first paint is correct, no flash). The toggle/setter
- * are kept as no-ops so existing callers compile unchanged.
- */
+const readStoredTheme = (): Theme => {
+  if (typeof window === 'undefined') return 'dark';
+  try {
+    const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return raw === 'aero' ? 'aero' : 'dark';
+  } catch {
+    return 'dark';
+  }
+};
+
+const applyThemeToDom = (theme: Theme) => {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  if (theme === 'aero') {
+    root.classList.remove('dark');
+    root.classList.add('theme-aero');
+  } else {
+    root.classList.remove('theme-aero');
+    root.classList.add('dark');
+  }
+};
+
 export const useTheme = () => {
+  const [theme, setThemeState] = useState<Theme>(() => readStoredTheme());
+
   useEffect(() => {
-    document.documentElement.classList.add('dark');
+    applyThemeToDom(theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const onThemeEvent = (e: Event) => {
+      const next = (e as CustomEvent<Theme>).detail;
+      if (next === 'dark' || next === 'aero') {
+        setThemeState(next);
+      }
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === THEME_STORAGE_KEY) {
+        setThemeState(e.newValue === 'aero' ? 'aero' : 'dark');
+      }
+    };
+    window.addEventListener(THEME_EVENT, onThemeEvent);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(THEME_EVENT, onThemeEvent);
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
+  const setTheme = useCallback((next: Theme) => {
+    const normalized: Theme = next === 'aero' ? 'aero' : 'dark';
+    setThemeState(normalized);
+    applyThemeToDom(normalized);
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, normalized);
+    } catch {
+      /* ignore storage errors */
+    }
+    window.dispatchEvent(new CustomEvent<Theme>(THEME_EVENT, { detail: normalized }));
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(theme === 'aero' ? 'dark' : 'aero');
+  }, [theme, setTheme]);
+
   return {
-    theme: 'dark' as Theme,
-    isDark: true,
-    toggleTheme: noop,
-    setTheme: noop,
+    theme,
+    isDark: theme === 'dark',
+    isAero: theme === 'aero',
+    toggleTheme,
+    setTheme,
   };
 };

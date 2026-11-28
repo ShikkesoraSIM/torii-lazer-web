@@ -4,6 +4,7 @@ import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 import type { RegisterForm } from '../types';
 
@@ -11,6 +12,7 @@ const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x0000000
 
 const RegisterPage: React.FC = () => {
   const { register, isLoading, isAuthenticated } = useAuth();
+  const { isAero } = useTheme();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [formData, setFormData] = useState<RegisterForm>({
@@ -348,7 +350,7 @@ const RegisterPage: React.FC = () => {
                 onError={handleTurnstileError}
                 onExpire={handleTurnstileError}
                 options={{
-                  theme: 'dark',
+                  theme: isAero ? 'light' : 'dark',
                   size: 'normal',
                 }}
               />

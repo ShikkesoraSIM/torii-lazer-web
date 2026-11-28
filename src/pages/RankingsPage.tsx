@@ -204,14 +204,13 @@ const RankingsPage: React.FC = () => {
           </div>
           <Link
             to="/rankings/matchmaking"
-            className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-torii/20 to-sky-400/10 border border-torii/40 hover:border-torii/80 hover:shadow-elev-2 transition-all self-start md:self-auto"
+            className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-torii/15 border border-torii/40 hover:border-torii/80 hover:bg-torii/25 hover:shadow-elev-2 transition-all self-start md:self-auto"
           >
-            <span className="text-torii text-lg" aria-hidden="true">🏆</span>
             <span className="text-sm font-semibold text-text-primary">
               {t('rankings.matchmakingLadder', { defaultValue: 'Matchmaking ladder' })}
             </span>
-            <span className="text-xs text-text-muted group-hover:text-torii transition-colors">
-              →
+            <span className="text-xs text-text-muted group-hover:text-torii transition-colors" aria-hidden="true">
+              &rarr;
             </span>
           </Link>
         </div>
@@ -237,8 +236,8 @@ const RankingsPage: React.FC = () => {
                 onClick={() => setSelectedTab('users')}
                 className={`relative px-3 sm:px-4 py-2 rounded-xl font-medium transition-colors duration-150 text-sm sm:text-base ${
                   selectedTab === 'users'
-                    ? 'text-white border border-white/20 bg-torii/25 shadow-elev-1'
-                    : 'text-white/70 hover:text-white border border-transparent'
+                    ? 'text-white border border-torii bg-torii shadow-elev-1'
+                    : 'text-text-secondary hover:text-text-primary border border-transparent'
                 }`}
               >
                 <span className="relative z-10">{t('rankings.tabs.users')}</span>
@@ -250,8 +249,8 @@ const RankingsPage: React.FC = () => {
                 onClick={() => setSelectedTab('countries')}
                 className={`relative px-3 sm:px-4 py-2 rounded-xl font-medium transition-colors duration-150 text-sm sm:text-base ${
                   selectedTab === 'countries'
-                    ? 'text-white border border-white/20 bg-torii/25 shadow-elev-1'
-                    : 'text-white/70 hover:text-white border border-transparent'
+                    ? 'text-white border border-torii bg-torii shadow-elev-1'
+                    : 'text-text-secondary hover:text-text-primary border border-transparent'
                 }`}
               >
                 <span className="relative z-10">{t('rankings.tabs.countries')}</span>

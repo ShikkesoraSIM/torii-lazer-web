@@ -13,6 +13,8 @@ import {
   FiCheck,
   FiLogIn,
   FiLogOut,
+  FiSun,
+  FiMoon,
 } from 'react-icons/fi';
 import {
   BarChart3,
@@ -52,15 +54,15 @@ const NavItem = memo<{ item: NavItemType; isActive: boolean; compact?: boolean }
             compact ? 'p-[7px]' : 'px-3 py-[7px]'
           } ${
             isActive
-              ? 'text-white bg-gradient-to-r from-torii via-torii to-sky-400 shadow-elev-1 border border-white/25'
+              ? 'text-white bg-torii shadow-elev-1 border border-white/25'
               : 'text-white/75 hover:text-white hover:bg-white/[0.08] border border-transparent'
           }`}
         >
           <span
             className={`h-6 w-6 rounded-full flex items-center justify-center border transition-transform duration-150 ${
               isActive
-                ? 'border-white/35 bg-white/20 scale-105'
-                : 'border-white/15 bg-white/5 group-hover:-rotate-6'
+                ? 'border-white/30 bg-white/20'
+                : 'border-white/15 bg-white/5'
             }`}
           >
             {IconComponent && <IconComponent size={14} />}
@@ -329,7 +331,7 @@ const BrandMark = memo<{ size?: number }>(({ size = 36 }) => {
 BrandMark.displayName = 'BrandMark';
 
 const Navbar: React.FC = () => {
-  useTheme();
+  const { isAero, toggleTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
   const { t } = useTranslation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -502,6 +504,16 @@ const Navbar: React.FC = () => {
               <div ref={rightRef} className="flex items-center justify-end gap-3">
                 <button
                   type="button"
+                  onClick={toggleTheme}
+                  title={isAero ? 'Switch to Torii Night' : 'Switch to Frutiger Aero'}
+                  aria-label={isAero ? 'Switch to Torii Night' : 'Switch to Frutiger Aero'}
+                  className="relative h-10 w-10 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 active:scale-95 transition inline-flex items-center justify-center text-white/90"
+                >
+                  {isAero ? <FiMoon size={18} /> : <FiSun size={18} />}
+                </button>
+
+                <button
+                  type="button"
                   onClick={openSearch}
                   className="relative h-10 w-10 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 active:scale-95 transition inline-flex items-center justify-center text-white/90"
                   aria-label={t('common.search')}
@@ -584,6 +596,16 @@ const Navbar: React.FC = () => {
             </Link>
 
             <div className="flex shrink-0 items-center gap-1.5">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                title={isAero ? 'Switch to Torii Night' : 'Switch to Frutiger Aero'}
+                aria-label={isAero ? 'Switch to Torii Night' : 'Switch to Frutiger Aero'}
+                className="h-10 w-10 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 active:scale-95 text-white/90 transition inline-flex items-center justify-center"
+              >
+                {isAero ? <FiMoon size={18} /> : <FiSun size={18} />}
+              </button>
+
               <button
                 type="button"
                 onClick={openSearch}

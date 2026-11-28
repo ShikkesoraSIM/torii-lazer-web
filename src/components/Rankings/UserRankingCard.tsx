@@ -6,7 +6,6 @@ import LazyBackgroundImage from '../UI/LazyBackgroundImage';
 import LazyAvatar from '../UI/LazyAvatar';
 import LazyFlag from '../UI/LazyFlag';
 import CountryFlag from '../UI/CountryFlag';
-import { GAME_MODE_COLORS } from '../../types';
 import type { UserRanking, GameMode, RankingType } from '../../types';
 import { pickUserCoverCandidates, isCoverDebugEnabled } from '../../utils/profileMedia';
 
@@ -72,7 +71,7 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
       : null;
 
   const cardBaseClass =
-    'group relative overflow-hidden rounded-2xl border border-white/10 shadow-[0_12px_34px_rgba(0,0,0,0.28)] transition-all duration-300 hover:border-white/20 hover:shadow-[0_18px_44px_rgba(0,0,0,0.36)]'
+    'group relative overflow-hidden rounded-2xl border border-border-color shadow-elev-1 transition-all duration-300 hover:border-border-hover hover:shadow-elev-2'
     + (isInactive ? ' opacity-50 saturate-50' : '');
 
   const renderRow = () => (
@@ -86,14 +85,14 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
           src={ranking.user.avatar_url}
           alt={ranking.user.username}
           size="md"
-          className="ring-1 ring-white/25 hover:ring-white/45 transition-all duration-200"
+          className="ring-1 ring-border-color hover:ring-torii transition-all duration-200"
         />
       </Link>
 
       <div className="flex-1 min-w-0">
         <Link
           to={profilePath}
-          className="font-semibold text-sm sm:text-base text-white hover:text-white/85 transition-colors truncate block"
+          className="font-semibold text-sm sm:text-base text-text-primary hover:text-torii transition-colors truncate block"
         >
           {ranking.user.username}
         </Link>
@@ -119,11 +118,11 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
       </div>
 
       <div className="flex flex-col gap-1 text-right flex-shrink-0">
-        <div className="text-base sm:text-[1.65rem] font-bold leading-none" style={{ color: GAME_MODE_COLORS[selectedMode] }}>
+        <div className="text-base sm:text-[1.65rem] font-bold leading-none tabular-nums text-torii">
           {primaryValue}
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:gap-3 text-2xs sm:text-xs text-white/65">
+        <div className="flex flex-col sm:flex-row sm:gap-3 text-2xs sm:text-xs text-text-secondary tabular-nums">
           {secondaryValue && <div className="whitespace-nowrap">{secondaryValue}</div>}
           {accuracyValue && <div className="whitespace-nowrap">{accuracyValue}</div>}
         </div>
@@ -133,10 +132,10 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
 
   if (coverCandidates.length === 0) {
     return (
-      <div className={`${cardBaseClass} bg-[linear-gradient(140deg,rgba(19,24,58,0.9),rgba(11,15,37,0.84))]`}>
+      <div className={`${cardBaseClass} bg-card`}>
         <div className="absolute inset-0 bg-gradient-to-r from-white/6 via-transparent to-transparent opacity-70" />
         {isTopThree && (
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-300/15 via-orange-300/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-torii/15 via-sky-400/10 to-transparent" />
         )}
         {renderRow()}
       </div>
@@ -152,7 +151,7 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
       <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f2edd] via-[#0a0f2eb8] to-[#090d25e6] group-hover:from-[#080c24e6] group-hover:via-[#080c24c9] group-hover:to-[#080c24ee] transition-all duration-300" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-white/5" />
       {isTopThree && (
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-300/18 via-orange-300/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-torii/15 via-sky-400/10 to-transparent" />
       )}
       {renderRow()}
     </LazyBackgroundImage>

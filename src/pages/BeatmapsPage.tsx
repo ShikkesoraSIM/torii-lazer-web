@@ -129,7 +129,7 @@ const BeatmapsPage: React.FC = () => {
               type="text"
               aria-label={t('beatmap.searchPlaceholder', { defaultValue: 'Search beatmaps' })}
               placeholder={t('beatmap.searchPlaceholder', { defaultValue: 'Search beatmaps...' })}
-              className="w-full bg-[#0d122c]/80 border border-white/10 rounded-xl px-4 py-3 text-text-primary placeholder:text-text-muted focus:ring-2 focus:ring-torii/60 focus:border-torii/50 outline-none transition-all duration-150"
+              className="form-input rounded-xl px-4 py-3 placeholder:text-text-muted"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -137,7 +137,7 @@ const BeatmapsPage: React.FC = () => {
 
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap gap-3 items-center">
-              <div className="bg-white/5 rounded-xl p-1.5 border border-white/10">
+              <div className="bg-btn-bg rounded-xl p-1.5 border border-border-color">
                 <GameModeSelector selectedMode={selectedMode} onModeChange={setSelectedMode} variant="compact" />
               </div>
 
@@ -146,12 +146,12 @@ const BeatmapsPage: React.FC = () => {
                 aria-pressed={isLocalOnly}
                 className={`relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold border transition-all duration-150 active:scale-[0.98] ${
                   isLocalOnly
-                    ? 'bg-red-500/20 border-red-400/40 text-red-100 shadow-[0_0_0_2px_rgba(239,68,68,0.15)]'
-                    : 'bg-white/5 border-white/10 text-text-secondary hover:border-white/25 hover:text-white'
+                    ? 'bg-red-500/20 border-red-400/50 text-red-700 dark:text-red-100 shadow-[0_0_0_2px_rgba(239,68,68,0.15)]'
+                    : 'bg-btn-bg border-border-color text-text-secondary hover:border-border-hover hover:text-text-primary'
                 }`}
                 onClick={() => setIsLocalOnly((prev) => !prev)}
               >
-                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isLocalOnly ? 'bg-red-300' : 'bg-slate-400'}`} />
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isLocalOnly ? 'bg-red-500 dark:bg-red-300' : 'bg-slate-400'}`} />
                 {t('beatmap.customMaps', { defaultValue: 'Custom Maps' })}
               </button>
 
@@ -160,12 +160,12 @@ const BeatmapsPage: React.FC = () => {
                 aria-pressed={isAiOnly}
                 className={`relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold border transition-all duration-150 active:scale-[0.98] ${
                   isAiOnly
-                    ? 'bg-sky-500/20 border-sky-400/40 text-sky-100 shadow-[0_0_0_2px_rgba(56,189,248,0.15)]'
-                    : 'bg-white/5 border-white/10 text-text-secondary hover:border-white/25 hover:text-white'
+                    ? 'bg-sky-500/20 border-sky-400/50 text-sky-700 dark:text-sky-100 shadow-[0_0_0_2px_rgba(56,189,248,0.15)]'
+                    : 'bg-btn-bg border-border-color text-text-secondary hover:border-border-hover hover:text-text-primary'
                 }`}
                 onClick={() => setIsAiOnly((prev) => !prev)}
               >
-                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isAiOnly ? 'bg-sky-300' : 'bg-slate-400'}`} />
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${isAiOnly ? 'bg-sky-500 dark:bg-sky-300' : 'bg-slate-400'}`} />
                 {t('beatmap.aiGenerated', { defaultValue: 'AI generated' })}
               </button>
             </div>
@@ -182,7 +182,7 @@ const BeatmapsPage: React.FC = () => {
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wide border transition-all duration-150 ${
                       active
                         ? 'bg-torii text-white border-torii shadow-elev-1'
-                        : 'text-text-secondary border-white/10 bg-white/[0.03] hover:border-white/25 hover:text-white'
+                        : 'text-text-secondary border-border-color bg-btn-bg hover:border-border-hover hover:text-text-primary'
                     }`}
                   >
                     {t(`beatmap.status.${option}`, { defaultValue: option })}
@@ -213,7 +213,7 @@ const BeatmapsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="px-4 py-2 rounded-xl border border-white/15 bg-white/5 text-sm font-medium text-white hover:bg-white/10 transition-colors"
+                  className="px-4 py-2 rounded-xl border border-border-color bg-btn-bg text-sm font-medium text-text-primary hover:bg-btn-bg-hover transition-colors"
                 >
                   {t('common.resetFilters', { defaultValue: 'Reset filters' })}
                 </button>
@@ -261,7 +261,7 @@ const BeatmapsPage: React.FC = () => {
                       {set.title}
                     </h3>
                     <p className="text-text-secondary text-sm truncate mb-2">{set.artist}</p>
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/10">
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-border-color">
                       <div className="text-xs text-text-muted truncate pr-2">
                         {t('beatmap.mappedBy', { defaultValue: 'mapped by' })}:{' '}
                         <span className="text-text-secondary font-medium">{set.creator}</span>
