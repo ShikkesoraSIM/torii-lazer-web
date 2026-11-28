@@ -6,10 +6,10 @@ import type { GameMode, MainGameMode } from '../../types';
 import {
   GAME_MODE_NAMES,
   GAME_MODE_COLORS,
-  GAME_MODE_GROUPS,
-  MAIN_MODE_ICONS
+  GAME_MODE_GROUPS
 } from '../../types';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
+import ToriiModeIcon from './ToriiModeIcon';
 
 interface ModeDropdownProps {
   mainMode: MainGameMode;
@@ -235,11 +235,9 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
                     className="flex items-center justify-center"
                     animate={{ x: shouldExpand ? -6 : 0 }}
                     transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    style={{ color: isActive ? 'white' : 'currentColor' }}
                   >
-                    <i
-                      className={`${MAIN_MODE_ICONS[mainMode]} text-xl transition-colors duration-200`}
-                      style={{ color: isActive ? 'white' : 'currentColor' }}
-                    />
+                    <ToriiModeIcon mode={mainMode} className="w-5 h-5 transition-colors duration-200" />
                   </motion.div>
 
                   {hasSubModes && (
@@ -325,11 +323,9 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
                 rotate: selectedMode !== mode ? 5 : 0
               }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              style={{ color: selectedMode === mode ? 'white' : 'currentColor' }}
             >
-              <i
-                className={`${mainMode ? MAIN_MODE_ICONS[mainMode] : 'icon-osu'} text-xl transition-colors duration-200`}
-                style={{ color: selectedMode === mode ? 'white' : 'currentColor' }}
-              />
+              <ToriiModeIcon mode={mainMode ?? 'osu'} className="w-5 h-5 transition-colors duration-200" />
             </motion.div>
 
             <motion.span className="text-xs font-semibold transition-colors duration-200 text-center leading-tight px-1">

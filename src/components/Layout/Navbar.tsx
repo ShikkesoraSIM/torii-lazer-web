@@ -294,7 +294,7 @@ const MobileMenuDropdown = memo<{
                     onLogout();
                     handleClose();
                   }}
-                  className="w-full flex items-center px-4 py-3 text-sm font-medium text-red-300 hover:bg-red-500/10 transition-colors duration-150"
+                  className="w-full flex items-center px-4 py-3 text-sm font-medium text-red-600 dark:text-red-300 hover:bg-red-500/10 transition-colors duration-150"
                 >
                   <FiLogOut size={16} className="mr-3" />
                   <span>{t('nav.logout')}</span>
@@ -568,7 +568,7 @@ const Navbar: React.FC = () => {
                     </Link>
                     <Link
                       to="/register"
-                      className="text-white text-sm font-semibold px-4 py-2 rounded-full bg-torii/20 hover:bg-torii/30 border border-torii/35 transition"
+                      className="text-white text-sm font-semibold px-4 py-2 rounded-full bg-torii hover:bg-torii-hover border border-torii transition"
                     >
                       {t('nav.register')}
                     </Link>
@@ -651,7 +651,7 @@ const Navbar: React.FC = () => {
                   to="/login"
                   title={t('nav.login')}
                   aria-label={t('nav.login')}
-                  className="inline-flex h-10 w-10 min-[480px]:w-auto min-[480px]:px-4 items-center justify-center whitespace-nowrap text-sm font-semibold text-white bg-torii/20 hover:bg-torii/30 rounded-2xl transition-colors duration-150 border border-torii/35"
+                  className="inline-flex h-10 w-10 min-[480px]:w-auto min-[480px]:px-4 items-center justify-center whitespace-nowrap text-sm font-semibold text-white bg-torii hover:bg-torii-hover rounded-2xl transition-colors duration-150 border border-torii"
                 >
                   <FiLogIn size={18} className="min-[480px]:hidden" aria-hidden="true" />
                   <span className="hidden min-[480px]:inline">{t('nav.login')}</span>

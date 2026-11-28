@@ -28,16 +28,16 @@ export default function PlayerProfileSelector({ userId, mode }: { userId: number
   if (!data || data.profiles.length <= 1) return null;
   const selected = data.profiles.some(profile => profile.user_id === userId) ? userId : '';
   return (
-    <label className="inline-flex w-fit max-w-full items-center gap-1.5 text-xs text-white/80">
-      <UserRound size={14} className="text-white/60" aria-hidden="true" />
+    <label className="inline-flex w-fit max-w-full items-center gap-1.5 text-xs text-text-secondary">
+      <UserRound size={14} className="text-text-muted" aria-hidden="true" />
       <select
         aria-label="Player profile"
         value={selected}
         onChange={event => navigate(`/users/${event.target.value}?mode=${encodeURIComponent(mode)}`)}
-        className="rounded-md border border-white/20 bg-gray-900/90 px-2 py-1 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-osu-pink"
+        className="rounded-lg border border-border-color bg-btn-bg px-2.5 py-1 text-xs font-medium text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-torii"
       >
-        {selected === '' && <option value="" disabled>Choose profile</option>}
-        {data.profiles.map(profile => <option key={profile.user_id} value={profile.user_id}>{profile.name}</option>)}
+        {selected === '' && <option value="" disabled className="bg-panel text-text-primary">Choose profile</option>}
+        {data.profiles.map(profile => <option key={profile.user_id} value={profile.user_id} className="bg-panel text-text-primary">{profile.name}</option>)}
       </select>
     </label>
   );
