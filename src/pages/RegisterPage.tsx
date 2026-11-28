@@ -167,12 +167,12 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#030014] flex justify-center px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-0 lg:items-center">
+    <div className="min-h-screen torii-page-stage flex justify-center px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-8 lg:items-center">
       {showAiModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" role="dialog" aria-modal="true">
-          <div className="max-w-md w-full rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Before you sign up</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-5 leading-relaxed">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4" role="dialog" aria-modal="true">
+          <div className="max-w-md w-full rounded-2xl glass-thick p-6 shadow-elev-4">
+            <h3 className="font-heading text-lg font-bold text-text-primary mb-2">Before you sign up</h3>
+            <p className="text-sm text-text-secondary mb-5 leading-relaxed">
               Torii and some of its assets (a bit of the art, and parts of the server, client and website)
               are built with the help of AI. We are telling you upfront instead of hiding it. You can read
               the full statement{' '}
@@ -181,14 +181,14 @@ const RegisterPage: React.FC = () => {
             <button
               type="button"
               onClick={handleAiAcknowledge}
-              className="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-osu-pink text-white font-semibold hover:bg-osu-pink/90 transition-colors"
+              className="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-osu-pink text-white font-semibold hover:bg-osu-pink/90 transition-colors"
             >
               Got it
             </button>
           </div>
         </div>
       )}
-      <div className="max-w-md w-full space-y-3 pb-4 lg:pb-0">
+      <div className="max-w-md w-full space-y-4 pb-8 lg:pb-0">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto flex items-center justify-center mb-2">
             <img
@@ -198,31 +198,31 @@ const RegisterPage: React.FC = () => {
               className="w-12 h-12 object-contain"
             />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h2 className="font-heading text-2xl font-bold text-text-primary">
             {t('auth.register.title')}
           </h2>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-sm text-text-secondary">
             {t('auth.register.subtitle')}
           </p>
         </div>
 
-        <div className="sm:bg-white sm:dark:bg-gray-800 sm:py-4 sm:px-6 sm:shadow-sm sm:rounded-lg sm:border sm:border-gray-200 sm:dark:border-gray-700 py-2">
-          <form className="space-y-3" onSubmit={handleSubmit}>
+        <div className="glass rounded-2xl py-6 px-6 shadow-elev-2">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="username" className="block text-sm font-medium text-text-secondary mb-1.5">
                 {t('auth.register.username')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiUser className="h-5 w-5 text-gray-400" />
+                  <FiUser className="h-5 w-5 text-text-muted" />
                 </div>
                 <input
                   id="username"
                   name="username"
                   type="text"
                   required
-                  className={`w-full px-3 py-2 pl-10 border rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent ${
-                    errors.username ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  className={`w-full px-3 py-2.5 pl-10 border rounded-xl bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all ${
+                    errors.username ? 'border-red-500' : 'border-white/10'
                   }`}
                   placeholder={t('auth.register.usernamePlaceholder')}
                   value={formData.username}
@@ -231,25 +231,25 @@ const RegisterPage: React.FC = () => {
                 />
               </div>
               {errors.username && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.username}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.username}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1.5">
                 {t('auth.register.email')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="h-5 w-5 text-gray-400" />
+                  <FiMail className="h-5 w-5 text-text-muted" />
                 </div>
                 <input
                   id="email"
                   name="email"
                   type="email"
                   required
-                  className={`w-full px-3 py-2 pl-10 border rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent ${
-                    errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  className={`w-full px-3 py-2.5 pl-10 border rounded-xl bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all ${
+                    errors.email ? 'border-red-500' : 'border-white/10'
                   }`}
                   placeholder={t('auth.register.emailPlaceholder')}
                   value={formData.email}
@@ -258,25 +258,25 @@ const RegisterPage: React.FC = () => {
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.email}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-text-secondary mb-1.5">
                 {t('auth.register.password')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-gray-400" />
+                  <FiLock className="h-5 w-5 text-text-muted" />
                 </div>
                 <input
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
-                  className={`w-full px-3 py-2 pl-10 pr-10 border rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent ${
-                    errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  className={`w-full px-3 py-2.5 pl-10 pr-10 border rounded-xl bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all ${
+                    errors.password ? 'border-red-500' : 'border-white/10'
                   }`}
                   placeholder={t('auth.register.passwordPlaceholder')}
                   value={formData.password}
@@ -285,36 +285,37 @@ const RegisterPage: React.FC = () => {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 dark:hover:text-gray-300"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-muted hover:text-text-primary transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <FiEyeOff className="h-5 w-5 text-gray-400" />
+                    <FiEyeOff className="h-5 w-5" />
                   ) : (
-                    <FiEye className="h-5 w-5 text-gray-400" />
+                    <FiEye className="h-5 w-5" />
                   )}
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.password}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-secondary mb-1.5">
                 {t('auth.register.confirmPassword')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-gray-400" />
+                  <FiLock className="h-5 w-5 text-text-muted" />
                 </div>
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   required
-                  className={`w-full px-3 py-2 pl-10 pr-10 border rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  className={`w-full px-3 py-2.5 pl-10 pr-10 border rounded-xl bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all ${
+                    errors.confirmPassword ? 'border-red-500' : 'border-white/10'
                   }`}
                   placeholder={t('auth.register.confirmPasswordPlaceholder')}
                   value={formData.confirmPassword}
@@ -323,18 +324,19 @@ const RegisterPage: React.FC = () => {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 dark:hover:text-gray-300"
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-muted hover:text-text-primary transition-colors"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
-                    <FiEyeOff className="h-5 w-5 text-gray-400" />
+                    <FiEyeOff className="h-5 w-5" />
                   ) : (
-                    <FiEye className="h-5 w-5 text-gray-400" />
+                    <FiEye className="h-5 w-5" />
                   )}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.confirmPassword}</p>
               )}
             </div>
 
@@ -368,7 +370,7 @@ const RegisterPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading || !turnstileToken}
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-osu-pink disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-elev-1 text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-torii disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >
                 {isLoading ? (
                   <LoadingSpinner size="sm" />
@@ -379,11 +381,11 @@ const RegisterPage: React.FC = () => {
             </div>
 
             <div className="text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-text-secondary">
                 {t('auth.register.hasAccount')}{' '}
                 <Link
                   to="/login"
-                  className="font-medium text-osu-pink hover:text-osu-pink/80 dark:text-osu-pink dark:hover:text-osu-pink/80"
+                  className="font-medium text-osu-pink hover:text-osu-pink/80 transition-colors"
                 >
                   {t('auth.register.loginNow')}
                 </Link>
@@ -393,10 +395,10 @@ const RegisterPage: React.FC = () => {
         </div>
 
         <div className="text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-text-muted">
             {t('common.registerAgreement')}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+          <p className="text-xs text-text-muted mt-2 leading-relaxed">
             A quick honest heads up: Torii is one person, me. I use AI to help build parts of it
             (the server, the client, the website, art like these default avatars), and there is
             still endless manual work on top of all of it. I would rather be upfront about that

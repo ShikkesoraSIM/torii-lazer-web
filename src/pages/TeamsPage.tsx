@@ -89,10 +89,10 @@ const TeamsPage: React.FC = () => {
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary mb-1.5">
                 {t('teams.title')}
               </h1>
-              <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
+              <p className="text-sm sm:text-base text-text-secondary">
                 {t('teams.description')}
               </p>
             </div>

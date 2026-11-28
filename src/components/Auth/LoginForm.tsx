@@ -86,19 +86,19 @@ const LoginForm: React.FC = () => {
             className="w-12 h-12 object-contain"
           />
         </div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('auth.login.title')}</h2>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{t('auth.login.subtitle')}</p>
+        <h2 className="font-heading text-2xl font-bold text-text-primary">{t('auth.login.title')}</h2>
+        <p className="mt-1 text-sm text-text-secondary">{t('auth.login.subtitle')}</p>
       </div>
 
-      <div className="sm:bg-white sm:dark:bg-gray-800 sm:py-4 sm:px-6 sm:shadow-sm sm:rounded-lg sm:border sm:border-gray-200 sm:dark:border-gray-700 py-2">
-        <form className="space-y-3" onSubmit={handleSubmit}>
+      <div className="glass rounded-2xl py-6 px-6 shadow-elev-2">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="username" className="block text-sm font-medium text-text-secondary mb-1.5">
               {t('auth.login.usernameOrEmail')}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiUser className="h-5 w-5 text-gray-400" />
+                <FiUser className="h-5 w-5 text-text-muted" />
               </div>
               <input
                 id="username"
@@ -106,7 +106,7 @@ const LoginForm: React.FC = () => {
                 type="text"
                 autoComplete="username"
                 required
-                className="w-full px-3 py-2 pl-10 border border-gray-600 rounded-md shadow-sm bg-gray-800/80 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent"
+                className="w-full px-3 py-2.5 pl-10 border border-white/10 rounded-xl bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all"
                 placeholder={t('auth.login.usernameOrEmailPlaceholder')}
                 value={formData.username}
                 onChange={handleInputChange}
@@ -116,20 +116,20 @@ const LoginForm: React.FC = () => {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-text-secondary">
                 {t('auth.login.password')}
               </label>
               <Link
                 to="/password-reset"
-                className="text-xs font-medium text-osu-pink hover:text-osu-pink/80"
+                className="text-xs font-medium text-osu-pink hover:text-osu-pink/80 transition-colors"
               >
                 {t('auth.login.forgotPassword')}
               </Link>
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-gray-400" />
+                <FiLock className="h-5 w-5 text-text-muted" />
               </div>
               <input
                 id="password"
@@ -137,7 +137,7 @@ const LoginForm: React.FC = () => {
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 required
-                className="w-full px-3 py-2 pl-10 pr-10 border border-gray-600 rounded-md shadow-sm bg-gray-800/80 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent"
+                className="w-full px-3 py-2.5 pl-10 pr-10 border border-white/10 rounded-xl bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all"
                 placeholder={t('auth.login.passwordPlaceholder')}
                 value={formData.password}
                 onChange={handleInputChange}
@@ -146,7 +146,7 @@ const LoginForm: React.FC = () => {
               <button
                 type="button"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-muted hover:text-text-primary transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
@@ -188,16 +188,16 @@ const LoginForm: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading || !formData.username || !formData.password || !turnstileToken}
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-osu-pink disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-elev-1 text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-torii disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
               {isLoading ? <LoadingSpinner size="sm" /> : t('auth.login.submit')}
             </button>
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-text-secondary">
               {t('auth.login.noAccount')}{' '}
-              <Link to="/register" className="font-medium text-osu-pink hover:text-osu-pink/80 dark:text-osu-pink dark:hover:text-osu-pink/80">
+              <Link to="/register" className="font-medium text-osu-pink hover:text-osu-pink/80 transition-colors">
                 {t('auth.login.registerNow')}
               </Link>
             </p>
@@ -206,7 +206,7 @@ const LoginForm: React.FC = () => {
       </div>
 
       <div className="text-center">
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-text-muted">
           {t('common.authAgreement')}
         </p>
       </div>

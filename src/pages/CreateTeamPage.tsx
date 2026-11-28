@@ -256,12 +256,12 @@ const CreateTeamPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+    <div className="min-h-screen torii-page-stage">
       <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 sm:py-8">
         <div className="mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="inline-flex items-center text-text-secondary hover:text-text-primary transition-colors"
           >
             <FiArrowLeft className="mr-2" />
             {t('common.back')}
@@ -269,22 +269,22 @@ const CreateTeamPage: React.FC = () => {
         </div>
 
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary mb-2">
             {isEditing ? t('teams.create.editTeam') : t('teams.create.createTeam')}
           </h1>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-sm sm:text-base text-text-secondary">
             {isEditing ? t('teams.create.editDescription') : t('teams.create.createDescription')}
           </p>
         </div>
 
         <div className="max-w-2xl mx-auto">
           <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="bg-card rounded-xl shadow-sm border border-card p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">{t('teams.create.basicInfo')}</h2>
+            <div className="card-standard p-6">
+              <h2 className="font-heading text-xl font-bold text-text-primary mb-6">{t('teams.create.basicInfo')}</h2>
 
               <div className="space-y-6">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-2">
                     {t('teams.create.teamName')} {t('teams.create.required')}
                   </label>
                   <input
@@ -293,14 +293,14 @@ const CreateTeamPage: React.FC = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-card rounded-lg bg-card text-gray-900 dark:text-white focus:ring-2 focus:ring-osu-pink focus:border-transparent"
+                    className="w-full px-4 py-3 border border-white/10 rounded-xl bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all"
                     placeholder={t('teams.create.teamNamePlaceholder')}
                     maxLength={100}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="short_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="short_name" className="block text-sm font-medium text-text-secondary mb-2">
                     {t('teams.create.teamShortName')} {t('teams.create.required')}
                   </label>
                   <input
@@ -309,15 +309,15 @@ const CreateTeamPage: React.FC = () => {
                     name="short_name"
                     value={formData.short_name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-card rounded-lg bg-card text-gray-900 dark:text-white focus:ring-2 focus:ring-osu-pink focus:border-transparent"
+                    className="w-full px-4 py-3 border border-white/10 rounded-xl bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all"
                     placeholder={t('teams.create.teamShortNamePlaceholder')}
                     maxLength={10}
                   />
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('teams.create.shortNameDescription')}</p>
+                  <p className="mt-1 text-sm text-text-muted">{t('teams.create.shortNameDescription')}</p>
                 </div>
 
                 <div>
-                  <label htmlFor="playmode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="playmode" className="block text-sm font-medium text-text-secondary mb-2">
                     {t('teams.create.preferredMode')}
                   </label>
                   <select
@@ -325,7 +325,7 @@ const CreateTeamPage: React.FC = () => {
                     name="playmode"
                     value={formData.playmode}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-card rounded-lg bg-card text-gray-900 dark:text-white focus:ring-2 focus:ring-osu-pink focus:border-transparent"
+                    className="w-full px-4 py-3 border border-white/10 rounded-xl bg-[#0d122c]/80 text-text-primary focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all"
                   >
                     {TEAM_MODE_OPTIONS.map((mode) => (
                       <option key={mode} value={mode}>
@@ -336,7 +336,7 @@ const CreateTeamPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="website" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="website" className="block text-sm font-medium text-text-secondary mb-2">
                     {t('teams.create.website')}
                   </label>
                   <input
@@ -345,14 +345,14 @@ const CreateTeamPage: React.FC = () => {
                     name="website"
                     value={formData.website}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-card rounded-lg bg-card text-gray-900 dark:text-white focus:ring-2 focus:ring-osu-pink focus:border-transparent"
+                    className="w-full px-4 py-3 border border-white/10 rounded-xl bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all"
                     placeholder={t('teams.create.websitePlaceholder')}
                     maxLength={255}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="description" className="block text-sm font-medium text-text-secondary mb-2">
                     {t('teams.create.description')}
                   </label>
                   <textarea
@@ -360,7 +360,7 @@ const CreateTeamPage: React.FC = () => {
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-card rounded-lg bg-card text-gray-900 dark:text-white focus:ring-2 focus:ring-osu-pink focus:border-transparent"
+                    className="w-full px-4 py-3 border border-white/10 rounded-xl bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 transition-all"
                     placeholder={t('teams.create.descriptionPlaceholder')}
                     rows={5}
                     maxLength={2000}

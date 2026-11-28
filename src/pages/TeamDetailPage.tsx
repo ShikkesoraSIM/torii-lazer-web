@@ -146,10 +146,10 @@ const TeamDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
+      <div className="min-h-screen torii-page-stage flex items-center justify-center">
         <div className="text-center">
-          <FiLoader className="animate-spin h-12 w-12 text-blue-500 mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400 font-medium">{t('teams.detail.loading')}</p>
+          <FiLoader className="animate-spin h-12 w-12 text-torii mx-auto mb-4" />
+          <p className="text-text-muted font-medium">{t('teams.detail.loading')}</p>
         </div>
       </div>
     );
@@ -157,14 +157,14 @@ const TeamDetailPage: React.FC = () => {
 
   if (!teamDetail) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
+      <div className="min-h-screen torii-page-stage flex items-center justify-center">
         <div className="text-center">
-          <FiUsers className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">{t('teams.detail.notFound')}</h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">{t('teams.detail.notFoundDescription')}</p>
+          <FiUsers className="h-16 w-16 text-text-muted mx-auto mb-4" />
+          <h3 className="font-heading text-xl font-semibold text-text-primary mb-2">{t('teams.detail.notFound')}</h3>
+          <p className="text-text-muted mb-6">{t('teams.detail.notFoundDescription')}</p>
           <Link
             to="/teams"
-            className="inline-flex items-center px-4 py-2 bg-osu-pink text-white rounded-lg hover:bg-osu-pink/90 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-osu-pink text-white rounded-xl hover:bg-osu-pink/90 transition-colors"
           >
             <FiArrowLeft className="mr-2" />
             {t('teams.detail.backToTeams')}
@@ -180,20 +180,20 @@ const TeamDetailPage: React.FC = () => {
   const preferredMode = (team.playmode || 'osu') as GameMode;
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+    <div className="min-h-screen torii-page-stage">
       <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 sm:py-8">
         <div className="mb-6">
           <Link
             to="/teams"
-            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="inline-flex items-center text-text-secondary hover:text-text-primary transition-colors"
           >
             <FiArrowLeft className="mr-2" />
             {t('teams.detail.backToTeams')}
           </Link>
         </div>
 
-        <div className="-mx-4 sm:mx-0 sm:bg-card sm:rounded-xl sm:shadow-sm sm:border sm:border-card mb-6">
-          <div className="relative h-32 sm:h-48 bg-gradient-to-r from-blue-500 to-purple-600 sm:rounded-t-xl overflow-hidden">
+        <div className="-mx-4 sm:mx-0 sm:card-standard sm:overflow-hidden mb-6">
+          <div className="relative h-32 sm:h-48 bg-gradient-to-r from-blue-500 to-purple-600 sm:rounded-t-2xl overflow-hidden">
             <img
               src={team.cover_url}
               alt={`${team.name} cover`}
@@ -205,9 +205,9 @@ const TeamDetailPage: React.FC = () => {
             <div className="absolute inset-0 bg-black bg-opacity-30" />
           </div>
 
-          <div className="relative px-4 sm:px-6 py-6 sm:bg-card sm:rounded-b-xl">
+          <div className="relative px-4 sm:px-6 py-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="w-32 h-16 sm:w-40 sm:h-20 rounded-xl overflow-hidden border-4 border-white dark:border-gray-800 bg-gray-100 dark:bg-gray-700 flex-shrink-0 -mt-12 sm:-mt-16">
+              <div className="w-32 h-16 sm:w-40 sm:h-20 rounded-xl overflow-hidden border-2 border-white/20 bg-white/10 flex-shrink-0 -mt-12 sm:-mt-16 shadow-elev-2">
                 <img
                   src={team.flag_url}
                   alt={`${team.name} flag`}
@@ -221,12 +221,12 @@ const TeamDetailPage: React.FC = () => {
               <div className="flex-1">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">{team.name}</h1>
-                    {team.short_name !== team.name && <p className="text-lg text-gray-600 dark:text-gray-400">{team.short_name}</p>}
+                    <h1 className="font-heading text-2xl sm:text-3xl font-bold text-text-primary mb-1">{team.name}</h1>
+                    {team.short_name !== team.name && <p className="text-lg text-text-secondary">{team.short_name}</p>}
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-text-secondary">
                       <div className="flex items-center gap-1">
                         <FiCalendar className="w-4 h-4" />
                         <span>{t('teams.detail.createdAt', { date: formatDate(team.created_at) })}</span>
@@ -254,21 +254,21 @@ const TeamDetailPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="sm:bg-card sm:rounded-xl sm:shadow-sm sm:border sm:border-card p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-2">
+          <div className="card-standard p-4">
+            <p className="text-xs uppercase tracking-wide text-text-muted mb-2 flex items-center gap-2">
               <FiTag /> {t('teams.detail.preferredMode')}
             </p>
-            <p className="text-base font-semibold text-gray-900 dark:text-white">{GAME_MODE_NAMES[preferredMode]}</p>
+            <p className="text-base font-semibold text-text-primary">{GAME_MODE_NAMES[preferredMode]}</p>
           </div>
 
-          <div className="sm:bg-card sm:rounded-xl sm:shadow-sm sm:border sm:border-card p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-2">
+          <div className="card-standard p-4">
+            <p className="text-xs uppercase tracking-wide text-text-muted mb-2 flex items-center gap-2">
               <FiGlobe /> {t('teams.detail.website')}
             </p>
             {(() => {
               const safeWebsite = team.website && /^https?:\/\//i.test(team.website) ? team.website : null;
               if (!team.website) {
-                return <p className="text-base text-gray-500 dark:text-gray-400">{t('teams.detail.noWebsite')}</p>;
+                return <p className="text-base text-text-muted">{t('teams.detail.noWebsite')}</p>;
               }
               return safeWebsite ? (
                 <a
@@ -280,24 +280,24 @@ const TeamDetailPage: React.FC = () => {
                   {team.website}
                 </a>
               ) : (
-                <span className="text-base font-semibold text-gray-300 break-all">{team.website}</span>
+                <span className="text-base font-semibold text-text-secondary break-all">{team.website}</span>
               );
             })()}
           </div>
 
-          <div className="sm:bg-card sm:rounded-xl sm:shadow-sm sm:border sm:border-card p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-2">
+          <div className="card-standard p-4">
+            <p className="text-xs uppercase tracking-wide text-text-muted mb-2 flex items-center gap-2">
               <FiInfo /> {t('teams.detail.rankSummary')}
             </p>
-            <p className="text-base font-semibold text-gray-900 dark:text-white">
+            <p className="text-base font-semibold text-text-primary tabular-nums">
               #{team.rank || 0} • {(team.pp || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}pp
             </p>
           </div>
         </div>
 
-        <div className="sm:bg-card sm:rounded-xl sm:shadow-sm sm:border sm:border-card p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{t('teams.detail.description')}</h2>
-          <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+        <div className="card-standard p-6 mb-8">
+          <h2 className="font-heading text-xl font-bold text-text-primary mb-3">{t('teams.detail.description')}</h2>
+          <p className="text-text-secondary whitespace-pre-wrap">
             {team.description || t('teams.detail.noDescription')}
           </p>
         </div>

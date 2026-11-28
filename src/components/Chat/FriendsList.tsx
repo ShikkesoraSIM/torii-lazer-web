@@ -130,7 +130,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ currentUser: _currentUser, on
               placeholder="Search friends..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-osu-pink focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-2 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted transition-all"
             />
           </div>
 
@@ -139,12 +139,12 @@ const FriendsList: React.FC<FriendsListProps> = ({ currentUser: _currentUser, on
             {isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-osu-pink mx-auto"></div>
-                <p className="text-gray-500 dark:text-gray-400 mt-2">Loading...</p>
+                <p className="text-text-muted mt-2">Loading...</p>
               </div>
             ) : filteredFriends.length === 0 ? (
               <div className="text-center py-8">
-                <FiUser className="mx-auto h-12 w-12 text-gray-400" />
-                <p className="text-gray-500 dark:text-gray-400 mt-2">
+                <FiUser className="mx-auto h-12 w-12 text-text-muted" />
+                <p className="text-text-muted mt-2">
                   {searchQuery ? 'No matching friends found' : 'No friends yet'}
                 </p>
               </div>
@@ -152,7 +152,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ currentUser: _currentUser, on
               filteredFriends.map((friend) => (
                 <div
                   key={friend.target_id}
-                  className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  className="flex items-center space-x-3 p-3 rounded-xl border border-white/10 hover:bg-white/[0.06] transition-colors"
                 >
                   <Avatar
                     userId={friend.target_id}
@@ -163,16 +163,16 @@ const FriendsList: React.FC<FriendsListProps> = ({ currentUser: _currentUser, on
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                      <h3 className="font-medium text-text-primary truncate">
                         {friend.target?.username || 'Unknown user'}
                       </h3>
                       {friend.mutual && (
-                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full">
+                        <span className="text-xs px-2 py-0.5 bg-emerald-500/15 text-emerald-300 rounded-full">
                           Mutual
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-text-muted">
                       {friend.target?.country_code ? `From ${friend.target.country_code}` : 'Unknown region'}
                     </p>
                   </div>

@@ -17,7 +17,7 @@ const LoginPage: React.FC = () => {
   }, [isAuthenticated, navigate, from]);
 
   return (
-    <div className="min-h-screen bg-[#030014] flex justify-center px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-0 lg:items-center">
+    <div className="min-h-screen torii-page-stage flex justify-center px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-8 lg:items-center">
       <LoginForm />
     </div>
   );

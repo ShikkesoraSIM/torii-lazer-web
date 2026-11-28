@@ -82,11 +82,11 @@ const MessageInput: React.FC<MessageInputProps> = ({
             disabled={disabled}
             maxLength={maxLength}
             className={`
-              w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 
-              border border-gray-200 dark:border-gray-600 rounded-lg 
-              resize-none text-gray-900 dark:text-white 
-              placeholder-gray-500 dark:placeholder-gray-400 
-              focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent
+              w-full px-4 py-3 bg-[#0d122c]/80 
+              border border-white/10 rounded-xl 
+              resize-none text-text-primary 
+              placeholder:text-text-muted 
+              focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50
               transition-all duration-200 overflow-hidden
               [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
               ${disabled ? 'opacity-50 cursor-not-allowed' : ''}

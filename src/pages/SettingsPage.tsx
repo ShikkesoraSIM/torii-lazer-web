@@ -106,15 +106,15 @@ const SettingsPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
         <div className="text-center max-w-lg">
-          <h2 className="text-2xl font-bold text-white mb-3">
+          <h2 className="font-heading text-2xl font-bold text-text-primary mb-3">
             {t('messages.loginRequired.title')}
           </h2>
-          <p className="text-slate-400 mb-6">
+          <p className="text-text-secondary mb-6">
             {t('messages.loginRequired.description')}
           </p>
           <Link
             to="/login"
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-torii hover:bg-torii-hover text-white font-semibold transition-colors"
+            className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-torii hover:bg-torii-hover text-white font-semibold transition-colors"
           >
             {t('auth.login.submit')}
           </Link>
@@ -126,11 +126,11 @@ const SettingsPage: React.FC = () => {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <div className="text-6xl mb-4 text-slate-400">😕</div>
-        <h2 className="text-2xl font-bold text-white mb-2">
+        <div className="text-6xl mb-4 text-text-muted">😕</div>
+        <h2 className="font-heading text-2xl font-bold text-text-primary mb-2">
           {t('settings.errors.loadFailed')}
         </h2>
-        <p className="text-slate-400">
+        <p className="text-text-secondary">
           {t('settings.errors.tryRefresh')}
         </p>
       </div>
@@ -220,31 +220,31 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8 animate-fade-up">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-2">
+        <h1 className="font-heading text-3xl font-bold text-text-primary mb-2">
           {t('settings.title')}
         </h1>
-        <p className="text-gray-400">
+        <p className="text-text-secondary">
           {t('settings.description')}
         </p>
       </div>
 
-      <section className="bg-card rounded-xl shadow-lg p-6">
+      <section className="card-standard p-6">
         <div className="flex items-center gap-3 mb-6">
           <FiUser className="w-6 h-6 text-osu-pink" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="font-heading text-xl font-semibold text-text-primary">
             {t('settings.username.title')}
           </h2>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
               {t('settings.username.current')}
             </label>
             {!isEditing ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-medium text-gray-900 dark:text-white">
+                  <span className="text-lg font-medium text-text-primary">
                     {user.username}
                   </span>
                   {!isPending && (
@@ -311,7 +311,7 @@ const SettingsPage: React.FC = () => {
                     type="text"
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-osu-pink focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-4 py-3 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-torii/60 focus:border-torii/50 bg-[#0d122c]/80 text-text-primary placeholder:text-text-muted transition-all"
                     placeholder={t('settings.username.placeholder')}
                     maxLength={50}
                   />

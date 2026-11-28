@@ -54,10 +54,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         {/* Sender info and timestamp */}
         {!isGrouped && (
           <div className={`flex items-center space-x-2 mb-1 ${isOwnMessage ? 'justify-end' : ''}`}>
-            <span className="font-medium text-gray-900 dark:text-white text-sm">
+            <span className="font-medium text-text-primary text-sm">
               {isOwnMessage ? t('messages.chat.you') : message.sender?.username}
             </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-text-muted">
               {formattedTimestamp}
             </span>
           </div>
@@ -69,7 +69,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
             p-3 rounded-2xl text-sm
             ${isOwnMessage
               ? 'bg-osu-pink text-white rounded-br-md'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md'
+              : 'bg-white/10 border border-white/10 text-text-primary rounded-bl-md'
             }
             ${message.is_action ? 'italic font-medium' : ''}
           `}>

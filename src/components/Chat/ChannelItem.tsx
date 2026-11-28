@@ -109,10 +109,10 @@ const ChannelItem: React.FC<ChannelItemProps> = ({ channel, isSelected, onClick 
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={`
-        w-full p-3 rounded-lg text-left transition-all duration-200
-        hover:bg-gray-50 dark:hover:bg-gray-700/50
+        w-full p-3 rounded-xl text-left transition-all duration-200
+        hover:bg-white/[0.06]
         ${isSelected
-          ? 'bg-osu-pink/10 border border-osu-pink/20 shadow-sm'
+          ? 'bg-osu-pink/15 border border-osu-pink/30 shadow-elev-1'
           : 'border border-transparent'
         }
       `}
@@ -122,7 +122,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({ channel, isSelected, onClick 
         <div className="flex-shrink-0 relative">
           {getChannelIcon()}
           {hasUnreadMessages && (
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-osu-pink rounded-full border-2 border-white dark:border-gray-800" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-osu-pink rounded-full border-2 border-[#0d122c]" />
           )}
         </div>
         
@@ -133,7 +133,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({ channel, isSelected, onClick 
               font-medium truncate
               ${isSelected 
                 ? 'text-osu-pink' 
-                : 'text-gray-900 dark:text-white'
+                : 'text-text-primary'
               }
               ${hasUnreadMessages ? 'font-semibold' : ''}
             `}>
@@ -150,8 +150,8 @@ const ChannelItem: React.FC<ChannelItemProps> = ({ channel, isSelected, onClick 
           <p className={`
             text-sm truncate
             ${hasUnreadMessages 
-              ? 'text-gray-700 dark:text-gray-200 font-medium' 
-              : 'text-gray-500 dark:text-gray-400'
+              ? 'text-text-primary font-medium' 
+              : 'text-text-muted'
             }
           `}>
             {formatLastMessage()}
@@ -160,22 +160,22 @@ const ChannelItem: React.FC<ChannelItemProps> = ({ channel, isSelected, onClick 
           {/* Channel type labels */}
           <div className="flex items-center space-x-1 mt-1">
             {channel.type === 'PM' && (
-              <span className="text-xs px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded">
+              <span className="text-xs px-1.5 py-0.5 bg-emerald-500/15 text-emerald-300 rounded">
                 {t('messages.sidebar.channelTypes.private')}
               </span>
             )}
             {channel.type === 'TEAM' && (
-              <span className="text-xs px-1.5 py-0.5 bg-osu-pink/10 text-osu-pink rounded">
+              <span className="text-xs px-1.5 py-0.5 bg-osu-pink/15 text-osu-pink rounded">
                 {t('messages.sidebar.channelTypes.team')}
               </span>
             )}
             {channel.type === 'PUBLIC' && (
-              <span className="text-xs px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded">
+              <span className="text-xs px-1.5 py-0.5 bg-blue-500/15 text-blue-300 rounded">
                 {t('messages.sidebar.channelTypes.public')}
               </span>
             )}
             {channel.moderated && (
-              <span className="text-xs px-1.5 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded">
+              <span className="text-xs px-1.5 py-0.5 bg-amber-500/15 text-amber-300 rounded">
                 {t('messages.sidebar.channelTypes.moderated')}
               </span>
             )}

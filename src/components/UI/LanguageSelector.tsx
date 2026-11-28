@@ -133,7 +133,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
           }
           ${isOpen
             ? 'text-osu-pink bg-osu-pink/10'
-            : 'text-gray-600 dark:text-gray-300 hover:text-osu-pink hover:bg-gray-50 dark:hover:bg-gray-800/50'
+            : 'text-text-secondary hover:text-osu-pink hover:bg-white/10'
           }
         `}
         aria-label={t('common.language.label')}
@@ -192,14 +192,11 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
               ease: [0.16, 1, 0.3, 1]
             }}
             className={`
-              absolute right-0 mt-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl 
-              rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 
+              absolute right-0 mt-2 glass-thick 
+              rounded-2xl shadow-elev-4 
               py-2 z-50 overflow-hidden
               ${isMobile ? 'w-40' : 'w-48'}
             `}
-            style={{
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.05)'
-            }}
             role="listbox"
             aria-label={t('common.language.label')}
           >
@@ -217,7 +214,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
                       transition-all duration-200 group
                       ${isSelected
                         ? 'text-osu-pink bg-osu-pink/10'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-osu-pink'
+                        : 'text-text-secondary hover:bg-white/10 hover:text-osu-pink'
                       }
                     `}
                     role="option"
@@ -231,8 +228,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = memo(({
                         rounded="rounded-sm"
                       />
                       <div className="flex flex-col items-start">
-                        <span className="font-medium">{language.nativeName}</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="font-medium text-text-primary">{language.nativeName}</span>
+                        <span className="text-xs text-text-muted">
                           {language.name}
                         </span>
                       </div>

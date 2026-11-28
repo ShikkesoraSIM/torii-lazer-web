@@ -83,10 +83,10 @@ const FriendsPage: React.FC = () => {
     <div className="min-h-screen torii-page-stage">
       <div className="max-w-5xl mx-auto px-4 lg:px-6 py-6 sm:py-8">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary mb-1.5">
             {t('friends.title')}
           </h1>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-sm sm:text-base text-text-secondary">
             {t('friends.subtitle')}
           </p>
         </div>
@@ -121,7 +121,7 @@ const FriendsPage: React.FC = () => {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
               <LoadingSpinner size="lg" className="mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 font-medium">{t('common.loading')}</p>
+              <p className="text-text-muted font-medium">{t('common.loading')}</p>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">

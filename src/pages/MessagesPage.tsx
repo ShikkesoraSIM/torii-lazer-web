@@ -1353,7 +1353,7 @@ const MessagesPage: React.FC = () => {
   }
 
   return (
-    <div className="flex torii-chat-shell overflow-hidden bg-gray-900">
+    <div className="flex torii-chat-shell overflow-hidden torii-page-stage">
       <AnimatePresence>
         {showSidebar && (
           <motion.div
@@ -1363,13 +1363,13 @@ const MessagesPage: React.FC = () => {
             transition={{ duration: 0.25 }}
             className={`
               ${isMobile ? 'fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] torii-chat-sidebar-mobile' : 'relative w-80 torii-chat-shell'}
-              bg-card border-r border-card flex flex-col
+              bg-card border-r border-white/10 flex flex-col
             `}
           >
-            <div className="p-4 border-b border-card">
+            <div className="p-4 border-b border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="font-heading text-xl font-bold text-text-primary">
                     {t('messages.sidebar.title')}
                   </h1>
                   {/* <div className="flex items-center space-x-1">
@@ -1380,22 +1380,22 @@ const MessagesPage: React.FC = () => {
                   <button
                     onClick={() => setShowSidebar(false)}
                     aria-label={t('common.close')}
-                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    className="p-2 text-text-muted hover:text-text-primary transition-colors"
                   >
                     <FiX size={20} />
                   </button>
                 )}
               </div>
 
-              <div className="flex space-x-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+              <div className="flex space-x-1 bg-white/5 border border-white/10 p-1 rounded-xl">
                 <button
                   onClick={() => setActiveTab('channels')}
                   className={`
-                    flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md text-sm font-medium
+                    flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-lg text-sm font-medium
                     transition-all duration-200
                     ${activeTab === 'channels'
-                      ? 'bg-white dark:bg-gray-600 text-osu-pink shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                      ? 'bg-white/15 text-osu-pink shadow-elev-1'
+                      : 'text-text-secondary hover:text-text-primary'
                     }
                   `}
                 >
@@ -1405,11 +1405,11 @@ const MessagesPage: React.FC = () => {
                 <button
                   onClick={() => setActiveTab('notifications')}
                   className={`
-                    flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md text-sm font-medium
+                    flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-lg text-sm font-medium
                     transition-all duration-200 relative
                     ${activeTab === 'notifications'
-                      ? 'bg-white dark:bg-gray-600 text-osu-pink shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                      ? 'bg-white/15 text-osu-pink shadow-elev-1'
+                      : 'text-text-secondary hover:text-text-primary'
                     }
                   `}
                 >
@@ -1427,17 +1427,17 @@ const MessagesPage: React.FC = () => {
             <div className="flex-1 overflow-hidden">
               {activeTab === 'channels' ? (
                 <div className="h-full flex flex-col">
-                  <div className="p-4 border-b border-card space-y-3">
-                    <div className="grid grid-cols-2 gap-1 text-xs">
+                  <div className="p-4 border-b border-white/10 space-y-3">
+                    <div className="grid grid-cols-2 gap-1.5 text-xs">
                       {filterOptions.map(filter => (
                         <button
                           key={filter.key}
                           onClick={() => setChannelFilter(filter.key)}
                           className={`
-                            py-1.5 px-2 rounded text-center font-medium transition-all duration-200
+                            py-1.5 px-2 rounded-lg text-center font-medium transition-all duration-200
                             ${channelFilter === filter.key
                               ? 'bg-osu-pink text-white'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                              : 'bg-white/5 text-text-secondary hover:bg-white/10 hover:text-text-primary'
                             }
                           `}
                         >
@@ -1675,10 +1675,10 @@ const MessagesPage: React.FC = () => {
                   </button>
                 )}
                 <div>
-                  <h2 className="font-semibold text-gray-900 dark:text-white">
+                  <h2 className="font-semibold text-text-primary">
                     {selectedChannel.name}
                   </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-text-muted">
                     {selectedChannel.type === 'PM'
                       ? t('messages.sidebar.channelTypes.private')
                       : selectedChannel.type === 'TEAM'
@@ -1735,10 +1735,10 @@ const MessagesPage: React.FC = () => {
                   <FiMessageCircle size={24} />
                 </button>
               )}
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="font-heading text-xl font-semibold text-text-primary mb-2">
                 {t('messages.sidebar.selectPromptTitle')}
               </h3>
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-text-muted">
                 {t('messages.sidebar.selectPromptDescription')}
               </p>
             </div>
