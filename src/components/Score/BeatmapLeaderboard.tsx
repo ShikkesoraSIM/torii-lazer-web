@@ -21,37 +21,47 @@ const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beat
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchScores = async () => {
       setLoading(true);
       setError(null);
       try {
         const mode = beatmap?.mode || 'osu';
         const data = await scoreAPI.getBeatmapScores(beatmapId, mode, limit);
-        setScores(Array.isArray(data.scores) ? data.scores : []);
+        if (!cancelled) {
+          setScores(Array.isArray(data.scores) ? data.scores : []);
+        }
       } catch (err) {
-        console.error('Failed to fetch beatmap scores:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load scores');
-        setScores([]);
+        if (!cancelled) {
+          console.error('Failed to fetch beatmap scores:', err);
+          setError(err instanceof Error ? err.message : 'Failed to load scores');
+          setScores([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchScores();
+    void fetchScores();
+    return () => {
+      cancelled = true;
+    };
   }, [beatmapId, beatmap?.mode, limit]);
 
-  const getRankColor = (rank: string): string => {
+  const getRankBadgeStyle = (rank: string): { bg: string; text: string } => {
     switch (rank) {
-      case 'F': return '#FF0000';
-      case 'D': return '#FF6B6B';
-      case 'C': return '#FFB85C';
-      case 'B': return '#FFE181';
-      case 'A': return '#A4D65E';
-      case 'S': return '#FFDAB9';
-      case 'X': return '#FFD700';
-      case 'SH': return '#E0E0E0';
-      case 'XH': return '#FFD700';
-      default: return '#999999';
+      case 'F': return { bg: '#EF4444', text: '#FFFFFF' };
+      case 'D': return { bg: '#F87171', text: '#0F172A' };
+      case 'C': return { bg: '#FFB85C', text: '#0F172A' };
+      case 'B': return { bg: '#FFE181', text: '#0F172A' };
+      case 'A': return { bg: '#A4D65E', text: '#0F172A' };
+      case 'S': return { bg: '#FFDAB9', text: '#0F172A' };
+      case 'X': return { bg: '#FFD700', text: '#0F172A' };
+      case 'SH': return { bg: '#E0E0E0', text: '#0F172A' };
+      case 'XH': return { bg: '#FFD700', text: '#0F172A' };
+      default: return { bg: '#475569', text: '#FFFFFF' };
     }
   };
 
@@ -172,59 +182,61 @@ const BeatmapLeaderboard: React.FC<BeatmapLeaderboardProps> = ({ beatmapId, beat
           </tr>
         </thead>
         <tbody>
-          {scores.map((score, index) => (
-            <tr
-              key={score.id}
-              className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
-              onClick={() => navigate(`/scores/${score.id}`)}
-              onKeyDown={(event) => {
-                if (event.target !== event.currentTarget) return;
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  navigate(`/scores/${score.id}`);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-            >
-              <td className="px-4 py-3 text-sm font-bold text-osu-pink">{index + 1}</td>
-              <td className="px-4 py-3 text-sm">
-                {renderPlayerCell(score)}
-              </td>
-              <td className="px-4 py-3 text-center">
-                <span
-                  className="inline-block px-2 py-1 rounded font-bold text-white text-xs"
-                  style={{ backgroundColor: getRankColor(score.rank) }}
-                >
-                  {score.rank}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-right font-bold text-osu-pink">{(score.pp || 0).toFixed(2)}</td>
-              <td className="px-4 py-3 text-right text-sm font-semibold text-slate-900 dark:text-white">
-                {(score.accuracy * 100).toFixed(2)}%
-              </td>
-              <td className="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-400">
-                {score.max_combo}
-                {beatmap?.max_combo ? `/${beatmap.max_combo}` : ''}
-              </td>
-              <td className="px-4 py-3 text-center">
-                <div className="flex flex-wrap gap-1 justify-center">
-                  {score.mods && score.mods.length > 0 ? (
-                    score.mods.map((mod, idx) => (
-                      <span
-                        key={`${score.id}-${idx}`}
-                        className="px-2 py-0.5 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded"
-                      >
-                        {mod.acronym}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-slate-500 dark:text-slate-400 text-xs">NM</span>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
+          {scores.map((score, index) => {
+            const badge = getRankBadgeStyle(score.rank);
+            return (
+              <tr
+                key={score.id}
+                className="border-b border-white/10 hover:bg-white/[0.04] transition-colors cursor-pointer"
+                onClick={() => navigate(`/scores/${score.id}`)}
+              >
+                <td className="px-4 py-3 text-sm font-bold text-torii">
+                  <Link
+                    to={`/scores/${score.id}`}
+                    onClick={(event) => event.stopPropagation()}
+                    className="inline-block hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii rounded px-1"
+                  >
+                    #{index + 1}
+                  </Link>
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  {renderPlayerCell(score)}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <span
+                    className="inline-block px-2 py-0.5 rounded font-bold text-xs"
+                    style={{ backgroundColor: badge.bg, color: badge.text }}
+                  >
+                    {score.rank}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right font-bold text-osu-pink tabular-nums">{(score.pp || 0).toFixed(2)}</td>
+                <td className="px-4 py-3 text-right text-sm font-semibold text-text-primary tabular-nums">
+                  {(score.accuracy * 100).toFixed(2)}%
+                </td>
+                <td className="px-4 py-3 text-right text-sm text-text-muted tabular-nums">
+                  {score.max_combo}
+                  {beatmap?.max_combo ? `/${beatmap.max_combo}` : ''}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <div className="flex flex-wrap gap-1 justify-center">
+                    {score.mods && score.mods.length > 0 ? (
+                      score.mods.map((mod, idx) => (
+                        <span
+                          key={`${score.id}-${idx}`}
+                          className="px-2 py-0.5 bg-white/10 text-text-primary text-xs font-semibold rounded"
+                        >
+                          {mod.acronym}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-text-muted">—</span>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

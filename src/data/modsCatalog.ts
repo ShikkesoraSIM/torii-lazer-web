@@ -1,32 +1,22 @@
-// Frontend-bundled copy of the server's `static/mods.json`.
-//
-// We bundle this rather than always fetching from the server because:
-//   1. It's metadata that rarely changes (only when osu! ships new
-//      mods or we add custom ones), so caching at build time is fine.
-//   2. The admin Daily-Challenge UI works offline / before the
-//      server-side catalog endpoint is deployed.
-//
-// The runtime first tries `GET /api/private/admin/mods-catalog` and
-// silently falls back to this bundle if the endpoint is missing
-// (older server) or unreachable.
-//
-// To refresh: `cp g0v0-server/static/mods.json
-//                torii-lazer-web/src/data/modsCatalog.json`.
+import type { ModCatalogByRuleset, ModDefinition } from '../types/mods';
 
-import raw from './modsCatalog.json';
-import type {
-  ModCatalogByRuleset,
-  RulesetModCatalog,
-} from '../types/mods';
+interface RawRulesetCatalogEntry {
+  Name: string;
+  RulesetID: number;
+  Mods: ModDefinition[];
+}
 
-const rulesets = raw as unknown as RulesetModCatalog[];
+// Bundled snapshot of /api/private/admin/mods-catalog so the Daily Challenge
+// ModPicker still works against an older backend, loaded dynamically on demand
+// so normal users never download ~185 KB of admin mod metadata.
+let cachedCatalog: ModCatalogByRuleset | null = null;
 
-/** Catalog as a `{ "0": Mod[], "1": Mod[], ... }` dict. */
-export const BUNDLED_MODS_CATALOG: ModCatalogByRuleset = Object.fromEntries(
-  rulesets.map((rs) => [String(rs.RulesetID), rs.Mods]),
-);
-
-/** Pretty name for each ruleset, indexed by ruleset id. */
-export const RULESET_NAMES: Record<string, string> = Object.fromEntries(
-  rulesets.map((rs) => [String(rs.RulesetID), rs.Name]),
-);
+export async function loadBundledModsCatalog(): Promise<ModCatalogByRuleset> {
+  if (cachedCatalog) return cachedCatalog;
+  const mod = await import('./modsCatalog.json');
+  const raw = mod.default as unknown as RawRulesetCatalogEntry[];
+  cachedCatalog = Object.fromEntries(
+    (Array.isArray(raw) ? raw : []).map((entry) => [entry.Name, entry.Mods])
+  ) as ModCatalogByRuleset;
+  return cachedCatalog;
+}

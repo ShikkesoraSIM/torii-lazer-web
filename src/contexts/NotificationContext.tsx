@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useNotifications } from '../hooks/useNotifications';
 import type { APINotification, UnreadCount, User } from '../types';
@@ -35,28 +35,29 @@ export const NotificationProvider: React.FC<{ isAuthenticated: boolean; user?: U
     refresh,
   } = useNotifications(isAuthenticated, user);
 
-  // chatConnected mirrors isConnected because both use the same WebSocket connection;
-  // with the global singleton WebSocket these two values are always identical
   const chatConnected = isConnected;
 
+  const value = useMemo<NotificationContextValue>(() => ({
+    unreadCount,
+    notifications,
+    isLoading,
+    isConnected,
+    chatConnected,
+    connectionError,
+    markAsRead,
+    removeNotification,
+    removeNotificationByObject,
+    refresh,
+  }), [unreadCount, notifications, isLoading, isConnected, chatConnected, connectionError, markAsRead, removeNotification, removeNotificationByObject, refresh]);
+
   return (
-    <NotificationContext.Provider value={{
-      unreadCount,
-      notifications,
-      isLoading,
-      isConnected,
-      chatConnected,
-      connectionError,
-      markAsRead,
-      removeNotification,
-      removeNotificationByObject,
-      refresh,
-    }}>
+    <NotificationContext.Provider value={value}>
       {children}
     </NotificationContext.Provider>
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNotificationContext = () => {
   const ctx = useContext(NotificationContext);
   if (!ctx) {

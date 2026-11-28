@@ -1,7 +1,7 @@
 export const auth = {
   login: {
     title: '登录',
-    subtitle: '登录到你的 咕哦！ 账户',
+    subtitle: '登录到你的 Torii 账户',
     username: '用户名',
     password: '密码',
     usernamePlaceholder: '输入用户名',
@@ -15,7 +15,7 @@ export const auth = {
   },
   register: {
     title: '注册',
-    subtitle: '创建你的 咕哦！ 账户',
+    subtitle: '创建你的 Torii 账户',
     username: '用户名',
     email: '邮箱',
     password: '密码',

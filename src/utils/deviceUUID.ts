@@ -9,8 +9,9 @@
 
 const DEVICE_UUID_KEY = 'device_uuid';
 
-// Cached FingerprintJS instance
+// Cached FingerprintJS instance & in-flight UUID promise
 let fpPromise: Promise<any> | null = null;
+let pendingDeviceUuidPromise: Promise<string> | null = null;
 
 /**
  * Initialize FingerprintJS
@@ -59,22 +60,38 @@ function generateFallbackUUID(): string {
  * Prefers a FingerprintJS fingerprint; returns the stored value if one already exists.
  */
 export async function getDeviceUUID(): Promise<string> {
-  try {
-    // Try to read an existing UUID from localStorage
-    let uuid = localStorage.getItem(DEVICE_UUID_KEY);
-
-    if (!uuid) {
-      // None stored: generate a new fingerprint ID with FingerprintJS
-      uuid = await generateFingerprintUUID();
-      localStorage.setItem(DEVICE_UUID_KEY, uuid);
-    }
-
-    return uuid;
-  } catch (error) {
-    console.error('Error getting device UUID:', error);
-    // localStorage unavailable: generate a temporary (session-only) UUID
-    return generateFallbackUUID();
+  if (pendingDeviceUuidPromise) {
+    return pendingDeviceUuidPromise;
   }
+
+  pendingDeviceUuidPromise = (async () => {
+    try {
+      let uuid: string | null = null;
+      try {
+        uuid = localStorage.getItem(DEVICE_UUID_KEY);
+      } catch {
+        uuid = null;
+      }
+
+      if (!uuid) {
+        uuid = await generateFingerprintUUID();
+        try {
+          localStorage.setItem(DEVICE_UUID_KEY, uuid);
+        } catch {
+          // Ignore storage write errors in restricted environments
+        }
+      }
+
+      return uuid;
+    } catch (error) {
+      console.error('Error getting device UUID:', error);
+      return generateFallbackUUID();
+    } finally {
+      pendingDeviceUuidPromise = null;
+    }
+  })();
+
+  return pendingDeviceUuidPromise;
 }
 
 /**

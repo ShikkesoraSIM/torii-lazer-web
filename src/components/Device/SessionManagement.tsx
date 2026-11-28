@@ -15,6 +15,7 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
   const { t, i18n } = useTranslation();
   const [sessionsData, setSessionsData] = useState<SessionsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [revokingSessionId, setRevokingSessionId] = useState<number | null>(null);
   const [showRevokeModal, setShowRevokeModal] = useState(false);
   const [sessionToRevoke, setSessionToRevoke] = useState<Session | null>(null);
@@ -23,10 +24,12 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
   const fetchSessions = async () => {
     try {
       setIsLoading(true);
+      setLoadError(false);
       const data = await deviceAPI.getUserSessions();
       setSessionsData(data);
     } catch (error) {
       console.error('Failed to fetch login sessions:', error);
+      setLoadError(true);
       toast.error(t('settings.device.sessions.loadError'));
     } finally {
       setIsLoading(false);
@@ -165,14 +168,27 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
       {isLoading ? (
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-osu-pink"></div>
-          <span className="ml-3 text-gray-500 dark:text-gray-400">
+          <span className="ml-3 text-gray-400">
             {t('settings.device.sessions.loading')}
           </span>
+        </div>
+      ) : loadError ? (
+        <div className="text-center py-8 space-y-3">
+          <p className="text-red-400 text-sm">
+            {t('settings.device.sessions.loadError')}
+          </p>
+          <button
+            type="button"
+            onClick={() => void fetchSessions()}
+            className="btn-secondary !px-4 !py-1.5 text-sm"
+          >
+            {t('common.retry', 'Retry')}
+          </button>
         </div>
       ) : !sessionsData || sessionsData.sessions.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-4xl mb-3">🔒</div>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-gray-400">
             {t('settings.device.sessions.noSessions')}
           </p>
         </div>
@@ -187,7 +203,7 @@ const SessionManagement: React.FC<SessionManagementProps> = ({ className = '' })
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className={`flex items-center justify-between p-4 rounded-lg border ${
+                className={`flex flex-wrap items-center justify-between gap-3 p-4 rounded-lg border ${
                   isCurrent
                     ? 'border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/10'
                     : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'

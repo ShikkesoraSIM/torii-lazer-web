@@ -10,14 +10,8 @@ const AdminAnnouncements: React.FC = () => {
   const [severity, setSeverity] = useState<Severity>('warning');
   const [onlineOnly, setOnlineOnly] = useState(true);
   const [alsoSendPm, setAlsoSendPm] = useState(true);
-  // When true the backend additionally emits a synthetic
-  // UserAchievementUnlock per recipient so the lazer client renders
-  // the announcement via its medal-popup overlay -- a much louder UX
-  // than the regular notification drawer entry. Default ON because
-  // most admin announcements are something users should actually see
-  // mid-play (maintenance windows, etc.); flip off for low-priority
-  // info that shouldn't interrupt gameplay.
-  const [showPopup, setShowPopup] = useState(true);
+  // Default false so admins intentionally opt in to interrupting live gameplay with modal popups
+  const [showPopup, setShowPopup] = useState(false);
   const [senderUsername, setSenderUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [lastResult, setLastResult] = useState<{
@@ -30,6 +24,12 @@ const AdminAnnouncements: React.FC = () => {
     const cleanMessage = message.trim();
     if (!cleanMessage) {
       toast.error('Message cannot be empty');
+      return;
+    }
+
+    const audience = onlineOnly ? 'all online users' : 'all registered users (online & offline)';
+    const popupWarning = showPopup ? ' with full-screen in-game popup' : '';
+    if (!window.confirm(`Send announcement to ${audience}${popupWarning}?`)) {
       return;
     }
 

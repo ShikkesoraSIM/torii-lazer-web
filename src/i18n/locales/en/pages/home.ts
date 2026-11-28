@@ -18,7 +18,7 @@ export const homePage = {
     register: 'Sign up',
     login: 'Sign in',
     featuresTitle: 'What you get here',
-    featuresSubtitle: 'A few extras on top of osu!',
+    featuresSubtitle: 'Custom scoring, ranked mods, and your own look',
     community: {
       discord: 'Discord',
       github: 'GitHub',

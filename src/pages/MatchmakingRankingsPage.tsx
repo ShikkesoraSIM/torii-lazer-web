@@ -90,6 +90,15 @@ const MatchmakingRankingsPage: React.FC = () => {
 
   const [selectedPoolId, setSelectedPoolId] = useState<number | null>(initialPoolId);
 
+  // Sync URL ?pool= changes (e.g. browser back/forward) back into state
+  const urlPoolParam = searchParams.get('pool');
+  useEffect(() => {
+    const raw = Number(urlPoolParam);
+    if (Number.isFinite(raw) && raw > 0) {
+      setSelectedPoolId((prev) => (prev === raw ? prev : raw));
+    }
+  }, [urlPoolParam]);
+
   const [leaderboard, setLeaderboard] = useState<MatchmakingLeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
@@ -277,18 +286,18 @@ const MatchmakingRankingsPage: React.FC = () => {
             }}
           />
 
-          <div className="relative z-10 p-6 md:p-8 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
+          <div className="relative z-10 p-4 sm:p-6 md:p-8 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-8 items-center">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className="inline-block w-1.5 h-5 bg-osu-pink rounded-full" />
-                <span className="uppercase tracking-[0.25em] text-[11px] text-osu-pink font-bold">
+                <span className="inline-block w-1.5 h-5 bg-torii rounded-full" />
+                <span className="uppercase tracking-[0.25em] text-2xs text-torii font-bold">
                   Live ranked ladder
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
+              <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-text-primary leading-tight">
                 Matchmaking
               </h1>
-              <p className="text-gray-400 text-sm md:text-base max-w-xl leading-relaxed">
+              <p className="text-text-secondary text-sm md:text-base max-w-xl leading-relaxed">
                 Climb the elo ladder pool by pool. Each victory shifts your rating, each defeat
                 tightens your search radius — your position is the only thing the matchmaker cares
                 about.
@@ -299,7 +308,7 @@ const MatchmakingRankingsPage: React.FC = () => {
             {top1 && (
               <Link
                 to={`/users/${top1.user_id}`}
-                className="group relative flex items-center gap-4 px-5 py-4 rounded-2xl bg-gradient-to-br from-osu-pink/15 via-osu-pink/5 to-transparent border border-osu-pink/30 hover:border-osu-pink/70 hover:shadow-[0_0_28px_rgba(236,72,153,0.4)] transition-all min-w-[18rem]"
+                className="group relative flex items-center gap-4 px-4 sm:px-5 py-4 rounded-2xl bg-gradient-to-br from-torii/20 via-osu-pink/10 to-transparent border border-torii/35 hover:border-torii/75 hover:shadow-elev-2 transition-all w-full min-w-0 lg:w-auto lg:min-w-[18rem]"
               >
                 <FaCrown className="absolute -top-2.5 -right-2.5 text-yellow-300 text-2xl drop-shadow-[0_0_8px_rgba(252,211,77,0.7)]" />
                 {top1.user?.avatar_url ? (

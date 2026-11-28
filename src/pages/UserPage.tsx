@@ -1,11 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import UserProfileLayout from '../components/User/UserProfileLayout';
+import LoadingSpinner from '../components/UI/LoadingSpinner';
 import ProfilePage from './ProfilePage';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../utils/api';
 import type { User, GameMode, BestScore } from '../types';
+
+const VALID_GAME_MODES: readonly GameMode[] = ['osu', 'taiko', 'fruits', 'mania', 'osurx', 'osuap', 'taikorx', 'fruitsrx'];
+const parseGameMode = (value: string | null): GameMode | null =>
+  value && VALID_GAME_MODES.includes(value as GameMode) ? (value as GameMode) : null;
 
 const UserPage: React.FC = () => {
   const { t } = useTranslation();
@@ -24,7 +29,7 @@ const UserPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const modeFromUrl = searchParams.get('mode') as GameMode | null;
+  const modeFromUrl = parseGameMode(searchParams.get('mode'));
   const [selectedMode, setSelectedMode] = useState<GameMode>(modeFromUrl || 'osu');
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -141,17 +146,31 @@ const UserPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-pink" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   if (error || !user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="text-6xl mb-4">:(</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">{t('profile.errors.userNotFound')}</h2>
-        <p className="text-gray-600">{error || t('profile.errors.checkId')}</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <div className="text-6xl mb-4 text-slate-400">:(</div>
+        <h2 className="text-2xl font-bold text-white mb-2">{t('profile.errors.userNotFound')}</h2>
+        <p className="text-slate-400 max-w-md mb-6">{error || t('profile.errors.checkId')}</p>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link
+            to="/rankings"
+            className="px-4 py-2 rounded-lg bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] text-white text-sm font-medium transition-colors"
+          >
+            {t('navigation.rankings', 'Rankings')}
+          </Link>
+          <Link
+            to="/"
+            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 text-sm font-medium transition-colors"
+          >
+            {t('navigation.home', 'Home')}
+          </Link>
+        </div>
       </div>
     );
   }

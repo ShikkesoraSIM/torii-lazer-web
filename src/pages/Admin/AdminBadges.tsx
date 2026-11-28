@@ -126,7 +126,7 @@ const AdminBadges: React.FC = () => {
   };
 
   const filteredBadges = badges.filter(badge => 
-    badge.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (badge.description ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (badge.username && badge.username.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -226,20 +226,6 @@ const AdminBadges: React.FC = () => {
         maxWidthClass="max-w-lg"
       >
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">
-                  {editingBadge ? 'Edit badge' : 'Create badge'}
-                </h2>
-                <button
-                  onClick={closeModal}
-                  className="text-white/50 hover:text-white"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-              </div>
-
               <form onSubmit={editingBadge ? handleUpdate : handleCreate} className="space-y-4">
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1.5">

@@ -1,50 +1,42 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import UserProfileLayout from '../components/User/UserProfileLayout';
+import LoadingSpinner from '../components/UI/LoadingSpinner';
 import type { GameMode } from '../types';
 
 const ProfilePage: React.FC<{ initialMode?: GameMode }> = ({ initialMode }) => {
   const { t } = useTranslation();
   const { user, isAuthenticated, isLoading, isBootstrapping, updateUserMode, updateUser } = useAuth();
-  const [selectedMode, setSelectedMode] = useState<GameMode>(initialMode || 'osu');
-  
-  const isUpdatingModeRef = useRef(false);
-  const latestModeRef = useRef<GameMode>(selectedMode);
+  const [selectedMode, setSelectedMode] = useState<GameMode>(
+    () => initialMode || user?.g0v0_playmode || 'osu'
+  );
+  const syncedInitialRef = useRef(false);
 
+  // Sync user's saved playmode once when user arrives without an explicit initialMode
   useEffect(() => {
-    if (!initialMode && user?.g0v0_playmode && user.g0v0_playmode !== selectedMode) {
+    if (initialMode) {
+      setSelectedMode(initialMode);
+      return;
+    }
+    if (!syncedInitialRef.current && user?.g0v0_playmode) {
+      syncedInitialRef.current = true;
       setSelectedMode(user.g0v0_playmode);
-      latestModeRef.current = user.g0v0_playmode;
     }
   }, [user?.g0v0_playmode, initialMode]);
 
-  useEffect(() => {
-    if (!isAuthenticated || isUpdatingModeRef.current) return;
-    
-    if (latestModeRef.current === selectedMode && user?.g0v0_playmode === selectedMode) {
-      return;
+  const handleModeChange = useCallback((mode: GameMode) => {
+    setSelectedMode(mode);
+    if (isAuthenticated && mode !== user?.g0v0_playmode) {
+      void updateUserMode(mode).catch(() => {});
     }
-    
-    latestModeRef.current = selectedMode;
-    isUpdatingModeRef.current = true;
-    
-    updateUserMode(selectedMode)
-      .catch(() => {})
-      .finally(() => {
-        isUpdatingModeRef.current = false;
-      });
-  }, [selectedMode, isAuthenticated, updateUserMode, user?.g0v0_playmode]);
+  }, [isAuthenticated, user?.g0v0_playmode, updateUserMode]);
 
-  // isBootstrapping va junto con isLoading: esta rama del spinner existia
-  // desde siempre pero era inalcanzable en una carga fria, porque isLoading
-  // solo se prende cuando hay un login EN CURSO, no mientras averiguamos si ya
-  // habia sesion. Por eso se caia derecho a "necesitas iniciar sesion".
   if (isLoading || isBootstrapping) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-pink" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -53,15 +45,15 @@ const ProfilePage: React.FC<{ initialMode?: GameMode }> = ({ initialMode }) => {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
         <div className="text-center max-w-lg">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+          <h2 className="text-2xl font-bold text-white mb-3">
             {t('messages.loginRequired.title')}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-slate-400 mb-6">
             {t('messages.loginRequired.description')}
           </p>
           <Link
             to="/login"
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-osu-pink text-white font-semibold hover:bg-osu-pink/90 transition-colors"
+            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-torii hover:bg-torii-hover text-white font-semibold transition-colors"
           >
             {t('auth.login.submit')}
           </Link>
@@ -72,10 +64,10 @@ const ProfilePage: React.FC<{ initialMode?: GameMode }> = ({ initialMode }) => {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="text-6xl mb-4">😕</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">{t('profile.errors.loadFailed')}</h2>
-        <p className="text-gray-600">{t('profile.errors.tryRefresh')}</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <div className="text-6xl mb-4 text-slate-400">😕</div>
+        <h2 className="text-2xl font-bold text-white mb-2">{t('profile.errors.loadFailed')}</h2>
+        <p className="text-slate-400">{t('profile.errors.tryRefresh')}</p>
       </div>
     );
   }
@@ -84,7 +76,7 @@ const ProfilePage: React.FC<{ initialMode?: GameMode }> = ({ initialMode }) => {
     <UserProfileLayout
       user={user}
       selectedMode={selectedMode}
-      onModeChange={setSelectedMode}
+      onModeChange={handleModeChange}
       onUserUpdate={updateUser}
     />
   );

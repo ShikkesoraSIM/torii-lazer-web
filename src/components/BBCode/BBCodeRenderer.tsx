@@ -146,48 +146,25 @@ const BBCodeRenderer: React.FC<BBCodeRendererProps> = ({ html, className = '' })
     const cleanupSpoilerBoxes = initializeSpoilerBoxes();
     const cleanupSpoilers = initializeSpoilers();
     const cleanupImageMaps = initializeImageMaps();
-    
-    return () => {
-      cleanupSpoilerBoxes?.();
-      cleanupSpoilers?.();
-      cleanupImageMaps?.();
-    };
 
-    const externalLinks = container.querySelectorAll('a[href^="http"]');
+    const externalLinks = container.querySelectorAll('a[target="_blank"], a[href^="http"], a[href^="//"]');
     externalLinks.forEach((link) => {
       link.setAttribute('target', '_blank');
       link.setAttribute('rel', 'noopener noreferrer');
     });
 
-    const images = container.querySelectorAll('img[loading="lazy"]');
-    if ('IntersectionObserver' in window) {
-      const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const img = entry.target as HTMLImageElement;
-            if (img.dataset.src) {
-              img.src = img.dataset.src;
-              img.removeAttribute('data-src');
-              imageObserver.unobserve(img);
-            }
-          }
-        });
-      });
-
-      images.forEach((img) => imageObserver.observe(img));
-
-      return () => {
-        imageObserver.disconnect();
-      };
-    }
+    return () => {
+      cleanupSpoilerBoxes?.();
+      cleanupSpoilers?.();
+      cleanupImageMaps?.();
+    };
   }, [html]);
 
   return (
     <div
       ref={containerRef}
-      className={`bbcode-renderer ${className}`}
+      className={`bbcode bbcode-renderer ${className}`}
       dangerouslySetInnerHTML={{ __html: safeHtml }}
-      aria-live="polite"
     />
   );
 };

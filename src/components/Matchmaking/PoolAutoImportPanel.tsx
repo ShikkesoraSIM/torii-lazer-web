@@ -161,9 +161,9 @@ const PoolAutoImportPanel: React.FC<Props> = ({ poolId, rulesetId, onImported })
   // drag a slider without flooding the backend.
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
+    let cancelled = false;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      let cancelled = false;
       setPreviewLoading(true);
       setPreviewError(null);
       matchmakingAPI
@@ -181,11 +181,9 @@ const PoolAutoImportPanel: React.FC<Props> = ({ poolId, rulesetId, onImported })
         .finally(() => {
           if (!cancelled) setPreviewLoading(false);
         });
-      return () => {
-        cancelled = true;
-      };
     }, 350);
     return () => {
+      cancelled = true;
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

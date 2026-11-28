@@ -133,16 +133,18 @@ const UserPreferencesSection: React.FC = () => {
   const savePreference = async <K extends keyof UserPreferences>(
     key: K,
     value: UserPreferences[K]
-  ) => {
+  ): Promise<boolean> => {
     setSavingFields(prev => new Set(prev).add(key as string));
     try {
       await preferencesAPI.updatePreferences({ [key]: value });
       setPreferences(prev => ({ ...prev, [key]: value }));
       setOriginalPreferences(prev => ({ ...prev, [key]: value }));
       toast.success(t('settings.preferences.saveSuccess'));
+      return true;
     } catch (error) {
       console.error(`Failed to save ${key}:`, error);
       toast.error(t('settings.preferences.saveError'));
+      return false;
     } finally {
       setSavingFields(prev => {
         const next = new Set(prev);
@@ -160,8 +162,13 @@ const UserPreferencesSection: React.FC = () => {
     key: K,
     value: UserPreferences[K]
   ) => {
+    const previousValue = preferences[key];
     setPreferences(prev => ({ ...prev, [key]: value }));
-    await savePreference(key, value);
+    const saved = await savePreference(key, value);
+    if (!saved) {
+      setPreferences(prev => ({ ...prev, [key]: previousValue }));
+      return;
+    }
     if (key === 'profile_media_show_nsfw') {
       apiCache.clearCache();
       await refreshUser();

@@ -105,6 +105,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
   useEffect(() => {
     if (!isOpen) return;
 
+    const previousFocused = document.activeElement as HTMLElement | null;
     const timeout = window.setTimeout(() => {
       inputRef.current?.focus();
     }, 40);
@@ -115,6 +116,9 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
     return () => {
       window.clearTimeout(timeout);
       document.body.style.overflow = previousOverflow;
+      if (previousFocused && typeof previousFocused.focus === 'function') {
+        previousFocused.focus();
+      }
     };
   }, [isOpen]);
 
@@ -125,6 +129,22 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
       if (event.key === 'Escape') {
         event.preventDefault();
         handleClose();
+      } else if (event.key === 'Tab') {
+        const dialog = document.getElementById('navbar-search-dialog');
+        if (!dialog) return;
+        const focusables = dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
       }
     };
 
@@ -224,87 +244,82 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
     <>
       {isOpen && (
         <motion.div
-          // Explicit key so AnimatePresence has an unambiguous identity
-          // for the conditional child. Without one, framer-motion v11
-          // sometimes left the exit animation in a stalled state on
-          // React 19 — the overlay state was already isOpen=false but
-          // the DOM node hung around (backdrop blur visible, content
-          // not interactable) until a hard reload. With a stable key
-          // the presence machine has a fixed handle to track.
           key="navbar-search-overlay"
-          className="fixed inset-0 z-[120] bg-black/65 backdrop-blur-[3px] px-4 pt-24 pb-6"
+          className="fixed inset-0 z-[120] bg-black/65 backdrop-blur-[3px] px-3 sm:px-4 pt-16 sm:pt-24 pb-4 sm:pb-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          // Use onClick (not onMouseDown) so a click that starts inside
-          // the inner card and drifts outside doesn't accidentally
-          // close. onClick fires only when mousedown + mouseup land on
-          // the same element. Combined with the inner stopPropagation
-          // below, this is the standard "click outside the card to
-          // close" pattern that doesn't fight nested buttons.
           onClick={(event) => {
-            // Only close when the click actually lands on the backdrop
-            // itself, not on something that bubbled up from inside.
             if (event.target === event.currentTarget) handleClose();
           }}
         >
           <motion.div
-            className="mx-auto w-full max-w-6xl rounded-3xl bg-[rgba(20,20,38,0.76)] backdrop-blur-xl shadow-[0_30px_100px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(140,125,255,0.08)] overflow-hidden"
+            id="navbar-search-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('common.search', { defaultValue: 'Search' })}
+            className="mx-auto flex torii-max-h-search w-full max-w-6xl flex-col rounded-3xl bg-[#0d122c]/95 backdrop-blur-xl border border-white/10 shadow-elev-4 overflow-hidden"
             initial={{ opacity: 0, y: -14, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.99 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="px-6 py-5 bg-white/[0.015]">
-              <div className="flex items-center gap-4">
-                <FiSearch className="text-white/75 flex-shrink-0" size={27} />
+            <div className="px-4 sm:px-6 py-4 sm:py-5 bg-white/[0.015] border-b border-white/[0.06] flex-shrink-0">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <FiSearch className="text-white/75 flex-shrink-0 h-5 w-5 sm:h-7 sm:w-7" aria-hidden="true" />
                 <input
                   ref={inputRef}
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder={t('common.search') || 'Search'}
-                  className="w-full bg-transparent border-0 border-b border-violet-300/20 pb-2 text-3xl md:text-4xl font-semibold text-white placeholder:text-white/40 focus:outline-none focus:border-violet-300/40"
+                  placeholder={t('common.search', { defaultValue: 'Search' })}
+                  aria-label={t('common.search', { defaultValue: 'Search' })}
+                  className="w-full min-w-0 bg-transparent border-0 border-b border-torii/30 pb-1.5 text-lg sm:text-3xl font-semibold text-white placeholder:text-white/40 focus:outline-none focus:border-torii/60"
                 />
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-semibold hover:brightness-110 transition"
+                  aria-label={t('common.close', { defaultValue: 'Close' })}
+                  className="inline-flex min-h-[40px] flex-shrink-0 items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full text-white font-semibold hover:brightness-110 transition"
                   style={{
                     backgroundImage: `linear-gradient(135deg, ${buttonColorLight}, ${buttonColorDark})`,
                     boxShadow: `0 10px 24px rgba(${buttonRgb.r}, ${buttonRgb.g}, ${buttonRgb.b}, 0.30)`,
                   }}
                 >
-                  <FiX size={16} />
-                  <span>{t('common.close') || 'Close'}</span>
+                  <FiX size={16} aria-hidden="true" />
+                  <span className="hidden sm:inline">{t('common.close', { defaultValue: 'Close' })}</span>
                 </button>
               </div>
             </div>
 
-            <div className="max-h-[66vh] overflow-y-auto px-6 py-5 space-y-8">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-6" aria-live="polite">
               {query.trim().length < 2 && (
-                <div className="text-white/60 text-lg">
-                  Type at least 2 characters to search users, beatmaps, and teams.
+                <div className="text-white/60 text-sm sm:text-base">
+                  {t('search.minChars', { defaultValue: 'Type at least 2 characters to search users, beatmaps, and teams.' })}
                 </div>
               )}
 
               {query.trim().length >= 2 && isLoading && (
-                <div className="text-white/70 text-lg">Searching...</div>
+                <div className="text-white/70 text-sm sm:text-base" role="status">
+                  {t('common.searching', { defaultValue: 'Searching...' })}
+                </div>
               )}
 
               {query.trim().length >= 2 && !isLoading && !hasResults && (
-                <div className="text-white/65 text-lg">{t('common.noDataFound') || 'No data found'}</div>
+                <div className="text-white/65 text-sm sm:text-base">{t('common.noDataFound', { defaultValue: 'No data found' })}</div>
               )}
 
               {query.trim().length >= 2 && !isLoading && directorySearchUnavailable && (
-                <div className="text-white/55 text-sm">
-                  User/team quick-search is not available on this API version yet.
+                <div className="text-white/55 text-xs sm:text-sm">
+                  {t('search.directoryUnavailable', { defaultValue: 'User/team quick-search is not available on this API version yet.' })}
                 </div>
               )}
 
               {beatmaps.length > 0 && (
                 <section>
-                  <h3 className="text-xl font-semibold text-white mb-3">Beatmap Results</h3>
+                  <h2 className="text-lg sm:text-xl font-semibold text-white mb-3">
+                    {t('search.beatmapResults', { defaultValue: 'Beatmap Results' })}
+                  </h2>
                   <div className="space-y-2">
                     {beatmaps.map((beatmapset) => (
                       <button
@@ -350,7 +365,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
 
               {users.length > 0 && (
                 <section>
-                  <h3 className="text-xl font-semibold text-white mb-3">Player Results</h3>
+                  <h2 className="text-lg sm:text-xl font-semibold text-white mb-3">Player Results</h2>
                   <div className="space-y-2">
                     {users.map((searchUser) => (
                       <button
@@ -389,7 +404,7 @@ const NavbarSearchOverlay: React.FC<NavbarSearchOverlayProps> = ({ isOpen, onClo
 
               {teams.length > 0 && (
                 <section>
-                  <h3 className="text-xl font-semibold text-white mb-3">Team Results</h3>
+                  <h2 className="text-lg sm:text-xl font-semibold text-white mb-3">Team Results</h2>
                   <div className="space-y-2">
                     {teams.map((team) => (
                       <button

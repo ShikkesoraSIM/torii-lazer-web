@@ -50,7 +50,7 @@ export const countries = {
   
   // 亚洲国家
   AE: '阿联酋',
-  SA: '沙特阿拉伾',
+  SA: '沙特阿拉伯',
   IL: '以色列',
   
   // 大洋洲

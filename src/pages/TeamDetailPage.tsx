@@ -265,18 +265,24 @@ const TeamDetailPage: React.FC = () => {
             <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-2">
               <FiGlobe /> {t('teams.detail.website')}
             </p>
-            {team.website ? (
-              <a
-                href={team.website}
-                target="_blank"
-                rel="noreferrer"
-                className="text-base font-semibold text-osu-pink hover:underline break-all"
-              >
-                {team.website}
-              </a>
-            ) : (
-              <p className="text-base text-gray-500 dark:text-gray-400">{t('teams.detail.noWebsite')}</p>
-            )}
+            {(() => {
+              const safeWebsite = team.website && /^https?:\/\//i.test(team.website) ? team.website : null;
+              if (!team.website) {
+                return <p className="text-base text-gray-500 dark:text-gray-400">{t('teams.detail.noWebsite')}</p>;
+              }
+              return safeWebsite ? (
+                <a
+                  href={safeWebsite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-base font-semibold text-osu-pink hover:underline break-all"
+                >
+                  {team.website}
+                </a>
+              ) : (
+                <span className="text-base font-semibold text-gray-300 break-all">{team.website}</span>
+              );
+            })()}
           </div>
 
           <div className="sm:bg-card sm:rounded-xl sm:shadow-sm sm:border sm:border-card p-4">

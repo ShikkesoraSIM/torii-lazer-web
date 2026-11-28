@@ -1,24 +1,33 @@
 // Small colour helpers shared across the profile sections.
 
+const HEX6_RE = /^#?([0-9a-f]{6})$/i;
+
 /** Convert "#rrggbb" (or "rrggbb") to an "r, g, b" string for use in rgba(). */
 export function hexToRgb(hex: string): string {
-  const c = hex.replace('#', '');
+  const m = HEX6_RE.exec((hex || '').trim());
+  if (!m) return '237, 142, 166';
+  const c = m[1];
   const r = parseInt(c.substring(0, 2), 16);
   const g = parseInt(c.substring(2, 4), 16);
   const b = parseInt(c.substring(4, 6), 16);
   return `${r}, ${g}, ${b}`;
 }
 
-/**
- * Rotate a hex colour's hue by `deg` degrees while keeping its saturation and
- * lightness. We use this to give each profile section an adjacent-but-distinct
- * accent derived from the user's chosen colour: top plays stay on the base
- * colour, pinned shifts one way, most-played shifts the other. Returns the
- * original string unchanged if it isn't a 6-digit hex.
- */
+/** Space-separated "r g b" string for Tailwind rgb(var(...) / <alpha-value>) tokens. */
+export function hexToRgbChannels(hex: string): string {
+  const m = HEX6_RE.exec((hex || '').trim());
+  if (!m) return '237 142 166';
+  const c = m[1];
+  const r = parseInt(c.substring(0, 2), 16);
+  const g = parseInt(c.substring(2, 4), 16);
+  const b = parseInt(c.substring(4, 6), 16);
+  return `${r} ${g} ${b}`;
+}
+
 export function shiftHue(hex: string, deg: number): string {
-  const c = hex.replace('#', '');
-  if (c.length < 6) return hex;
+  const match = HEX6_RE.exec((hex || '').trim());
+  if (!match) return hex;
+  const c = match[1];
 
   const r = parseInt(c.substring(0, 2), 16) / 255;
   const g = parseInt(c.substring(2, 4), 16) / 255;

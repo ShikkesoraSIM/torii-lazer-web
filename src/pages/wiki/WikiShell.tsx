@@ -86,11 +86,15 @@ export function WikiShell({
   useWikiBackground();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#030014]">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-64 -left-72 h-[560px] w-[560px] rounded-full bg-fuchsia-500/15 blur-[150px]" />
-        <div className="absolute top-1/3 -right-56 h-[640px] w-[640px] rounded-full bg-violet-500/20 blur-[150px]" />
-        <div className="absolute bottom-[-260px] left-1/3 h-[640px] w-[640px] rounded-full bg-sky-400/10 blur-[160px]" />
+    <div className="relative min-h-screen bg-[#030014]">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              'radial-gradient(600px circle at 12% 28%, rgba(217,70,239,0.14), transparent 70%), radial-gradient(640px circle at 88% 42%, rgba(139,92,246,0.16), transparent 70%), radial-gradient(600px circle at 45% 95%, rgba(56,189,248,0.10), transparent 70%)',
+          }}
+        />
         <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#030014] via-[#030014]/95 to-transparent" />
       </div>
 
@@ -189,7 +193,7 @@ export function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <div className={cx("rounded-2xl border bg-white/[0.02] p-5 backdrop-blur", ACCENT_BORDER[accent], className)}>
+    <div className={cx("rounded-2xl border bg-[#0d122c]/70 p-5", ACCENT_BORDER[accent], className)}>
       {children}
     </div>
   );

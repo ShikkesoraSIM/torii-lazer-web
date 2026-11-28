@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
 import { FiChevronDown, FiCheck } from 'react-icons/fi';
 
 interface Option {
@@ -14,101 +14,79 @@ interface CustomSelectProps {
   disabled?: boolean;
   placeholder?: string;
   className?: string;
+  ariaLabel?: string;
 }
 
+/**
+ * Accessible select built on @headlessui/react Listbox (keyboard navigation,
+ * typeahead, Escape, ARIA listbox/option semantics, no extra framer-motion overhead).
+ */
 const CustomSelect: React.FC<CustomSelectProps> = ({
   value,
   onChange,
   options,
   disabled = false,
   placeholder = 'Select...',
-  className = ''
+  className = '',
+  ariaLabel,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectRef = useRef<HTMLDivElement>(null);
-
-  const selectedOption = options.find(opt => opt.value === value);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleSelect = (optionValue: string) => {
-    onChange(optionValue);
-    setIsOpen(false);
-  };
+  const selectedOption = options.find((opt) => opt.value === value);
 
   return (
-    <div className={`relative ${className}`} ref={selectRef}>
-      <button
-        type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        disabled={disabled}
-        className={`w-full px-4 py-2.5 border rounded-lg bg-card text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-osu-pink focus:border-transparent transition-all duration-200
-                   flex items-center justify-between
-                   ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-osu-pink/50'}
-                   ${isOpen ? 'border-osu-pink ring-2 ring-osu-pink/20' : 'border-card'}`}
-      >
-        <span className={selectedOption ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <FiChevronDown className="w-5 h-5 text-gray-400" />
-        </motion.div>
-      </button>
+    <div className={`relative ${className}`}>
+      <Listbox value={value} onChange={onChange} disabled={disabled}>
+        {({ open }) => (
+          <>
+            <ListboxButton
+              aria-label={ariaLabel}
+              className={`w-full px-4 py-2.5 border rounded-xl bg-card text-text-primary transition-colors duration-150 flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii ${
+                disabled
+                  ? 'opacity-50 cursor-not-allowed border-border-color'
+                  : 'cursor-pointer hover:border-torii/60'
+              } ${open ? 'border-torii ring-2 ring-torii/25' : 'border-border-color'}`}
+            >
+              <span className={`truncate ${selectedOption ? 'text-text-primary' : 'text-text-muted'}`}>
+                {selectedOption ? selectedOption.label : placeholder}
+              </span>
+              <FiChevronDown
+                className={`w-5 h-5 text-text-muted flex-shrink-0 transition-transform duration-150 ${
+                  open ? 'rotate-180' : ''
+                }`}
+                aria-hidden="true"
+              />
+            </ListboxButton>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-50 w-full mt-2 bg-card border border-gray-200 dark:border-gray-600 
-                       rounded-lg shadow-xl overflow-hidden"
-          >
-            <div className="py-1 max-h-60 overflow-y-auto">
-              {options.map((option, index) => {
-                const isSelected = option.value === value;
-                return (
-                  <motion.button
-                    key={option.value}
-                    type="button"
-                    onClick={() => handleSelect(option.value)}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: index * 0.03 }}
-                    className={`w-full px-4 py-2.5 text-left flex items-center justify-between transition-colors duration-150
-                               ${isSelected 
-                                 ? 'bg-osu-pink text-white' 
-                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                               }`}
-                  >
-                    <span className="font-medium">{option.label}</span>
-                    {isSelected && (
-                      <FiCheck className="w-4 h-4" />
-                    )}
-                  </motion.button>
-                );
-              })}
-            </div>
-          </motion.div>
+            <ListboxOptions
+              className="absolute z-50 w-full mt-2 bg-[#0d122c] border border-white/15 rounded-xl shadow-elev-3 py-1 max-h-60 overflow-y-auto focus:outline-none"
+            >
+              {options.map((option) => (
+                <ListboxOption
+                  key={option.value}
+                  value={option.value}
+                  className={({ focus, selected }) =>
+                    `w-full px-4 py-2.5 text-left flex items-center justify-between cursor-pointer transition-colors duration-150 ${
+                      selected
+                        ? 'bg-torii text-white'
+                        : focus
+                          ? 'bg-white/10 text-white'
+                          : 'text-text-secondary'
+                    }`
+                  }
+                >
+                  {({ selected }) => (
+                    <>
+                      <span className="font-medium truncate">{option.label}</span>
+                      {selected && <FiCheck className="w-4 h-4 flex-shrink-0" aria-hidden="true" />}
+                    </>
+                  )}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </>
         )}
-      </AnimatePresence>
+      </Listbox>
     </div>
   );
 };
 
 export default CustomSelect;
-

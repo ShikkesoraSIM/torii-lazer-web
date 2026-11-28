@@ -112,3 +112,12 @@ export const writeFrontendPreference = (
 
   document.cookie = attributes.join('; ');
 };
+
+export const clearToriiWebPreferenceIfSet = (): void => {
+  const match = document.cookie
+    .split('; ')
+    .find((entry) => entry.startsWith(`${FRONTEND_PREFERENCE_COOKIE}=`));
+  if (match?.split('=')[1] === 'torii-web') {
+    writeFrontendPreference('classic', true);
+  }
+};

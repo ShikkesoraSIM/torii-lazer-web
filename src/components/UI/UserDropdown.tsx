@@ -63,11 +63,15 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
     };
   }, []);
 
-  // Close dropdown when pressing escape
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Close dropdown when pressing escape and return focus to trigger
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsOpen(false);
+        setLanguageOpen(false);
+        triggerRef.current?.focus();
       }
     };
 
@@ -106,11 +110,13 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
     <div className="relative" ref={dropdownRef}>
       {/* User Avatar/Button */}
       <button
+        ref={triggerRef}
+        type="button"
         onClick={handleToggle}
         className={`flex items-center space-x-2 px-3 py-2.5 rounded-xl font-medium transition-all duration-200 ${
           isOpen
-            ? 'text-osu-pink bg-osu-pink/10 shadow-sm'
-            : 'text-gray-600 dark:text-gray-300 hover:text-osu-pink dark:hover:text-osu-pink hover:bg-gray-50 dark:hover:bg-gray-800/50'
+            ? 'text-torii bg-torii/15 shadow-sm'
+            : 'text-white/85 hover:text-white hover:bg-white/10'
         }`}
         aria-expanded={isOpen}
         aria-haspopup="true"
@@ -164,10 +170,7 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
               duration: 0.15,
               ease: [0.16, 1, 0.3, 1]
             }}
-            className="absolute right-0 mt-3 w-52 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2 z-50 overflow-visible"
-            style={{
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.05)'
-            }}
+            className="absolute right-0 mt-3 w-52 bg-[#0d122c]/95 backdrop-blur-xl rounded-2xl shadow-elev-4 border border-white/15 py-2 z-50 overflow-visible"
           >
             {/* Menu Items */}
             <div className="py-2">
@@ -195,8 +198,11 @@ const UserDropdown: React.FC<UserDropdownProps> = memo(({ user, onLogout }) => {
               {/* Language Selector */}
               <div className="relative">
                 <button
+                  type="button"
                   onClick={handleLanguageToggle}
-                  className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-osu-pink dark:hover:text-osu-pink transition-all duration-200"
+                  aria-expanded={languageOpen}
+                  aria-haspopup="true"
+                  className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-medium text-white/80 hover:bg-white/5 hover:text-torii transition-colors duration-150"
                 >
                   <div className="flex items-center space-x-3">
                     <CountryFlag

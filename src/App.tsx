@@ -1,6 +1,6 @@
 
-import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import RequireAdmin from './components/Auth/RequireAdmin';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './contexts/AuthContext';
@@ -10,7 +10,6 @@ import { ProfileColorProvider } from './contexts/ProfileColorContext';
 import { FrontendExperienceProvider } from './contexts/FrontendExperienceContext';
 import ScrollToTop from './components/ScrollToTop';
 import Layout from './components/Layout/Layout';
-import LoadingSpinner from './components/UI/LoadingSpinner';
 // HomePage stays eager — it's the landing route, lazy-loading it would just
 // add a network round-trip + flash of spinner for the most common path.
 import HomePage from './pages/HomePage';
@@ -53,17 +52,33 @@ const AdminPanel = lazy(() => import('./pages/Admin/AdminPanel'));
 const AdminBeatmap = lazy(() => import('./pages/Admin/AdminBeatmap'));
 const AdminBeatmapRankstatus = lazy(() => import('./pages/Admin/AdminBeatmapRankstatus'));
 
-function PageFallback() {
+function NotFoundPage() {
+  const { t } = useTranslation();
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <LoadingSpinner size="lg" />
+    <div className="flex items-center justify-center min-h-[60vh] px-4 py-12">
+      <div className="max-w-md w-full rounded-2xl border border-white/10 bg-card p-8 text-center shadow-elev-2">
+        <p className="text-4xl font-heading font-bold text-torii">404</p>
+        <h1 className="mt-2 text-xl font-heading font-bold text-text-primary">{t('app.notFound')}</h1>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            to="/"
+            className="inline-flex min-h-[40px] items-center rounded-xl bg-torii px-4 py-2 text-sm font-semibold text-white hover:bg-torii-hover transition-colors"
+          >
+            {t('nav.home', { defaultValue: 'Home' })}
+          </Link>
+          <Link
+            to="/beatmaps"
+            className="inline-flex min-h-[40px] items-center rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-text-primary hover:bg-white/10 transition-colors"
+          >
+            {t('nav.beatmaps', { defaultValue: 'Beatmaps' })}
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
 
 function App() {
-  const { t } = useTranslation();
-
   return (
     <AuthProvider>
       <ProfileColorProvider>
@@ -72,13 +87,13 @@ function App() {
             <Router>
               <FrontendExperienceProvider>
                 <ScrollToTop />
-                <Suspense fallback={<PageFallback />}>
-                  <Routes>
+                <Routes>
                   <Route path="/" element={<Layout />}>
                     <Route index element={<HomePage />} />
                     <Route path="login" element={<LoginPage />} />
                     <Route path="register" element={<RegisterPage />} />
                     <Route path="password-reset" element={<PasswordResetPage />} />
+                    <Route path="home/password-reset" element={<PasswordResetPage />} />
                     <Route path="profile" element={<ProfileRedirect />} />
                     <Route path="users/:userId" element={<UserPage />} />
                     <Route path="settings" element={<SettingsPage />} />
@@ -106,11 +121,9 @@ function App() {
                     <Route path="beatmapsets/:beatmapsetId" element={<BeatmapPage />} />
                     <Route path="beatmaps" element={<BeatmapsPage />} />
                     <Route path="scores/:scoreId" element={<ScorePage />} />
-                    <Route path="frontend-choice" element={<div className="frontend-choice-page" />} />
+                    <Route path="frontend-choice" element={<Navigate to="/" replace />} />
                     <Route path="bbcode-test" element={<BBCodeTester />} />
                     <Route path="admin" element={<RequireAdmin><AdminPanel /></RequireAdmin>} />
-                    {/* Las dos de beatmaps colgaban sueltas sin ningun control:
-                        cualquiera deslogueado abria el panel de moderacion. */}
                     <Route
                       path="admin/beatmaps"
                       element={<RequireAdmin><AdminBeatmap /></RequireAdmin>}
@@ -119,17 +132,9 @@ function App() {
                       path="admin/beatmaps/:id"
                       element={<RequireAdmin><AdminBeatmapRankstatus /></RequireAdmin>}
                     />
-                    <Route
-                      path="*"
-                      element={
-                        <div className="flex items-center justify-center h-screen">
-                          <h1 className="text-2xl font-bold">{t('app.notFound')}</h1>
-                        </div>
-                      }
-                    />
+                    <Route path="*" element={<NotFoundPage />} />
                   </Route>
-                  </Routes>
-                </Suspense>
+                </Routes>
               </FrontendExperienceProvider>
             </Router>
           </AudioProvider>

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FiAward } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
+import { Tooltip } from 'react-tooltip';
 import UserRankingCard from './UserRankingCard';
 import { apiCache } from '../../utils/apiCache';
 import { isCoverDebugEnabled, pickUserCoverCandidates } from '../../utils/profileMedia';
@@ -102,6 +103,7 @@ const UserRankingsList: React.FC<Props> = ({ rankings, currentPage, selectedMode
           rankingType={rankingType}
         />
       ))}
+      <Tooltip id="team-tooltip-ranking" place="bottom" float style={{ zIndex: 9999 }} />
     </div>
   );
 };

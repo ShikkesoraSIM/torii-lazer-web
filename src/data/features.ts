@@ -27,32 +27,4 @@ export const features = [
     image: '/image/ui/card-image4.svg',
     imageAltKey: 'features.items.3.imageAlt',
   },
-  {
-    id: 5,
-    titleKey: 'features.items.4.title',
-    contentKey: 'features.items.4.content',
-    image: '/image/ui/card-image5.svg',
-    imageAltKey: 'features.items.4.imageAlt',
-  },
-  {
-    id: 6,
-    titleKey: 'features.items.5.title',
-    contentKey: 'features.items.5.content',
-    image: '/image/ui/card-image6.svg',
-    imageAltKey: 'features.items.5.imageAlt',
-  },
-  {
-    id: 7,
-    titleKey: 'features.items.6.title',
-    contentKey: 'features.items.6.content',
-    image: '/image/ui/card-image7.svg',
-    imageAltKey: 'features.items.6.imageAlt',
-  },
-  {
-    id: 8,
-    titleKey: 'features.items.7.title',
-    contentKey: 'features.items.7.content',
-    image: '/image/ui/card-image8.svg',
-    imageAltKey: 'features.items.7.imageAlt',
-  },
 ] as const;

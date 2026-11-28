@@ -5,8 +5,6 @@ import { getDeviceUUID } from '../deviceUUID';
 
 export const authAPI = {
   login: async (username: string, password: string, clientId: number, clientSecret: string, turnstileToken?: string) => {
-    console.log('Login attempt with:', { username, clientId });
-
     const formData = new FormData();
     formData.append('grant_type', 'password');
     formData.append('client_id', clientId.toString());
@@ -23,6 +21,7 @@ export const authAPI = {
 
     try {
       const response = await axios.post(`${API_BASE_URL}/oauth/token`, formData, {
+        timeout: 15000,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'x-api-version': '20250913',
@@ -38,8 +37,6 @@ export const authAPI = {
   },
 
   register: async (username: string, email: string, password: string, turnstileToken?: string) => {
-    console.log('Register attempt with:', { username, email });
-
     const formData = new URLSearchParams();
     formData.append('user[username]', username);
     formData.append('user[user_email]', email);
@@ -74,6 +71,7 @@ export const authAPI = {
     const deviceUUID = await getDeviceUUID();
 
     const response = await axios.post(`${API_BASE_URL}/oauth/token`, formData, {
+      timeout: 15000,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'x-api-version': '20250913',
@@ -85,8 +83,6 @@ export const authAPI = {
 
   // Password reset - Request reset code
   requestPasswordReset: async (email: string, turnstileToken?: string) => {
-    console.log('Password reset request for:', email);
-
     const formData = new URLSearchParams();
     formData.append('email', email);
     if (turnstileToken) {
@@ -110,8 +106,6 @@ export const authAPI = {
 
   // Password reset - Reset password with code
   resetPassword: async (email: string, resetCode: string, newPassword: string, turnstileToken?: string) => {
-    console.log('Password reset with code for:', email);
-
     const formData = new URLSearchParams();
     formData.append('email', email);
     formData.append('reset_code', resetCode);

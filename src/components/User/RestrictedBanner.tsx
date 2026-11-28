@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import { FaExclamationTriangle, FaTimes } from 'react-icons/fa';
 import { BsQuestionCircle } from 'react-icons/bs';
 
 interface RestrictedBannerProps {
@@ -9,15 +10,12 @@ interface RestrictedBannerProps {
 
 const RestrictedBanner: React.FC<RestrictedBannerProps> = ({ className = '' }) => {
   const { t } = useTranslation();
-
-  const handleLearnMore = () => {
-    // Could link to a help page or documentation
-    window.open('', '_blank');
-  };
+  const [mobileDismissed, setMobileDismissed] = useState(false);
 
   return (
     <>
-      {/* Mobile: bottom banner */}
+      {/* Mobile: bottom banner (dismissible so bottom controls stay reachable) */}
+      {!mobileDismissed && (
       <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 ${className}`}>
         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-4 shadow-lg">
           <div className="flex items-start gap-3">
@@ -30,16 +28,27 @@ const RestrictedBanner: React.FC<RestrictedBannerProps> = ({ className = '' }) =
                 {t('profile.restrictedBanner.message')}
               </p>
             </div>
-            <button
-              onClick={handleLearnMore}
-              className="flex-shrink-0 bg-white/20 hover:bg-white/30 transition-colors rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap flex items-center gap-1.5"
-            >
-              <BsQuestionCircle className="h-4 w-4" />
-              {t('profile.restrictedBanner.learnMore')}
-            </button>
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <Link
+                to="/wiki"
+                className="bg-white/20 hover:bg-white/30 transition-colors rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap flex items-center gap-1"
+              >
+                <BsQuestionCircle className="h-3.5 w-3.5" />
+                {t('profile.restrictedBanner.learnMore')}
+              </Link>
+              <button
+                type="button"
+                onClick={() => setMobileDismissed(true)}
+                aria-label={t('common.close', 'Close')}
+                className="p-2 rounded-full bg-white/15 hover:bg-white/25 text-white transition-colors"
+              >
+                <FaTimes className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
+      )}
 
       {/* Desktop: rounded toast in the bottom-right */}
       <div className={`hidden md:block fixed bottom-6 right-6 z-50 ${className}`}>
@@ -56,13 +65,13 @@ const RestrictedBanner: React.FC<RestrictedBannerProps> = ({ className = '' }) =
                 <p className="text-sm opacity-95 leading-relaxed mb-4">
                   {t('profile.restrictedBanner.message')}
                 </p>
-                <button
-                  onClick={handleLearnMore}
-                  className="bg-white/90 hover:bg-white transition-colors text-red-700 rounded-full px-5 py-2.5 text-sm font-semibold flex items-center gap-2 shadow-md hover:shadow-lg"
+                <Link
+                  to="/wiki"
+                  className="inline-flex bg-white/90 hover:bg-white transition-colors text-red-700 rounded-full px-5 py-2.5 text-sm font-semibold items-center gap-2 shadow-md hover:shadow-lg"
                 >
                   <BsQuestionCircle className="h-4 w-4" />
                   {t('profile.restrictedBanner.learnMore')}
-                </button>
+                </Link>
               </div>
             </div>
           </div>

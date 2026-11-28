@@ -6,7 +6,7 @@ export const beatmapPage = {
   'beatmap.actions': '操作',
   'beatmap.download': '下载',
   'beatmap.preview': '预览',
-  'beatmap.viewOnOsu': '在 osu! 查看',
+  'beatmap.viewOnOsu': '查看外部谱面',
   'beatmap.creator': '作图者',
   'beatmap.source': '来源',
   'beatmap.submitted': '提交时间',

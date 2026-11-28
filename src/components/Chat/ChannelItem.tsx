@@ -34,7 +34,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({ channel, isSelected, onClick 
 
   const getChannelIcon = () => {
     switch (channel.type) {
-      case 'PM':
+      case 'PM': {
         // For PM channels, prefer the avatar info from user_info
         if (channel.user_info) {
           return (
@@ -60,6 +60,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({ channel, isSelected, onClick 
             size="sm"
           />
         );
+      }
       case 'TEAM':
         return (
           <div className="w-10 h-10 bg-osu-pink/20 rounded-lg flex items-center justify-center">
@@ -141,11 +142,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({ channel, isSelected, onClick 
             
             {/* Unread-message indicator */}
             {hasUnreadMessages && (
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-2 h-2 bg-osu-pink rounded-full flex-shrink-0"
-              />
+              <div className="w-2 h-2 bg-osu-pink rounded-full flex-shrink-0 motion-safe:animate-pulse" />
             )}
           </div>
           

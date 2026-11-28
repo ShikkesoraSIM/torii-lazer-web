@@ -7,12 +7,20 @@ export default defineConfig({
   plugins: [react(), removeConsole({
       external: ['error', 'warn']
     })],
+  esbuild: {
+    target: 'es2020',
+  },
   build: {
-    // target esnext + terser minifier → skips the vite:esbuild-transpile
-    // renderChunk pass entirely, which avoids the Windows esbuild IPC pipe
-    // temp-file cleanup error ("remove AppData/Temp/esbuild-xxx: Access is denied")
+    // Keep renderChunk transpile off on Windows (avoids Temp Access Denied IPC error)
+    // while esbuild module transform + terser ecma:2020 still compile app syntax for Chrome 87+/Safari 14+.
     target: 'esnext',
     minify: 'terser',
+    terserOptions: {
+      ecma: 2020,
+      compress: {
+        ecma: 2020,
+      },
+    },
     rollupOptions: {
       output: {
         // Split stable, always-loaded vendor code into cacheable chunks.

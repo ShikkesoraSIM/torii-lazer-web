@@ -104,7 +104,7 @@ const AdminChangelogEditor: React.FC = () => {
 
   // GitHub commits modal
   const [showGitHubCommits, setShowGitHubCommits] = useState(false);
-  const [repoName, setRepoName] = useState('shikkesora/torii-osu');
+  const [repoName, setRepoName] = useState('shikkesora/torii');
   const [githubCommits, setGithubCommits] = useState<GitHubCommit[]>([]);
   const [loadingCommits, setLoadingCommits] = useState(false);
   const [commitsError, setCommitsError] = useState<string | null>(null);
@@ -272,7 +272,7 @@ const AdminChangelogEditor: React.FC = () => {
         selectedBuildId,
         commit.full_sha,
         commit.message,
-        repoName.trim() || 'shikkesora/torii-osu',
+        repoName.trim() || 'shikkesora/torii',
       );
       toast.success('Entry imported from commit');
       await Promise.all([loadEntries(selectedBuildId), loadBuilds()]);

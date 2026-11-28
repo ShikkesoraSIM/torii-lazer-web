@@ -26,7 +26,11 @@ const getApiBaseOrigin = (): string | undefined => API_BASE_ORIGIN;
 const shouldDebugCoverMedia = (): boolean => {
   if (typeof window === 'undefined') return false;
   if (window.location.search.includes('debugCover=1')) return true;
-  return window.localStorage.getItem(MEDIA_DEBUG_FLAG) === '1';
+  try {
+    return window.localStorage.getItem(MEDIA_DEBUG_FLAG) === '1';
+  } catch {
+    return false;
+  }
 };
 
 export const isCoverDebugEnabled = (): boolean => shouldDebugCoverMedia();

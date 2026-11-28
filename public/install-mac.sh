@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-REPO="ShikkesoraSIM/torii-osu"
+REPO="ShikkesoraSIM/torii"
 STREAM="torii"
 RELAUNCH=0
 LAUNCH=1

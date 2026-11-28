@@ -6,7 +6,6 @@ import AdminModal from '../../components/Admin/AdminModal';
 import ModPicker, { isModFullyConfigured, incompatibleAcronyms } from '../../components/Admin/ModPicker';
 import BeatmapThumb from '../../components/Matchmaking/BeatmapThumb';
 import type { ApiMod, ModCatalogByRuleset } from '../../types/mods';
-import { BUNDLED_MODS_CATALOG } from '../../data/modsCatalog';
 
 interface DailyChallenge {
   date: string;
@@ -501,10 +500,8 @@ const AdminDailyChallenges: React.FC = () => {
 
   const [formData, setFormData] = useState<FormState>(blankForm);
 
-  // Mod catalog (server endpoint with bundled fallback). Start with
-  // the bundle so the picker renders immediately on mount; the fetch
-  // upgrades us to the live data once it lands.
-  const [catalog, setCatalog] = useState<ModCatalogByRuleset>(BUNDLED_MODS_CATALOG);
+  // Mod catalog (server endpoint with lazy bundled fallback).
+  const [catalog, setCatalog] = useState<ModCatalogByRuleset>({});
 
   // Track DOM rows for scroll-and-highlight after creating a challenge.
   const challengeRowRefs = useRef<Record<string, HTMLDivElement | null>>({});

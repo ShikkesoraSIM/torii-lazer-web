@@ -139,7 +139,7 @@ export const messagesPage = {
         privateMessageWithId: 'Private message from {{userName}} (ID: {{id}})',
         privateMessageFallback: 'Private message from {{userName}}',
         privateMessageSourceLabel: 'From user',
-        privateMessageSourceRaw: '来自用户',
+        privateMessageSourceRaw: 'From user',
         teamChannel: 'Team channel: {{title}}',
         publicChannel: 'Public channel: {{title}}',
         privateChannel: 'Private channel: {{title}}',

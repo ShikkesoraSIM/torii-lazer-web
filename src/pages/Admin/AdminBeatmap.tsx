@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { hexToRgb } from '../../utils/color';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
 import LazyBackgroundImage from '../../components/UI/LazyBackgroundImage';
 import { Tooltip } from 'react-tooltip';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
+import { useDebounce } from '../../hooks/useDebounce';
 
 interface Beatmap {
   id: number;
@@ -50,14 +51,17 @@ const AdminBeatmap: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { profileColor } = useProfileColor();
 
-  useEffect(() => {
-    loadBeatmaps();
-  }, [currentPage, searchQuery]);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
 
-  const loadBeatmaps = async () => {
+  const updateDebouncedQuery = useDebounce((val: string) => {
+    setCurrentPage(1);
+    setDebouncedQuery(val);
+  }, 300);
+
+  const loadBeatmaps = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await adminAPI.getBeatmaps(currentPage, 25, searchQuery);
+      const data = await adminAPI.getBeatmaps(currentPage, 25, debouncedQuery);
       setBeatmaps(data);
     } catch (error) {
       console.error('Failed to load beatmaps:', error);
@@ -65,12 +69,16 @@ const AdminBeatmap: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, debouncedQuery]);
+
+  useEffect(() => {
+    void loadBeatmaps();
+  }, [loadBeatmaps]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
-    loadBeatmaps();
+    setDebouncedQuery(searchQuery);
   };
 
   const handleBeatmapClick = async (beatmapsetId: number) => {
@@ -98,15 +106,18 @@ const AdminBeatmap: React.FC = () => {
     }
   };
 
-  const handleBanBeatmap = async () => {
-    if (!selectedBeatmapset) return;
-    if (!confirm(`Are you sure you want to ban this beatmapset? This will remove all scores.`)) return;
+  const handleBanBeatmap = async (target: Beatmapset | null = selectedBeatmapset) => {
+    const resolved = target ?? selectedBeatmapset;
+    if (!resolved) return;
+    if (!confirm(`Are you sure you want to ban "${resolved.artist} - ${resolved.title}"? This will remove all scores.`)) return;
 
     try {
-      await adminAPI.banBeatmap(selectedBeatmapset.id);
+      await adminAPI.banBeatmap(resolved.id);
       toast.success('Beatmapset banned and scores removed');
-      setSelectedBeatmapset(null);
-      loadBeatmaps();
+      if (selectedBeatmapset?.id === resolved.id) {
+        setSelectedBeatmapset(null);
+      }
+      void loadBeatmaps();
     } catch (error) {
       console.error('Failed to ban beatmap:', error);
       toast.error('Failed to ban beatmap');
@@ -139,77 +150,81 @@ const AdminBeatmap: React.FC = () => {
 
         <div className="relative bg-transparent hover:bg-white/20 dark:hover:bg-gray-800/20 transition-colors duration-150 group">
           {/* Desktop layout */}
-          <div className="hidden sm:block">
-            <div className="flex items-center h-12 pl-5 pr-24">
-              {/* Beatmap Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-col -space-y-0.5">
-                  {/* Title and Artist */}
-                  <div className="flex items-baseline gap-1 text-sm leading-tight">
-                    <span
-                      className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 truncate transition-colors cursor-pointer"
-                      title={`${beatmapset.artist} - ${beatmapset.title}`}
-                      data-tooltip-id={tooltipId}
-                      data-tooltip-content={`${beatmapset.beatmaps.length} beatmap${beatmapset.beatmaps.length !== 1 ? 's' : ''} • Click to view details`}
-                      onClick={() => handleBeatmapClick(beatmapset.id)}
-                    >
-                      {beatmapset.title}
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400 text-xs flex-shrink-0">
-                      by
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400 text-xs truncate">
-                      {beatmapset.artist}
-                    </span>
-                  </div>
+          <div className="hidden sm:flex items-center justify-between gap-3 h-14 px-5">
+            {/* Beatmap Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col -space-y-0.5">
+                {/* Title and Artist */}
+                <div className="flex items-baseline gap-1 text-sm leading-tight">
+                  <span
+                    className="font-semibold text-white hover:text-torii truncate transition-colors cursor-pointer"
+                    title={`${beatmapset.artist} - ${beatmapset.title}`}
+                    data-tooltip-id={tooltipId}
+                    data-tooltip-content={`${beatmapset.beatmaps.length} beatmap${beatmapset.beatmaps.length !== 1 ? 's' : ''} • Click to view details`}
+                    onClick={() => handleBeatmapClick(beatmapset.id)}
+                  >
+                    {beatmapset.title}
+                  </span>
+                  <span className="text-gray-400 text-xs flex-shrink-0">
+                    by
+                  </span>
+                  <span className="text-gray-400 text-xs truncate">
+                    {beatmapset.artist}
+                  </span>
+                </div>
 
-                  {/* Creator and Stats */}
-                  <div className="flex items-center gap-3 text-xs">
-                    <span className="text-yellow-600 dark:text-yellow-400 font-medium">
-                      {beatmapset.creator}
-                    </span>
-                    <span className="text-gray-500 dark:text-gray-400">
-                      {beatmapset.beatmaps.length} beatmap{beatmapset.beatmaps.length !== 1 ? 's' : ''}
-                    </span>
-                  </div>
+                {/* Creator and Stats */}
+                <div className="flex items-center gap-3 text-xs">
+                  <span className="text-yellow-400 font-medium truncate max-w-[180px]">
+                    {beatmapset.creator}
+                  </span>
+                  <span className="text-gray-400 flex-shrink-0">
+                    {beatmapset.beatmaps.length} beatmap{beatmapset.beatmaps.length !== 1 ? 's' : ''}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Right side status and actions */}
-              <div className="absolute right-0 top-0 h-full flex items-center justify-center pr-2 gap-2">
-                <span className={`px-2 py-1 rounded text-xs font-medium ${
-                  beatmapset.rank_status === 'ranked' 
-                    ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
-                    : beatmapset.rank_status === 'approved'
-                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                    : beatmapset.rank_status === 'qualified'
-                    ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'
-                    : beatmapset.rank_status === 'loved'
-                    ? 'bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}>
-                  {beatmapset.rank_status || 'pending'}
-                </span>
-                <button
-                  onClick={() => handleBeatmapClick(beatmapset.id)}
-                  className="px-2 py-1 bg-osu-pink text-white rounded hover:bg-osu-pink/80 transition-colors text-xs"
-                >
-                  View
-                </button>
-                <button
-                  onClick={() => setSelectedBeatmapset(beatmapset)}
-                  className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors text-xs"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleBanBeatmap()}
-                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-xs"
-                >
-                  Delete
-                </button>
-              </div>
+            <div className="flex-shrink-0 flex items-center gap-2">
+              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                beatmapset.rank_status === 'ranked' 
+                  ? 'bg-green-900 text-green-300'
+                  : beatmapset.rank_status === 'approved'
+                  ? 'bg-blue-900 text-blue-300'
+                  : beatmapset.rank_status === 'qualified'
+                  ? 'bg-purple-900 text-purple-300'
+                  : beatmapset.rank_status === 'loved'
+                  ? 'bg-pink-900 text-pink-300'
+                  : 'bg-gray-700 text-gray-300'
+              }`}>
+                {beatmapset.rank_status || 'pending'}
+              </span>
+              <button
+                type="button"
+                onClick={() => handleBeatmapClick(beatmapset.id)}
+                className="px-2.5 py-1 bg-osu-pink text-white rounded hover:bg-osu-pink/80 transition-colors text-xs"
+              >
+                View
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedBeatmapset(beatmapset);
+                  setNewRankStatus(beatmapset.rank_status || '');
+                }}
+                className="px-2.5 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-500 transition-colors text-xs"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleBanBeatmap(beatmapset)}
+                className="px-2.5 py-1 bg-red-600 text-white rounded hover:bg-red-500 transition-colors text-xs"
+              >
+                Delete
+              </button>
+            </div>
           </div>
 
           {/* Mobile layout */}
@@ -265,13 +280,17 @@ const AdminBeatmap: React.FC = () => {
                     View
                   </button>
                   <button
-                    onClick={() => setSelectedBeatmapset(beatmapset)}
+                    onClick={() => {
+                      setSelectedBeatmapset(beatmapset);
+                      setNewRankStatus(beatmapset.rank_status || '');
+                    }}
                     className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors text-xs"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleBanBeatmap()}
+                    type="button"
+                    onClick={() => void handleBanBeatmap(beatmapset)}
                     className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-xs"
                   >
                     Delete
@@ -304,7 +323,11 @@ const AdminBeatmap: React.FC = () => {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              setSearchQuery(v);
+              updateDebouncedQuery(v);
+            }}
             placeholder="Search by Artist, Title, or ID..."
             className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
           />
@@ -319,6 +342,7 @@ const AdminBeatmap: React.FC = () => {
               type="button"
               onClick={() => {
                 setSearchQuery('');
+                setDebouncedQuery('');
                 setCurrentPage(1);
               }}
               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
@@ -479,7 +503,8 @@ const AdminBeatmap: React.FC = () => {
                     Cancel
                   </button>
                   <button
-                    onClick={handleBanBeatmap}
+                    type="button"
+                    onClick={() => void handleBanBeatmap()}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
                     Ban Beatmap

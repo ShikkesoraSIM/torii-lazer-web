@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getDeviceUUID } from '../deviceUUID';
 import { API_BASE_URL } from '../apiBaseUrl';
+import { clearSessionTokens, hasSharedSession, restoreWebSession, sharedSessionUser, storeSessionTokens, WebSessionExpiredError } from '../webSession';
 
 export { API_BASE_URL } from '../apiBaseUrl';
 
@@ -12,12 +13,18 @@ export const setGlobalVerificationHandler = (handler: (error: any) => boolean) =
   globalVerificationHandler = handler;
 };
 
+export const AUTH_CACHE_KEYS = {
+  USER: 'cached_user',
+  AUTH_STATUS: 'cached_auth_status',
+  CACHE_TIMESTAMP: 'cache_timestamp',
+} as const;
+
 // Helper to clear cached auth state
-const clearAuthCache = () => {
+export const clearAuthCache = () => {
   try {
-    sessionStorage.removeItem('cached_user');
-    sessionStorage.removeItem('cached_auth_status');
-    sessionStorage.removeItem('cache_timestamp');
+    sessionStorage.removeItem(AUTH_CACHE_KEYS.USER);
+    sessionStorage.removeItem(AUTH_CACHE_KEYS.AUTH_STATUS);
+    sessionStorage.removeItem(AUTH_CACHE_KEYS.CACHE_TIMESTAMP);
   } catch (error) {
     console.error('Failed to clear auth cache:', error);
   }
@@ -44,6 +51,7 @@ const clearAuthCache = () => {
 // still rode the global default. This removes the root cause.
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 15000,
   headers: {
     'x-api-version': '20250913',
   },
@@ -55,15 +63,19 @@ let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value?: unknown) => void;
   reject: (reason?: any) => void;
+  authUserId?: string | null;
 }> = [];
 
 // Flush the pending-request queue
 const processQueue = (error: Error | null = null) => {
+  const currentUser = sharedSessionUser();
   failedQueue.forEach(prom => {
     if (error) {
       prom.reject(error);
+    } else if (prom.authUserId && currentUser && prom.authUserId !== currentUser) {
+      prom.reject(new Error('The account changed. Reload the page.'));
     } else {
-      prom.resolve();
+      prom.resolve(undefined);
     }
   });
   
@@ -72,6 +84,19 @@ const processQueue = (error: Error | null = null) => {
 
 // Function that refreshes the token
 const refreshToken = async (): Promise<string> => {
+  const remembered = await restoreWebSession();
+  if (typeof remembered !== 'string') {
+    const previousUser = sharedSessionUser();
+    if (previousUser && previousUser !== remembered.user_id.toString()) {
+      // No repetir una escritura de la cuenta anterior con la cuenta nueva.
+      throw new WebSessionExpiredError('The account changed in another frontend. Reload the page.');
+    }
+    storeSessionTokens(remembered, true);
+    return remembered.access_token;
+  }
+  if (remembered === 'missing' && hasSharedSession()) {
+    throw new WebSessionExpiredError('Web session expired');
+  }
   const refreshToken = localStorage.getItem('refresh_token');
   if (!refreshToken) {
     throw new Error('No refresh token available');
@@ -107,6 +132,7 @@ const refreshToken = async (): Promise<string> => {
 
 api.interceptors.request.use(
   async (config) => {
+    (config as InternalAxiosRequestConfig & { _authUserId?: string | null })._authUserId ??= sharedSessionUser();
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -127,7 +153,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean; _authUserId?: string | null };
 
     // First, check whether this is a user-verification error
     if (globalVerificationHandler && globalVerificationHandler(error)) {
@@ -136,19 +162,23 @@ api.interceptors.response.use(
     }
 
     // Handle 401 errors (expired token)
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      if (!localStorage.getItem('access_token') && !localStorage.getItem('refresh_token') && !hasSharedSession()) {
+        return Promise.reject(error);
+      }
+      if (originalRequest._authUserId && sharedSessionUser() && originalRequest._authUserId !== sharedSessionUser()) {
+        return Promise.reject(new Error('The account changed. Reload the page.'));
+      }
+      originalRequest._retry = true;
       // If the failing request is the token refresh itself, just log out
       if (originalRequest.url?.includes('/oauth/token')) {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        clearAuthCache(); // Clear the cache
         return Promise.reject(error);
       }
 
       if (isRefreshing) {
         // A refresh is already in flight: queue this request
         return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
+          failedQueue.push({ resolve, reject, authUserId: originalRequest._authUserId });
         }).then(() => {
           // Token refreshed: resend the request
           const token = localStorage.getItem('access_token');
@@ -161,7 +191,6 @@ api.interceptors.response.use(
         });
       }
 
-      originalRequest._retry = true;
       isRefreshing = true;
 
       try {
@@ -178,11 +207,17 @@ api.interceptors.response.use(
         // Resend the original request
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed: clear the local tokens and auth cache; let pages handle their own state
         processQueue(new Error('Token refresh failed'));
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        clearAuthCache(); // Clear the cache
+        const expired = refreshError instanceof WebSessionExpiredError
+          || (axios.isAxiosError(refreshError) && (
+            refreshError.response?.status === 401
+            || refreshError.response?.data?.error === 'invalid_grant'
+          ));
+        if (expired) {
+          clearSessionTokens();
+          clearAuthCache();
+          window.dispatchEvent(new CustomEvent('torii:session-cleared'));
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

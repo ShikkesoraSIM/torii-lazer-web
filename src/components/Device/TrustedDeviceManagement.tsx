@@ -15,6 +15,7 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
   const { t, i18n } = useTranslation();
   const [devicesData, setDevicesData] = useState<TrustedDevicesResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [removingDeviceId, setRemovingDeviceId] = useState<number | null>(null);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [deviceToRemove, setDeviceToRemove] = useState<TrustedDevice | null>(null);
@@ -23,10 +24,12 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
   const fetchDevices = async () => {
     try {
       setIsLoading(true);
+      setLoadError(false);
       const data = await deviceAPI.getTrustedDevices();
       setDevicesData(data);
     } catch (error) {
       console.error('Failed to fetch trusted devices:', error);
+      setLoadError(true);
       toast.error(t('settings.device.trustedDevices.loadError'));
     } finally {
       setIsLoading(false);
@@ -164,14 +167,27 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
       {isLoading ? (
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-osu-pink"></div>
-          <span className="ml-3 text-gray-500 dark:text-gray-400">
+          <span className="ml-3 text-gray-400">
             {t('settings.device.trustedDevices.loading')}
           </span>
+        </div>
+      ) : loadError ? (
+        <div className="text-center py-8 space-y-3">
+          <p className="text-red-400 text-sm">
+            {t('settings.device.trustedDevices.loadError')}
+          </p>
+          <button
+            type="button"
+            onClick={() => void fetchDevices()}
+            className="btn-secondary !px-4 !py-1.5 text-sm"
+          >
+            {t('common.retry', 'Retry')}
+          </button>
         </div>
       ) : !devicesData || devicesData.devices.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-4xl mb-3">📱</div>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-gray-400">
             {t('settings.device.trustedDevices.noDevices')}
           </p>
         </div>
@@ -194,7 +210,7 @@ const TrustedDeviceManagement: React.FC<TrustedDeviceManagementProps> = ({ class
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className={`flex items-center justify-between p-4 rounded-lg border ${
+                  className={`flex flex-wrap items-center justify-between gap-3 p-4 rounded-lg border ${
                     isCurrent
                       ? 'border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/10'
                       : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'

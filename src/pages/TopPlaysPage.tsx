@@ -73,9 +73,15 @@ const TopPlaysPage: React.FC = () => {
     initialMode && ALLOWED_MODES.includes(initialMode) ? initialMode : 'osu'
   );
   const [page, setPage] = useState(initialPage);
+  const [reloadKey, setReloadKey] = useState(0);
   const [scores, setScores] = useState<TopScoreRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const scrollToTop = useCallback(() => {
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  }, []);
 
   const sync = useCallback(
     (nextMode: GameMode, nextPage: number) => {
@@ -98,7 +104,7 @@ const TopPlaysPage: React.FC = () => {
       .catch((err) => {
         if (cancelled) return;
         console.error('Failed to load top plays:', err);
-        setError(t('rankings.errors.loadFailed', 'Failed to load top plays.'));
+        setError(t('rankings.errors.loadFailed', { defaultValue: 'Failed to load top plays.' }));
       })
       .finally(() => {
         if (cancelled) return;
@@ -108,13 +114,13 @@ const TopPlaysPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [mode, page, t]);
+  }, [mode, page, reloadKey, t]);
 
   const onModeChange = (next: GameMode) => {
     setMode(next);
     setPage(1);
     sync(next, 1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
   };
 
   const onPrev = () => {
@@ -122,112 +128,113 @@ const TopPlaysPage: React.FC = () => {
     const next = page - 1;
     setPage(next);
     sync(mode, next);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
   };
 
   const onNext = () => {
     const next = page + 1;
     setPage(next);
     sync(mode, next);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
   };
 
-  // The backend doesn't tell us total count — when the current page
-  // has fewer than PAGE_SIZE rows we know we're at the end and can
-  // hide the Next button. Same heuristic the upstream UI uses.
   const hasMore = scores.length === PAGE_SIZE;
 
   return (
-    <div className="max-w-5xl mx-auto px-3 md:px-6 py-6">
-      <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-            Top Plays
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Highest-PP scores across the server, ordered by performance points.
-          </p>
+    <div className="min-h-screen torii-page-stage">
+      <div className="max-w-7xl 3xl:max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6 flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary">
+              {t('rankings.topPlays.title', { defaultValue: 'Top Plays' })}
+            </h1>
+            <p className="text-sm sm:text-base text-text-secondary mt-1.5">
+              {t('rankings.topPlays.subtitle', { defaultValue: 'Highest-PP scores across the server, ordered by performance points.' })}
+            </p>
+          </div>
+          <div className="torii-liquid-soft rounded-2xl p-2">
+            <GameModeSelector selectedMode={mode} onModeChange={onModeChange} variant="compact" />
+          </div>
         </div>
-        <GameModeSelector selectedMode={mode} onModeChange={onModeChange} />
-      </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <LoadingSpinner />
-        </div>
-      ) : error ? (
-        <div className="bg-red-500/10 border border-red-500/30 text-red-200 rounded-2xl p-5 flex items-center justify-between gap-3">
-          <span>{error}</span>
-          <button
-            onClick={() => setPage(page)}
-            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
-          >
-            Retry
-          </button>
-        </div>
-      ) : scores.length === 0 ? (
-        <div className="text-center py-16 text-gray-500 dark:text-gray-400">
-          No scores on this page.
-        </div>
-      ) : (
-        <ul className="space-y-2">
-          {scores.map((s, idx) => {
-            const rankNumber = (page - 1) * PAGE_SIZE + idx + 1;
-            const cover = s.beatmapset?.covers?.list || s.beatmapset?.covers?.card;
-            const mods = formatMods(s.mods);
-            return (
-              <li
-                key={s.id}
-                className="flex items-center gap-3 p-3 rounded-xl bg-card border border-card hover:border-osu-pink/40 transition-colors"
+        <div className="torii-liquid rounded-3xl p-3 sm:p-6">
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : error ? (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-200 rounded-2xl p-5 flex items-center justify-between gap-3 flex-wrap">
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-sm font-semibold transition-colors"
               >
-                <div className="w-10 text-right font-bold text-gray-500 dark:text-gray-400 tabular-nums">
-                  #{rankNumber}
-                </div>
-
-                {/* Beatmap thumbnail */}
-                <Link
-                  to={`/beatmapsets/${s.beatmapset?.id ?? ''}#${s.beatmap?.id ?? ''}`}
-                  className="flex-shrink-0 w-16 h-12 rounded-md overflow-hidden bg-gray-200 dark:bg-gray-800"
-                >
-                  {cover && (
-                    <img
-                      src={cover}
-                      alt=""
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                </Link>
-
-                {/* Beatmap title + diff */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                    {s.beatmapset?.artist} — {s.beatmapset?.title}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    [{s.beatmap?.version || '—'}]
-                    {s.beatmap?.difficulty_rating != null && (
-                      <span className="ml-2">★ {s.beatmap.difficulty_rating.toFixed(2)}</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* User */}
-                {s.user && (
-                  <Link
-                    to={`/users/${s.user.id}`}
-                    className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-md hover:bg-white/5"
+                {t('common.retry', { defaultValue: 'Retry' })}
+              </button>
+            </div>
+          ) : scores.length === 0 ? (
+            <div className="text-center py-16 text-text-muted">
+              {t('rankings.topPlays.empty', { defaultValue: 'No scores on this page.' })}
+            </div>
+          ) : (
+            <ul className="space-y-2.5">
+              {scores.map((s, idx) => {
+                const rankNumber = (page - 1) * PAGE_SIZE + idx + 1;
+                const cover = s.beatmapset?.covers?.list || s.beatmapset?.covers?.card;
+                const mods = formatMods(s.mods);
+                return (
+                  <li
+                    key={s.id}
+                    className="flex flex-wrap sm:flex-nowrap items-center gap-3 p-3 rounded-2xl bg-card border border-white/10 hover:border-torii/45 transition-colors"
                   >
-                    {s.user.avatar_url && (
-                      <img
-                        src={s.user.avatar_url}
-                        alt={s.user.username}
-                        className="w-7 h-7 rounded-full"
-                      />
-                    )}
-                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate max-w-[8rem]">
-                      {s.user.username}
-                    </span>
+                    <div className="w-9 text-right font-bold text-text-muted tabular-nums flex-shrink-0">
+                      #{rankNumber}
+                    </div>
+
+                    <Link
+                      to={`/beatmapsets/${s.beatmapset?.id ?? ''}#${s.beatmap?.id ?? ''}`}
+                      className="flex-shrink-0 w-16 h-12 rounded-xl overflow-hidden bg-white/5"
+                    >
+                      {cover && (
+                        <img
+                          src={cover}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      )}
+                    </Link>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-text-primary truncate">
+                        {s.beatmapset?.artist} — {s.beatmapset?.title}
+                      </div>
+                      <div className="text-xs text-text-muted truncate">
+                        [{s.beatmap?.version || '—'}]
+                        {s.beatmap?.difficulty_rating != null && (
+                          <span className="ml-2">★ {s.beatmap.difficulty_rating.toFixed(2)}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {s.user && (
+                      <Link
+                        to={`/users/${s.user.id}`}
+                        className="flex items-center gap-2 px-2 py-1 rounded-xl hover:bg-white/5 min-w-0"
+                      >
+                        {s.user.avatar_url && (
+                          <img
+                            src={s.user.avatar_url}
+                            alt=""
+                            className="hidden sm:block w-7 h-7 rounded-full flex-shrink-0"
+                            loading="lazy"
+                          />
+                        )}
+                        <span className="text-xs sm:text-sm font-medium text-text-primary truncate max-w-[7rem] sm:max-w-[8rem]">
+                          {s.user.username}
+                        </span>
                   </Link>
                 )}
 
@@ -238,7 +245,7 @@ const TopPlaysPage: React.FC = () => {
                       +{mods}
                     </span>
                   )}
-                  <span className="text-sm tabular-nums text-gray-700 dark:text-gray-300">
+                  <span className="text-sm tabular-nums text-text-secondary">
                     {formatAccuracy(s.accuracy)}
                   </span>
                   <span className="text-sm font-bold tabular-nums text-osu-pink min-w-[5rem]">
@@ -250,30 +257,34 @@ const TopPlaysPage: React.FC = () => {
           })}
         </ul>
       )}
+        </div>
 
       {/* Pagination — only render when there's actually more data to
           show or to walk back to. Hides on a fresh-load empty page. */}
       {!loading && !error && (page > 1 || hasMore) && (
         <div className="mt-6 flex items-center justify-center gap-3">
           <button
+            type="button"
             onClick={onPrev}
             disabled={page <= 1}
-            className="px-4 py-2 rounded-xl bg-card border border-card disabled:opacity-40 hover:border-osu-pink/40 transition-colors"
+            className="px-4 py-2 rounded-xl torii-liquid-soft text-text-primary disabled:opacity-40 hover:border-torii/40 transition-colors"
           >
             ← Prev
           </button>
-          <span className="text-sm text-gray-500 dark:text-gray-400 tabular-nums">
+          <span className="text-sm text-text-secondary tabular-nums">
             Page {page}
           </span>
           <button
+            type="button"
             onClick={onNext}
             disabled={!hasMore}
-            className="px-4 py-2 rounded-xl bg-card border border-card disabled:opacity-40 hover:border-osu-pink/40 transition-colors"
+            className="px-4 py-2 rounded-xl torii-liquid-soft text-text-primary disabled:opacity-40 hover:border-torii/40 transition-colors"
           >
             Next →
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 };

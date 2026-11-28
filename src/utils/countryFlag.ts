@@ -11,12 +11,14 @@ const TWEMOJI_BASE = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/
 
 /** Build the Twemoji flag SVG URL for an ISO 3166-1 alpha-2 country code. */
 export function twemojiFlagUrl(code: string): string {
-  const cp = code
-    .trim()
-    .toUpperCase()
+  const normalized = code.trim().toUpperCase();
+  if (!normalized || normalized.includes('-') || normalized === 'XK') {
+    return '';
+  }
+  const cp = normalized
     .replace(/[^A-Z]/g, '')
     .split('')
     .map((ch) => (0x1f1e6 + ch.charCodeAt(0) - 65).toString(16))
     .join('-');
-  return `${TWEMOJI_BASE}/${cp}.svg`;
+  return cp ? `${TWEMOJI_BASE}/${cp}.svg` : '';
 }

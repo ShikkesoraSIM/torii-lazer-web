@@ -43,13 +43,13 @@ const GROUPS: Group[] = [
     features: [
       { name: "Daily Briefing", description: "On login, a card comparing this session to your last: global and country rank, pp, recalc gains and losses on your top scores, unread chat, and snipe and leaderboard events. Reopen or refresh it in Settings > Torii > Briefing." },
       { name: "Recalculation replay", description: "Re-shows the per-score pp gains and losses from the last server-side mass recalc, each top play listed as old pp to new pp. Settings > Torii > Briefing, 'Replay last recalc'." },
-      { name: "Legacy song select", description: "Makes song select look like osu!stable: the skinnable stable footer, with the modern filter bar and info wedges hidden. Settings > Torii > Song Select." },
-      { name: "Legacy footer", description: "Just the stable-style footer over the normal lazer song select. Settings > Torii > Song Select, and only changeable while full legacy song select is off." },
+      { name: "Legacy song select", description: "Makes song select look like classic stable: the skinnable stable footer, with the modern filter bar and info wedges hidden. Settings > Torii > Song Select." },
+      { name: "Legacy footer", description: "Just the stable-style footer over the normal modern song select. Settings > Torii > Song Select, and only changeable while full legacy song select is off." },
       { name: "Unslanted song select", description: "Re-renders the slanted song-select panels as straight rectangles. 'Strictly vertical UI (no slant)' in Settings > Torii > Song Select. Takes effect next time you enter song select." },
       { name: "Auto-hide toolbar", description: "Hides the top toolbar and reveals it when the cursor reaches the top edge of the screen, then tucks it away after about 1.5s. Settings > Torii > Menus." },
       { name: "Key debounce", description: "Drops a gameplay key press that fires too soon after that same key's last release, filtering chatter from rapid-trigger or hall-effect keyboards and worn switches. Settings > Input, 'Filter double-taps', with a threshold slider (15ms to start). Gameplay keys only, never typing." },
-      { name: "Migration wizard", description: "On first launch it finds an existing osu!lazer data folder and offers to link to it so you reuse your maps, skins, scores and collections right away, or keep Torii portable. Linking needs a restart." },
-      { name: "Data-source switch", description: "Switch the client's data between its own portable Torii folder and a linked osu!lazer one. Settings > Torii, 'Manage Torii data source'; applies after a restart. Ships pointed at the portable folder." },
+      { name: "Migration wizard", description: "On first launch it finds an existing compatible data folder and offers to link to it so you reuse your maps, skins, scores and collections right away, or keep Torii portable. Linking needs a restart." },
+      { name: "Data-source switch", description: "Switch the client's data between its own portable Torii folder and a linked compatible one. Settings > Torii, 'Manage Torii data source'; applies after a restart. Ships pointed at the portable folder." },
       { name: "Restriction notice", description: "If your account is restricted, you get a panel explaining the reason and whether or when it lifts, with a Discord button to appeal, instead of just bouncing off the login form." },
       { name: "NEW badges", description: "A small NEW tag on a setting Torii just added, so it is easy to find. It clears for good after you use that control three times." },
     ],
@@ -110,7 +110,8 @@ export default function WikiFeaturesPage() {
       accent="violet"
       intro={
         <>
-          Torii is a custom osu!lazer build, so it carries a pile of things stock osu! does not.
+          Torii is an independent community project.
+          It is not affiliated with, endorsed by, or supported by ppy Pty Ltd.
           Here is what is in it.
         </>
       }

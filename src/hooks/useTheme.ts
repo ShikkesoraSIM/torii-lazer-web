@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import type { Theme } from '../types';
 
+const noop = () => {};
+
 /**
  * Torii is dark-only by design. The light-mode tokens were never finished and
  * the glass surfaces are forced dark via CSS, so a real light mode renders
@@ -11,14 +13,7 @@ import type { Theme } from '../types';
 export const useTheme = () => {
   useEffect(() => {
     document.documentElement.classList.add('dark');
-    try {
-      localStorage.setItem('theme', 'dark');
-    } catch {
-      /* ignore storage errors */
-    }
   }, []);
-
-  const noop = () => {};
 
   return {
     theme: 'dark' as Theme,

@@ -57,7 +57,7 @@ const DefaultModeSelector: React.FC = () => {
       setCurrentMode(selectedMode);
       setIsEditing(false);
       toast.success(t('settings.preferences.defaultMode.success'));
-    } catch (error) {
+    } catch {
       toast.error(t('settings.preferences.defaultMode.error'));
       setSelectedMode(currentMode);
     } finally {

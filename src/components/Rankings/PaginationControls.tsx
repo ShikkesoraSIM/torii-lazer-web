@@ -12,9 +12,9 @@ export default function PaginationControls({ total, currentPage, onPageChange }:
   if (totalPages <= 1) return null;
 
   const base =
-    'px-4 py-2 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25';
-  const inactive = `${base} border border-white/10 bg-white/[0.05] text-white/70 hover:bg-white/10 hover:text-white`;
-  const active = `${base} border border-osu-pink bg-osu-pink text-white shadow-[0_6px_18px_-8px_rgba(0,0,0,0.6)]`;
+    'px-2.5 sm:px-4 py-2 min-h-[38px] rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii';
+  const inactive = `${base} border border-white/10 bg-white/[0.05] text-white/75 hover:bg-white/10 hover:text-white`;
+  const active = `${base} border border-torii bg-torii text-white shadow-elev-1`;
 
   const pages: ReactNode[] = [];
   const maxVisiblePages = 5;

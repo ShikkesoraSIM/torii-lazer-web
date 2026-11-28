@@ -30,8 +30,8 @@ const FAQ: { q: string; a: React.ReactNode }[] = [
     q: "Do unranked / graveyard maps count?",
     a: (
       <>
-        Yes. On Torii, unranked, graveyard and loved maps give pp and have leaderboards. On official osu!
-        standard those give no pp at all, so this is a real difference.
+        Yes. On Torii, unranked, graveyard and loved maps give pp and have leaderboards. On official upstream
+        servers those give no pp at all, so this is a real difference.
       </>
     ),
   },
@@ -47,7 +47,7 @@ const FAQ: { q: string; a: React.ReactNode }[] = [
     q: "Can I use custom Double Time / Half Time rates?",
     a: (
       <>
-        Yes. Custom rate variants of DT, NC, HT, DC and Easy still earn pp on Torii, unlike official osu!.
+        Yes. Custom rate variants of DT, NC, HT, DC and Easy still earn pp on Torii, unlike official upstream.
       </>
     ),
   },

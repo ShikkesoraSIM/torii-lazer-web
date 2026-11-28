@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Tooltip } from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
 import RankBadge from '../UI/RankBadge';
 import LazyBackgroundImage from '../UI/LazyBackgroundImage';
@@ -108,21 +107,13 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
             />
           )}
           {ranking.user.team && (
-            <>
-              <LazyFlag
-                src={ranking.user.team.flag_url}
-                alt={ranking.user.team.short_name}
-                className="w-3 h-2 sm:w-4 sm:h-3 rounded-sm flex-shrink-0 ml-1"
-                data-tooltip-id={`team-tooltip-ranking-${ranking.user.id}`}
-                data-tooltip-content={ranking.user.team.short_name}
-              />
-              <Tooltip
-                id={`team-tooltip-ranking-${ranking.user.id}`}
-                place="bottom"
-                float={true}
-                style={{ zIndex: 9999 }}
-              />
-            </>
+            <LazyFlag
+              src={ranking.user.team.flag_url}
+              alt={ranking.user.team.short_name}
+              className="w-3 h-2 sm:w-4 sm:h-3 rounded-sm flex-shrink-0 ml-1"
+              data-tooltip-id="team-tooltip-ranking"
+              data-tooltip-content={ranking.user.team.short_name}
+            />
           )}
         </div>
       </div>
@@ -132,7 +123,7 @@ const UserRankingCard: React.FC<Props> = ({ ranking, rank, selectedMode, ranking
           {primaryValue}
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:gap-3 text-[11px] sm:text-xs text-white/65">
+        <div className="flex flex-col sm:flex-row sm:gap-3 text-2xs sm:text-xs text-white/65">
           {secondaryValue && <div className="whitespace-nowrap">{secondaryValue}</div>}
           {accuracyValue && <div className="whitespace-nowrap">{accuracyValue}</div>}
         </div>

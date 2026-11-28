@@ -207,36 +207,36 @@ const ScoreCard: React.FC<{
                 <div className="flex items-baseline gap-1 text-sm leading-tight">
                   <BeatmapLink
                     beatmapUrl={beatmapUrl}
-                    className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 truncate transition-colors"
+                    className="font-semibold text-white hover:text-torii truncate transition-colors"
                     title={title}
                   >
                     {title}
                   </BeatmapLink>
-                  <span className="text-gray-600 dark:text-gray-400 text-xs flex-shrink-0">
+                  <span className="text-gray-400 text-xs flex-shrink-0">
                     {t('profile.bestScores.by')}
                   </span>
-                  <span className="text-gray-600 dark:text-gray-400 text-xs truncate">
+                  <span className="text-gray-400 text-xs truncate">
                     {artist}
                   </span>
                 </div>
                 
                 <div className="flex items-center gap-3 text-xs">
-                  <span className="text-yellow-600 dark:text-yellow-400 font-medium">
+                  <span className="text-yellow-400 font-medium truncate max-w-[180px]">
                     {version}
                   </span>
-                  <span className="text-gray-500 dark:text-gray-400">
+                  <span className="text-gray-400 flex-shrink-0">
                     {endedAt}
                   </span>
                   <ClientVersionDisplay
                     clientVersion={score.client_version}
                     mode={clientDisplayMode}
-                    className="text-gray-500 dark:text-gray-400 truncate max-w-[220px]"
+                    className="text-gray-400 truncate max-w-[220px]"
                   />
                   <Link
                     to={`/scores/${score.id}`}
-                    className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium"
+                    className="text-osu-pink hover:text-osu-pink/80 transition-colors font-medium flex-shrink-0"
                   >
-                    View score
+                    {t('profile.bestScores.viewScore', 'View score')}
                   </Link>
                 </div>
               </div>
@@ -244,14 +244,14 @@ const ScoreCard: React.FC<{
 
             <div className="flex-shrink-0 flex items-center gap-2 mr-6">
               <ScoreModsDisplay mods={mods} />
-              <div className="text-sm font-bold text-cyan-600 dark:text-cyan-300 ml-2 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+              <div className="text-sm font-bold text-cyan-300 ml-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] tabular-nums">
                 {accuracy}%
               </div>
             </div>
           </div>
 
           <div className="absolute right-0 top-0 h-full flex items-center justify-center gap-2 pr-2">
-            <div className="text-sm font-bold torii-pp-gradient drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+            <div className="text-sm font-bold torii-pp-gradient drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] tabular-nums">
               {originalPp} PP
             </div>
             {canEdit && (
@@ -288,15 +288,15 @@ const ScoreCard: React.FC<{
               <div className="flex items-baseline gap-1 text-sm leading-tight mb-1">
                 <BeatmapLink
                   beatmapUrl={beatmapUrl}
-                  className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 truncate transition-colors"
+                  className="font-semibold text-white hover:text-torii truncate transition-colors"
                   title={title}
                 >
                   {title}
                 </BeatmapLink>
-                <span className="text-gray-600 dark:text-gray-400 text-xs flex-shrink-0">
+                <span className="text-gray-400 text-xs flex-shrink-0">
                   {t('profile.bestScores.by')}
                 </span>
-                <span className="text-gray-600 dark:text-gray-400 text-xs truncate">
+                <span className="text-gray-400 text-xs truncate">
                   {artist}
                 </span>
               </div>

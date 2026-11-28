@@ -20,13 +20,14 @@ const OAuthAppsSection: React.FC = () => {
   
   const [deleteConfirm, setDeleteConfirm] = useState<{ clientId: number; name: string } | null>(null);
   const [refreshConfirm, setRefreshConfirm] = useState<{ clientId: number; name: string } | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
 
   const loadApps = async () => {
     try {
       setIsLoading(true);
       const data = await oauthAPI.list();
       setApps(data);
-    } catch (error) {
+    } catch {
       toast.error(t('settings.oauth.errors.loadFailed'));
     } finally {
       setIsLoading(false);
@@ -43,7 +44,7 @@ const OAuthAppsSection: React.FC = () => {
       setCopiedField(field);
       toast.success(t('settings.oauth.copied'));
       setTimeout(() => setCopiedField(null), 2000);
-    } catch (error) {
+    } catch {
       toast.error(t('settings.oauth.errors.copyFailed'));
     }
   };
@@ -53,15 +54,17 @@ const OAuthAppsSection: React.FC = () => {
   };
 
   const confirmDelete = async () => {
-    if (!deleteConfirm) return;
+    if (!deleteConfirm || isMutating) return;
 
+    setIsMutating(true);
     try {
       await oauthAPI.delete(deleteConfirm.clientId);
       toast.success(t('settings.oauth.deleteSuccess'));
       loadApps();
-    } catch (error) {
+    } catch {
       toast.error(t('settings.oauth.errors.deleteFailed'));
     } finally {
+      setIsMutating(false);
       setDeleteConfirm(null);
     }
   };
@@ -71,8 +74,9 @@ const OAuthAppsSection: React.FC = () => {
   };
 
   const confirmRefreshSecret = async () => {
-    if (!refreshConfirm) return;
+    if (!refreshConfirm || isMutating) return;
 
+    setIsMutating(true);
     try {
       const response = await oauthAPI.refreshSecret(refreshConfirm.clientId);
       setNewAppResponse({
@@ -85,9 +89,10 @@ const OAuthAppsSection: React.FC = () => {
       });
       toast.success(t('settings.oauth.refreshSuccess'));
       loadApps();
-    } catch (error) {
+    } catch {
       toast.error(t('settings.oauth.errors.refreshFailed'));
     } finally {
+      setIsMutating(false);
       setRefreshConfirm(null);
     }
   };
@@ -218,17 +223,17 @@ const OAuthAppCard: React.FC<OAuthAppCardProps> = ({
       animate={{ opacity: 1, y: 0 }}
       className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow"
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+          <h3 className="text-lg font-semibold text-white mb-1 break-words">
             {app.name}
           </h3>
           {app.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <p className="text-sm text-gray-400 mb-2 break-words">
               {app.description}
             </p>
           )}
-          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
             <div className="flex items-center gap-1">
               <span className="font-medium">{t('settings.oauth.clientId')}:</span>
               <button
@@ -372,7 +377,7 @@ const CreateEditModal: React.FC<CreateEditModalProps> = ({
         toast.success(t('settings.oauth.createSuccess'));
         onSuccess(response);
       }
-    } catch (error) {
+    } catch {
       toast.error(
         app
           ? t('settings.oauth.errors.updateFailed')

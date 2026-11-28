@@ -31,34 +31,25 @@ export const VerificationProvider: React.FC<VerificationProviderProps> = ({ chil
   };
 
   const handleVerify = async (code: string): Promise<void> => {
-    try {
-      await verificationAPI.verify(code);
-      setIsModalOpen(false);
-      if (resolveVerification) {
-        resolveVerification();
-        setResolveVerification(null);
-        setRejectVerification(null);
-      }
-      // Reload the page after success so API requests are re-issued
-      window.location.reload();
-    } catch (error) {
-      // On failure, rethrow so the modal can display the error message
-      throw error;
+    await verificationAPI.verify(code);
+    setIsModalOpen(false);
+    if (resolveVerification) {
+      resolveVerification();
+      setResolveVerification(null);
+      setRejectVerification(null);
     }
+    // Reload the page after success so API requests are re-issued
+    window.location.reload();
   };
 
   const handleSwitchMethod = async (): Promise<void> => {
-    try {
-      if (currentMethod === 'totp') {
-        // Switch from TOTP to email verification
-        await verificationAPI.switchToMailFallback();
-        setCurrentMethod('mail');
-      } else {
-        // Switch from email back to TOTP (may need adjusting depending on the API design)
-        setCurrentMethod('totp');
-      }
-    } catch (error) {
-      throw error;
+    if (currentMethod === 'totp') {
+      // Switch from TOTP to email verification
+      await verificationAPI.switchToMailFallback();
+      setCurrentMethod('mail');
+    } else {
+      // Switch from email back to TOTP
+      setCurrentMethod('totp');
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
   matchmakingAPI,
@@ -158,17 +158,22 @@ const AdminMatchmaking: React.FC = () => {
     loadPools();
   }, []);
 
-  // When the user expands a pool, hydrate edit form + load beatmaps.
+  // Track last hydrated pool ID so background pools refreshes do not wipe in-progress edits
+  const hydratedPoolIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (editingPoolId == null) {
+      hydratedPoolIdRef.current = null;
       setEditForm(null);
       setPoolBeatmaps([]);
       setLastBulkResult(null);
       setBulkInput('');
       return;
     }
+    if (hydratedPoolIdRef.current === editingPoolId) return;
     const pool = pools.find((p) => p.id === editingPoolId);
     if (!pool) return;
+    hydratedPoolIdRef.current = editingPoolId;
     setEditForm({
       ruleset_id: pool.ruleset_id,
       name: pool.name,

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 
@@ -24,6 +24,7 @@ interface AudioContextType extends AudioState {
 
 const AudioContext = createContext<AudioContextType | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAudio = () => {
   const context = useContext(AudioContext);
   if (!context) {
@@ -38,6 +39,8 @@ interface AudioProviderProps {
 
 export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const currentUrlRef = useRef<string | undefined>(undefined);
+  const lastTimeEmitRef = useRef<number>(0);
   const [state, setState] = useState<AudioState>({
     isPlaying: false,
     currentTime: 0,
@@ -51,9 +54,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   useEffect(() => {
     const audio = new Audio();
     audioRef.current = audio;
-
-    // Set initial volume
-    audio.volume = state.volume;
+    audio.volume = 0.7;
 
     const handleLoadStart = () => {
       setState(prev => ({ ...prev, isLoading: true }));
@@ -72,6 +73,9 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     };
 
     const handleTimeUpdate = () => {
+      const now = performance.now();
+      if (now - lastTimeEmitRef.current < 240 && !audio.ended) return;
+      lastTimeEmitRef.current = now;
       setState(prev => ({
         ...prev,
         currentTime: audio.currentTime,
@@ -131,18 +135,17 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (state.currentUrl !== url) {
+    if (currentUrlRef.current !== url) {
+      currentUrlRef.current = url;
       audio.src = url;
       setState(prev => ({ ...prev, currentUrl: url, currentTime: 0 }));
     }
 
     audio.play().catch(console.error);
-  }, [state.currentUrl]);
+  }, []);
 
   const pause = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.pause();
+    audioRef.current?.pause();
   }, []);
 
   const stop = useCallback(() => {
@@ -157,6 +160,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     const audio = audioRef.current;
     if (!audio) return;
     audio.currentTime = time;
+    setState(prev => ({ ...prev, currentTime: time }));
   }, []);
 
   const setVolume = useCallback((volume: number) => {
@@ -171,7 +175,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     audio.muted = !audio.muted;
   }, []);
 
-  const contextValue: AudioContextType = {
+  const contextValue = useMemo<AudioContextType>(() => ({
     ...state,
     play,
     pause,
@@ -180,7 +184,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     setVolume,
     toggleMute,
     audioElement: audioRef.current,
-  };
+  }), [state, play, pause, stop, seek, setVolume, toggleMute]);
 
   return (
     <AudioContext.Provider value={contextValue}>
@@ -346,76 +350,80 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Progress bar drag handling
-  const updateProgressFromMouse = useCallback((e: MouseEvent | React.MouseEvent) => {
+  const updateProgressFromClientX = useCallback((clientX: number) => {
     if (!progressRef.current || !duration) return;
-    
     const rect = progressRef.current.getBoundingClientRect();
-    const progress = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    seek(progress * duration);
+    if (!rect.width) return;
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    seek(ratio * duration);
   }, [duration, seek]);
 
-  const handleProgressMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleProgressPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
     setIsDraggingProgress(true);
-    updateProgressFromMouse(e);
-  }, [updateProgressFromMouse]);
+    updateProgressFromClientX(e.clientX);
+  }, [updateProgressFromClientX]);
 
-  const handleProgressClick = useCallback((e: React.MouseEvent) => {
-    if (!isDraggingProgress) {
-      updateProgressFromMouse(e);
-    }
-  }, [isDraggingProgress, updateProgressFromMouse]);
-
-  // Volume bar drag handling
-  const updateVolumeFromMouse = useCallback((e: MouseEvent | React.MouseEvent) => {
+  const updateVolumeFromClientX = useCallback((clientX: number) => {
     if (!volumeRef.current) return;
-    
     const rect = volumeRef.current.getBoundingClientRect();
-    const volume = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    setVolume(volume);
+    if (!rect.width) return;
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    setVolume(ratio);
   }, [setVolume]);
 
-  const handleVolumeMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleVolumePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
     setIsDraggingVolume(true);
-    updateVolumeFromMouse(e);
-  }, [updateVolumeFromMouse]);
+    updateVolumeFromClientX(e.clientX);
+  }, [updateVolumeFromClientX]);
 
-  const handleVolumeClick = useCallback((e: React.MouseEvent) => {
-    if (!isDraggingVolume) {
-      updateVolumeFromMouse(e);
+  const handleProgressKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!duration) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      seek(Math.min(duration, currentTime + 5));
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      seek(Math.max(0, currentTime - 5));
     }
-  }, [isDraggingVolume, updateVolumeFromMouse]);
+  }, [currentTime, duration, seek]);
 
-  // Global mouse event handling
+  const handleVolumeKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      setVolume(Math.min(1, volume + 0.1));
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      setVolume(Math.max(0, volume - 0.1));
+    }
+  }, [volume, setVolume]);
+
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDraggingProgress) {
-        updateProgressFromMouse(e);
-      }
-      if (isDraggingVolume) {
-        updateVolumeFromMouse(e);
-      }
+    const handlePointerMove = (e: PointerEvent) => {
+      if (isDraggingProgress) updateProgressFromClientX(e.clientX);
+      if (isDraggingVolume) updateVolumeFromClientX(e.clientX);
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       setIsDraggingProgress(false);
       setIsDraggingVolume(false);
     };
 
     if (isDraggingProgress || isDraggingVolume) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.userSelect = 'none'; // prevent text selection while dragging
+      document.addEventListener('pointermove', handlePointerMove);
+      document.addEventListener('pointerup', handlePointerUp);
+      document.addEventListener('pointercancel', handlePointerUp);
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.userSelect = '';
+      document.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('pointerup', handlePointerUp);
+      document.removeEventListener('pointercancel', handlePointerUp);
     };
-  }, [isDraggingProgress, isDraggingVolume, updateProgressFromMouse, updateVolumeFromMouse]);
+  }, [isDraggingProgress, isDraggingVolume, updateProgressFromClientX, updateVolumeFromClientX]);
 
   if (!currentUrl) return null;
 
@@ -424,122 +432,82 @@ export const AudioPlayerControls: React.FC<AudioPlayerControlsProps> = ({ classN
       fixed bottom-4 right-4 z-50
       w-1/3 min-w-[280px] max-w-[400px]
       sm:min-w-[320px] md:w-1/3 lg:w-1/4
-      bg-card border border-gray-200 dark:border-gray-700
-      rounded-xl shadow-lg backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95
+      bg-[#0d122c]/95 border border-white/15
+      rounded-2xl shadow-elev-3 backdrop-blur-md
       px-3 py-2 flex items-center gap-2 sm:gap-3
       max-sm:bottom-2 max-sm:right-2 max-sm:left-2 max-sm:w-auto
       ${className}
     `}>
-      {/* Play/pause button */}
-      <motion.button
+      <button
+        type="button"
         onClick={isPlaying ? pause : () => currentUrl && play(currentUrl)}
-        className="flex items-center justify-center w-8 h-8 rounded-full bg-osu-pink hover:bg-osu-pink/80 text-white transition-colors shadow-lg flex-shrink-0"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+        className="flex items-center justify-center w-8 h-8 rounded-full bg-torii hover:bg-torii-hover active:scale-95 text-white transition flex-shrink-0 shadow-elev-1"
       >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={isPlaying ? 'pause' : 'play'}
-            initial={{ opacity: 0, rotate: -90 }}
-            animate={{ opacity: 1, rotate: 0 }}
-            exit={{ opacity: 0, rotate: 90 }}
-            transition={{ duration: 0.15 }}
-          >
-            {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
-          </motion.div>
-        </AnimatePresence>
-      </motion.button>
+        {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+      </button>
 
       {/* Progress bar */}
       <div className="flex-1 flex items-center gap-1 sm:gap-2">
-        <span className="text-xs text-gray-600 dark:text-gray-400 min-w-[28px] sm:min-w-[32px] hidden xs:block">
+        <span className="text-xs text-text-muted min-w-[28px] sm:min-w-[32px] hidden xs:block">
           {formatTime(currentTime)}
         </span>
-        
-        <motion.div
+
+        <div
           ref={progressRef}
-          onClick={handleProgressClick}
-          onMouseDown={handleProgressMouseDown}
-          className={`flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer group overflow-hidden ${
+          role="slider"
+          tabIndex={0}
+          aria-label="Audio playback position"
+          aria-valuemin={0}
+          aria-valuemax={Math.round(duration)}
+          aria-valuenow={Math.round(currentTime)}
+          onKeyDown={handleProgressKeyDown}
+          onPointerDown={handleProgressPointerDown}
+          className={`flex-1 h-2 bg-white/15 rounded-full group overflow-hidden touch-none ${
             isDraggingProgress ? 'cursor-grabbing' : 'cursor-pointer'
           }`}
-          whileHover={{ height: 8 }}
-          transition={{ duration: 0.2 }}
         >
           <div
-            className="h-full bg-osu-pink rounded-full relative group-hover:bg-osu-pink/90 shadow-sm transition-all duration-100"
-            style={{ 
-              width: `${progress}%`,
-            }}
-          >
-            {/* Progress bar shine effect */}
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
-              animate={{ x: ['-100%', '100%'] }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-                repeatDelay: 1
-              }}
-            />
-            
-            {/* Drag handle shown on hover */}
-            <div
-              className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-osu-pink rounded-full shadow-lg border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            />
-          </div>
-        </motion.div>
-        
-        <span className="text-xs text-gray-600 dark:text-gray-400 min-w-[28px] sm:min-w-[32px] hidden xs:block">
+            className="h-full bg-torii rounded-full relative"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        <span className="text-xs text-text-muted min-w-[28px] sm:min-w-[32px] hidden xs:block">
           {formatTime(duration)}
         </span>
       </div>
 
       {/* Volume control */}
-      <div className="flex items-center gap-1 flex-shrink-0 hidden sm:flex">
-        <motion.button
+      <div className="items-center gap-1.5 flex-shrink-0 hidden sm:flex">
+        <button
+          type="button"
           onClick={toggleMute}
-          className="p-1 text-gray-600 dark:text-gray-400 hover:text-osu-pink transition-colors rounded"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          aria-label={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
+          className="p-1 text-text-muted hover:text-torii transition-colors rounded"
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={isMuted || volume === 0 ? 'muted' : 'unmuted'}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.15 }}
-            >
-              {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            </motion.div>
-          </AnimatePresence>
-        </motion.button>
-        
-        <motion.div
+          {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
+        </button>
+
+        <div
           ref={volumeRef}
-          onClick={handleVolumeClick}
-          onMouseDown={handleVolumeMouseDown}
-          className={`w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full group overflow-hidden ${
+          role="slider"
+          tabIndex={0}
+          aria-label="Audio volume"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(volumeProgress)}
+          onKeyDown={handleVolumeKeyDown}
+          onPointerDown={handleVolumePointerDown}
+          className={`w-14 h-2 bg-white/15 rounded-full overflow-hidden touch-none ${
             isDraggingVolume ? 'cursor-grabbing' : 'cursor-pointer'
           }`}
-          whileHover={{ height: 6 }}
-          transition={{ duration: 0.2 }}
         >
           <div
-            className="h-full bg-osu-pink rounded-full relative group-hover:bg-osu-pink/90 transition-all duration-100"
-            style={{ 
-              width: `${volumeProgress}%`,
-            }}
-          >
-            <div 
-              className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-osu-pink rounded-full shadow-md border border-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            />
-          </div>
-        </motion.div>
+            className="h-full bg-torii rounded-full"
+            style={{ width: `${volumeProgress}%` }}
+          />
+        </div>
       </div>
     </div>
   );

@@ -11,7 +11,7 @@
 // hidden via the visibility API to avoid burning cycles for inactive
 // tabs.
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import { api } from '../../utils/api/client';
 
@@ -25,6 +25,7 @@ interface ServerStatus {
 
 const MaintenanceBanner: React.FC = () => {
   const [status, setStatus] = useState<ServerStatus | null>(null);
+  const bannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,9 +36,7 @@ const MaintenanceBanner: React.FC = () => {
         const res = await api.get<ServerStatus>(ENDPOINT);
         if (!cancelled) setStatus(res.data);
       } catch {
-        // Swallow — banner is best-effort. A 5xx on /server/status
-        // shouldn't make us flash an error to the user; we just keep
-        // showing whatever the last successful poll returned.
+        // Swallow — banner is best-effort.
       } finally {
         if (!cancelled && document.visibilityState === 'visible') {
           timer = setTimeout(tick, POLL_INTERVAL_MS);
@@ -47,13 +46,11 @@ const MaintenanceBanner: React.FC = () => {
 
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible' && !timer) {
-        // Coming back from a hidden tab — re-poll immediately and
-        // resume the schedule.
-        tick();
+        void tick();
       }
     };
 
-    tick();
+    void tick();
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
@@ -63,13 +60,34 @@ const MaintenanceBanner: React.FC = () => {
     };
   }, []);
 
-  if (!status?.maintenance) return null;
+  const visible = !!status?.maintenance;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const el = bannerRef.current;
+    if (!visible || !el) {
+      root.style.setProperty('--maintenance-banner-h', '0px');
+      return;
+    }
+    const update = () => root.style.setProperty('--maintenance-banner-h', `${el.offsetHeight}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.setProperty('--maintenance-banner-h', '0px');
+    };
+  }, [visible, status?.message]);
+
+  if (!visible || !status) return null;
 
   return (
     <div
+      ref={bannerRef}
       role="alert"
       aria-label="Server maintenance notice"
-      className="bg-amber-600/95 text-white text-sm shadow-md"
+      className="fixed left-0 right-0 z-[65] bg-amber-600/95 text-white text-sm shadow-md"
+      style={{ top: 'var(--restriction-banner-h, 0px)' }}
     >
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center gap-3">
         <FaExclamationTriangle className="w-4 h-4 flex-shrink-0" aria-hidden="true" />

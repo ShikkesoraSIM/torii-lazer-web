@@ -25,7 +25,7 @@ const choices: Array<{
   {
     id: 'torii-web',
     name: 'Torii Web',
-    description: 'An osu!web-style alternative. It\'s still under development, some features are missing and you bugs might happen.',
+    description: 'A classic web-style alternative. It\'s still under development, some features are missing and bugs might happen.',
     screenshot: '/image/frontend-choice/torii-web.webp',
   },
 ];

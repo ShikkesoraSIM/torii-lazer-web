@@ -18,7 +18,7 @@ export const homePage = {
     register: '注册',
     login: '登录',
     featuresTitle: '在这里可以做什么',
-    featuresSubtitle: 'osu! 之外的一些新玩法',
+    featuresSubtitle: '自定义评分、更多排名模组与专属外观',
     community: {
       qq: 'QQ群',
       discord: 'Discord',

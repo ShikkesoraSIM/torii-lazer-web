@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
 import type { Team } from '../../types';
@@ -86,12 +87,12 @@ const AdminTeams: React.FC = () => {
                     Created: {new Date(team.created_at).toLocaleDateString()}
                   </div>
                   <div className="flex items-center justify-end gap-2">
-                    <a
-                      href={`/teams/${team.id}/edit`}
+                    <Link
+                      to={`/teams/${team.id}/edit`}
                       className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
                     >
                       Edit
-                    </a>
+                    </Link>
                     <button
                       onClick={() => handleDelete(team.id)}
                       className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"

@@ -13,11 +13,12 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const base =
   'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition ' +
-  'duration-base ease-torii disabled:opacity-50 disabled:cursor-not-allowed select-none';
+  'duration-base ease-torii disabled:opacity-50 disabled:cursor-not-allowed select-none ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-torii focus-visible:ring-offset-2 focus-visible:ring-offset-[#030014]';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-osu-pink text-black hover:brightness-110 shadow-elev-1',
-  secondary: 'border border-white/10 bg-white/10 text-white hover:bg-white/[0.15]',
+  primary: 'bg-torii text-white hover:bg-torii-hover shadow-elev-1',
+  secondary: 'border border-white/15 bg-white/10 text-white hover:bg-white/[0.16]',
   danger: 'bg-red-600 text-white hover:bg-red-500',
   ghost: 'bg-transparent text-white/80 hover:bg-white/10',
 };
@@ -28,10 +29,6 @@ const SIZES: Record<Size, string> = {
   lg: 'h-12 px-6 text-base',
 };
 
-/**
- * The one button. Folds in the disabled/loading + spinner pattern that was
- * re-spelled across dozens of components. Variants map to the design tokens.
- */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     { variant = 'primary', size = 'md', loading = false, fullWidth = false, className = '', disabled, children, ...rest },
@@ -40,14 +37,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={`${base} ${VARIANTS[variant]} ${SIZES[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
       {...rest}
     >
       {loading && (
-        <span
-          className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-          aria-hidden
-        />
+        <>
+          <span
+            className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+            aria-hidden
+          />
+          <span className="sr-only">Loading</span>
+        </>
       )}
       {children}
     </button>

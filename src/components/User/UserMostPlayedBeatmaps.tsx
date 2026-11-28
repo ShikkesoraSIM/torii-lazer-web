@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 import { useProfileColor } from '../../contexts/ProfileColorContext';
@@ -99,7 +100,7 @@ const BeatmapCard: React.FC<BeatmapCardProps> = ({ item, idx, profileColor }) =>
         style={{ background: `linear-gradient(90deg, rgba(${themeRgb}, 0.22) 0%, rgba(${themeRgb}, 0.06) 45%, transparent 80%)` }}
       />
 
-      <div className="relative bg-transparent hover:bg-white/20 dark:hover:bg-gray-800/20 transition-colors duration-150 group">
+      <div className="relative bg-transparent hover:bg-white/[0.06] transition-colors duration-150 group">
         {/* Desktop layout */}
         <div className="hidden sm:block">
           <div className="flex items-center h-12 pl-5 pr-24">
@@ -108,30 +109,30 @@ const BeatmapCard: React.FC<BeatmapCardProps> = ({ item, idx, profileColor }) =>
               <div className="flex flex-col -space-y-0.5">
                 {/* Title and Artist */}
                 <div className="flex items-baseline gap-1 text-sm leading-tight">
-                  <a
-                    href={`/beatmapsets/${bsId}#osu/${bmId}`}
-                    className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 truncate transition-colors"
+                  <Link
+                    to={`/beatmapsets/${bsId}#osu/${bmId}`}
+                    className="font-semibold text-white hover:text-torii truncate transition-colors"
                     title={title}
                     data-tooltip-id={tooltipId}
                     data-tooltip-content={count ? `Played ${count} times` : undefined}
                   >
                     {title}
-                  </a>
-                  <span className="text-gray-600 dark:text-gray-400 text-xs flex-shrink-0">
+                  </Link>
+                  <span className="text-gray-400 text-xs flex-shrink-0">
                     {t('profile.bestScores.by') || 'by'}
                   </span>
-                  <span className="text-gray-600 dark:text-gray-400 text-xs truncate">
+                  <span className="text-gray-400 text-xs truncate">
                     {artist}
                   </span>
                 </div>
 
                 {/* Difficulty and Stats */}
                 <div className="flex items-center gap-3 text-xs">
-                  <span className="text-yellow-600 dark:text-yellow-400 font-medium">
+                  <span className="text-yellow-400 font-medium truncate max-w-[180px]">
                     {version}
                   </span>
-                  <span className="text-gray-500 dark:text-gray-400">
-                    {difficultyRating.toFixed(2)}?
+                  <span className="text-gray-400 tabular-nums">
+                    {difficultyRating.toFixed(2)}★
                   </span>
                 </div>
               </div>
@@ -141,7 +142,7 @@ const BeatmapCard: React.FC<BeatmapCardProps> = ({ item, idx, profileColor }) =>
           {/* Right side play count */}
           <div className="absolute right-0 top-0 h-full flex items-center justify-center pr-2">
             {count && (
-              <div className="flex items-center gap-1 text-sm font-bold text-pink-600 dark:text-pink-400 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+              <div className="flex items-center gap-1 text-sm font-bold text-pink-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] tabular-nums">
                 <FaPlay className="text-xs" />
                 {count}
               </div>
@@ -154,19 +155,19 @@ const BeatmapCard: React.FC<BeatmapCardProps> = ({ item, idx, profileColor }) =>
           <div className="flex-1">
             {/* Title and Artist */}
             <div className="flex items-baseline gap-1 text-sm leading-tight mb-1">
-              <a
-                href={`/beatmapsets/${bsId}#osu/${bmId}`}
-                className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 truncate transition-colors"
+              <Link
+                to={`/beatmapsets/${bsId}#osu/${bmId}`}
+                className="font-semibold text-white hover:text-torii truncate transition-colors"
                 title={title}
                 data-tooltip-id={tooltipId}
                 data-tooltip-content={count ? `Played ${count} times` : undefined}
               >
                 {title}
-              </a>
-              <span className="text-gray-600 dark:text-gray-400 text-xs flex-shrink-0">
+              </Link>
+              <span className="text-gray-400 text-xs flex-shrink-0">
                 {t('profile.bestScores.by') || 'by'}
               </span>
-              <span className="text-gray-600 dark:text-gray-400 text-xs truncate">
+              <span className="text-gray-400 text-xs truncate">
                 {artist}
               </span>
             </div>

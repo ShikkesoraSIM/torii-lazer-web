@@ -1,10 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { authAPI, userAPI, handleApiError, CLIENT_CONFIG, type RestrictionStatus } from '../utils/api';
 import type { User, TokenResponse } from '../types';
 import toast from 'react-hot-toast';
 import { apiCache } from '../utils/apiCache';
+import { AUTH_CACHE_KEYS, clearAuthCache } from '../utils/api/client';
+import { resetGlobalWebSocket } from '../hooks/useWebSocketNotifications';
+import { clearPendingLogout, clearSessionTokens, hasPendingLogout, hasSharedSession, logoutWebSession, rememberWebSession, restoreWebSession, storeSessionTokens } from '../utils/webSession';
 
 interface AuthContextType {
   user: User | null;
@@ -29,13 +32,6 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Cache keys
-const CACHE_KEYS = {
-  USER: 'cached_user',
-  AUTH_STATUS: 'cached_auth_status',
-  CACHE_TIMESTAMP: 'cache_timestamp',
-} as const;
-
 // Cache lifetime (ms) - 5 minutes
 const CACHE_DURATION = 5 * 60 * 1000;
 
@@ -44,9 +40,9 @@ const CacheUtil = {
   // Save user data to the cache
   saveUserCache: (user: User) => {
     try {
-      sessionStorage.setItem(CACHE_KEYS.USER, JSON.stringify(user));
-      sessionStorage.setItem(CACHE_KEYS.AUTH_STATUS, 'true');
-      sessionStorage.setItem(CACHE_KEYS.CACHE_TIMESTAMP, Date.now().toString());
+      sessionStorage.setItem(AUTH_CACHE_KEYS.USER, JSON.stringify(user));
+      sessionStorage.setItem(AUTH_CACHE_KEYS.AUTH_STATUS, 'true');
+      sessionStorage.setItem(AUTH_CACHE_KEYS.CACHE_TIMESTAMP, Date.now().toString());
     } catch (error) {
       console.error('Failed to save user cache:', error);
     }
@@ -55,9 +51,9 @@ const CacheUtil = {
   // Read user data from the cache
   getUserCache: (): { user: User | null; isAuthenticated: boolean; isValid: boolean } => {
     try {
-      const timestamp = sessionStorage.getItem(CACHE_KEYS.CACHE_TIMESTAMP);
-      const authStatus = sessionStorage.getItem(CACHE_KEYS.AUTH_STATUS);
-      const userJson = sessionStorage.getItem(CACHE_KEYS.USER);
+      const timestamp = sessionStorage.getItem(AUTH_CACHE_KEYS.CACHE_TIMESTAMP);
+      const authStatus = sessionStorage.getItem(AUTH_CACHE_KEYS.AUTH_STATUS);
+      const userJson = sessionStorage.getItem(AUTH_CACHE_KEYS.USER);
 
       // Check that the cache exists
       if (!timestamp || !authStatus || !userJson) {
@@ -67,7 +63,7 @@ const CacheUtil = {
       // Check whether the cache has expired
       const cacheAge = Date.now() - parseInt(timestamp, 10);
       if (cacheAge > CACHE_DURATION) {
-        CacheUtil.clearCache();
+        clearAuthCache();
         return { user: null, isAuthenticated: false, isValid: false };
       }
 
@@ -80,21 +76,12 @@ const CacheUtil = {
       };
     } catch (error) {
       console.error('Failed to read user cache:', error);
-      CacheUtil.clearCache();
+      clearAuthCache();
       return { user: null, isAuthenticated: false, isValid: false };
     }
   },
 
-  // Clear the cache
-  clearCache: () => {
-    try {
-      sessionStorage.removeItem(CACHE_KEYS.USER);
-      sessionStorage.removeItem(CACHE_KEYS.AUTH_STATUS);
-      sessionStorage.removeItem(CACHE_KEYS.CACHE_TIMESTAMP);
-    } catch (error) {
-      console.error('Failed to clear user cache:', error);
-    }
-  },
+  clearCache: clearAuthCache,
 };
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
@@ -122,18 +109,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // pasaron, que es exactamente el caso que se rompia.
   const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [restriction, setRestriction] = useState<RestrictionStatus | null>(null);
+  const authEpoch = useRef(0);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const clearState = () => {
+      authEpoch.current++;
+      resetGlobalWebSocket();
+      setUser(null);
+      setIsAuthenticated(false);
+      setRestriction(null);
+      CacheUtil.clearCache();
+      apiCache.clearCache();
+    };
+    const storageChanged = (event: StorageEvent) => {
+      if (event.key === 'access_token' && event.newValue === null) clearState();
+    };
+    window.addEventListener('torii:session-cleared', clearState);
+    window.addEventListener('storage', storageChanged);
+    return () => {
+      window.removeEventListener('torii:session-cleared', clearState);
+      window.removeEventListener('storage', storageChanged);
+    };
+  }, []);
 
   // Pull restriction status from the one endpoint that does NOT 403 a
   // restricted user. Safe to call whenever a token exists; returns
   // { is_restricted: false } for everyone else. Drives RestrictionBanner.
   const checkRestriction = useCallback(async (): Promise<RestrictionStatus | null> => {
+    const epoch = authEpoch.current;
     try {
       const status = await userAPI.getRestriction();
-      setRestriction(status);
+      if (epoch === authEpoch.current) setRestriction(status);
       return status;
     } catch {
-      setRestriction(null);
+      if (epoch === authEpoch.current) setRestriction(null);
       return null;
     }
   }, []);
@@ -141,6 +151,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check if user is authenticated on mount
   useEffect(() => {
     const checkAuth = async () => {
+      const epoch = authEpoch.current;
+      if (hasPendingLogout()) {
+        clearSessionTokens();
+        CacheUtil.clearCache();
+        await logoutWebSession().catch(() => {});
+        return;
+      }
+      try {
+        const remembered = await restoreWebSession();
+        if (epoch !== authEpoch.current) return;
+        if (typeof remembered !== 'string') {
+          if (remembered.access_token !== localStorage.getItem('access_token')) {
+            CacheUtil.clearCache();
+            apiCache.clearCache();
+          }
+          storeSessionTokens(remembered, true);
+        } else if (remembered === 'missing' && hasSharedSession()) {
+          clearSessionTokens();
+          CacheUtil.clearCache();
+          apiCache.clearCache();
+          return;
+        }
+      } catch {
+        // Un corte de red no invalida los tokens que ya teniamos.
+      }
+      if (epoch !== authEpoch.current) return;
       const token = localStorage.getItem('access_token');
       const refreshToken = localStorage.getItem('refresh_token');
 
@@ -166,10 +202,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         void (async () => {
           try {
             const freshUser = await userAPI.getMe();
+            if (epoch !== authEpoch.current) return;
             setUser(freshUser);
             setIsAuthenticated(true);
             CacheUtil.saveUserCache(freshUser);
+            if (!hasSharedSession()) void rememberWebSession();
           } catch (error) {
+            if (epoch !== authEpoch.current) return;
             const err = error as { response?: { status?: number } };
             if (err.response?.status === 401) {
               setUser(null);
@@ -189,11 +228,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         console.log(t('auth.context.cache.fetchingFromApi'));
         const userData = await userAPI.getMe();
+        if (epoch !== authEpoch.current) return;
         setUser(userData);
         setIsAuthenticated(true);
         // Save to the cache
         CacheUtil.saveUserCache(userData);
+        if (!hasSharedSession()) void rememberWebSession();
       } catch (error) {
+        if (epoch !== authEpoch.current) return;
         // If fetching the user fails, the axios interceptor automatically tries to
         // refresh the token; here we only handle the case where the refresh failed.
         const err = error as { response?: { status?: number } };
@@ -220,6 +262,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = useCallback(async (username: string, password: string, turnstileToken?: string): Promise<boolean> => {
+    authEpoch.current++;
     try {
       setIsLoading(true);
       const tokenResponse: TokenResponse = await authAPI.login(
@@ -231,12 +274,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
 
       // Store tokens
+      clearPendingLogout();
       localStorage.setItem('access_token', tokenResponse.access_token);
       localStorage.setItem('refresh_token', tokenResponse.refresh_token);
 
       // Get user data
       try {
         const userData = await userAPI.getMe();
+        await rememberWebSession();
         setUser(userData);
         setIsAuthenticated(true);
 
@@ -274,6 +319,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [t, checkRestriction]);
 
   const register = useCallback(async (username: string, email: string, password: string, turnstileToken?: string): Promise<boolean> => {
+    authEpoch.current++;
     try {
       setIsLoading(true);
       // El register ahora devuelve el OAuth token directo (server auto-login). Antes no devolvia el
@@ -283,10 +329,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const tokenResponse = await authAPI.register(username, email, password, turnstileToken);
 
       if (tokenResponse?.access_token) {
+        clearPendingLogout();
         localStorage.setItem('access_token', tokenResponse.access_token);
         localStorage.setItem('refresh_token', tokenResponse.refresh_token);
 
         const userData = await userAPI.getMe();
+        await rememberWebSession();
         setUser(userData);
         setIsAuthenticated(true);
         CacheUtil.saveUserCache(userData);
@@ -330,8 +378,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [t, login, checkRestriction]);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    authEpoch.current++;
+    resetGlobalWebSocket();
+    clearSessionTokens();
+    void logoutWebSession().catch(() => {});
     setUser(null);
     setIsAuthenticated(false);
     setRestriction(null);

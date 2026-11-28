@@ -53,6 +53,11 @@ const BeatmapLink: React.FC<BeatmapLinkProps> = ({
     );
   }
 
+  // Only allow http(s) links to block javascript:/data: URLs
+  if (!/^https?:\/\//i.test(beatmapUrl)) {
+    return <span className={className} title={title}>{children}</span>;
+  }
+
   // Fall back to external link
   return (
     <a

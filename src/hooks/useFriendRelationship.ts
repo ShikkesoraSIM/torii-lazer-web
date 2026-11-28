@@ -13,41 +13,30 @@ export type FriendStatus = {
 
 export function useFriendRelationship(targetUserId: number, selfUserId: number) {
   const mountedRef = useRef(true);
+  const requestIdRef = useRef(0);
 
-  // Validate params
-  const isValidUserId = (id: any): id is number => {
-    return typeof id === 'number' && !isNaN(id) && id > 0;
+  const isValidUserId = (id: unknown): id is number => {
+    return typeof id === 'number' && !Number.isNaN(id) && id > 0;
   };
-  
-  if (!isValidUserId(targetUserId)) {
-    console.error('Invalid targetUserId:', targetUserId);
-  }
-  
-  if (!isValidUserId(selfUserId)) {
-    console.error('Invalid selfUserId:', selfUserId);
-  }
-  
+
   const [status, setStatus] = useState<FriendStatus>({
     isFriend: false,
     isBlocked: false,
     isMutual: false,
     followsMe: false,
-    loading: true, // always start loading; let the API decide
-    isSelf: false, // assume not self until the API tells us
+    loading: isValidUserId(targetUserId) && isValidUserId(selfUserId),
+    isSelf: isValidUserId(targetUserId) && isValidUserId(selfUserId) && targetUserId === selfUserId,
   });
+  const statusRef = useRef(status);
+  statusRef.current = status;
 
   const refresh = useCallback(async () => {
-    // Bail out if targetUserId is invalid
-    if (!isValidUserId(targetUserId)) {
-      console.error('Cannot make API call with invalid targetUserId:', targetUserId);
-      setStatus(prev => ({ ...prev, loading: false }));
-      return;
-    }
+    const requestId = ++requestIdRef.current;
 
-    // Bail out if selfUserId is invalid
-    if (!isValidUserId(selfUserId)) {
-      console.error('Cannot make API call with invalid selfUserId:', selfUserId);
-      setStatus(prev => ({ ...prev, loading: false }));
+    if (!isValidUserId(targetUserId) || !isValidUserId(selfUserId)) {
+      if (mountedRef.current) {
+        setStatus(prev => ({ ...prev, loading: false }));
+      }
       return;
     }
 
@@ -56,18 +45,19 @@ export function useFriendRelationship(targetUserId: number, selfUserId: number) 
 
       const res = await friendsAPI.checkRelationship(targetUserId);
 
-      if (!mountedRef.current) return;
+      if (!mountedRef.current || requestId !== requestIdRef.current) return;
 
       // Map API response fields onto component state
       setStatus({
-        isFriend: !!res?.is_following,    // whether I follow them
-        isBlocked: !!res?.isBlocked,      // whether blocked (API may omit this field)
-        isMutual: !!res?.mutual,          // whether mutually following
-        followsMe: !!res?.is_followed,    // whether they follow me
+        isFriend: !!res?.is_following,
+        isBlocked: !!res?.isBlocked,
+        isMutual: !!res?.mutual,
+        followsMe: !!res?.is_followed,
         loading: false,
         isSelf: false,
       });
     } catch (err: any) {
+      if (!mountedRef.current || requestId !== requestIdRef.current) return;
       // Detect the "cannot check relationship with yourself" error
       const errorMessage = err?.response?.data?.message || err?.message || '';
       const isSelfError = errorMessage.includes('Cannot check relationship with yourself') || 
@@ -122,9 +112,8 @@ export function useFriendRelationship(targetUserId: number, selfUserId: number) 
     action: () => Promise<any>,
     okMsg?: string
   ) => {
-    const prev = status;
-    const optimistic = updater(prev);
-    setStatus(optimistic);
+    const prev = statusRef.current;
+    setStatus(updater);
 
     return action()
       .then(() => {
@@ -132,10 +121,12 @@ export function useFriendRelationship(targetUserId: number, selfUserId: number) 
         return refresh();
       })
       .catch((err) => {
-        setStatus(prev);
+        if (mountedRef.current) {
+          setStatus(prev);
+        }
         handleApiError(err);
       });
-  }, [status, refresh]);
+  }, [refresh]);
 
   // Action helpers
   const add = useCallback(() => {

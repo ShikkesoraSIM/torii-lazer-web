@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
@@ -154,25 +154,36 @@ const BeatmapPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-torii" role="status">
+          <span className="sr-only">{t('common.loading', { defaultValue: 'Loading' })}</span>
+        </div>
       </div>
     );
   }
 
   if (error || !beatmapset) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">
+      <div className="flex items-center justify-center min-h-[60vh] px-4">
+        <div className="text-center max-w-md rounded-2xl border border-white/10 bg-card p-8 shadow-elev-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-red-400 mb-4">
             {error || t('beatmap.notFound')}
           </h1>
-          <button
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            {t('beatmap.goBack')}
-          </button>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              to="/beatmaps"
+              className="px-4 py-2 bg-torii text-white rounded-xl hover:bg-torii-hover font-semibold text-sm transition-colors"
+            >
+              {t('nav.beatmaps', { defaultValue: 'Browse Beatmaps' })}
+            </Link>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 border border-white/15 bg-white/5 text-white rounded-xl hover:bg-white/10 text-sm transition-colors"
+            >
+              {t('beatmap.goBack')}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -180,23 +191,33 @@ const BeatmapPage: React.FC = () => {
 
   if (!selectedBeatmap) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">{t('beatmap.notFound')}</h1>
-          <button
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            {t('beatmap.goBack')}
-          </button>
+      <div className="flex items-center justify-center min-h-[60vh] px-4">
+        <div className="text-center max-w-md rounded-2xl border border-white/10 bg-card p-8 shadow-elev-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-red-400 mb-4">{t('beatmap.notFound')}</h1>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              to="/beatmaps"
+              className="px-4 py-2 bg-torii text-white rounded-xl hover:bg-torii-hover font-semibold text-sm transition-colors"
+            >
+              {t('nav.beatmaps', { defaultValue: 'Browse Beatmaps' })}
+            </Link>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 border border-white/15 bg-white/5 text-white rounded-xl hover:bg-white/10 text-sm transition-colors"
+            >
+              {t('beatmap.goBack')}
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   const coverUrl = beatmapset.covers?.cover ?? '';
-  const heroBackground = coverUrl
-    ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${coverUrl})`
+  const safeCoverUrl = coverUrl ? encodeURI(coverUrl).replace(/"/g, '%22') : '';
+  const heroBackground = safeCoverUrl
+    ? `linear-gradient(rgba(3,0,20,0.45), rgba(3,0,20,0.78)), url("${safeCoverUrl}")`
     : 'linear-gradient(rgba(15,23,42,0.85), rgba(15,23,42,0.95))';
   const apiBaseUrl = API_BASE_URL;
   const selectedMode = selectedBeatmap?.mode || 'osu';
@@ -204,45 +225,44 @@ const BeatmapPage: React.FC = () => {
   const downloadUrl = `${apiBaseUrl}/api/v2/beatmapsets/${beatmapset.id}/download?noVideo=true`;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen torii-page-stage">
       {/* Hero Section Container */}
-      <div className="px-4 lg:px-6 pt-0 pb-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-6">
+        <div className="max-w-7xl 3xl:max-w-[1536px] mx-auto">
           <div 
-            className="relative h-72 overflow-hidden rounded-2xl shadow-lg"
+            className="relative min-h-[16rem] sm:h-72 overflow-hidden rounded-3xl shadow-elev-2 border border-white/10"
             style={{
               backgroundImage: heroBackground,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/60" />
-            <div className="relative px-6 lg:px-8 h-full flex flex-col justify-end pb-6">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#030014]/75" />
+            <div className="relative px-5 sm:px-6 lg:px-8 py-6 min-h-[16rem] sm:h-full flex flex-col justify-end">
               <div className="text-white">
                 {/* Badges */}
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-osu-pink/90 text-white">
-                    {beatmapset.status}
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span className="px-2.5 sm:px-3 py-1 rounded-full text-2xs sm:text-xs font-bold uppercase tracking-wider bg-torii/90 text-white">
+                    {t(`beatmap.status.${beatmapset.status}`, { defaultValue: beatmapset.status })}
                   </span>
                   {beatmapset.video && (
-                    <span className="px-3 py-1 bg-red-500/90 text-white rounded-full text-xs font-bold uppercase tracking-wider">
+                    <span className="px-2.5 sm:px-3 py-1 bg-red-500/90 text-white rounded-full text-2xs sm:text-xs font-bold uppercase tracking-wider">
                       VIDEO
                     </span>
                   )}
                   {beatmapset.storyboard && (
-                    <span className="px-3 py-1 bg-purple-500/90 text-white rounded-full text-xs font-bold uppercase tracking-wider">
+                    <span className="px-2.5 sm:px-3 py-1 bg-purple-500/90 text-white rounded-full text-2xs sm:text-xs font-bold uppercase tracking-wider">
                       STORYBOARD
                     </span>
                   )}
-                  {/* de donde salio el mapa y como se hizo, igual que en el listado */}
                   {beatmapset.is_local && (
-                    <span className="px-3 py-1 bg-red-600/90 text-white rounded-full text-xs font-bold uppercase tracking-wider">
-                      {t('beatmap.toriiBadge') || 'Torii'}
+                    <span className="px-2.5 sm:px-3 py-1 bg-red-600/90 text-white rounded-full text-2xs sm:text-xs font-bold uppercase tracking-wider">
+                      {t('beatmap.toriiBadge', { defaultValue: 'Torii' })}
                     </span>
                   )}
                   {isAiSet(beatmapset) && (
-                    <span className="px-3 py-1 bg-sky-500/90 text-white rounded-full text-xs font-bold uppercase tracking-wider">
-                      {t('beatmap.aiGenBadge') || 'AI gen'}
+                    <span className="px-2.5 sm:px-3 py-1 bg-sky-500/90 text-white rounded-full text-2xs sm:text-xs font-bold uppercase tracking-wider">
+                      {t('beatmap.aiGenBadge', { defaultValue: 'AI gen' })}
                     </span>
                   )}
                 </div>
@@ -250,14 +270,24 @@ const BeatmapPage: React.FC = () => {
                 {/* Title and Artist */}
                 <div className="flex items-end justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 truncate">
+                    <h1 className="font-heading text-2xl sm:text-4xl lg:text-5xl font-bold mb-1 truncate">
                       {beatmapset.title_unicode || beatmapset.title}
                     </h1>
-                    <p className="text-lg sm:text-xl opacity-95 mb-1">
-                      by <span className="font-semibold">{beatmapset.artist_unicode || beatmapset.artist}</span>
+                    <p className="text-base sm:text-xl opacity-95 mb-1 truncate">
+                      {t('beatmap.by', { defaultValue: 'by' })} <span className="font-semibold">{beatmapset.artist_unicode || beatmapset.artist}</span>
                     </p>
-                    <p className="text-base opacity-80">
-                      mapped by <span className="font-medium hover:text-osu-pink transition-colors cursor-pointer">{beatmapset.creator}</span>
+                    <p className="text-sm sm:text-base opacity-85 truncate">
+                      {t('beatmap.mappedByPrefix', { defaultValue: 'mapped by' })}{' '}
+                      {beatmapset.user_id ? (
+                        <Link
+                          to={`/users/${beatmapset.user_id}?mode=${selectedMode}`}
+                          className="font-medium hover:text-torii transition-colors underline decoration-white/30 underline-offset-2"
+                        >
+                          {beatmapset.creator}
+                        </Link>
+                      ) : (
+                        <span className="font-medium">{beatmapset.creator}</span>
+                      )}
                     </p>
                   </div>
                   
@@ -279,21 +309,21 @@ const BeatmapPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 lg:py-8">
+      <div className="max-w-7xl 3xl:max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Difficulty Selection - Horizontal List */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <span className="text-osu-pink">●</span>
+            <div className="card-standard overflow-hidden">
+              <div className="px-6 py-4 border-b border-white/10 bg-white/[0.03]">
+                <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                  <span className="text-torii">●</span>
                   {t('beatmap.difficulties')}
                 </h2>
               </div>
               <div className="p-4">
                 <div className="flex flex-wrap gap-2">
-                  {beatmapset.beatmaps
+                  {[...beatmapset.beatmaps]
                     .sort((a, b) => a.difficulty_rating - b.difficulty_rating)
                     .map((beatmap) => {
                       const isSelected = selectedBeatmap?.id === beatmap.id;

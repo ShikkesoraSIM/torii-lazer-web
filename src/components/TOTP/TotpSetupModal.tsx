@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiShield, FiDownload, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +28,7 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
   const [backupCodes, setBackupCodes] = useState<TOTPBackupCodes>([]);
   const [showSecret, setShowSecret] = useState(false);
   const [verificationError, setVerificationError] = useState<string>('');
+  const lastAttemptedCodeRef = useRef('');
 
   // Start the TOTP setup flow
   const handleStartSetup = async () => {
@@ -45,12 +46,13 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
   };
 
   // Verify the TOTP code
-  const handleVerifyCode = async () => {
+  const handleVerifyCode = useCallback(async () => {
     if (verificationCode.length !== 6) {
       setVerificationError(t('settings.totp.errors.invalidCodeLength', { length: 6 }));
       return;
     }
 
+    lastAttemptedCodeRef.current = verificationCode;
     setIsLoading(true);
     setVerificationError('');
     
@@ -61,26 +63,16 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
       toast.success(t('settings.totp.setupSuccess'));
     } catch (error: any) {
       console.error('TOTP verification failed:', error);
-      console.error('Error details:', error.response?.data);
 
-      // Handle different error types
       if (error.response?.status === 400) {
-        const errorDetail = error.response?.data?.detail;
-        if (Array.isArray(errorDetail) && errorDetail.length > 0) {
-          // Handle validation errors
-          setVerificationError(t('settings.totp.errors.invalidCode'));
-        } else if (error.response?.data?.error === 'Invalid TOTP code') {
-          setVerificationError(t('settings.totp.errors.invalidCode'));
-        } else {
-          setVerificationError(t('settings.totp.errors.invalidCode'));
-        }
+        setVerificationError(t('settings.totp.errors.invalidCode'));
       } else {
         setVerificationError(t('settings.totp.errors.verificationFailed'));
       }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [verificationCode, t]);
 
   // Download the backup codes
   const handleDownloadBackupCodes = () => {
@@ -106,6 +98,7 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
   // Handle verification-code input
   const handleCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    lastAttemptedCodeRef.current = '';
     setVerificationCode(value);
     setVerificationError('');
   };
@@ -115,6 +108,7 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
     setStep('setup');
     setTotpSecret(null);
     setVerificationCode('');
+    lastAttemptedCodeRef.current = '';
     setBackupCodes([]);
     setShowSecret(false);
     setVerificationError('');
@@ -127,12 +121,17 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
     }
   }, [isOpen]);
 
-  // Auto-verify once the code reaches full length
+  // Auto-verify once when code reaches full length (guarded against retry loop on error)
   useEffect(() => {
-    if (verificationCode.length === 6 && step === 'verify' && !isLoading) {
-      handleVerifyCode();
+    if (
+      verificationCode.length === 6 &&
+      step === 'verify' &&
+      !isLoading &&
+      lastAttemptedCodeRef.current !== verificationCode
+    ) {
+      void handleVerifyCode();
     }
-  }, [verificationCode, step, isLoading]);
+  }, [verificationCode, step, isLoading, handleVerifyCode]);
 
   // Prevent background scrolling
   useEffect(() => {
@@ -159,28 +158,34 @@ const TotpSetupModal: React.FC<TotpSetupModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute m-[-10px] inset-1 bg-black/60 backdrop-blur-sm"
-            onClick={onClose}
+            className="absolute inset-0 bg-black/60"
+            onClick={() => {
+              if (step !== 'backup') onClose();
+            }}
           />
           
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-card rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            className="relative bg-card border border-white/10 rounded-xl shadow-xl max-w-md w-full max-h-[90dvh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <FiShield className="w-6 h-6 text-osu-pink" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-xl font-semibold text-white">
               {t('settings.totp.setupTitle')}
             </h2>
           </div>
           <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            type="button"
+            onClick={step === 'backup' ? handleFinishSetup : onClose}
+            aria-label={t('common.close', 'Close')}
+            className="p-2 text-gray-400 hover:text-gray-200 rounded-lg hover:bg-white/10 transition-colors"
           >
             <FiX className="w-5 h-5" />
           </button>

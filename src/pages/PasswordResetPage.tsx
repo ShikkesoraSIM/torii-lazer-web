@@ -122,14 +122,13 @@ const PasswordResetPage: React.FC = () => {
       if (turnstileRef.current) {
         turnstileRef.current.reset();
       }
-      // If request is rate-limited, a code is usually already active.
       const errorMessage = String(error?.response?.data?.error || '').toLowerCase();
       const isRateLimited = error?.response?.status === 429 || errorMessage.includes('too many requests');
 
-      // A rate-limited request usually means a valid code was recently requested.
       if (isRateLimited) {
-        toast.success(t('auth.passwordReset.codeSent'));
-        setStep('reset');
+        toast.error(t('auth.passwordReset.errors.rateLimited', {
+          defaultValue: 'Too many requests. Wait a minute before trying again.',
+        }));
         setResendCountdown(60);
         setTurnstileToken('');
       } else {
@@ -217,7 +216,7 @@ const PasswordResetPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-gray-900 flex justify-center px-4 sm:px-6 lg:px-8 overflow-auto pt-8 sm:pt-12 lg:pt-0 lg:items-center">
+    <div className="min-h-[100dvh] bg-[#030014] flex justify-center px-4 sm:px-6 lg:px-8 overflow-auto pt-12 sm:pt-16 lg:pt-0 lg:items-center">
       <div className="max-w-md w-full space-y-3 pb-4 lg:pb-0">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto flex items-center justify-center mb-2">
@@ -268,16 +267,6 @@ const PasswordResetPage: React.FC = () => {
                 )}
               </div>
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={isLoading || !formData.email || !turnstileToken}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-osu-pink hover:bg-osu-pink/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-osu-pink disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                >
-                  {isLoading ? <LoadingSpinner size="sm" /> : t('auth.passwordReset.sendCode')}
-                </button>
-              </div>
-
               <div className="flex justify-center">
                 <Turnstile
                   ref={turnstileRef}
@@ -286,10 +275,20 @@ const PasswordResetPage: React.FC = () => {
                   onError={handleTurnstileError}
                   onExpire={handleTurnstileError}
                   options={{
-                    theme: 'auto',
+                    theme: 'dark',
                     size: 'normal',
                   }}
                 />
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={isLoading || !formData.email || !turnstileToken}
+                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-osu-pink disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                >
+                  {isLoading ? <LoadingSpinner size="sm" /> : t('auth.passwordReset.sendCode')}
+                </button>
               </div>
 
               <div className="text-center">
@@ -423,16 +422,6 @@ const PasswordResetPage: React.FC = () => {
                 )}
               </div>
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={isLoading || !formData.resetCode || !formData.newPassword || !formData.confirmPassword || !turnstileToken}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-osu-pink hover:bg-osu-pink/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-osu-pink disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                >
-                  {isLoading ? <LoadingSpinner size="sm" /> : t('auth.passwordReset.resetPassword')}
-                </button>
-              </div>
-
               <div className="flex justify-center">
                 <Turnstile
                   ref={turnstileRef}
@@ -441,10 +430,20 @@ const PasswordResetPage: React.FC = () => {
                   onError={handleTurnstileError}
                   onExpire={handleTurnstileError}
                   options={{
-                    theme: 'auto',
+                    theme: 'dark',
                     size: 'normal',
                   }}
                 />
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={isLoading || !formData.resetCode || !formData.newPassword || !formData.confirmPassword || !turnstileToken}
+                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-osu-pink disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                >
+                  {isLoading ? <LoadingSpinner size="sm" /> : t('auth.passwordReset.resetPassword')}
+                </button>
               </div>
 
               <div className="text-center">

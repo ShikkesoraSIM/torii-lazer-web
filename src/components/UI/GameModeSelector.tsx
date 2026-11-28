@@ -58,12 +58,31 @@ const ModeDropdown: React.FC<ModeDropdownProps> = ({
     };
   }, [isOpen, buttonEl]);
 
+  const dropdownPanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const firstBtn = dropdownPanelRef.current?.querySelector<HTMLButtonElement>('button');
+    firstBtn?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+        buttonEl?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose, buttonEl]);
+
   if (!isOpen || !pos) return null;
 
   // Portaled to <body> so the menu escapes any ancestor overflow-hidden (e.g. the
   // rounded profile header panel that was clipping it and cutting off the modes).
   return createPortal(
     <motion.div
+      ref={dropdownPanelRef}
+      role="menu"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
@@ -83,9 +102,12 @@ const ModeDropdown: React.FC<ModeDropdownProps> = ({
       {modes.map((mode, index) => (
         <motion.button
           key={mode}
+          role="menuitem"
+          type="button"
           onClick={() => {
             onSelectMode(mode);
             onClose();
+            buttonEl?.focus();
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -186,6 +208,10 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
                 onMouseLeave={() => setHoveredMode(null)}
               >
                 <motion.button
+                  type="button"
+                  aria-label={GAME_MODE_NAMES[GAME_MODE_GROUPS[mainMode][0]]}
+                  aria-haspopup={hasSubModes ? 'menu' : undefined}
+                  aria-expanded={hasSubModes ? isExpanded : undefined}
                   ref={(el) => {
                     buttonRefs.current[mainMode] = el;
                   }}

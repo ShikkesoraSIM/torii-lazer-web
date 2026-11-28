@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { rankingsAPI, handleApiError } from '../utils/api';
 import CountrySelect from '../components/UI/CountrySelect';
 import RankingTypeSelector from '../components/UI/RankingTypeSelector';
@@ -9,6 +8,7 @@ import UserRankingsList from '../components/Rankings/UserRankingsList';
 import CountryRankingsList from '../components/Rankings/CountryRankingsList';
 import PaginationControls from '../components/Rankings/PaginationControls';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
+import EmptyState from '../components/UI/EmptyState';
 import GameModeSelector from '../components/UI/GameModeSelector';
 import { useAvailableCountries } from '../hooks/useAvailableCountries';
 import type {
@@ -52,8 +52,10 @@ const RankingsPage: React.FC = () => {
   const [userRankings, setUserRankings] = useState<TopUsersResponse | null>(null);
   const [countryRankings, setCountryRankings] = useState<CountryResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   
   const abortControllerRef = useRef<AbortController | null>(null);
+  const hasMountedRef = useRef(false);
   
   const { countries: availableCountries, isLoading: isLoadingCountries } = useAvailableCountries(selectedMode);
   
@@ -67,6 +69,7 @@ const RankingsPage: React.FC = () => {
     abortControllerRef.current = abortController;
     
     setIsLoading(true);
+    setLoadError(null);
     try {
       const response = await rankingsAPI.getUserRankings(
         selectedMode, 
@@ -81,6 +84,7 @@ const RankingsPage: React.FC = () => {
     } catch (error) {
       if (!abortController.signal.aborted) {
         handleApiError(error);
+        setLoadError(t('rankings.errors.loadFailed', { defaultValue: 'Failed to load rankings.' }));
         console.error(t('rankings.errors.loadFailed'), error);
       }
     } finally {
@@ -100,6 +104,7 @@ const RankingsPage: React.FC = () => {
     abortControllerRef.current = abortController;
     
     setIsLoading(true);
+    setLoadError(null);
     try {
       const response = await rankingsAPI.getCountryRankings(selectedMode, currentPage);
       
@@ -109,6 +114,7 @@ const RankingsPage: React.FC = () => {
     } catch (error) {
       if (!abortController.signal.aborted) {
         handleApiError(error);
+        setLoadError(t('rankings.errors.loadFailed', { defaultValue: 'Failed to load rankings.' }));
         console.error(t('rankings.errors.loadFailed'), error);
       }
     } finally {
@@ -118,10 +124,15 @@ const RankingsPage: React.FC = () => {
     }
   }, [selectedMode, currentPage, t]);
 
-  // Reset pagination and load data
+  // Reset pagination only on subsequent filter changes so deep links (?page=N) work on initial mount
   useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
     setCurrentPage(1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
   }, [selectedMode, selectedTab, rankingType, selectedCountry]);
 
   // Load data when dependencies change
@@ -178,37 +189,31 @@ const RankingsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen torii-page-stage">
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 sm:py-8">
+      <div className="max-w-7xl 3xl:max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Page title */}
-        <div className="mb-6 sm:mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div className="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary mb-1.5">
               {pageTitle}
             </h1>
             {showSubtitle && (
-              <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
+              <p className="text-sm sm:text-base text-text-secondary">
                 {pageSubtitle}
               </p>
             )}
           </div>
-          {/*
-            Discoverability: matchmaking has its own dedicated rankings
-            page with a different layout (per-pool tabs + map rotation),
-            so surface it as a sibling rather than cramming a third tab
-            into this page's mode/country selector.
-          */}
-          <a
-            href="/rankings/matchmaking"
-            className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-osu-pink/15 to-fuchsia-500/10 border border-osu-pink/40 hover:border-osu-pink/80 hover:shadow-[0_0_18px_rgba(236,72,153,0.35)] transition-all"
+          <Link
+            to="/rankings/matchmaking"
+            className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-torii/20 to-sky-400/10 border border-torii/40 hover:border-torii/80 hover:shadow-elev-2 transition-all self-start md:self-auto"
           >
-            <span className="text-osu-pink text-lg">🏆</span>
-            <span className="text-sm font-semibold text-foreground">
-              Matchmaking ladder
+            <span className="text-torii text-lg" aria-hidden="true">🏆</span>
+            <span className="text-sm font-semibold text-text-primary">
+              {t('rankings.matchmakingLadder', { defaultValue: 'Matchmaking ladder' })}
             </span>
-            <span className="text-xs text-gray-400 group-hover:text-osu-pink transition-colors">
+            <span className="text-xs text-text-muted group-hover:text-torii transition-colors">
               →
             </span>
-          </a>
+          </Link>
         </div>
 
         <div className="relative z-30 flex flex-col xl:flex-row xl:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
@@ -224,39 +229,31 @@ const RankingsPage: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 xl:flex-1">
           <div className="flex-1">
-            <div className="inline-flex torii-liquid-soft rounded-2xl p-1.5 sm:p-2 min-h-[44px] sm:min-h-[48px] items-center gap-1">
+            <div className="inline-flex torii-liquid-soft rounded-2xl p-1.5 sm:p-2 min-h-[44px] sm:min-h-[48px] items-center gap-1" role="tablist">
               <button
+                type="button"
+                role="tab"
+                aria-selected={selectedTab === 'users'}
                 onClick={() => setSelectedTab('users')}
-                className={`relative px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium transition-colors duration-200 text-sm sm:text-base ${
+                className={`relative px-3 sm:px-4 py-2 rounded-xl font-medium transition-colors duration-150 text-sm sm:text-base ${
                   selectedTab === 'users'
-                    ? 'text-white'
-                    : 'text-white/70 hover:text-white'
+                    ? 'text-white border border-white/20 bg-torii/25 shadow-elev-1'
+                    : 'text-white/70 hover:text-white border border-transparent'
                 }`}
               >
-                {selectedTab === 'users' && (
-                  <motion.span
-                    layoutId="rankings-tab-pill"
-                    className="absolute inset-0 rounded-xl border border-white/20 bg-white/14 shadow-[0_8px_24px_rgba(0,0,0,0.22)]"
-                    transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.6 }}
-                  />
-                )}
                 <span className="relative z-10">{t('rankings.tabs.users')}</span>
               </button>
               <button
+                type="button"
+                role="tab"
+                aria-selected={selectedTab === 'countries'}
                 onClick={() => setSelectedTab('countries')}
-                className={`relative px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium transition-colors duration-200 text-sm sm:text-base ${
+                className={`relative px-3 sm:px-4 py-2 rounded-xl font-medium transition-colors duration-150 text-sm sm:text-base ${
                   selectedTab === 'countries'
-                    ? 'text-white'
-                    : 'text-white/70 hover:text-white'
+                    ? 'text-white border border-white/20 bg-torii/25 shadow-elev-1'
+                    : 'text-white/70 hover:text-white border border-transparent'
                 }`}
               >
-                {selectedTab === 'countries' && (
-                  <motion.span
-                    layoutId="rankings-tab-pill"
-                    className="absolute inset-0 rounded-xl border border-white/20 bg-white/14 shadow-[0_8px_24px_rgba(0,0,0,0.22)]"
-                    transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.6 }}
-                  />
-                )}
                 <span className="relative z-10">{t('rankings.tabs.countries')}</span>
               </button>
             </div>
@@ -289,8 +286,21 @@ const RankingsPage: React.FC = () => {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 sm:px-0">
               <LoadingSpinner size="lg" className="mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 font-medium">{t('common.loading')}</p>
+              <p className="text-text-muted font-medium">{t('common.loading')}</p>
             </div>
+          ) : loadError ? (
+            <EmptyState
+              tone="error"
+              title={loadError}
+              retryLabel={t('common.retry', { defaultValue: 'Retry' })}
+              onRetry={() => {
+                if (selectedTab === 'users') {
+                  void loadUserRankings();
+                } else {
+                  void loadCountryRankings();
+                }
+              }}
+            />
           ) : selectedTab === 'users' ? (
             <UserRankingsList
               rankings={userRankings}

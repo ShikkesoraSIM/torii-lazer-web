@@ -1,9 +1,15 @@
-import { zh } from './locales/zh';
 import { en } from './locales/en';
 
 export const resources = {
-  zh,
   en,
 } as const;
 
-export type AppLanguages = keyof typeof resources;
+export type AppLanguages = 'en' | 'zh';
+
+export async function loadLanguageBundle(lng: AppLanguages) {
+  if (lng === 'zh') {
+    const mod = await import('./locales/zh');
+    return mod.zh;
+  }
+  return en;
+}

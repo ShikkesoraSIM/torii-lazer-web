@@ -80,7 +80,7 @@ export interface LegacyUserPreferences {
 }
 
 // Get-user-preferences response - returns the UserPreferences object directly
-export interface GetUserPreferencesResponse extends UserPreferences {}
+export type GetUserPreferencesResponse = UserPreferences;
 
 // PATCH request body for updating preferences
-export interface UpdateUserPreferencesRequest extends Partial<UserPreferences> {}
+export type UpdateUserPreferencesRequest = Partial<UserPreferences>;

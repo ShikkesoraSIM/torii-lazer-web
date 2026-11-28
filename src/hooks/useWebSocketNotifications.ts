@@ -10,10 +10,11 @@ import type {
 } from '../types';
 import { showCustomToast } from '../components/CustomToast';
 
-// Generate a unique notification ID
+// Generate a unique notification ID within safe JS integer bounds (< Number.MAX_SAFE_INTEGER)
 let notificationIdCounter = 0;
 const generateUniqueNotificationId = (): number => {
-  return Date.now() * 10000 + (++notificationIdCounter % 10000);
+  notificationIdCounter = (notificationIdCounter + 1) % 1000;
+  return (Date.now() % 10_000_000_000) * 1000 + notificationIdCounter;
 };
 
 interface UseWebSocketNotificationsProps {
@@ -31,6 +32,37 @@ const globalMessageListeners = new Set<(m: ChatMessage) => void>();
 const globalNotificationListeners = new Set<(n: APINotification) => void>();
 const globalConnectionStateListeners = new Set<(connected: boolean, error: string | null) => void>(); // connection-state listeners
 let globalEndpointCache: string | null = null; // endpoint cache
+let globalEndpointUserId: number | null = null;
+let globalReconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+let globalReconnectAttempts = 0;
+let globalLastConnectAttempt = 0;
+const maxReconnectAttempts = 5;
+const reconnectDelayBase = 1000;
+const connectionThrottleMs = 2000;
+
+export const resetGlobalWebSocket = () => {
+  if (globalReconnectTimeout) {
+    clearTimeout(globalReconnectTimeout);
+    globalReconnectTimeout = null;
+  }
+  if (globalWsRef) {
+    try {
+      if (globalWsRef.readyState === WebSocket.OPEN) {
+        globalWsRef.send(JSON.stringify({ event: 'chat.end' }));
+      }
+      globalWsRef.close();
+    } catch { /* ignore */ }
+    globalWsRef = null;
+  }
+  globalConnecting = false;
+  globalReconnectAttempts = 0;
+  globalLastConnectAttempt = 0;
+  globalEndpointCache = null;
+  globalEndpointUserId = null;
+  messageBuffer.length = 0;
+  notificationBuffer.length = 0;
+  dispatchConnectionState(false, null);
+};
 
 // Dispatch functions
 const dispatchChatMessage = (msg: ChatMessage) => {
@@ -66,34 +98,34 @@ export const useWebSocketNotifications = ({
   const [isConnected, setIsConnected] = useState(globalIsConnected);
   const [connectionError, setConnectionError] = useState<string | null>(globalConnectionError);
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttempts = 5;
-  const reconnectDelayBase = 1000;
   const endpointCacheRef = useRef<string | null>(null);
-  const lastConnectAttemptRef = useRef<number>(0);
-  const connectionThrottleMs = 2000; // don't reconnect within 2s
 
-  // Get the WebSocket endpoint (cached)
+  // Get the WebSocket endpoint (cached per user)
   const getWebSocketEndpoint = useCallback(async (): Promise<string | null> => {
+    const userId = currentUser?.id ?? null;
     if (!isAuthenticated) {
       endpointCacheRef.current = null;
       globalEndpointCache = null;
+      globalEndpointUserId = null;
       return null;
     }
-    // Prefer the global cache
-    if (globalEndpointCache) return globalEndpointCache;
-    if (endpointCacheRef.current) return endpointCacheRef.current;
+    if (globalEndpointCache && globalEndpointUserId === userId) {
+      return globalEndpointCache;
+    }
+    if (endpointCacheRef.current && globalEndpointUserId === userId) {
+      return endpointCacheRef.current;
+    }
     try {
       const response = await notificationsAPI.getNotifications();
       endpointCacheRef.current = response.notification_endpoint;
       globalEndpointCache = endpointCacheRef.current;
+      globalEndpointUserId = userId;
       return endpointCacheRef.current;
     } catch (error) {
       console.error('Failed to get notification endpoint:', error);
       return null;
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, currentUser?.id]);
 
   // Send a message over the WebSocket
   const sendMessage = useCallback((message: SocketMessage) => {
@@ -318,11 +350,10 @@ export const useWebSocketNotifications = ({
               
               let toastMessage = '';
               switch (channelType) {
-                case 'pm':
+                case 'pm': {
                   // Show the actual message content
                   const messageContent = data.details?.title as string;
                   if (messageContent && messageContent.length > 0 && messageContent !== 'From user') {
-                    // Flag the message if it was truncated
                     if (messageContent.length >= 36) {
                       toastMessage = `${messageContent}... (possibly truncated)`;
                     } else {
@@ -332,18 +363,22 @@ export const useWebSocketNotifications = ({
                     toastMessage = 'Sent you a private message';
                   }
                   break;
-                case 'team':
+                }
+                case 'team': {
                   const teamMessage = data.details?.title as string;
                   toastMessage = teamMessage || 'Sent a message in team chat';
                   break;
-                case 'public':
+                }
+                case 'public': {
                   const publicMessage = data.details?.title as string;
                   toastMessage = publicMessage || 'Sent a message in a public channel';
                   break;
-                default:
+                }
+                default: {
                   const generalMessage = data.details?.title as string;
                   toastMessage = generalMessage || 'Sent a message';
                   break;
+                }
               }
               
               showCustomToast({
@@ -424,10 +459,10 @@ export const useWebSocketNotifications = ({
     }
     // Replay the buffer (runs once when a listener is added)
     if (onNewMessage && messageBuffer.length) {
-      messageBuffer.splice(0).forEach(m => { try { onNewMessage(m); } catch {} });
+      messageBuffer.splice(0).forEach(m => { try { onNewMessage(m); } catch { /* ignore listener failure */ } });
     }
     if (onNewNotification && notificationBuffer.length) {
-      notificationBuffer.splice(0).forEach(n => { try { onNewNotification(n); } catch {} });
+      notificationBuffer.splice(0).forEach(n => { try { onNewNotification(n); } catch { /* ignore listener failure */ } });
     }
     return () => {
       globalConnectionStateListeners.delete(connectionStateListener);
@@ -484,20 +519,19 @@ export const useWebSocketNotifications = ({
 
   // Open the WebSocket connection
   const connect = useCallback(async () => {
-  if (!isAuthenticated) return;
+    if (!isAuthenticated) return;
 
     // Throttle to avoid frequent reconnects
     const now = Date.now();
-  if (now - lastConnectAttemptRef.current < connectionThrottleMs) {
+    if (now - globalLastConnectAttempt < connectionThrottleMs) {
       return;
     }
-    lastConnectAttemptRef.current = now;
+    globalLastConnectAttempt = now;
 
     // Reuse the global connection if it already exists and isn't closed
     if (globalWsRef && (globalWsRef.readyState === WebSocket.OPEN || globalWsRef.readyState === WebSocket.CONNECTING)) {
       wsRef.current = globalWsRef;
       if (globalWsRef.readyState === WebSocket.OPEN) {
-        // Sync the current connection state to local state
         setIsConnected(globalIsConnected);
         setConnectionError(globalConnectionError);
       }
@@ -508,45 +542,53 @@ export const useWebSocketNotifications = ({
     }
     globalConnecting = true;
 
-    const endpoint = await getWebSocketEndpoint();
-    if (!endpoint) {
-      dispatchConnectionState(false, 'Failed to get WebSocket endpoint');
-      return;
-    }
-
     try {
+      const endpoint = await getWebSocketEndpoint();
+      if (!endpoint) {
+        globalConnecting = false;
+        dispatchConnectionState(false, 'Failed to get WebSocket endpoint');
+        return;
+      }
+
       dispatchConnectionState(false, null);
 
       // Build the WebSocket URL, adding the auth parameter
-      const token = localStorage.getItem('access_token');
+      let token: string | null = null;
+      try {
+        token = localStorage.getItem('access_token');
+      } catch {
+        token = null;
+      }
       if (!token) {
+        globalConnecting = false;
         dispatchConnectionState(false, 'No access token available');
         return;
       }
 
       // Ensure the endpoint is a full WebSocket URL
+      const sep = endpoint.includes('?') ? '&' : '?';
       let wsUrl: string;
       if (endpoint.startsWith('ws://') || endpoint.startsWith('wss://')) {
-        wsUrl = `${endpoint}?access_token=${encodeURIComponent(token)}`;
+        wsUrl = `${endpoint}${sep}access_token=${encodeURIComponent(token)}`;
       } else {
-        // If it's a relative path, build the full WebSocket URL
         const baseUrl = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
         const host = window.location.host;
-        wsUrl = `${baseUrl}${host}${endpoint}?access_token=${encodeURIComponent(token)}`;
+        wsUrl = `${baseUrl}${host}${endpoint}${sep}access_token=${encodeURIComponent(token)}`;
       }
-  const ws = new WebSocket(wsUrl);
-  globalWsRef = ws;
+
+      const ws = new WebSocket(wsUrl);
+      globalWsRef = ws;
 
       ws.onopen = () => {
         dispatchConnectionState(true, null);
-        reconnectAttemptsRef.current = 0;
+        globalReconnectAttempts = 0;
         globalConnecting = false;
 
-        // Send the start message
         ws.send(JSON.stringify({
           event: 'chat.start'
         }));
-      };  ws.onmessage = handleMessage;
+      };
+      ws.onmessage = handleMessage;
 
       ws.onclose = () => {
         dispatchConnectionState(false, null);
@@ -555,29 +597,30 @@ export const useWebSocketNotifications = ({
         globalConnecting = false;
 
         // Auto-reconnect
-        if (isAuthenticated && (globalMessageListeners.size > 0 || globalNotificationListeners.size > 0) && reconnectAttemptsRef.current < maxReconnectAttempts) {
-          const delay = reconnectDelayBase * Math.pow(2, reconnectAttemptsRef.current);
-          reconnectAttemptsRef.current++;
-          
-          console.log(`Attempting to reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current})`);
-          
-          reconnectTimeoutRef.current = setTimeout(() => {
-            connect();
+        if (
+          isAuthenticated &&
+          (globalMessageListeners.size > 0 || globalNotificationListeners.size > 0) &&
+          globalReconnectAttempts < maxReconnectAttempts
+        ) {
+          const delay = reconnectDelayBase * Math.pow(2, globalReconnectAttempts);
+          globalReconnectAttempts++;
+
+          if (globalReconnectTimeout) clearTimeout(globalReconnectTimeout);
+          globalReconnectTimeout = setTimeout(() => {
+            globalReconnectTimeout = null;
+            void connect();
           }, delay);
-        } else {
+        } else if (isAuthenticated && globalReconnectAttempts >= maxReconnectAttempts) {
           dispatchConnectionState(false, 'Connection lost and max reconnect attempts reached');
         }
       };
 
       ws.onerror = (error) => {
         console.error('WebSocket error (singleton):', error);
-        console.log('WebSocket URL:', wsUrl);
-        console.log('Endpoint:', endpoint);
         dispatchConnectionState(false, `WebSocket connection error: ${endpoint}`);
       };
 
       wsRef.current = ws;
-      
     } catch (error) {
       console.error('Failed to create WebSocket connection:', error);
       dispatchConnectionState(false, 'Failed to create WebSocket connection');
@@ -587,48 +630,27 @@ export const useWebSocketNotifications = ({
 
   // Disconnect
   const disconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
+    const shouldClose = !isAuthenticated || (globalMessageListeners.size === 0 && globalNotificationListeners.size === 0);
+    if (!shouldClose) {
+      return;
     }
-    // Only truly close the global connection when no listeners remain
-    const shouldClose = globalMessageListeners.size === 0 && globalNotificationListeners.size === 0;
-    if (shouldClose && globalWsRef) {
-      try {
-        if (globalWsRef.readyState === WebSocket.OPEN) {
-          globalWsRef.send(JSON.stringify({ event: 'chat.end' }));
-        }
-        globalWsRef.close();
-      } catch { /* ignore */ }
-      globalWsRef = null;
-    }
-    if (wsRef.current && wsRef.current !== globalWsRef) {
-      try { wsRef.current.close(); } catch { /* ignore */ }
-      wsRef.current = null;
-    }
-    globalConnecting = false;
-    dispatchConnectionState(false, null);
-    reconnectAttemptsRef.current = 0;
-
-    // Clear the cache
-    if (shouldClose) {
-      endpointCacheRef.current = null;
-      globalEndpointCache = null;
-      lastConnectAttemptRef.current = 0;
-    }
-  }, []);
+    resetGlobalWebSocket();
+    endpointCacheRef.current = null;
+    wsRef.current = null;
+  }, [isAuthenticated]);
 
   // Manage the connection state
   useEffect(() => {
     if (isAuthenticated) {
-      connect();
+      void connect();
     } else {
-      disconnect();
+      resetGlobalWebSocket();
+      endpointCacheRef.current = null;
     }
     return () => {
       disconnect();
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, connect, disconnect]);
 
   // Reconnect when the page becomes visible again
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import Avatar from '../UI/Avatar';
@@ -91,7 +91,7 @@ const CoverImage: React.FC<{ src?: string; alt?: string; isExpanded: boolean }> 
     : 'h-[120px] md:h-[150px]';
 
   return (
-    <div ref={ref} className={`relative w-full overflow-hidden transition-all duration-300 ${heightClass}`}>
+    <div ref={ref} className={`relative w-full overflow-hidden transition-[height] duration-300 ${heightClass}`}>
       <div className="absolute inset-0 cover-bg">
         <div className="h-full w-full" style={{ background: 'transparent' }} />
       </div>
@@ -137,6 +137,7 @@ const TeamFlag: React.FC<{ team: { id: number; name: string; short_name?: string
   return (
     <Link
       to={`/teams/${team.id}`}
+      aria-label={team.name}
       className="block transition-transform hover:scale-105"
       data-tooltip-id="team-tooltip"
       data-tooltip-content={team.name}
@@ -206,7 +207,15 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
     stats?.play_count && stats.play_count > 0 ? Math.round((stats.total_hits ?? 0) / stats.play_count) : 0;
 
   const coverUrl = pickBestUserCoverUrl(user) || (isDefaultUserCoverUrl(user.cover_url) ? "/image/backgrounds/bgcover.jpg" : user.cover_url);
-  const [isUpdatingMode] = useState(false);
+  const avatarRefreshTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (avatarRefreshTimeoutRef.current !== null) {
+        window.clearTimeout(avatarRefreshTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Only the owner may edit their own page.
   const canEdit = currentUser?.id === user.id;
@@ -245,12 +254,16 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
     }
   }, [preferences.profile_cover_expanded]);
 
-  const handleAvatarUpdate = async () => {
+  const handleAvatarUpdate = useCallback(() => {
+    if (avatarRefreshTimeoutRef.current !== null) {
+      window.clearTimeout(avatarRefreshTimeoutRef.current);
+    }
     // Delay the refresh so the server has finished processing the upload.
-    setTimeout(async () => {
-      await refreshUser();
+    avatarRefreshTimeoutRef.current = window.setTimeout(() => {
+      avatarRefreshTimeoutRef.current = null;
+      void refreshUser();
     }, 3000);
-  };
+  }, [refreshUser]);
 
   const handleToggleCover = async () => {
     const newExpandedState = !isCoverExpanded;
@@ -261,7 +274,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
   };
 
   return (
-    <main className="torii-profile relative mx-auto w-full max-w-6xl px-3 md:px-6 py-5 md:py-9">
+    <div className="torii-profile relative mx-auto w-full max-w-6xl px-3 md:px-6 py-5 md:py-9">
       {/* One restrained profile-color glow up top, replacing the old four-blob soup. */}
       <div
         aria-hidden
@@ -426,7 +439,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
 
             <RankHistoryChart
               rankHistory={user.rank_history}
-              isUpdatingMode={isUpdatingMode}
+              isUpdatingMode={false}
               selectedModeColor={profileColor}
               delay={0.2}
               height="6rem"
@@ -558,7 +571,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({
       {/* Profile-only tooltip anchors (country-tooltip is mounted globally in Layout). */}
       <Tooltip id="team-tooltip" />
       <Tooltip id="cover-toggle-tooltip" />
-    </main>
+    </div>
   );
 };
 

@@ -28,7 +28,7 @@ export default function HeroSection() {
           fetchPriority="high"
         />
         <div className="torii-home__content">
-          <div className="torii-home__server-label">osu!lazer private server</div>
+          <div className="torii-home__server-label">Private rhythm game server</div>
           <div className="torii-home__brand-mark">
             <img
               src="/image/logos/logo.png"

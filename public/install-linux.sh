@@ -13,7 +13,7 @@
 
 set -euo pipefail
 
-REPO="ShikkesoraSIM/torii-osu"
+REPO="ShikkesoraSIM/torii"
 STREAM="torii"
 LAUNCH=1
 
@@ -92,7 +92,7 @@ cat > "$APPS_DIR/torii.desktop" <<EOF
 [Desktop Entry]
 Type=Application
 Name=Torii
-Comment=osu!lazer, the Torii way
+Comment=Torii rhythm game client
 Exec=$TARGET %U
 Icon=torii
 Terminal=false

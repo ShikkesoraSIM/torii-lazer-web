@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { FiSend } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 
@@ -48,8 +47,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       handleSend();
     }
@@ -69,7 +68,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className=" px-3 pt-3 pb-2 bg-card border-t border-gray-200 dark:border-gray-700">
+    <div className="px-3 pt-3 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] bg-card border-t border-white/10">
       <div className="mb-3 flex items-end space-x-3">
         {/* Message input area */}
         <div className="flex-1 relative">
@@ -77,7 +76,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             onPaste={handlePaste}
             placeholder={resolvedPlaceholder}
             disabled={disabled}
@@ -113,21 +112,19 @@ const MessageInput: React.FC<MessageInputProps> = ({
         </div>
 
         {/* Send button */}
-        <motion.button
-          whileHover={{ scale: disabled ? 1 : 1.05 }}
-          whileTap={{ scale: disabled ? 1 : 0.95 }}
+        <button
+          type="button"
           onClick={handleSend}
           disabled={!message.trim() || disabled}
-          className={`mb-[5px]
-            w-12 h-12 rounded-lg transition-all duration-200 flex items-center justify-center flex-shrink-0
-            ${!message.trim() || disabled
-              ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-              : 'bg-osu-pink text-white hover:bg-osu-pink/90 shadow-lg shadow-osu-pink/25'
-            }
-          `}
+          aria-label={t('messages.chat.send', 'Send message')}
+          className={`mb-[5px] w-12 h-12 rounded-lg transition-all duration-200 flex items-center justify-center flex-shrink-0 ${
+            !message.trim() || disabled
+              ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              : 'bg-[var(--torii-blue)] text-white hover:bg-[var(--torii-blue-hover)] shadow-lg shadow-[var(--torii-blue)]/25 active:scale-95'
+          }`}
         >
           <FiSend size={16} />
-        </motion.button>
+        </button>
       </div>
       
       {/* Simplified hint text */}

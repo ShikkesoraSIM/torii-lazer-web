@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { notificationsAPI } from '../utils/api';
 import { apiCache } from '../utils/apiCache';
 import { useWebSocketNotifications } from './useWebSocketNotifications';
@@ -12,6 +12,8 @@ export const useNotifications = (isAuthenticated: boolean, currentUser?: User | 
     friend_requests: 0,
   });
   const [notifications, setNotifications] = useState<APINotification[]>([]);
+  const notificationsRef = useRef<APINotification[]>([]);
+  notificationsRef.current = notifications;
   const [isLoading, setIsLoading] = useState(false);
 
   // Handle a new notification
@@ -96,7 +98,7 @@ export const useNotifications = (isAuthenticated: boolean, currentUser?: User | 
     }
 
     // Skip if not forcing a refresh and we already have data
-    if (!force && notifications.length > 0) {
+    if (!force && notificationsRef.current.length > 0) {
       return;
     }
 
@@ -147,25 +149,27 @@ export const useNotifications = (isAuthenticated: boolean, currentUser?: User | 
     }
   }, [isAuthenticated]);
 
-  // Initial load
+  // Initial load & logout reset
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchNotifications(true); // force-refresh the initial data
-    }
-  }, [isAuthenticated]);
+    void fetchNotifications(true);
+  }, [isAuthenticated, fetchNotifications]);
 
-  // Periodic refresh (while the WebSocket is disconnected)
+  // Periodic refresh (while the WebSocket is disconnected and tab is visible)
   useEffect(() => {
     if (!isConnected && isAuthenticated) {
-      const interval = setInterval(() => fetchNotifications(true), 60000); // 60s to reduce frequency
+      const interval = setInterval(() => {
+        if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+          void fetchNotifications(true);
+        }
+      }, 60000);
       return () => clearInterval(interval);
     }
-  }, [isConnected, isAuthenticated]);
+  }, [isConnected, isAuthenticated, fetchNotifications]);
 
   // Manual refresh
   const refresh = useCallback(() => {
-    fetchNotifications(true);
-  }, []);
+    void fetchNotifications(true);
+  }, [fetchNotifications]);
 
   // Mark a notification as read
   const markAsRead = useCallback(async (notificationId: number) => {
@@ -230,38 +234,33 @@ export const useNotifications = (isAuthenticated: boolean, currentUser?: User | 
 
   // Remove a notification
   const removeNotification = useCallback((notificationId: number) => {
-    setNotifications(prev => {
-      const notification = prev.find(n => n.id === notificationId);
-      if (notification && !notification.is_read) {
-        // If removing an unread notification, update the unread count
-        setUnreadCount(prevCount => {
-          const newCount = { ...prevCount };
-          
-          switch (notification.name) {
-            case 'team_application_store':
-            case 'team_application_accept':
-            case 'team_application_reject':
-              newCount.team_requests = Math.max(0, newCount.team_requests - 1);
-              break;
-            case 'channel_message':
-              newCount.private_messages = Math.max(0, newCount.private_messages - 1);
-              break;
-          }
-          
-          newCount.total = newCount.team_requests + newCount.private_messages + newCount.friend_requests;
-          return newCount;
-        });
-      }
-      
-      return prev.filter(n => n.id !== notificationId);
-    });
+    const notification = notificationsRef.current.find(n => n.id === notificationId);
+    setNotifications(prev => prev.filter(n => n.id !== notificationId));
+    if (notification && !notification.is_read) {
+      setUnreadCount(prevCount => {
+        const newCount = { ...prevCount };
+
+        switch (notification.name) {
+          case 'team_application_store':
+          case 'team_application_accept':
+          case 'team_application_reject':
+            newCount.team_requests = Math.max(0, newCount.team_requests - 1);
+            break;
+          case 'channel_message':
+            newCount.private_messages = Math.max(0, newCount.private_messages - 1);
+            break;
+        }
+
+        newCount.total = newCount.team_requests + newCount.private_messages + newCount.friend_requests;
+        return newCount;
+      });
+    }
   }, []);
 
   // Remove notifications matching a given object_id and object_type
   const removeNotificationByObject = useCallback(async (objectId: string, objectType: string) => {
     try {
-      // Find the matching notifications
-      const notificationsToRemove = notifications.filter(n =>
+      const notificationsToRemove = notificationsRef.current.filter(n =>
         n.object_id === objectId && n.object_type === objectType
       );
 
@@ -269,53 +268,54 @@ export const useNotifications = (isAuthenticated: boolean, currentUser?: User | 
         return;
       }
 
+      const parsedObjectId = Number.parseInt(objectId, 10);
+      if (!Number.isFinite(parsedObjectId)) {
+        return;
+      }
+
       // Mark them read via the batch API. Only pass object_id; passing object_type
       // would fail because the backend expects an int there.
       await notificationsAPI.markMultipleAsRead([
         {
-          object_id: parseInt(objectId),
+          object_id: parsedObjectId,
         }
       ]);
 
-      // Update local state
-      setNotifications(prev => {
-        const unreadNotificationsToRemove = notificationsToRemove.filter(n => !n.is_read);
+      const unreadNotificationsToRemove = notificationsToRemove.filter(n => !n.is_read);
+      if (unreadNotificationsToRemove.length > 0) {
+        setUnreadCount(prevCount => {
+          const newCount = { ...prevCount };
 
-        if (unreadNotificationsToRemove.length > 0) {
-          setUnreadCount(prevCount => {
-            const newCount = { ...prevCount };
-
-            unreadNotificationsToRemove.forEach(notification => {
-              switch (notification.name) {
-                case 'team_application_store':
-                case 'team_application_accept':
-                case 'team_application_reject':
-                  newCount.team_requests = Math.max(0, newCount.team_requests - 1);
-                  break;
-                case 'channel_message':
-                  newCount.private_messages = Math.max(0, newCount.private_messages - 1);
-                  break;
-              }
-            });
-
-            newCount.total = newCount.team_requests + newCount.private_messages + newCount.friend_requests;
-            return newCount;
+          unreadNotificationsToRemove.forEach(notification => {
+            switch (notification.name) {
+              case 'team_application_store':
+              case 'team_application_accept':
+              case 'team_application_reject':
+                newCount.team_requests = Math.max(0, newCount.team_requests - 1);
+                break;
+              case 'channel_message':
+                newCount.private_messages = Math.max(0, newCount.private_messages - 1);
+                break;
+            }
           });
-        }
 
-        // Mark the matching notifications as read instead of deleting them
-        const updatedNotifications = prev.map(n =>
+          newCount.total = newCount.team_requests + newCount.private_messages + newCount.friend_requests;
+          return newCount;
+        });
+      }
+
+      // Mark the matching notifications as read instead of deleting them
+      setNotifications(prev =>
+        prev.map(n =>
           (n.object_id === objectId && n.object_type === objectType)
             ? { ...n, is_read: true }
             : n
-        );
-
-        return updatedNotifications;
-      });
+        )
+      );
     } catch (error) {
       console.error('Failed to batch-mark notifications as read:', error);
     }
-  }, [notifications]);
+  }, []);
 
   return {
     unreadCount,

@@ -98,31 +98,31 @@ const FriendsList: React.FC<FriendsListProps> = ({ currentUser: _currentUser, on
         initial={{ y: 50 }}
         animate={{ y: 0 }}
         exit={{ y: 50 }}
-        className="bg-card rounded-lg shadow-xl w-full max-w-md max-h-[80vh] overflow-hidden"
+        className="bg-card border border-white/10 rounded-lg shadow-xl w-full max-w-md max-h-[90dvh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Friends</h2>
+        <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
+          <h2 className="text-lg font-semibold text-white">Friends</h2>
           <button
-            onClick={() => {
-              onClose();
-            }}
-            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            type="button"
+            onClick={onClose}
+            aria-label="Close friends list"
+            className="p-2 text-gray-400 hover:text-gray-200 rounded-lg hover:bg-white/10"
           >
             <FiX size={20} />
           </button>
         </div>
 
         {/* Title bar */}
-        <div className="py-3 px-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div className="py-3 px-4 border-b border-white/10 flex-shrink-0">
+          <h3 className="text-sm font-medium text-gray-300">
             Friends list ({friends.length})
           </h3>
         </div>
 
         {/* Content area */}
-        <div className="p-4 max-h-[60vh] overflow-y-auto">
+        <div className="p-4 flex-1 min-h-0 overflow-y-auto">
           {/* Search box */}
           <div className="mb-4">
             <input

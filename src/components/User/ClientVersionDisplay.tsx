@@ -109,15 +109,6 @@ const ClientVersionDisplay: React.FC<ClientVersionDisplayProps> = ({
   const [isHovered, setIsHovered] = useState(false);
 
   const clientInfo = parseScoreClientVersion(clientVersion);
-  if (!clientInfo) return null;
-
-  const theme = STREAM_THEMES[clientInfo.stream];
-  const PlatformIcon = PLATFORM_ICONS[clientInfo.platform];
-
-  const tooltipText = [clientInfo.clientName, clientInfo.version, clientInfo.os]
-    .filter(Boolean)
-    .join(' • ');
-  const detailLine = [clientInfo.version, clientInfo.os].filter(Boolean).join(' • ');
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
@@ -135,6 +126,16 @@ const ClientVersionDisplay: React.FC<ClientVersionDisplayProps> = ({
   const dismiss = useDismiss(context);
   const role = useRole(context, { role: 'tooltip' });
   const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role]);
+
+  if (!clientInfo) return null;
+
+  const theme = STREAM_THEMES[clientInfo.stream];
+  const PlatformIcon = PLATFORM_ICONS[clientInfo.platform];
+
+  const tooltipText = [clientInfo.clientName, clientInfo.version, clientInfo.os]
+    .filter(Boolean)
+    .join(' • ');
+  const detailLine = [clientInfo.version, clientInfo.os].filter(Boolean).join(' • ');
 
   const isActive = isHovered || isOpen;
 

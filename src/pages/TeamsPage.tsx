@@ -24,28 +24,8 @@ const TeamsPage: React.FC = () => {
 
   const [teamRankings, setTeamRankings] = useState<TeamRankingsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const loadTeamRankings = async () => {
-    setIsLoading(true);
-    try {
-      const response = await rankingsAPI.getTeamRankings(
-        selectedMode,
-        rankingType,
-        currentPage
-      );
-      setTeamRankings(response);
-    } catch (error) {
-      handleApiError(error);
-      console.error('Failed to load team rankings:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    setCurrentPage(1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [selectedMode, rankingType]);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadNonce, setReloadNonce] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -53,16 +33,55 @@ const TeamsPage: React.FC = () => {
   }, [isAuthenticated, refreshUser]);
 
   useEffect(() => {
-    loadTeamRankings();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [selectedMode, rankingType, currentPage]);
+    let cancelled = false;
+    const fetchRankings = async () => {
+      setIsLoading(true);
+      setLoadError(false);
+      try {
+        const response = await rankingsAPI.getTeamRankings(
+          selectedMode,
+          rankingType,
+          currentPage
+        );
+        if (!cancelled) {
+          setTeamRankings(response);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(true);
+          handleApiError(error);
+          console.error('Failed to load team rankings:', error);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+    void fetchRankings();
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedMode, rankingType, currentPage, reloadNonce]);
+
+  const handleModeChange = (mode: GameMode) => {
+    setSelectedMode(mode);
+    setCurrentPage(1);
+  };
+
+  const handleRankingTypeChange = (type: RankingType) => {
+    setRankingType(type);
+    setCurrentPage(1);
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
   const actionClass =
-    'inline-flex items-center px-4 py-2 rounded-2xl border border-white/20 bg-osu-pink text-white hover:brightness-110 transition-all self-start sm:self-auto shadow-[0_12px_28px_-10px_rgba(0,0,0,0.6)]';
+    'inline-flex items-center px-4 py-2 rounded-2xl border border-white/20 bg-torii hover:bg-torii-hover text-white transition-all self-start sm:self-auto shadow-elev-2';
 
   return (
     <div className="min-h-screen torii-page-stage">
@@ -105,7 +124,7 @@ const TeamsPage: React.FC = () => {
           <div className="torii-liquid-soft rounded-2xl p-2">
             <GameModeSelector
               selectedMode={selectedMode}
-              onModeChange={setSelectedMode}
+              onModeChange={handleModeChange}
               variant="compact"
               className=""
             />
@@ -115,7 +134,7 @@ const TeamsPage: React.FC = () => {
             <div className="w-full sm:w-48">
               <RankingTypeSelector
                 value={rankingType}
-                onChange={setRankingType}
+                onChange={handleRankingTypeChange}
               />
             </div>
           </div>
@@ -125,7 +144,18 @@ const TeamsPage: React.FC = () => {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 sm:px-0">
               <LoadingSpinner size="lg" className="mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 font-medium">{t('teams.loadingTeams')}</p>
+              <p className="text-text-secondary font-medium">{t('teams.loadingTeams')}</p>
+            </div>
+          ) : loadError ? (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-200 rounded-2xl p-5 flex items-center justify-between gap-3 flex-wrap">
+              <span>{t('teams.loadError', { defaultValue: 'Failed to load teams.' })}</span>
+              <button
+                type="button"
+                onClick={() => setReloadNonce((n) => n + 1)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-sm font-semibold transition-colors"
+              >
+                {t('common.retry', { defaultValue: 'Retry' })}
+              </button>
             </div>
           ) : (
             <TeamRankingsList
@@ -136,7 +166,7 @@ const TeamsPage: React.FC = () => {
             />
           )}
 
-          {!isLoading && (
+          {!isLoading && !loadError && (
             <PaginationControls
               total={teamRankings?.total || 0}
               currentPage={currentPage}

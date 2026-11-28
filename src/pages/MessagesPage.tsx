@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiMessageCircle, 
@@ -49,10 +50,15 @@ const MessagesPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesRef = useRef<ChatMessage[]>([]);
   const [channelFilter, setChannelFilter] = useState<ChannelFilter>('all');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false
+  );
+  const [showSidebar, setShowSidebar] = useState(() =>
+    typeof window !== 'undefined' ? !window.matchMedia('(max-width: 767px)').matches : true
+  );
   const [showNewPMModal, setShowNewPMModal] = useState(false);
+  const channelLoadSeqRef = useRef(0);
   
   const loadChannelMessages = useCallback(async (channelId: number): Promise<ChatMessage[] | null> => {
     try {
@@ -151,92 +157,109 @@ const MessagesPage: React.FC = () => {
   });
 
   useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      setShowSidebar(!mobile);
+    const mq = window.matchMedia('(max-width: 767px)');
+    const syncViewport = (matches: boolean) => {
+      setIsMobile(matches);
+      setShowSidebar(!matches);
     };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    syncViewport(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => syncViewport(e.matches);
+    if (mq.addEventListener) {
+      mq.addEventListener('change', onChange);
+      return () => mq.removeEventListener('change', onChange);
+    }
+    mq.addListener(onChange);
+    return () => mq.removeListener(onChange);
   }, []);
 
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      setChannels([]);
+      setSelectedChannel(null);
+      setMessages([]);
+      return;
+    }
+
+    let cancelled = false;
 
     const loadChannels = async () => {
       try {
         setIsLoading(true);
         const channelsData = await apiCache.getChannels();
-        
-        const pmChannels = (channelsData || []).filter((ch: ChatChannel) => ch.type === 'PM');
-        if (pmChannels.length > 0) { /* no-op */ }
-        
-        const channelsWithUserInfo = await Promise.all(
-          (channelsData || []).map(async (channel: ChatChannel) => {
-            if (channel.type === 'PM' && channel.users.length > 0) {
-              try {
-                const targetUserId = channel.users.find(id => id !== user?.id);
-                if (targetUserId) {
-                  
-                  const userInfo = await apiCache.getUser(targetUserId);
-                  
-                  if (userInfo) {
-                    return {
-                      ...channel,
-                      name: `DM: ${userInfo.username}`,
-                      user_info: {
-                        id: userInfo.id,
-                        username: userInfo.username,
-                        avatar_url: userInfo.avatar_url || '/default.jpg',
-                        cover_url: userInfo.cover_url || userInfo.cover?.url || userInfo.cover?.custom_url || ''
-                      }
-                    };
-                  }
-                }
-              } catch { /* non-fatal */ }
-            }
-            return channel;
-          })
+        if (cancelled) return;
+
+        const pmTargetIds = Array.from(
+          new Set(
+            (channelsData || [])
+              .filter((ch: ChatChannel) => ch.type === 'PM' && ch.users?.length > 0)
+              .map((ch: ChatChannel) => ch.users.find(id => id !== user?.id))
+              .filter((id: number | undefined): id is number => typeof id === 'number' && id > 0 && !apiCache.hasCachedUser(id))
+          )
         );
-        
+
+        if (pmTargetIds.length > 0) {
+          await apiCache.getUsers(pmTargetIds).catch(() => undefined);
+          if (cancelled) return;
+        }
+
+        const channelsWithUserInfo = (channelsData || []).map((channel: ChatChannel) => {
+          if (channel.type === 'PM' && channel.users.length > 0) {
+            const targetUserId = channel.users.find(id => id !== user?.id);
+            const userInfo = targetUserId ? apiCache.getCachedUser(targetUserId) : null;
+            if (userInfo) {
+              return {
+                ...channel,
+                name: `DM: ${userInfo.username}`,
+                user_info: {
+                  id: userInfo.id,
+                  username: userInfo.username,
+                  avatar_url: userInfo.avatar_url || '/default.jpg',
+                  cover_url: userInfo.cover_url || userInfo.cover?.url || userInfo.cover?.custom_url || ''
+                }
+              };
+            }
+          }
+          return channel;
+        });
+
         const sortedChannels = channelsWithUserInfo.sort((a: ChatChannel, b: ChatChannel) => {
           const typeOrder: Record<string, number> = { 'PUBLIC': 0, 'PM': 1, 'TEAM': 2, 'PRIVATE': 3 };
           const aOrder = typeOrder[a.type] || 4;
           const bOrder = typeOrder[b.type] || 4;
-          
+
           if (aOrder !== bOrder) {
             return bOrder - aOrder;
           }
-          
+
           return b.name.localeCompare(a.name);
         });
-        
+
         setChannels(sortedChannels);
-        
+
         setTimeout(() => {
-          cleanupDuplicatePrivateChannels();
+          if (!cancelled) cleanupDuplicatePrivateChannels();
         }, 100);
-        
-        if (!selectedChannel && sortedChannels.length > 0) {
-          const osuChannel = sortedChannels.find(ch => 
-            ch.name.toLowerCase().includes('osu') || 
-            ch.name.toLowerCase().includes('#osu') ||
-            ch.name === 'osu!'
-          );
-          
-          const channelToSelect = osuChannel || sortedChannels[0];
-          selectChannel(channelToSelect);
+
+        if (!selectedChannelRef.current && sortedChannels.length > 0) {
+          const defaultPublic = sortedChannels.find((ch: ChatChannel) =>
+            ch.type === 'PUBLIC' && (ch.name === '#general' || ch.name.toLowerCase().includes('torii') || ch.name.toLowerCase().includes('osu'))
+          ) || sortedChannels.find((ch: ChatChannel) => ch.type === 'PUBLIC');
+
+          const channelToSelect = defaultPublic || sortedChannels[0];
+          void selectChannel(channelToSelect);
         }
       } catch { /* non-fatal */ } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
-    loadChannels();
-  }, [isAuthenticated]);
+    void loadChannels();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, user?.id]);
 
   useEffect(() => {
     selectedChannelRef.current = selectedChannel;
@@ -302,26 +325,24 @@ const MessagesPage: React.FC = () => {
   );
 
   const selectChannelAndAddMessage = async (channel: ChatChannel, newMessage: ChatMessage) => {
-  initialLoadRef.current = true;
+    initialLoadRef.current = true;
     setSelectedChannel(channel);
     selectedChannelRef.current = channel;
-  const requestToken = Symbol('channel-load');
-  (selectChannelAndAddMessage as any).currentToken = requestToken;
-    
+    const requestSeq = ++channelLoadSeqRef.current;
+
     if (isMobile) {
       setShowSidebar(false);
     }
 
     try {
       const channelMessages = await loadChannelMessages(channel.channel_id);
-      
+      if (channelLoadSeqRef.current !== requestSeq) {
+        return;
+      }
+
       if (channelMessages && channelMessages.length > 0) {
-        if ((selectChannelAndAddMessage as any).currentToken !== requestToken) {
-          return;
-        }
-        
         const messageExists = channelMessages.find((m: ChatMessage) => m.message_id === newMessage.message_id);
-        
+
         setMessages(prev => {
           const inflight = prev.filter(m => m.channel_id === channel.channel_id);
           const mergedMap = new Map<number, ChatMessage>();
@@ -332,60 +353,22 @@ const MessagesPage: React.FC = () => {
               timestamp: convertUTCToLocal(newMessage.timestamp)
             });
           }
-          const all = Array.from(mergedMap.values()).sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-          return all;
+          return Array.from(mergedMap.values()).sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
         });
-        
+
         const lastMessage = channelMessages[channelMessages.length - 1];
         throttledMarkAsRead(channel.channel_id, lastMessage.message_id);
-
-        if (channel.type === 'PM') {
-          try {
-            const relatedPmNotifications = notifications.filter(n => n.name === 'channel_message' && n.object_id === channel.channel_id.toString());
-            if (relatedPmNotifications.some(n => !n.is_read)) {
-              await removeNotificationByObject(channel.channel_id.toString(), 'channel');
-            }
-          } catch { /* non-fatal */ }
-        }
       } else {
         setMessages(prev => {
           const inflight = prev.filter(m => m.channel_id === channel.channel_id);
           const exists = inflight.some(m => m.message_id === newMessage.message_id);
-            return exists ? inflight : [...inflight, {
-              ...newMessage,
-              timestamp: convertUTCToLocal(newMessage.timestamp)
-            }];
+          return exists ? inflight : [...inflight, {
+            ...newMessage,
+            timestamp: convertUTCToLocal(newMessage.timestamp)
+          }];
         });
-        
-        if (channel.type === 'PM') {
-          try {
-            const relatedPmNotifications = notifications.filter(n => n.name === 'channel_message' && n.object_id === channel.channel_id.toString());
-            if (relatedPmNotifications.some(n => !n.is_read)) {
-              await removeNotificationByObject(channel.channel_id.toString(), 'channel');
-            }
-          } catch { /* non-fatal */ }
-        }
       }
-    } catch (error) {
-      toast.error(t('messages.toasts.loadMessagesFailed'));
-      setMessages(prev => {
-        let allMessages = [...prev];
-        
-        const newMessageWithLocalTime = {
-          ...newMessage,
-          timestamp: convertUTCToLocal(newMessage.timestamp)
-        };
-        
-        const messageExists = allMessages.find(msg => msg.message_id === newMessage.message_id);
-        if (!messageExists) {
-          allMessages.push(newMessageWithLocalTime);
-        }
-        
-        allMessages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-        
-        return allMessages;
-      });
-      
+
       if (channel.type === 'PM') {
         try {
           const relatedPmNotifications = notifications.filter(n => n.name === 'channel_message' && n.object_id === channel.channel_id.toString());
@@ -394,15 +377,28 @@ const MessagesPage: React.FC = () => {
           }
         } catch { /* non-fatal */ }
       }
+    } catch {
+      if (channelLoadSeqRef.current !== requestSeq) {
+        return;
+      }
+      toast.error(t('messages.toasts.loadMessagesFailed'));
+      setMessages(prev => {
+        const inflight = prev.filter(m => m.channel_id === channel.channel_id);
+        const messageExists = inflight.some(msg => msg.message_id === newMessage.message_id);
+        if (messageExists) return inflight;
+        return [...inflight, {
+          ...newMessage,
+          timestamp: convertUTCToLocal(newMessage.timestamp)
+        }].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      });
     }
   };
 
   const selectChannel = async (channel: ChatChannel) => {
-  initialLoadRef.current = true;
+    initialLoadRef.current = true;
     setSelectedChannel(channel);
     selectedChannelRef.current = channel;
-  const requestToken = Symbol('channel-load');
-  (selectChannel as any).currentToken = requestToken;
+    const requestSeq = ++channelLoadSeqRef.current;
     
     if (isMobile) {
       setShowSidebar(false);
@@ -439,54 +435,27 @@ const MessagesPage: React.FC = () => {
 
     try {
       const channelMessages = await loadChannelMessages(channel.channel_id);
-      
+      if (channelLoadSeqRef.current !== requestSeq) {
+        return;
+      }
+
       if (channelMessages && channelMessages.length > 0) {
-        if ((selectChannel as any).currentToken !== requestToken) {
-          return;
-        }
-        
-        
         setMessages(prev => {
           const inflight = prev.filter(m => m.channel_id === channel.channel_id);
           const mergedMap = new Map<number, ChatMessage>();
           [...channelMessages, ...inflight].forEach(m => mergedMap.set(m.message_id, m));
-          const all = Array.from(mergedMap.values()).sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-          return all;
+          return Array.from(mergedMap.values()).sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
         });
-        
+
         const lastMessage = channelMessages[channelMessages.length - 1];
         throttledMarkAsRead(channel.channel_id, lastMessage.message_id);
-
-        if (channel.type === 'PM') {
-          try {
-            const relatedPmNotifications = notifications.filter(n => n.name === 'channel_message' && n.object_id === channel.channel_id.toString());
-            if (relatedPmNotifications.some(n => !n.is_read)) {
-              await removeNotificationByObject(channel.channel_id.toString(), 'channel');
-            }
-          } catch { /* non-fatal */ }
-        }
-    } else {
+      } else {
         setMessages(prev => {
-      const inflight = prev.filter(m => m.channel_id === channel.channel_id);
-      return inflight.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+          const inflight = prev.filter(m => m.channel_id === channel.channel_id);
+          return inflight.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
         });
-        
-        if (channel.type === 'PM') {
-          try {
-            const relatedPmNotifications = notifications.filter(n => n.name === 'channel_message' && n.object_id === channel.channel_id.toString());
-            if (relatedPmNotifications.some(n => !n.is_read)) {
-              await removeNotificationByObject(channel.channel_id.toString(), 'channel');
-            }
-          } catch { /* non-fatal */ }
-        }
       }
-    } catch (error) {
-      toast.error(t('messages.toasts.loadMessagesFailed'));
-      
-      setMessages(prev => {
-        return prev;
-      });
-      
+
       if (channel.type === 'PM') {
         try {
           const relatedPmNotifications = notifications.filter(n => n.name === 'channel_message' && n.object_id === channel.channel_id.toString());
@@ -495,6 +464,11 @@ const MessagesPage: React.FC = () => {
           }
         } catch { /* non-fatal */ }
       }
+    } catch {
+      if (channelLoadSeqRef.current !== requestSeq) {
+        return;
+      }
+      toast.error(t('messages.toasts.loadMessagesFailed'));
     }
   };
 
@@ -541,7 +515,7 @@ const MessagesPage: React.FC = () => {
       
       addMessageToList(message, 'api');
       
-    } catch (error) {
+    } catch {
       toast.error(t('messages.toasts.sendMessageFailed'));
     }
   };
@@ -1069,7 +1043,7 @@ const MessagesPage: React.FC = () => {
   };
 
   const batchMarkPrivateNotificationsAsRead = async () => {
-    let privateNotifications = notifications.filter(notification => 
+    const privateNotifications = notifications.filter(notification => 
       notification.name === 'channel_message' && 
       notification.details?.type === 'pm'
     );
@@ -1336,7 +1310,7 @@ const MessagesPage: React.FC = () => {
       }
 
       await markAsRead(notification.id);
-    } catch (error) {
+    } catch {
       toast.error(
         t('messages.toasts.teamRequestActionFailed', {
           action: action === 'accept' ? t('messages.actions.accept') : t('messages.actions.reject'),
@@ -1359,32 +1333,37 @@ const MessagesPage: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+      <div className="flex items-center justify-center min-h-[60vh] px-4">
+        <div className="text-center max-w-md">
+          <h1 className="text-2xl font-bold text-white mb-3">
             {t('messages.loginRequired.title')}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-slate-400 mb-6">
             {t('messages.loginRequired.description')}
           </p>
+          <Link
+            to="/login"
+            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] text-white text-sm font-semibold transition-colors"
+          >
+            {t('auth.login.submit', 'Sign in')}
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)] max-h-[calc(100vh-8rem)] md:max-h-[calc(100vh-4rem)] overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex torii-chat-shell overflow-hidden bg-gray-900">
       <AnimatePresence>
         {showSidebar && (
           <motion.div
             initial={{ x: isMobile ? -320 : 0, opacity: isMobile ? 0 : 1 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: isMobile ? -320 : 0, opacity: isMobile ? 0 : 1 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
             className={`
-              ${isMobile ? 'fixed inset-y-0 left-0 z-50' : 'relative'}
-              w-80 bg-card border-r border-card
-              flex flex-col ${isMobile ? 'h-screen max-h-screen' : 'h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)]'}
+              ${isMobile ? 'fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] torii-chat-sidebar-mobile' : 'relative w-80 torii-chat-shell'}
+              bg-card border-r border-card flex flex-col
             `}
           >
             <div className="p-4 border-b border-card">
@@ -1498,7 +1477,7 @@ const MessagesPage: React.FC = () => {
                               privateCount: pmChannels.length,
                             })
                           );
-                        } catch (error) {
+                        } catch {
                           toast.error(t('messages.toasts.refreshFailed'));
                         }
                       }}
@@ -1682,7 +1661,7 @@ const MessagesPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div className="flex-1 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)] max-h-[calc(100vh-8rem)] md:max-h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="flex-1 flex flex-col torii-chat-shell overflow-hidden">
         {selectedChannel ? (
           <>
             <div className="mt-[2px] h-16 bg-card border-b border-card flex items-center px-4 flex-shrink-0">
@@ -1799,7 +1778,7 @@ const MessagesPage: React.FC = () => {
               
               await selectChannel(newChannel);
               
-            } catch (error) {
+            } catch {
               toast.error(t('messages.toasts.loadPrivateChannelFailed'));
             }
           }

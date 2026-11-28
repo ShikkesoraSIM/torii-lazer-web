@@ -107,30 +107,36 @@
    */
   .mm-glass {
     background: var(--card-bg);
-    backdrop-filter: blur(24px) saturate(140%);
-    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-radius: 1.5rem; /* 24px */
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38);
   }
 
-  /* Elevated hero / champion-card variant — heavier blur + deeper drop. */
+  /* Elevated hero / champion-card variant */
   .mm-glass-pop {
     background: var(--card-bg);
-    backdrop-filter: blur(28px) saturate(160%);
-    -webkit-backdrop-filter: blur(28px) saturate(160%);
-    border-radius: 1.75rem; /* 28px */
-    box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 1.5rem; /* 24px */
+    box-shadow: 0 20px 52px -14px rgba(0, 0, 0, 0.50);
   }
 
-  /* Compact / inset variant — for nested cards (stat tiles, the "your
-   * placement" pill). Same family, smaller radius + lighter shadow so
-   * they don't fight the panel they're inside. */
+  /* Compact / inset variant — for nested cards (stat tiles, placement pill). */
   .mm-glass-inset {
     background: var(--card-bg);
-    backdrop-filter: blur(14px) saturate(130%);
-    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 1.25rem; /* 20px */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .mm-glass,
+    .mm-glass-pop,
+    .mm-glass-inset {
+      background: #1a214a;
+    }
   }
 
   /* Row-style hover. Used for leaderboard / rotation rows so we can
@@ -192,11 +198,12 @@
   }
   .mm-input:focus,
   .mm-input:focus-visible {
-    outline: none;
+    outline: 2px solid rgba(var(--torii-blue-rgb), 0.75);
+    outline-offset: 1px;
     box-shadow:
       inset 0 1px 2px rgba(0, 0, 0, 0.4),
-      inset 0 0 0 1px rgba(236, 72, 153, 0.6),
-      0 0 0 3px rgba(236, 72, 153, 0.15);
+      inset 0 0 0 1px rgba(var(--torii-blue-rgb), 0.55),
+      0 0 0 3px rgba(var(--torii-blue-rgb), 0.18);
   }
 }
 
@@ -255,97 +262,75 @@
 }
 
 :root {
-  /* Cambiamos el tono base a uno más violeta (270-280) en lugar de rosa (340) */
-  --hue: 275; 
+  color-scheme: dark;
+  --hue: 225;
+
+  /* Unified Torii Blue primary + Personal Profile Pink tokens (RGB for Tailwind <alpha-value>) */
+  --torii-blue-rgb: 79 143 255;       /* #4F8FFF */
+  --torii-blue-hover-rgb: 59 124 245; /* #3B7CF5 */
+  --torii-blue-deep-rgb: 20 34 78;    /* #14224E */
+  --torii-teal-rgb: 125 213 212;      /* #7DD5D4 */
+  --osu-pink-rgb: 237 142 166;        /* #ED8EA6 */
+  --profile-color-rgb: 237 142 166;
   --profile-color: #ED8EA6;
   --osu-pink: #ED8EA6;
-  
-  /* Fondos inspirados en tu #030014 */
+
+  /* Deep Navy / Torii Blue background & surface tokens (Chrome 80+ / Safari 14+ / Firefox 78+ safe, no oklch) */
   --page-bg: #030014;
   --bg-primary: #030014;
-  --bg-secondary: #0b0b1e;
-  
-  /* Card background - white in light mode */
-  /* --card-bg: white; */
-  --card-bg-hover: oklch(0.98 0.005 var(--hue));
-  /* Cartas y Paneles con efecto Glass de tu web */
-  --card-bg: rgba(30, 34, 72, 0.66);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --float-panel-bg: rgba(10, 10, 20, 0.75);
-  
-/* Textos */
-  --text-primary: #ffffff;
-  --text-secondary: #b4b4c0;
-  --text-muted: #a0aec0;
-  
-  /* Border color */
-  --border-color: #e2e8f0;
-  --border-hover: rgba(237, 142, 166, 0.2);
+  --bg-secondary: #0b0e24;
 
-  /* Button background */
-  --btn-bg: oklch(0.95 0.025 var(--hue));
-  --btn-bg-hover: oklch(0.9 0.05 var(--hue));
-  --btn-bg-active: oklch(0.85 0.08 var(--hue));
+  --card-bg: rgba(24, 30, 66, 0.78);
+  --card-bg-hover: rgba(34, 42, 92, 0.88);
+  --border-color: rgba(255, 255, 255, 0.09);
+  --border-hover: rgba(79, 143, 255, 0.35);
 
-  /* Accent color */
-  --bg-accent-light: rgba(237, 142, 166, 0.05);
-  --bg-accent-medium: rgba(237, 142, 166, 0.1);
+  /* Text colors */
+  --text-primary: rgba(255, 255, 255, 0.94);
+  --text-secondary: rgba(220, 228, 245, 0.76);
+  --text-muted: rgba(168, 180, 208, 0.72);
 
-  /* Floating panel */
-  --float-panel-bg: rgba(255, 255, 255, 0.9);
+  /* Button surfaces */
+  --btn-bg: rgba(38, 46, 94, 0.85);
+  --btn-bg-hover: rgba(48, 59, 118, 0.95);
+  --btn-bg-active: rgba(60, 74, 142, 1);
+  --btn-plain-bg-hover: rgba(42, 50, 102, 0.72);
+  --btn-plain-bg-active: rgba(34, 42, 86, 0.85);
 
-  /* Navbar */
-  --navbar-bg: rgba(255, 255, 255, 0.9);
+  /* Accent washes */
+  --bg-accent-light: rgba(79, 143, 255, 0.08);
+  --bg-accent-medium: rgba(79, 143, 255, 0.16);
+
+  /* Floating panel & Navbar */
+  --float-panel-bg: rgba(13, 18, 44, 0.94);
+  --navbar-bg: rgba(13, 18, 44, 0.90);
 }
 
 .dark {
-  /* Dark mode - based on the Fuwari implementation */
-  /* --page-bg: oklch(0.16 0.014 var(--hue)); */
+  color-scheme: dark;
   --page-bg: #030014;
-  --bg-primary: var(--page-bg);
-  --bg-secondary: oklch(0.20 0.015 var(--hue));
-
-  /* Card background - matches Fuwari */
-  /* --card-bg: oklch(0.23 0.015 var(--hue)); */
-  --card-bg: rgba(30, 34, 72, 0.82);
-  --card-bg-hover: oklch(0.30 0.03 var(--hue));
-
-  /* Text color */
-  --text-primary: rgba(255, 255, 255, 0.9);
-  --text-secondary: rgba(255, 255, 255, 0.75);
-  --text-muted: rgba(255, 255, 255, 0.5);
-
-  /* Border color - softer */
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(237, 142, 166, 0.3);
-
-  /* Button background - matches Fuwari */
-  --btn-bg: oklch(0.33 0.035 var(--hue));
-  --btn-bg-hover: oklch(0.38 0.04 var(--hue));
-  --btn-bg-active: oklch(0.43 0.045 var(--hue));
-
-  /* Hover-state background */
-  --btn-plain-bg-hover: oklch(0.30 0.035 var(--hue));
-  --btn-plain-bg-active: oklch(0.27 0.025 var(--hue));
-
-  /* Accent color */
-  --bg-accent-light: rgba(237, 142, 166, 0.08);
-  --bg-accent-medium: rgba(237, 142, 166, 0.15);
-
-  /* Floating panel - matches Fuwari, uses oklch */
-  --float-panel-bg: oklch(0.19 0.015 var(--hue) / 0.95);
-
-  /* Navbar - uses oklch with transparency */
-  --navbar-bg: oklch(0.19 0.015 var(--hue) / 0.9);
-
-  /* Dark-mode-only colors */
-  /* --osu-pink: var(--profile-color, #ED8EA6); */
+  --bg-primary: #030014;
+  --bg-secondary: #0b0e24;
+  --card-bg: rgba(24, 30, 66, 0.82);
+  --card-bg-hover: rgba(34, 42, 92, 0.92);
+  --text-primary: rgba(255, 255, 255, 0.94);
+  --text-secondary: rgba(220, 228, 245, 0.78);
+  --text-muted: rgba(168, 180, 208, 0.72);
+  --border-color: rgba(255, 255, 255, 0.09);
+  --border-hover: rgba(79, 143, 255, 0.35);
+  --float-panel-bg: rgba(13, 18, 44, 0.95);
+  --navbar-bg: rgba(13, 18, 44, 0.90);
   --osu-pink: #ED8EA6;
   --profile-color: #ED8EA6;
 }
 
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+:where(a, button, [role="button"], input, select, textarea, summary):focus-visible {
+  outline: 2px solid rgb(var(--torii-blue-rgb, 79 143 255));
+  outline-offset: 2px;
 }
 
 /* Prevent image dragging */
@@ -915,27 +900,23 @@ h1, h2, h3, h4, h5, h6 {
   clip-path: polygon(0 90%, 5% 85%, 15% 70%, 25% 60%, 35% 45%, 50% 35%, 65% 25%, 80% 20%, 90% 15%, 100% 10%, 100% 100%, 0 100%);
 }
 
-/* Disable selection globally (text & elements) */
-html, body, * {
-  -webkit-user-select: none; /* Chrome / Safari / new Edge / Opera */
-  -moz-user-select: none;    /* Firefox */
-  -ms-user-select: none;     /* old IE/Edge */
-  user-select: none;
-}
-
-/* Extra handling for images/media: no dragging, no long-press popup (iOS Safari) */
-img, svg, picture, video {
-  -webkit-user-drag: none;   /* Disable drag-to-save */
-  user-drag: none;           /* Non-standard, supported by some browsers */
-  -webkit-touch-callout: none; /* iOS long-press menu */
+/* Prevent accidental image drag / iOS callout while keeping normal text selectable everywhere */
+img, svg, picture, video, .no-select {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
 }
 
-input, textarea {
+.user-page-content, pre, code, .bbcode-box {
   -webkit-user-select: text;
-  -moz-user-select: text;
   user-select: text;
+}
+
+::selection {
+  background: rgba(79, 143, 255, 0.35);
+  color: #ffffff;
 }
 
 /* BBCode styles */
@@ -981,16 +962,26 @@ span.imagemap__link:hover {
 
 /* Inline spoiler styles */
 .spoiler {
-  background-color: #000;
-  color: #000;
-  border-radius: 3px;
-  padding: 0 2px;
+  background-color: #0b0e1e;
+  color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 0 4px;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.18s ease, background-color 0.18s ease;
 }
 
-.spoiler:hover {
+@media (hover: hover) {
+  .spoiler:hover {
+    color: inherit;
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.spoiler.revealed,
+.spoiler[data-revealed="true"] {
   color: inherit;
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 /* BBCode spoiler box styles */
@@ -1066,6 +1057,16 @@ span.imagemap__link:hover {
   appearance: none;
   width: 100%;
   height: 1.5rem;
+  /* Progressive enhancement: HSL fallback for older Chrome/Safari/Firefox, oklch where supported */
+  background: linear-gradient(to right,
+    hsl(0 82% 62%),
+    hsl(60 82% 62%),
+    hsl(120 82% 62%),
+    hsl(180 82% 62%),
+    hsl(240 82% 62%),
+    hsl(300 82% 62%),
+    hsl(360 82% 62%)
+  );
   background: linear-gradient(to right,
     oklch(0.70 0.14 0),
     oklch(0.70 0.14 30),
@@ -1312,31 +1313,6 @@ span.imagemap__link:hover {
   border-color: var(--torii-panel-border-strong) !important;
 }
 
-html,
-body,
-main,
-section,
-article,
-div,
-p,
-span,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-li,
-td,
-th,
-code,
-pre {
-  -webkit-user-select: text !important;
-  -moz-user-select: text !important;
-  -ms-user-select: text !important;
-  user-select: text !important;
-}
-
 button,
 a,
 img,
@@ -1457,85 +1433,34 @@ html.perf-mode .torii-app-shell::before {
   background: linear-gradient(180deg, #030014 0%, #050a24 45%, #04081d 100%);
 }
 
-/* Abre el selector de frontend sin perder la pagina actual. */
-.torii-frontend-switch {
-  position: fixed;
-  right: 1.25rem;
-  bottom: 1.25rem;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  border: 1px solid #ffffff26;
-  border-radius: 50%;
-  color: var(--osu-pink, #ED8EA6);
-  background: #242428;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .28);
-  transition: transform .28s cubic-bezier(.4, 0, .2, 1), border-color .2s ease, background-color .2s ease;
+html.perf-mode .gradient-text,
+html.perf-mode .animate-title-glow,
+html.perf-mode .cover-loading {
+  animation: none !important;
 }
 
-.torii-frontend-switch:hover,
-.torii-frontend-switch:focus-visible {
-  transform: translateY(-1px) scale(1.035);
-  border-color: var(--osu-pink, #ED8EA6);
-  background: #303035;
-}
-
-.torii-frontend-switch:focus-visible {
-  outline: 2px solid var(--osu-pink, #ED8EA6);
-  outline-offset: 4px;
-}
-
-.torii-frontend-switch svg {
-  width: 1.5rem;
-  height: 1.5rem;
-  position: relative;
-  z-index: 1;
-}
-
-.torii-frontend-switch__tip {
-  position: absolute;
-  right: calc(100% + .75rem);
-  bottom: 50%;
-  transform: translateY(50%) translateX(6px);
-  display: flex;
-  flex-direction: column;
-  gap: .15rem;
-  width: max-content;
-  max-width: 15rem;
-  padding: .55rem .75rem;
-  border-radius: .5rem;
-  background: #242428;
-  color: #f6f6f7;
-  border: 1px solid #ffffff26;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
-  font-size: .8rem;
-  line-height: 1.25;
-  text-align: left;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .16s ease, transform .16s ease;
-}
-
-.torii-frontend-switch__tip strong { font-weight: 600; }
-.torii-frontend-switch__tip span { opacity: .75; font-size: .72rem; }
-
-.torii-frontend-switch:hover .torii-frontend-switch__tip,
-.torii-frontend-switch:focus-visible .torii-frontend-switch__tip {
-  opacity: 1;
-  transform: translateY(50%) translateX(0);
-}
-
-/* En pantallas chicas el tooltip no entra al costado: va arriba del boton. */
-@media (max-width: 640px) {
-  .torii-frontend-switch { width: 3.25rem; height: 3.25rem; right: 1rem; bottom: 1rem; }
-  .torii-frontend-switch__tip {
-    right: 0;
-    bottom: calc(100% + .6rem);
-    transform: translateY(6px);
-    max-width: 12rem;
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
-  .torii-frontend-switch:hover .torii-frontend-switch__tip,
-  .torii-frontend-switch:focus-visible .torii-frontend-switch__tip { transform: translateY(0); }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 240ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

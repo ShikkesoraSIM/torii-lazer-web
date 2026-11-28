@@ -40,7 +40,7 @@ const Badges: React.FC<BadgesProps> = ({ badges = [], max = 6 }) => {
   };
 
   return (
-    <div className="inline-flex items-center gap-2">
+    <div className="inline-flex flex-wrap items-center gap-2 max-w-full">
       {visible.map((b: any, idx: number) => {
         const specialBadge = getSpecialBadgeColor(b?.description);
         

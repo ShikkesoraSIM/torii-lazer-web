@@ -62,22 +62,16 @@ const ScoreActionsMenu: React.FC<ScoreActionsMenuProps> = ({
 
   const handleTogglePin = async () => {
     setIsLoading(true);
-    
-    onPinChange?.(scoreId, isPinned);
-    onPinnedListChange?.();
-    
-    if (isPinned) {
-      toast.success(t('profile.bestScores.actions.unpinSuccess'));
-    } else {
-      toast.success(t('profile.bestScores.actions.pinSuccess'));
-    }
-    
     try {
       if (isPinned) {
         await scoreAPI.unpinScore(scoreId);
+        toast.success(t('profile.bestScores.actions.unpinSuccess'));
       } else {
         await scoreAPI.pinScore(scoreId);
+        toast.success(t('profile.bestScores.actions.pinSuccess'));
       }
+      onPinChange?.(scoreId, !isPinned);
+      onPinnedListChange?.();
     } catch (error) {
       console.error('Pin/Unpin API failed:', error);
       handleApiError(error);

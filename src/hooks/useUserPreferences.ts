@@ -18,6 +18,11 @@ export const useUserPreferences = () => {
   }, []);
 
   const loadPreferences = async () => {
+    if (!localStorage.getItem('access_token')) {
+      setPreferences({});
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {

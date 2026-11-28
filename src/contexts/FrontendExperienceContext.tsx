@@ -1,15 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import FrontendChoiceOverlay from '../components/Layout/FrontendChoiceOverlay';
-import { useAuth } from '../hooks/useAuth';
 import {
+  clearToriiWebPreferenceIfSet,
   getClassicPath,
-  getToriiWebPath,
-  readFrontendPreference,
   readReturnPath,
-  TORII_WEB_ORIGIN,
-  writeFrontendPreference,
   type FrontendExperience,
 } from '../utils/frontendExperience';
 
@@ -20,78 +15,34 @@ type FrontendExperienceContextValue = {
 
 const FrontendExperienceContext = createContext<FrontendExperienceContextValue | null>(null);
 
+// torii-web (osu-web fork) is disabled for now; force all users cleanly onto the main Torii frontend.
 export const FrontendExperienceProvider = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated, isBootstrapping, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [preference, setPreference] = useState<FrontendExperience | null>(() => readFrontendPreference());
-  const [manuallyOpen, setManuallyOpen] = useState(false);
 
   const isChoicePage = location.pathname === '/frontend-choice';
-  const isLocalPreview = import.meta.env.DEV && isChoicePage && new URLSearchParams(location.search).has('preview');
-  const needsFirstChoice = !isBootstrapping && isAuthenticated && preference === null;
-  const chooserOpen = isChoicePage || needsFirstChoice || manuallyOpen;
-  const source = `${location.pathname}${location.search}${location.hash}`;
 
   useEffect(() => {
-    if (
-      isBootstrapping ||
-      !isAuthenticated ||
-      preference !== 'torii-web' ||
-      chooserOpen ||
-      new URLSearchParams(location.search).has('frontend-fallback')
-    ) return;
+    clearToriiWebPreferenceIfSet();
+  }, []);
 
-    const targetPath = getToriiWebPath(source, user?.id);
-    if (targetPath) window.location.replace(`${TORII_WEB_ORIGIN}${targetPath}`);
-  }, [chooserOpen, isAuthenticated, isBootstrapping, location.search, preference, source, user?.id]);
+  useEffect(() => {
+    if (!isChoicePage) return;
+    const returnPath = readReturnPath(location.search);
+    const cameFromToriiWeb = new URLSearchParams(location.search).get('from') === 'torii-web';
+    const target = cameFromToriiWeb && returnPath ? getClassicPath(returnPath) : (returnPath ?? '/');
+    navigate(target, { replace: true });
+  }, [isChoicePage, location.search, navigate]);
 
-  const openChooser = useCallback(() => setManuallyOpen(true), []);
-  const closeChooser = useCallback(() => setManuallyOpen(false), []);
-
-  const selectFrontend = useCallback((next: FrontendExperience, remember: boolean) => {
-    writeFrontendPreference(next, remember);
-    setPreference(next);
-    setManuallyOpen(false);
-
-    if (isLocalPreview) {
-      window.location.reload();
-      return;
-    }
-
-    const returnPath = isChoicePage ? readReturnPath(location.search) : null;
-    const cameFromToriiWeb = isChoicePage && new URLSearchParams(location.search).get('from') === 'torii-web';
-
-    if (next === 'classic') {
-      if (isChoicePage) {
-        navigate(cameFromToriiWeb && returnPath ? getClassicPath(returnPath) : (returnPath ?? '/'), { replace: true });
-      }
-      return;
-    }
-
-    if (cameFromToriiWeb && returnPath) {
-      window.location.assign(`${TORII_WEB_ORIGIN}${returnPath}`);
-      return;
-    }
-
-    const targetPath = getToriiWebPath(returnPath ?? source, user?.id) ?? '/';
-    window.location.assign(`${TORII_WEB_ORIGIN}${targetPath}`);
-  }, [isChoicePage, isLocalPreview, location.search, navigate, source, user?.id]);
-
-  const value = useMemo(() => ({ openChooser, preference }), [openChooser, preference]);
-  const canDismiss = !needsFirstChoice && !isChoicePage;
+  const openChooser = useCallback(() => {}, []);
+  const value = useMemo<FrontendExperienceContextValue>(
+    () => ({ openChooser, preference: 'classic' }),
+    [openChooser],
+  );
 
   return (
     <FrontendExperienceContext.Provider value={value}>
       {children}
-      {chooserOpen && (
-        <FrontendChoiceOverlay
-          canDismiss={canDismiss}
-          currentPreference={preference}
-          onDismiss={closeChooser}
-          onSelect={selectFrontend}
-        />
-      )}
     </FrontendExperienceContext.Provider>
   );
 };

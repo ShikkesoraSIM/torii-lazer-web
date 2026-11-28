@@ -1,22 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { adminAPI } from '../../utils/api';
 import toast from 'react-hot-toast';
-import AdminUsers from './AdminUsers';
-import AdminBeatmapBlacklist from './AdminBeatmapBlacklist';
-import AdminBeatmap from './AdminBeatmap';
-import AdminBadges from './AdminBadges';
-import AdminTeams from './AdminTeams';
-import AdminDailyChallenges from './AdminDailyChallenges';
-import AdminAnnouncements from './AdminAnnouncements';
-import AdminLoginAudit from './AdminLoginAudit';
-import AdminDonations from './AdminDonations';
-import AdminMatchmaking from './AdminMatchmaking';
-import AdminMaintenance from './AdminMaintenance';
-import AdminChangelogEditor from './AdminChangelogEditor';
-import AdminAnticheat from './AdminAnticheat';
-import AdminNameChanges from './AdminNameChanges';
-import AdminMediaReview from './AdminMediaReview';
+import LoadingSpinner from '../../components/UI/LoadingSpinner';
+
+const AdminUsers = lazy(() => import('./AdminUsers'));
+const AdminBeatmapBlacklist = lazy(() => import('./AdminBeatmapBlacklist'));
+const AdminBeatmap = lazy(() => import('./AdminBeatmap'));
+const AdminBadges = lazy(() => import('./AdminBadges'));
+const AdminTeams = lazy(() => import('./AdminTeams'));
+const AdminDailyChallenges = lazy(() => import('./AdminDailyChallenges'));
+const AdminAnnouncements = lazy(() => import('./AdminAnnouncements'));
+const AdminLoginAudit = lazy(() => import('./AdminLoginAudit'));
+const AdminDonations = lazy(() => import('./AdminDonations'));
+const AdminMatchmaking = lazy(() => import('./AdminMatchmaking'));
+const AdminMaintenance = lazy(() => import('./AdminMaintenance'));
+const AdminChangelogEditor = lazy(() => import('./AdminChangelogEditor'));
+const AdminAnticheat = lazy(() => import('./AdminAnticheat'));
+const AdminNameChanges = lazy(() => import('./AdminNameChanges'));
+const AdminMediaReview = lazy(() => import('./AdminMediaReview'));
 
 
 type AdminTab =
@@ -485,21 +487,29 @@ const AdminPanel: React.FC = () => {
                 </div>
               </div>
               <div className="px-3 md:px-6 py-4 md:py-6">
-                {activeTab === 'users' && <AdminUsers />}
-                {activeTab === 'beatmaps' && <AdminBeatmapBlacklist />}
-                {activeTab === 'beatmap-list' && <AdminBeatmap />}
-                {activeTab === 'badges' && <AdminBadges />}
-                {activeTab === 'teams' && <AdminTeams />}
-                {activeTab === 'daily-challenges' && <AdminDailyChallenges />}
-                {activeTab === 'matchmaking' && <AdminMatchmaking />}
-                {activeTab === 'announcements' && <AdminAnnouncements />}
-                {activeTab === 'login-audit' && <AdminLoginAudit />}
-                {activeTab === 'name-changes' && <AdminNameChanges />}
-                {activeTab === 'media-review' && <AdminMediaReview />}
-                {activeTab === 'anticheat' && canSeeOwnerSection && <AdminAnticheat />}
-                {activeTab === 'donations' && <AdminDonations />}
-                {activeTab === 'maintenance' && <AdminMaintenance />}
-                {activeTab === 'changelog' && <AdminChangelogEditor />}
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center py-12">
+                      <LoadingSpinner size="lg" />
+                    </div>
+                  }
+                >
+                  {activeTab === 'users' && <AdminUsers />}
+                  {activeTab === 'beatmaps' && <AdminBeatmapBlacklist />}
+                  {activeTab === 'beatmap-list' && <AdminBeatmap />}
+                  {activeTab === 'badges' && <AdminBadges />}
+                  {activeTab === 'teams' && <AdminTeams />}
+                  {activeTab === 'daily-challenges' && <AdminDailyChallenges />}
+                  {activeTab === 'matchmaking' && <AdminMatchmaking />}
+                  {activeTab === 'announcements' && <AdminAnnouncements />}
+                  {activeTab === 'login-audit' && <AdminLoginAudit />}
+                  {activeTab === 'name-changes' && <AdminNameChanges />}
+                  {activeTab === 'media-review' && <AdminMediaReview />}
+                  {activeTab === 'anticheat' && canSeeOwnerSection && <AdminAnticheat />}
+                  {activeTab === 'donations' && <AdminDonations />}
+                  {activeTab === 'maintenance' && <AdminMaintenance />}
+                  {activeTab === 'changelog' && <AdminChangelogEditor />}
+                </Suspense>
               </div>
             </div>
           </div>

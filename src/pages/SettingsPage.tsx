@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { Suspense, lazy, useState, useEffect, useRef } from 'react';
 import { FiUser, FiCheck, FiX, FiImage, FiCamera, FiShield, FiMonitor, FiLock, FiSettings, FiKey, FiTrash2 } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
@@ -8,16 +7,20 @@ import toast from 'react-hot-toast';
 import { userAPI, type TOTPStatus, type PendingUsernameChange } from '../utils/api';
 import EditableCover from '../components/UI/EditableCover';
 import Avatar from '../components/UI/Avatar';
-import AvatarUpload from '../components/UI/AvatarUpload';
-import TotpSetupModal from '../components/TOTP/TotpSetupModal';
-import TotpDisableModal from '../components/TOTP/TotpDisableModal';
-import SessionManagement from '../components/Device/SessionManagement';
-import TrustedDeviceManagement from '../components/Device/TrustedDeviceManagement';
+import CountryFlag from '../components/UI/CountryFlag';
+import LoadingSpinner from '../components/UI/LoadingSpinner';
+import ConfirmationDialog from '../components/UI/ConfirmationDialog';
 import PasswordResetSection from '../components/Settings/PasswordResetSection';
-import UserPreferencesSection from '../components/Settings/UserPreferencesSection';
-import OAuthAppsSection from '../components/Settings/OAuthAppsSection';
-import AurasSection from '../components/Settings/AurasSection';
 import AvatarDefaultOptOut from '../components/Settings/AvatarDefaultOptOut';
+
+const AvatarUpload = lazy(() => import('../components/UI/AvatarUpload'));
+const TotpSetupModal = lazy(() => import('../components/TOTP/TotpSetupModal'));
+const TotpDisableModal = lazy(() => import('../components/TOTP/TotpDisableModal'));
+const SessionManagement = lazy(() => import('../components/Device/SessionManagement'));
+const TrustedDeviceManagement = lazy(() => import('../components/Device/TrustedDeviceManagement'));
+const UserPreferencesSection = lazy(() => import('../components/Settings/UserPreferencesSection'));
+const OAuthAppsSection = lazy(() => import('../components/Settings/OAuthAppsSection'));
+const AurasSection = lazy(() => import('../components/Settings/AurasSection'));
 
 const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -27,7 +30,17 @@ const SettingsPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
   const [deletingAvatar, setDeletingAvatar] = useState(false);
+  const [showDeleteAvatarConfirm, setShowDeleteAvatarConfirm] = useState(false);
   const [pendingRequest, setPendingRequest] = useState<PendingUsernameChange | null>(null);
+  const avatarRefreshTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (avatarRefreshTimerRef.current !== null) {
+        window.clearTimeout(avatarRefreshTimerRef.current);
+      }
+    };
+  }, []);
   const isPending = pendingRequest?.status === 'pending';
   const isResolved = !!pendingRequest && pendingRequest.status !== 'pending';
 
@@ -45,11 +58,12 @@ const SettingsPage: React.FC = () => {
   const [showTotpDisable, setShowTotpDisable] = useState(false);
 
   const fetchTotpStatus = async () => {
+    setIsLoadingTotpStatus(true);
     try {
       const status = await userAPI.totp.getStatus();
       setTotpStatus(status);
     } catch {
-      setTotpStatus({ enabled: false });
+      setTotpStatus(null);
     } finally {
       setIsLoadingTotpStatus(false);
     }
@@ -83,7 +97,7 @@ const SettingsPage: React.FC = () => {
   if (isLoading || isBootstrapping) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-pink"></div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -92,15 +106,15 @@ const SettingsPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
         <div className="text-center max-w-lg">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+          <h2 className="text-2xl font-bold text-white mb-3">
             {t('messages.loginRequired.title')}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-slate-400 mb-6">
             {t('messages.loginRequired.description')}
           </p>
           <Link
             to="/login"
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-osu-pink text-white font-semibold hover:bg-osu-pink/90 transition-colors"
+            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-torii hover:bg-torii-hover text-white font-semibold transition-colors"
           >
             {t('auth.login.submit')}
           </Link>
@@ -111,12 +125,12 @@ const SettingsPage: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="text-6xl mb-4">😕</div>
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <div className="text-6xl mb-4 text-slate-400">😕</div>
+        <h2 className="text-2xl font-bold text-white mb-2">
           {t('settings.errors.loadFailed')}
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-slate-400">
           {t('settings.errors.tryRefresh')}
         </p>
       </div>
@@ -176,15 +190,21 @@ const SettingsPage: React.FC = () => {
     toast.success(t('settings.avatar.success'));
     setShowAvatarUpload(false);
 
-    setTimeout(async () => {
-      await refreshUser();
+    if (avatarRefreshTimerRef.current !== null) {
+      window.clearTimeout(avatarRefreshTimerRef.current);
+    }
+    avatarRefreshTimerRef.current = window.setTimeout(() => {
+      avatarRefreshTimerRef.current = null;
+      void refreshUser();
     }, 2000);
   };
 
-  const handleDeleteAvatar = async () => {
-    if (!window.confirm('Delete your avatar and go back to a default? You can upload a new one anytime.')) {
-      return;
-    }
+  const handleDeleteAvatar = () => {
+    setShowDeleteAvatarConfirm(true);
+  };
+
+  const confirmDeleteAvatar = async () => {
+    setShowDeleteAvatarConfirm(false);
     setDeletingAvatar(true);
     try {
       await userAPI.deleteAvatar();
@@ -198,26 +218,17 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center"
-      >
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8 animate-fade-up">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-white mb-2">
           {t('settings.title')}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-400">
           {t('settings.description')}
         </p>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-card rounded-xl shadow-lg p-6"
-      >
+      <section className="bg-card rounded-xl shadow-lg p-6">
         <div className="flex items-center gap-3 mb-6">
           <FiUser className="w-6 h-6 text-osu-pink" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -331,14 +342,9 @@ const SettingsPage: React.FC = () => {
             )}
           </div>
         </div>
-      </motion.div>
+      </section>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-        className="bg-card rounded-xl shadow-lg p-6"
-      >
+      <section className="bg-card rounded-xl shadow-lg p-6">
         <div className="flex items-center gap-3 mb-6">
           <FiCamera className="w-6 h-6 text-osu-pink" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -392,27 +398,22 @@ const SettingsPage: React.FC = () => {
             )}
           </div>
         </div>
-      </motion.div>
+      </section>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="bg-card rounded-xl shadow-lg p-6"
-      >
+      <section className="bg-card rounded-xl shadow-lg p-6">
         <div className="flex items-center gap-3 mb-6">
           <FiImage className="w-6 h-6 text-osu-pink" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-white">
             {t('settings.cover.title')}
           </h2>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               {t('settings.cover.label')}
             </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+            <p className="text-xs text-gray-400 mb-4">
               {t('settings.cover.hint')}
             </p>
             <EditableCover
@@ -424,51 +425,41 @@ const SettingsPage: React.FC = () => {
             />
           </div>
         </div>
-      </motion.div>
+      </section>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.225 }}
-        className="bg-card rounded-xl shadow-lg p-6"
-      >
+      <section className="bg-card rounded-xl shadow-lg p-6">
         <div className="flex items-center gap-3 mb-6">
           <FiLock className="w-6 h-6 text-osu-pink" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-white">
             {t('settings.password.title')}
           </h2>
         </div>
 
         <PasswordResetSection />
-      </motion.div>
+      </section>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25 }}
-        className="bg-card rounded-xl shadow-lg p-6"
-      >
+      <section className="bg-card rounded-xl shadow-lg p-6">
         <div className="flex items-center gap-3 mb-6">
           <FiShield className="w-6 h-6 text-osu-pink" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-white">
             {t('settings.totp.title')}
           </h2>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               {t('settings.totp.status')}
             </label>
             {isLoadingTotpStatus ? (
               <div className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-osu-pink"></div>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+                <LoadingSpinner size="sm" />
+                <span className="text-sm text-gray-400">
                   {t('settings.totp.checking')}
                 </span>
               </div>
             ) : totpStatus ? (
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${totpStatus.enabled ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                   <div>
@@ -507,104 +498,94 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-red-500">
-                {t('settings.totp.loadError')}
+              <div className="flex items-center justify-between gap-3 text-sm text-red-400">
+                <span>{t('settings.totp.loadError')}</span>
+                <button
+                  type="button"
+                  onClick={fetchTotpStatus}
+                  className="btn-secondary !px-3 !py-1.5 text-xs"
+                >
+                  {t('common.retry', 'Retry')}
+                </button>
               </div>
             )}
           </div>
           
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+          <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4">
+            <p className="text-sm text-blue-300">
               {t('settings.totp.description')}
             </p>
           </div>
         </div>
-      </motion.div>
+      </section>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.26 }}
-        className="bg-card rounded-xl shadow-lg p-6"
-      >
+      <section className="bg-card rounded-xl shadow-lg p-6">
         <div className="flex items-center gap-3 mb-6">
           <FiKey className="w-6 h-6 text-osu-pink" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-white">
             {t('settings.oauth.title')}
           </h2>
         </div>
 
-        <OAuthAppsSection />
-      </motion.div>
+        <Suspense fallback={<div className="py-8 flex justify-center"><LoadingSpinner size="md" /></div>}>
+          <OAuthAppsSection />
+        </Suspense>
+      </section>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.275 }}
-        className="bg-card rounded-xl shadow-lg p-6"
-      >
+      <section className="bg-card rounded-xl shadow-lg p-6">
         <div className="flex items-center gap-3 mb-6">
           <FiSettings className="w-6 h-6 text-osu-pink" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-white">
             {t('settings.preferences.title')}
           </h2>
         </div>
         
         <div className="mb-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-400">
             {t('settings.preferences.description')}
           </p>
         </div>
 
-        <UserPreferencesSection />
-      </motion.div>
+        <Suspense fallback={<div className="py-8 flex justify-center"><LoadingSpinner size="md" /></div>}>
+          <UserPreferencesSection />
+        </Suspense>
+      </section>
 
       {/* User Aura cosmetic picker */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.29 }}
-        className="bg-card rounded-xl shadow-lg p-6"
-      >
-        <AurasSection />
-      </motion.div>
+      <section className="bg-card rounded-xl shadow-lg p-6">
+        <Suspense fallback={<div className="py-8 flex justify-center"><LoadingSpinner size="md" /></div>}>
+          <AurasSection />
+        </Suspense>
+      </section>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="bg-card rounded-xl shadow-lg p-6"
-      >
+      <section className="bg-card rounded-xl shadow-lg p-6">
         <div className="flex items-center gap-3 mb-6">
           <FiMonitor className="w-6 h-6 text-osu-pink" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-white">
             {t('settings.device.title')}
           </h2>
         </div>
         
         <div className="mb-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-400">
             {t('settings.device.description')}
           </p>
         </div>
 
-        <div className="mb-8">
-          <SessionManagement />
-        </div>
+        <Suspense fallback={<div className="py-8 flex justify-center"><LoadingSpinner size="md" /></div>}>
+          <div className="mb-8">
+            <SessionManagement />
+          </div>
 
-        <div className="border-t border-card my-8"></div>
+          <div className="border-t border-card my-8"></div>
 
-        <div>
-          <TrustedDeviceManagement />
-        </div>
-      </motion.div>
+          <div>
+            <TrustedDeviceManagement />
+          </div>
+        </Suspense>
+      </section>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="bg-card rounded-xl shadow-lg p-6"
-      >
+      <section className="bg-card rounded-xl shadow-lg p-6">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
           {t('settings.account.title')}
         </h2>
@@ -640,17 +621,17 @@ const SettingsPage: React.FC = () => {
 
           {user.country && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 {t('settings.account.country')}
               </label>
               <div className="px-4 py-3 bg-white/5 rounded-lg">
                 <div className="flex items-center gap-2">
-                  <img
-                    src={`https://flagcdn.com/w20/${user.country.code.toLowerCase()}.png`}
-                    alt={user.country.code}
-                    className="w-5 h-auto"
+                  <CountryFlag
+                    code={user.country.code}
+                    name={user.country.name}
+                    className="h-4"
                   />
-                  <span className="text-gray-900 dark:text-white">
+                  <span className="text-white">
                     {user.country.name}
                   </span>
                 </div>
@@ -660,11 +641,11 @@ const SettingsPage: React.FC = () => {
 
           {user.last_visit && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 {t('settings.account.lastVisit')}
               </label>
               <div className="px-4 py-3 bg-white/5 rounded-lg">
-                <span className="text-gray-900 dark:text-white">
+                <span className="text-white">
                   {new Date(user.last_visit).toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -675,29 +656,47 @@ const SettingsPage: React.FC = () => {
             </div>
           )}
         </div>
-      </motion.div>
+      </section>
 
-      {showAvatarUpload && (
-        <AvatarUpload
-          userId={user.id}
-          currentAvatarUrl={user.avatar_url}
-          onUploadSuccess={handleAvatarUpdate}
-          onClose={() => setShowAvatarUpload(false)}
-        />
-      )}
+      <Suspense fallback={null}>
+        {showAvatarUpload && (
+          <AvatarUpload
+            userId={user.id}
+            currentAvatarUrl={user.avatar_url}
+            onUploadSuccess={handleAvatarUpdate}
+            onClose={() => setShowAvatarUpload(false)}
+          />
+        )}
 
-      <div>
-      <TotpSetupModal
-        isOpen={showTotpSetup}
-        onClose={() => setShowTotpSetup(false)}
-        onSuccess={handleTotpSetupSuccess}
-      />
-       </div>
+        {showTotpSetup && (
+          <TotpSetupModal
+            isOpen={showTotpSetup}
+            onClose={() => setShowTotpSetup(false)}
+            onSuccess={handleTotpSetupSuccess}
+          />
+        )}
 
-      <TotpDisableModal
-        isOpen={showTotpDisable}
-        onClose={() => setShowTotpDisable(false)}
-        onSuccess={handleTotpDisableSuccess}
+        {showTotpDisable && (
+          <TotpDisableModal
+            isOpen={showTotpDisable}
+            onClose={() => setShowTotpDisable(false)}
+            onSuccess={handleTotpDisableSuccess}
+          />
+        )}
+      </Suspense>
+
+      <ConfirmationDialog
+        isOpen={showDeleteAvatarConfirm}
+        onCancel={() => setShowDeleteAvatarConfirm(false)}
+        onConfirm={() => void confirmDeleteAvatar()}
+        title={t('settings.avatar.deleteTitle', 'Delete Avatar')}
+        message={t(
+          'settings.avatar.deleteConfirm',
+          'Delete your avatar and go back to a default? You can upload a new one anytime.'
+        )}
+        confirmLabel={t('common.delete', 'Delete')}
+        cancelLabel={t('common.cancel', 'Cancel')}
+        isDanger
       />
     </div>
   );

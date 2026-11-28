@@ -28,12 +28,14 @@ const CountryFlag: React.FC<CountryFlagProps> = ({
   rounded = 'rounded-[3px]',
   ...rest
 }) => {
-  if (!code) return null;
-  const cc = code.toLowerCase();
+  if (!code || !code.trim()) return null;
+  const cc = code.trim().toLowerCase();
+  const primarySrc = twemojiFlagUrl(code) || `/image/flag/${cc}.svg`;
 
   return (
     <img
-      src={twemojiFlagUrl(code)}
+      {...rest}
+      src={primarySrc}
       alt={name || code}
       loading="lazy"
       decoding="async"
@@ -50,7 +52,6 @@ const CountryFlag: React.FC<CountryFlagProps> = ({
           img.src = `/image/flag/${cc}.svg`;
         }
       }}
-      {...rest}
     />
   );
 };

@@ -20,6 +20,7 @@ export const useAvailableCountries = (mode: GameMode) => {
       // Use the cache if available
       if (countryCache[mode]) {
         setCountries(countryCache[mode]);
+        setIsLoading(false);
         return;
       }
 

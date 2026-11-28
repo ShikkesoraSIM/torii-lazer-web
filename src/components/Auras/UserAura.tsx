@@ -1,92 +1,105 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getAuraPreset } from './registry';
 import Particle from './Particle';
-import type { ParticleConfig } from './types';
+import type { AuraPresetSpec, ParticleConfig } from './types';
 import './auras.css';
 
 interface UserAuraProps {
-  /** Aura id from `APIUser.equipped_aura`. Pass null for "no aura" — the
-   * children render unchanged with zero overhead. */
   auraId: string | null | undefined;
-  /** Username (or any drawable). Rendered on top of the particle layer. */
   children: React.ReactNode;
-  /** Extra class on the wrapper for layout / typography. */
   className?: string;
 }
 
+const isMotionDisabled = (): boolean => {
+  if (typeof window === 'undefined') return true;
+  if (document.documentElement.classList.contains('perf-mode')) return true;
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+};
+
 /**
- * Renders the equipped aura's particle effect behind any inline content.
- *
- * The spawn loop runs in JS (setInterval), maintains a small array of
- * live particles in React state, and lets each <Particle> component
- * fade/translate via CSS keyframes that consume per-instance CSS
- * variables. When a particle's drift animation finishes, the component
- * fires onDone and the array entry is dropped.
- *
- * `mix-blend-mode: screen` on the host gives the additive-glow look the
- * C# client gets from BlendingParameters.Additive — particles bloom into
- * each other and into the underlying name without per-particle blur.
- *
- * Falls through to rendering children unchanged when auraId is null —
- * non-elite users pay zero DOM overhead.
+ * Isolated emitter layer so particle state ticks never re-render `children`.
  */
-const UserAura: React.FC<UserAuraProps> = ({ auraId, children, className }) => {
-  const preset = getAuraPreset(auraId);
+const AuraLayer: React.FC<{ preset: AuraPresetSpec }> = React.memo(({ preset }) => {
   const [particles, setParticles] = useState<ParticleConfig[]>([]);
   const nextIdRef = useRef(1);
 
   useEffect(() => {
-    if (!preset) return;
+    if (isMotionDisabled()) return;
 
     let cancelled = false;
-    let timer: number;
+    let timer: number | undefined;
+    const expiryTimers = new Map<number, number>();
 
     const tick = () => {
       if (cancelled) return;
-      // Cap simultaneously-alive particles. We use functional updates
-      // so we read the latest particles count without re-binding the
-      // closure on every state change.
-      setParticles(curr => {
-        if (curr.length >= preset.maxAlive) return curr;
-        const config = preset.emit(nextIdRef.current++);
-        return [...curr, config];
-      });
+      if (document.visibilityState === 'visible') {
+        const nextId = nextIdRef.current++;
+        const config = preset.emit(nextId);
+        setParticles((curr) => {
+          if (curr.length >= preset.maxAlive) return curr;
+          return [...curr, config];
+        });
+        // Safety sweep if tab throttling swallows CSS animationend
+        const sweep = window.setTimeout(() => {
+          expiryTimers.delete(nextId);
+          setParticles((curr) => curr.filter((p) => p.id !== nextId));
+        }, config.lifetimeMs + 400);
+        expiryTimers.set(nextId, sweep);
+      }
       const next = preset.spawnIntervalMs + Math.random() * preset.spawnJitterMs;
       timer = window.setTimeout(tick, next);
     };
+
     timer = window.setTimeout(tick, preset.spawnIntervalMs);
 
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
-      // Drop any remaining particles when the aura swaps so we don't
-      // animate ghosts of the previous preset for their full lifetime.
+      if (timer !== undefined) window.clearTimeout(timer);
+      expiryTimers.forEach((t) => window.clearTimeout(t));
+      expiryTimers.clear();
       setParticles([]);
     };
   }, [preset]);
 
-  const handleParticleDone = (id: number) => {
-    setParticles(curr => curr.filter(p => p.id !== id));
-  };
+  const handleParticleDone = useCallback((id: number) => {
+    setParticles((curr) => curr.filter((p) => p.id !== id));
+  }, []);
 
-  if (!preset) {
-    // Cheap path — no DOM nodes, no spawn loop.
+  return (
+    <div className="aura-host" aria-hidden="true">
+      {preset.hasHalo && (
+        <div
+          className="aura-halo"
+          style={{ background: preset.haloColor }}
+        />
+      )}
+      {particles.map((config) => (
+        <Particle key={config.id} config={config} onDone={handleParticleDone} />
+      ))}
+    </div>
+  );
+});
+AuraLayer.displayName = 'AuraLayer';
+
+const UserAura: React.FC<UserAuraProps> = ({ auraId, children, className }) => {
+  const preset = getAuraPreset(auraId);
+  const [disabled, setDisabled] = useState<boolean>(isMotionDisabled);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onChange = () => setDisabled(isMotionDisabled());
+    mq.addEventListener?.('change', onChange);
+    return () => mq.removeEventListener?.('change', onChange);
+  }, []);
+
+  if (!preset || disabled) {
     return <>{children}</>;
   }
 
   return (
     <span className={`relative inline-block ${className ?? ''}`}>
-      <div className="aura-host" aria-hidden="true">
-        {preset.hasHalo && (
-          <div
-            className="aura-halo"
-            style={{ background: preset.haloColor }}
-          />
-        )}
-        {particles.map(config => (
-          <Particle key={config.id} config={config} onDone={handleParticleDone} />
-        ))}
-      </div>
+      <AuraLayer preset={preset} />
       <span className="relative">{children}</span>
     </span>
   );

@@ -53,6 +53,16 @@ const RankingTypeSelector: React.FC<RankingTypeSelectorProps> = ({
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
       setIsOpen(false);
+      return;
+    }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (!isOpen) {
+        setIsOpen(true);
+        return;
+      }
+      const next: RankingType = value === 'performance' ? 'score' : 'performance';
+      handleSelect(next);
     }
   };
 
@@ -102,10 +112,10 @@ const RankingTypeSelector: React.FC<RankingTypeSelectorProps> = ({
             : 'hover:border-white/30 hover:ring-1 hover:ring-profile-color/50'
           }
         `}
-        aria-label="Ranking Type Selector"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
+        <span className="sr-only">{t('rankings.rankingType', { defaultValue: 'Ranking Type' })}: </span>
         <div className="flex items-center space-x-2">
           {currentType && (
             <>
@@ -122,6 +132,7 @@ const RankingTypeSelector: React.FC<RankingTypeSelectorProps> = ({
 
       {isOpen && (
         <div
+          role="listbox"
           className={`
             absolute left-0 right-0 z-[180]
             bg-[rgba(11,15,38,0.94)] border border-white/15

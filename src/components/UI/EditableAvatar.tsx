@@ -49,10 +49,14 @@ const EditableAvatar: React.FC<EditableAvatarProps> = ({
         
         {editable && (
           <button
-            className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            type="button"
+            aria-label="Change avatar"
+            className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-200 [@media(hover:none)]:opacity-100 [@media(hover:none)]:bg-transparent [@media(hover:none)]:items-end [@media(hover:none)]:justify-end [@media(hover:none)]:p-1"
             onClick={() => setShowUploadModal(true)}
           >
-            <FiEdit2 className="text-white text-lg" />
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white border border-white/20">
+              <FiEdit2 className="text-sm" aria-hidden="true" />
+            </span>
           </button>
         )}
       </div>

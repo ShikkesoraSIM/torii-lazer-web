@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { adminAPI } from '../../utils/api';
 
 const AdminBeatmapRankstatus: React.FC = () => {
@@ -29,10 +30,10 @@ const AdminBeatmapRankstatus: React.FC = () => {
     if (!id) return;
     try {
       await adminAPI.updateRankStatus(id, newStatus);
-      alert('Rank status updated');
+      toast.success('Rank status updated');
     } catch (e) {
       console.error(e);
-      alert('Failed to update');
+      toast.error('Failed to update');
     }
   };
 
@@ -40,10 +41,10 @@ const AdminBeatmapRankstatus: React.FC = () => {
     if (!id) return;
     try {
       await adminAPI.banBeatmap(id);
-      alert('Beatmap imported to banned list');
+      toast.success('Beatmap imported to banned list');
     } catch (e) {
       console.error(e);
-      alert('Failed to ban');
+      toast.error('Failed to ban');
     }
   };
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import MaintenanceBanner from './MaintenanceBanner';
@@ -7,44 +7,58 @@ import { Toaster } from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 import { useAuth } from '../../hooks/useAuth';
 import { NotificationProvider } from '../../contexts/NotificationContext';
-import FrontendSwitch from './FrontendSwitch';
+import ErrorBoundary from '../ErrorBoundary';
+import LoadingSpinner from '../UI/LoadingSpinner';
+
+const PageFallback: React.FC = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <LoadingSpinner size="lg" />
+  </div>
+);
 
 const Layout: React.FC = () => {
-  const { isAuthenticated, user, restriction } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const location = useLocation();
 
   // Login / register / password-reset pages don't need the top padding.
   const noTopPaddingRoutes = ['/', '/login', '/register', '/password-reset'];
   const shouldApplyTopPadding = !noTopPaddingRoutes.includes(location.pathname);
 
-  // RestrictionBanner is a thin red stripe pinned above the navbar
-  // (z-index 60 vs navbar's 50). When it's visible the page content
-  // would otherwise sit underneath it — push the main stage down by
-  // an extra ~40px to compensate. The banner only renders for
-  // authenticated AND restricted users so this padding is dead code
-  // for everyone else.
-  // Driven by the dedicated restriction endpoint (see AuthContext), not the
-  // user payload: a restricted account 403s on /me and never produces a user
-  // object on the web, so user?.is_restricted would never be true here.
-  const isRestricted = !!restriction?.is_restricted;
+  // Move focus to main content on client-side route navigation for keyboard & screen-reader users
+  useEffect(() => {
+    const main = document.getElementById('main-content');
+    if (main && typeof main.focus === 'function') {
+      main.focus({ preventScroll: true });
+    }
+  }, [location.pathname]);
 
   return (
     <NotificationProvider isAuthenticated={isAuthenticated} user={user}>
-      <div className="torii-app-shell min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="torii-app-shell min-h-screen bg-[#030014]">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:rounded-xl focus:bg-torii focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+        >
+          Skip to main content
+        </a>
         <RestrictionBanner />
         <Navbar />
-        {/*
-          Maintenance banner sits between the fixed navbar and the page
-          content. The banner self-hides when the server is operating
-          normally, so on the happy path it's a no-op (single fetch on
-          mount + a 30s interval that returns {maintenance: false}).
-        */}
         <MaintenanceBanner />
         <main
-          className={`torii-page-stage ${shouldApplyTopPadding ? 'pt-[56px] md:pt-20' : ''}`}
-          style={isRestricted ? { marginTop: 'calc(var(--restriction-banner-h, 0px) + 0.5rem)' } : undefined}
+          id="main-content"
+          tabIndex={-1}
+          className="torii-page-stage outline-none"
+          style={{
+            paddingTop: shouldApplyTopPadding
+              ? 'calc(var(--restriction-banner-h, 0px) + var(--maintenance-banner-h, 0px) + var(--navbar-h, 76px))'
+              : 'calc(var(--restriction-banner-h, 0px) + var(--maintenance-banner-h, 0px))',
+          }}
         >
-          <Outlet />
+          <ErrorBoundary>
+            <Suspense fallback={<PageFallback />}>
+              <Outlet />
+            </Suspense>
+          </ErrorBoundary>
         </main>
         <Toaster
         position="top-right"
@@ -77,8 +91,6 @@ const Layout: React.FC = () => {
       />
       {/* One shared country-flag tooltip for the whole app (CountryFlag points here). */}
       <Tooltip id="country-tooltip" place="bottom" float style={{ zIndex: 9999 }} />
-      {/* Volver a elegir el frontend, conservando la ruta actual. */}
-      <FrontendSwitch />
       </div>
     </NotificationProvider>
   );

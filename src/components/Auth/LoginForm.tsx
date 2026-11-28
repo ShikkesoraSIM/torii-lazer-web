@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +17,19 @@ const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState<LoginFormType>({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
+  const [turnstileTimedOut, setTurnstileTimedOut] = useState(false);
   const turnstileRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (turnstileToken) {
+      setTurnstileTimedOut(false);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setTurnstileTimedOut(true);
+    }, 12000);
+    return () => window.clearTimeout(timer);
+  }, [turnstileToken]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -44,6 +56,7 @@ const LoginForm: React.FC = () => {
   };
 
   const handleTurnstileSuccess = useCallback((token: string) => {
+    setTurnstileTimedOut(false);
     setTurnstileToken(token);
   }, []);
 
@@ -53,6 +66,14 @@ const LoginForm: React.FC = () => {
       turnstileRef.current.reset();
     }
   }, []);
+
+  const handleRetryTurnstile = () => {
+    setTurnstileTimedOut(false);
+    setTurnstileToken('');
+    if (turnstileRef.current) {
+      turnstileRef.current.reset();
+    }
+  };
 
   return (
     <div className="max-w-md w-full space-y-3">
@@ -83,8 +104,9 @@ const LoginForm: React.FC = () => {
                 id="username"
                 name="username"
                 type="text"
+                autoComplete="username"
                 required
-                className="w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent"
+                className="w-full px-3 py-2 pl-10 border border-gray-600 rounded-md shadow-sm bg-gray-800/80 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent"
                 placeholder={t('auth.login.usernameOrEmailPlaceholder')}
                 value={formData.username}
                 onChange={handleInputChange}
@@ -95,12 +117,12 @@ const LoginForm: React.FC = () => {
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300">
                 {t('auth.login.password')}
               </label>
               <Link
                 to="/password-reset"
-                className="text-xs font-medium text-osu-pink hover:text-osu-pink/80 dark:text-osu-pink dark:hover:text-osu-pink/80"
+                className="text-xs font-medium text-osu-pink hover:text-osu-pink/80"
               >
                 {t('auth.login.forgotPassword')}
               </Link>
@@ -113,8 +135,9 @@ const LoginForm: React.FC = () => {
                 id="password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
                 required
-                className="w-full px-3 py-2 pl-10 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent"
+                className="w-full px-3 py-2 pl-10 pr-10 border border-gray-600 rounded-md shadow-sm bg-gray-800/80 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-osu-pink focus:border-transparent"
                 placeholder={t('auth.login.passwordPlaceholder')}
                 value={formData.password}
                 onChange={handleInputChange}
@@ -122,29 +145,20 @@ const LoginForm: React.FC = () => {
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 dark:hover:text-gray-300"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <FiEyeOff className="h-5 w-5 text-gray-400" />
+                  <FiEyeOff className="h-5 w-5" />
                 ) : (
-                  <FiEye className="h-5 w-5 text-gray-400" />
+                  <FiEye className="h-5 w-5" />
                 )}
               </button>
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading || !formData.username || !formData.password || !turnstileToken}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-osu-pink hover:bg-osu-pink/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-osu-pink disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-            >
-              {isLoading ? <LoadingSpinner size="sm" /> : t('auth.login.submit')}
-            </button>
-          </div>
-
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2 pt-1">
             <Turnstile
               ref={turnstileRef}
               siteKey={TURNSTILE_SITE_KEY}
@@ -152,10 +166,32 @@ const LoginForm: React.FC = () => {
               onError={handleTurnstileError}
               onExpire={handleTurnstileError}
               options={{
-                theme: 'auto',
+                theme: 'dark',
                 size: 'normal',
               }}
             />
+            {turnstileTimedOut && !turnstileToken && (
+              <div className="text-center text-xs text-amber-300 space-y-1">
+                <p>Security check is taking unusually long to load.</p>
+                <button
+                  type="button"
+                  onClick={handleRetryTurnstile}
+                  className="text-osu-pink hover:underline font-medium"
+                >
+                  Retry verification
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading || !formData.username || !formData.password || !turnstileToken}
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-osu-pink disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              {isLoading ? <LoadingSpinner size="sm" /> : t('auth.login.submit')}
+            </button>
           </div>
 
           <div className="text-center">

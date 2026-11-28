@@ -23,9 +23,19 @@ const RegisterPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<RegisterForm>>({});
   const [turnstileToken, setTurnstileToken] = useState<string>('');
+  const [turnstileTimedOut, setTurnstileTimedOut] = useState(false);
   const turnstileRef = useRef<any>(null);
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiAcknowledged, setAiAcknowledged] = useState(false);
+
+  useEffect(() => {
+    if (turnstileToken) {
+      setTurnstileTimedOut(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setTurnstileTimedOut(true), 12000);
+    return () => window.clearTimeout(timer);
+  }, [turnstileToken]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -121,6 +131,7 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleTurnstileSuccess = useCallback((token: string) => {
+    setTurnstileTimedOut(false);
     setTurnstileToken(token);
   }, []);
 
@@ -130,6 +141,14 @@ const RegisterPage: React.FC = () => {
       turnstileRef.current.reset();
     }
   }, []);
+
+  const handleRetryTurnstile = () => {
+    setTurnstileTimedOut(false);
+    setTurnstileToken('');
+    if (turnstileRef.current) {
+      turnstileRef.current.reset();
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -319,21 +338,7 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading || !turnstileToken}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-osu-pink hover:bg-osu-pink/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-osu-pink disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-              >
-                {isLoading ? (
-                  <LoadingSpinner size="sm" />
-                ) : (
-                  t('auth.register.submit')
-                )}
-              </button>
-            </div>
-
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-2 pt-1">
               <Turnstile
                 ref={turnstileRef}
                 siteKey={TURNSTILE_SITE_KEY}
@@ -341,10 +346,36 @@ const RegisterPage: React.FC = () => {
                 onError={handleTurnstileError}
                 onExpire={handleTurnstileError}
                 options={{
-                  theme: 'auto',
+                  theme: 'dark',
                   size: 'normal',
                 }}
               />
+              {turnstileTimedOut && !turnstileToken && (
+                <div className="text-center text-xs text-amber-300 space-y-1">
+                  <p>Security check is taking unusually long to load.</p>
+                  <button
+                    type="button"
+                    onClick={handleRetryTurnstile}
+                    className="text-osu-pink hover:underline font-medium"
+                  >
+                    Retry verification
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading || !turnstileToken}
+                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-[var(--torii-blue)] hover:bg-[var(--torii-blue-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-osu-pink disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                {isLoading ? (
+                  <LoadingSpinner size="sm" />
+                ) : (
+                  t('auth.register.submit')
+                )}
+              </button>
             </div>
 
             <div className="text-center">

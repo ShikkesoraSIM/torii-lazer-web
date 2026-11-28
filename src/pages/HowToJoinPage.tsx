@@ -285,23 +285,49 @@ export default function HowToJoinPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const cacheKey = "torii_github_releases_v1";
+    const applyReleases = (releases: Array<{ tag_name: string; html_url: string; draft: boolean; prerelease: boolean; assets: Array<{ name: string }> }>) => {
+      if (cancelled || !Array.isArray(releases)) return;
+      const live = releases.filter((r) => !r.draft);
+      const newestNova = live.find((r) => r.tag_name.endsWith("-nova"));
+      if (newestNova) setNovaUrl(newestNova.html_url);
+      const pack = (rs: typeof live) => rs.slice(0, 8).map((r) => ({ tag: r.tag_name, assets: r.assets.map((a) => a.name) }));
+      setReleasesByStream({
+        torii: pack(live.filter((r) => !r.prerelease)),
+        nova: pack(live.filter((r) => r.tag_name.endsWith("-nova"))),
+      });
+    };
 
-    fetch("https://api.github.com/repos/ShikkesoraSIM/torii/releases?per_page=30")
+    try {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached) as { ts: number; data: any[] };
+        if (parsed && Date.now() - parsed.ts < 5 * 60 * 1000 && Array.isArray(parsed.data)) {
+          applyReleases(parsed.data);
+          return () => { cancelled = true; };
+        }
+      }
+    } catch {
+      /* Ignore storage/JSON parse issues */
+    }
+
+    const controller = new AbortController();
+    fetch("https://api.github.com/repos/ShikkesoraSIM/torii/releases?per_page=30", { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then((releases: Array<{ tag_name: string; html_url: string; draft: boolean; prerelease: boolean; assets: Array<{ name: string }> }>) => {
-        if (cancelled) return;
-        const live = releases.filter((r) => !r.draft);
-        const newestNova = live.find((r) => r.tag_name.endsWith("-nova"));
-        if (newestNova) setNovaUrl(newestNova.html_url);
-        const pack = (rs: typeof live) => rs.slice(0, 8).map((r) => ({ tag: r.tag_name, assets: r.assets.map((a) => a.name) }));
-        setReleasesByStream({
-          torii: pack(live.filter((r) => !r.prerelease)),
-          nova: pack(live.filter((r) => r.tag_name.endsWith("-nova"))),
-        });
+      .then((releases) => {
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: releases }));
+        } catch {
+          /* Ignore quota errors */
+        }
+        applyReleases(releases);
       })
       .catch(() => { /* se queda con los links estaticos */ });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, []);
 
   useEffect(() => {
@@ -321,11 +347,14 @@ export default function HowToJoinPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#030014]">
-      {/* Background blobs. */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-64 -left-72 h-[560px] w-[560px] rounded-full bg-fuchsia-500/15 blur-[150px]" />
-        <div className="absolute top-1/3 -right-56 h-[640px] w-[640px] rounded-full bg-violet-500/20 blur-[150px]" />
-        <div className="absolute bottom-[-260px] left-1/3 h-[640px] w-[640px] rounded-full bg-sky-400/10 blur-[160px]" />
+      {/* Lightweight radial-gradient ambient backdrops (no large CSS filter:blur pass). */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(560px circle at 10% 30%, rgba(217, 70, 239, 0.14), transparent 70%), radial-gradient(640px circle at 88% 42%, rgba(139, 92, 246, 0.18), transparent 70%), radial-gradient(640px circle at 50% 95%, rgba(56, 189, 248, 0.10), transparent 70%)",
+        }}
+      >
         <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#030014] via-[#030014]/95 to-transparent" />
       </div>
 

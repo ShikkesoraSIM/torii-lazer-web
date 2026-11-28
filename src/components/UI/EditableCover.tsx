@@ -78,12 +78,14 @@ const EditableCover: React.FC<EditableCoverProps> = ({
         
         {editable && (
           <button
-            className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            type="button"
+            aria-label="Change cover"
+            className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-200 [@media(hover:none)]:opacity-100 [@media(hover:none)]:bg-black/25 [@media(hover:none)]:items-end [@media(hover:none)]:justify-end [@media(hover:none)]:p-2.5"
             onClick={() => setShowUploadModal(true)}
           >
-            <div className="text-white text-center">
-              <FiEdit2 className="w-6 h-6 mx-auto mb-2" />
-              <span className="text-sm font-medium">Change cover</span>
+            <div className="text-white text-center inline-flex items-center gap-1.5 sm:block rounded-xl bg-black/70 sm:bg-transparent px-2.5 py-1.5 sm:p-0 border border-white/15 sm:border-0">
+              <FiEdit2 className="w-4 h-4 sm:w-6 sm:h-6 sm:mx-auto sm:mb-2" aria-hidden="true" />
+              <span className="text-xs sm:text-sm font-medium">Change cover</span>
             </div>
           </button>
         )}
